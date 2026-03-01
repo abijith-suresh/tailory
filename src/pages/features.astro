@@ -1,0 +1,232 @@
+---
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+
+const features = [
+  {
+    n: "01",
+    title: "PDF & DOCX Upload",
+    detail:
+      "Drag and drop any resume file — PDF or Word document — directly into the editor. Tailory extracts the text entirely in your browser using PDF.js and Mammoth. No file is ever transmitted to a server. Extraction happens instantly, locally, privately.",
+    mockup: "upload",
+  },
+  {
+    n: "02",
+    title: "Intelligent Auto-Parsing",
+    detail:
+      "After extraction, a heuristic parser reads the raw text and maps it to the JSON Resume schema. It detects section headings, identifies dates and organisations, and populates contact details, work history, education, skills, and more — all without any AI calls.",
+    mockup: "parse",
+  },
+  {
+    n: "03",
+    title: "Live Preview",
+    detail:
+      "The editor and preview panels update in real time as you type. Switch between three templates without leaving the editor. What you see in the preview is exactly what will be exported — no surprises when you download.",
+    mockup: "preview",
+  },
+  {
+    n: "04",
+    title: "Three Templates",
+    detail:
+      "Modern — a two-column layout with accent colour headers, suited for creative and tech roles. Minimal — clean single-column typesetting, widely readable. Compact ATS — dense single-column layout optimised for applicant tracking system parsing, zero decorative elements.",
+    mockup: "templates",
+  },
+  {
+    n: "05",
+    title: "ATS-Safe PDF Export",
+    detail:
+      "PDF output is generated with pdfmake entirely in your browser. The resulting file is machine-readable text — no images, no embedded fonts that obscure content, no tables that confuse parsers. Every field is laid out as selectable, searchable text.",
+    mockup: "export",
+  },
+  {
+    n: "06",
+    title: "Draft Storage",
+    detail:
+      "Tailory autosaves your resume to the browser's IndexedDB after every change. You can also save named drafts to load later. All storage is local — clearing your browser data is the only way to erase it. No cloud, no sync, no account.",
+    mockup: "storage",
+  },
+];
+---
+
+<MarketingLayout
+  title="Features — Tailory"
+  description="Everything Tailory does — PDF & DOCX upload, auto-parsing, live preview, three templates, ATS-safe PDF export, and offline draft storage."
+>
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+    <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">Features</p>
+    <h1
+      class="max-w-2xl leading-[1.1] text-[#0e2418]"
+      style="font-family: 'Lora', Georgia, serif; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700"
+    >
+      Everything you need. Nothing you don't.
+    </h1>
+    <div class="mt-8 h-px w-20 bg-[#ccddd4]"></div>
+  </section>
+
+  <!-- Feature sections -->
+  <div class="mx-auto max-w-6xl px-8 pb-24">
+    {
+      features.map((f, i) => (
+        <div class="grid grid-cols-1 gap-12 border-t border-[#ccddd4] py-20 md:grid-cols-2">
+          {/* Text: always left on even, right on odd */}
+          <div class:list={["flex flex-col justify-center", i % 2 !== 0 ? "md:order-2" : ""]}>
+            <span class="mb-4 text-xs font-medium text-[#a0b8ab]">{f.n}</span>
+            <h2
+              class="mb-5 leading-snug text-[#0e2418]"
+              style="font-family: 'Lora', Georgia, serif; font-size: clamp(22px, 2.5vw, 30px); font-weight: 700"
+            >
+              {f.title}
+            </h2>
+            <p class="text-base leading-relaxed text-[#3d6650]">{f.detail}</p>
+          </div>
+          {/* Mockup: always right on even, left on odd */}
+          <div
+            class:list={[
+              "flex items-center justify-center rounded-xl border border-[#ccddd4] bg-white p-8",
+              i % 2 !== 0 ? "md:order-1" : "",
+            ]}
+          >
+            {f.mockup === "upload" && (
+              <div class="w-full max-w-xs text-center">
+                <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-dashed border-[#ccddd4]">
+                  <span class="text-3xl text-[#a0b8ab]">↑</span>
+                </div>
+                <p class="text-sm font-medium text-[#3d6650]">Drop PDF or DOCX here</p>
+                <p class="mt-1 text-xs text-[#a0b8ab]">or click to browse</p>
+                <div class="mt-4 flex justify-center gap-2">
+                  <span class="rounded-full border border-[#ccddd4] px-3 py-1 text-xs text-[#3d6650]">
+                    .pdf
+                  </span>
+                  <span class="rounded-full border border-[#ccddd4] px-3 py-1 text-xs text-[#3d6650]">
+                    .docx
+                  </span>
+                </div>
+              </div>
+            )}
+            {f.mockup === "parse" && (
+              <div class="w-full max-w-xs space-y-2">
+                {[
+                  "Name → basics.name",
+                  "Email → basics.email",
+                  "Work → work[ ]",
+                  "Skills → skills[ ]",
+                ].map((line) => (
+                  <div class="flex items-center gap-3 rounded border border-[#ccddd4] bg-[#f4f8f5] px-3 py-2">
+                    <div class="h-2 w-2 shrink-0 rounded-full bg-[#1d6648]" />
+                    <span class="font-mono text-xs text-[#3d6650]">{line}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {f.mockup === "preview" && (
+              <div class="w-full max-w-xs overflow-hidden rounded border border-[#ccddd4]">
+                <div class="flex border-b border-[#ccddd4] bg-[#f4f8f5]">
+                  {["Edit", "Preview"].map((t, ti) => (
+                    <div
+                      class:list={[
+                        "px-4 py-2 text-xs font-medium",
+                        ti === 1 ? "border-b-2 border-[#1d6648] text-[#1d6648]" : "text-[#a0b8ab]",
+                      ]}
+                    >
+                      {t}
+                    </div>
+                  ))}
+                </div>
+                <div class="bg-white p-4">
+                  <div class="mb-2 h-3 w-24 rounded bg-[#1d6648]/20" />
+                  <div class="mb-3 h-2 w-16 rounded bg-[#ccddd4]" />
+                  <div class="mb-1.5 h-2 w-full rounded bg-[#ccddd4]" />
+                  <div class="mb-1.5 h-2 w-5/6 rounded bg-[#ccddd4]" />
+                  <div class="h-2 w-4/5 rounded bg-[#ccddd4]" />
+                </div>
+              </div>
+            )}
+            {f.mockup === "templates" && (
+              <div class="flex w-full max-w-xs flex-col gap-3">
+                {[
+                  { name: "Modern", desc: "Two-column, accented" },
+                  { name: "Minimal", desc: "Clean single-column" },
+                  { name: "Compact ATS", desc: "ATS-optimised" },
+                ].map((t, ti) => (
+                  <div
+                    class:list={[
+                      "flex items-center justify-between rounded border px-4 py-3",
+                      ti === 0 ? "border-[#1d6648] bg-[#1d6648]/5" : "border-[#ccddd4] bg-white",
+                    ]}
+                  >
+                    <span
+                      class:list={[
+                        "text-sm font-medium",
+                        ti === 0 ? "text-[#1d6648]" : "text-[#0e2418]",
+                      ]}
+                    >
+                      {t.name}
+                    </span>
+                    <span class="text-xs text-[#a0b8ab]">{t.desc}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {f.mockup === "export" && (
+              <div class="w-full max-w-xs text-center">
+                <div class="mx-auto mb-4 flex h-20 w-14 items-center justify-center rounded-lg border border-[#ccddd4] bg-[#f4f8f5]">
+                  <span class="text-xs font-bold text-[#3d6650]">PDF</span>
+                </div>
+                <p class="text-sm font-medium text-[#0e2418]">resume.pdf</p>
+                <p class="mt-1 text-xs text-[#a0b8ab]">Machine-readable · ATS-safe</p>
+                <div class="mt-4 inline-block rounded bg-[#1d6648] px-4 py-2 text-xs font-medium text-white">
+                  Download
+                </div>
+              </div>
+            )}
+            {f.mockup === "storage" && (
+              <div class="w-full max-w-xs space-y-2">
+                {[
+                  { name: "autosave", date: "just now", active: true },
+                  { name: "Draft — Jan 2025", date: "2 days ago", active: false },
+                  { name: "Draft — Dec 2024", date: "1 month ago", active: false },
+                ].map((d) => (
+                  <div
+                    class:list={[
+                      "flex items-center justify-between rounded border px-3 py-2.5",
+                      d.active ? "border-[#1d6648] bg-[#1d6648]/5" : "border-[#ccddd4] bg-white",
+                    ]}
+                  >
+                    <span
+                      class:list={[
+                        "text-xs font-medium",
+                        d.active ? "text-[#1d6648]" : "text-[#0e2418]",
+                      ]}
+                    >
+                      {d.name}
+                    </span>
+                    <span class="text-xs text-[#a0b8ab]">{d.date}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- CTA bar -->
+  <div class="border-t border-[#ccddd4] bg-white">
+    <div class="mx-auto max-w-6xl px-8 py-20 text-center">
+      <h2
+        class="mb-6 text-[#0e2418]"
+        style="font-family: 'Lora', Georgia, serif; font-size: clamp(24px, 3vw, 38px); font-weight: 700"
+      >
+        Ready to try it?
+      </h2>
+      <p class="mb-8 text-base text-[#3d6650]">No account needed. Works in any modern browser.</p>
+      <a
+        href="/editor"
+        class="inline-block bg-[#1d6648] px-8 py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#155236]"
+      >
+        Open the editor →
+      </a>
+    </div>
+  </div>
+</MarketingLayout>

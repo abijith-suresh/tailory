@@ -1,0 +1,150 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Tailory", description } = Astro.props;
+
+const navLinks = [
+  { label: "Features", href: "/features" },
+  { label: "Changelog", href: "/changelog" },
+  { label: "About", href: "/about" },
+];
+---
+
+<Layout title={title} description={description}>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,700;1,600&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div
+    class="min-h-screen bg-[#f4f8f5] text-[#0e2418]"
+    style="font-family: 'DM Sans', system-ui, sans-serif"
+  >
+    <!-- Nav -->
+    <header class="border-b border-[#ccddd4] bg-[#f4f8f5]">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+        <a
+          href="/"
+          class="text-xl font-bold tracking-tight text-[#1d6648] no-underline"
+          style="font-family: 'Lora', Georgia, serif"
+        >
+          Tailory
+        </a>
+        <div class="flex items-center gap-8">
+          {
+            navLinks.map((link) => (
+              <a
+                href={link.href}
+                class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+              >
+                {link.label}
+              </a>
+            ))
+          }
+          <a
+            href="https://github.com/abijith-suresh/tailory"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+          >
+            GitHub ↗
+          </a>
+          <a
+            href="/editor"
+            class="inline-block bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#155236]"
+          >
+            Open Editor →
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Page content -->
+    <slot />
+
+    <!-- Footer -->
+    <footer class="border-t border-[#ccddd4] bg-[#f4f8f5]">
+      <div class="mx-auto max-w-6xl px-8 py-12">
+        <div class="flex flex-col gap-10 md:flex-row md:justify-between">
+          <!-- Left: copyright -->
+          <div>
+            <p
+              class="mb-2 text-lg font-bold text-[#1d6648]"
+              style="font-family: 'Lora', Georgia, serif"
+            >
+              Tailory
+            </p>
+            <p class="text-sm text-[#a0b8ab]">© 2025 Tailory — MIT licensed</p>
+          </div>
+          <!-- Right: link groups -->
+          <div class="flex flex-wrap gap-12">
+            <div>
+              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
+                Product
+              </p>
+              <nav class="flex flex-col gap-2">
+                <a
+                  href="/features"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Features</a
+                >
+                <a
+                  href="/changelog"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Changelog</a
+                >
+                <a
+                  href="/editor"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+                  >Open Editor</a
+                >
+              </nav>
+            </div>
+            <div>
+              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
+                Project
+              </p>
+              <nav class="flex flex-col gap-2">
+                <a
+                  href="/about"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">About</a
+                >
+                <a href="/faq" class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+                  >FAQ</a
+                >
+                <a
+                  href="https://github.com/abijith-suresh/tailory"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">GitHub ↗</a
+                >
+              </nav>
+            </div>
+            <div>
+              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
+                Legal
+              </p>
+              <nav class="flex flex-col gap-2">
+                <a
+                  href="/privacy"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Privacy</a
+                >
+                <a
+                  href="/terms"
+                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Terms</a
+                >
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</Layout>

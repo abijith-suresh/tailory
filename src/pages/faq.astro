@@ -1,0 +1,99 @@
+---
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+
+const faqs = [
+  {
+    q: "Is Tailory really free?",
+    a: "Yes, entirely. Tailory is open source under the MIT licence. There is no paid tier, no usage limits, no premium features behind a paywall. The source code is on GitHub and you are free to self-host it.",
+  },
+  {
+    q: "Does my resume get uploaded to a server?",
+    a: "No. Tailory has no backend server at all. Your file is opened locally in the browser using the File API. Text extraction, parsing, editing, preview rendering, and PDF generation all happen inside your browser tab. Nothing is transmitted over the network.",
+  },
+  {
+    q: "What file formats can I upload?",
+    a: "Tailory accepts PDF (.pdf) and Word documents (.docx). PDF text is extracted with PDF.js. DOCX text is extracted with Mammoth. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read.",
+  },
+  {
+    q: "Which browsers are supported?",
+    a: "Any modern browser with IndexedDB support: Chrome, Firefox, Safari, and Edge. Internet Explorer is not supported. Mobile browsers work but the editor layout is optimised for wider screens.",
+  },
+  {
+    q: "Will the exported PDF pass ATS screening?",
+    a: "Tailory's PDF output is generated with pdfmake and consists entirely of machine-readable text — no images, no vector graphics, no tables that confuse parsers. All three templates are designed to output plain, ATS-compatible text layouts.",
+  },
+  {
+    q: "What's the difference between the three templates?",
+    a: "Modern is a two-column layout with accent colour headings, suited for creative and tech roles. Minimal is a clean single-column layout that is widely readable across industries. Compact ATS is a dense single-column format with no decorative elements, maximising compatibility with automated screening tools.",
+  },
+  {
+    q: "Where is my data stored between sessions?",
+    a: "Tailory autosaves your resume to the browser's IndexedDB after each change. IndexedDB is a local browser storage mechanism — data lives only on your device and in your browser's storage for the site. It persists across sessions until you clear your browser data or manually delete drafts.",
+  },
+  {
+    q: "Can I use Tailory offline?",
+    a: "The editor works offline once the page has loaded (fonts and assets are cached by the browser). PDF export and live preview work offline. Uploading a file works offline. The only feature that requires a connection is the initial page load.",
+  },
+  {
+    q: "Can I start from scratch without uploading a file?",
+    a: "Yes. The editor opens with an empty form. You can type directly into any field without uploading anything. File upload is a convenience, not a requirement.",
+  },
+  {
+    q: "Is the source code available?",
+    a: "Yes. Tailory is fully open source on GitHub under the MIT licence. You can inspect, fork, self-host, or contribute to the project. Bug reports and pull requests are welcome.",
+  },
+];
+---
+
+<MarketingLayout
+  title="FAQ — Tailory"
+  description="Frequently asked questions about Tailory — privacy, file formats, ATS compatibility, offline use, and more."
+>
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+    <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">FAQ</p>
+    <h1
+      class="max-w-2xl leading-[1.1] text-[#0e2418]"
+      style="font-family: 'Lora', Georgia, serif; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700"
+    >
+      Frequently asked questions.
+    </h1>
+    <div class="mt-8 h-px w-20 bg-[#ccddd4]"></div>
+  </section>
+
+  <!-- FAQ accordion -->
+  <section class="mx-auto max-w-3xl px-8 pb-24">
+    {
+      faqs.map((item) => (
+        <details class="group border-t border-[#ccddd4]">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-medium text-[#0e2418] hover:text-[#1d6648]">
+            {item.q}
+            <span class="shrink-0 text-[#a0b8ab] transition-transform group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+          <p class="pb-6 text-base leading-relaxed text-[#3d6650]">{item.a}</p>
+        </details>
+      ))
+    }
+    <div class="border-t border-[#ccddd4]"></div>
+  </section>
+
+  <!-- Still have questions? -->
+  <div class="border-t border-[#ccddd4] bg-white">
+    <div class="mx-auto max-w-6xl px-8 py-16 text-center">
+      <p class="mb-4 text-2xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
+        Still have questions?
+      </p>
+      <p class="mb-6 text-base text-[#3d6650]">Open an issue on GitHub — we read every one.</p>
+      <a
+        href="https://github.com/abijith-suresh/tailory/issues"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-colors hover:bg-[#1d6648] hover:text-white"
+      >
+        Open an issue ↗
+      </a>
+    </div>
+  </div>
+</MarketingLayout>
