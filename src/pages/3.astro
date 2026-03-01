@@ -1,0 +1,181 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const features = [
+  { name: "PDF & DOCX Upload", desc: "Any resume format, dropped in." },
+  { name: "Auto-Parsing", desc: "Structured JSON from raw text, instantly." },
+  { name: "Live Preview", desc: "Real-time rendering as you type." },
+  { name: "3 Templates", desc: "Modern, Minimal, Compact ATS." },
+  { name: "ATS-Safe Export", desc: "Clean PDFs that pass every scanner." },
+  { name: "Draft Storage", desc: "Auto-saved to your browser, locally." },
+];
+---
+
+<Layout
+  title="Tailory — Resume Editor"
+  description="A fully client-side resume editor. No server, no account."
+>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div
+    class="min-h-screen overflow-x-hidden bg-[#09080f] text-white"
+    style="font-family: 'Instrument Sans', system-ui, sans-serif;"
+  >
+    <!-- Nav -->
+    <header class="relative z-50 mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
+      <span
+        class="text-xl font-bold tracking-tight text-white"
+        style="font-family: 'Syne', sans-serif;"
+      >
+        Tailory
+      </span>
+      <a
+        href="https://github.com/abijith-suresh/tailory"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded-full border border-white/10 px-4 py-2 text-sm text-white/50 transition-colors hover:text-white"
+      >
+        GitHub
+      </a>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative mx-auto max-w-7xl overflow-hidden px-8 pb-32 pt-16">
+      <!-- Background gradient blobs -->
+      <div
+        class="pointer-events-none absolute -left-32 -top-32 h-[600px] w-[600px] rounded-full opacity-30 blur-3xl"
+        style="background: radial-gradient(circle, #6d28d9, #4f46e5, transparent 70%);"
+      >
+      </div>
+      <div
+        class="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full opacity-20 blur-3xl"
+        style="background: radial-gradient(circle, #7c3aed, transparent 70%);"
+      >
+      </div>
+
+      <div class="relative">
+        <div
+          class="mb-8 inline-block rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-xs uppercase tracking-widest text-violet-300"
+        >
+          No server. No account. Just your browser.
+        </div>
+        <h1
+          class="mb-8 max-w-4xl text-7xl font-extrabold sm:text-8xl"
+          style="font-family: 'Syne', sans-serif; line-height: 1.0;"
+        >
+          Resume editing,<br />
+          <span
+            style="background: linear-gradient(135deg, #a78bfa, #818cf8, #c4b5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"
+          >
+            reimagined.
+          </span>
+        </h1>
+        <p class="mb-10 max-w-lg text-xl leading-relaxed text-white/60">
+          Upload a PDF or DOCX. Edit in a structured form. Export an ATS-safe PDF. Everything
+          happens in your browser — zero data leaves your device.
+        </p>
+        <a
+          href="/editor"
+          class="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white transition-all hover:scale-105"
+          style="background: linear-gradient(135deg, #6d28d9, #4f46e5); box-shadow: 0 0 40px rgba(109,40,217,0.5);"
+        >
+          Get Started →
+        </a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="relative border-t border-white/5 py-24">
+      <div class="mx-auto max-w-7xl px-8">
+        <h2 class="mb-16 text-center text-4xl font-bold" style="font-family: 'Syne', sans-serif;">
+          What it <span class="text-violet-400">does</span>
+        </h2>
+        <div
+          class="grid grid-cols-1 border border-white/5 bg-white/5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {
+            features.map((f) => (
+              <div class="bg-[#09080f] p-8 transition-colors hover:bg-white/5">
+                <h3 class="mb-2 text-base font-semibold text-white">{f.name}</h3>
+                <p class="text-sm text-white/40">{f.desc}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="py-24">
+      <div class="mx-auto max-w-7xl px-8">
+        <h2 class="mb-16 text-center text-4xl font-bold" style="font-family: 'Syne', sans-serif;">
+          Three steps
+        </h2>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {
+            [
+              { n: "1", title: "Upload", desc: "Drop your PDF or DOCX — or start blank." },
+              {
+                n: "2",
+                title: "Edit",
+                desc: "Structured fields, live preview, no formatting fights.",
+              },
+              { n: "3", title: "Export", desc: "ATS-safe PDF in one click." },
+            ].map((s) => (
+              <div class="rounded-2xl border border-white/10 p-8 transition-colors hover:border-violet-500/40">
+                <p
+                  class="mb-6 text-6xl font-extrabold text-violet-500/20"
+                  style="font-family: 'Syne', sans-serif;"
+                >
+                  {s.n}
+                </p>
+                <h3 class="mb-2 text-xl font-semibold text-white">{s.title}</h3>
+                <p class="text-sm leading-relaxed text-white/50">{s.desc}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy callout -->
+    <section class="relative overflow-hidden py-24">
+      <div
+        class="absolute inset-0 opacity-10"
+        style="background: radial-gradient(ellipse at center, #6d28d9, transparent 70%);"
+      >
+      </div>
+      <div class="relative mx-auto max-w-3xl px-8 text-center">
+        <h2 class="mb-6 text-5xl font-extrabold" style="font-family: 'Syne', sans-serif;">
+          Your data stays<br />
+          <span class="text-violet-400">with you.</span>
+        </h2>
+        <p class="text-lg leading-relaxed text-white/50">
+          No telemetry. No accounts. No cloud. Tailory is a browser-only tool — everything runs
+          locally, nothing is ever sent anywhere.
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-10">
+      <div
+        class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-8 sm:flex-row"
+      >
+        <p class="text-sm text-white/20">© 2025 Tailory</p>
+        <nav class="flex gap-6 text-sm text-white/40">
+          <a href="/features" class="transition-colors hover:text-white">Features</a>
+          <a href="/about" class="transition-colors hover:text-white">About</a>
+          <a href="/faq" class="transition-colors hover:text-white">FAQ</a>
+        </nav>
+      </div>
+    </footer>
+  </div>
+</Layout>
