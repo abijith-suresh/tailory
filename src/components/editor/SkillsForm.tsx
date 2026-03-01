@@ -1,4 +1,4 @@
-import { For, createSignal, type Component } from "solid-js";
+import { type Component, createSignal, For } from "solid-js";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeSkill } from "@/types/resume";
 
@@ -13,7 +13,10 @@ const SkillsForm: Component = () => {
     const name = inputValue().trim();
     if (!name) return;
     // Handle comma-separated entry
-    const names = name.split(",").map((s) => s.trim()).filter(Boolean);
+    const names = name
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     setResume("skills", (s) => [...(s ?? []), ...names.map(newSkill)]);
     setInputValue("");
   };

@@ -31,14 +31,9 @@ const CertificatesForm: Component = () => {
   const updateField = <K extends keyof ResumeCertificate>(
     id: string,
     field: K,
-    value: ResumeCertificate[K],
+    value: ResumeCertificate[K]
   ) => {
-    setResume(
-      "certificates",
-      (c) => c?.id === id,
-      field,
-      value,
-    );
+    setResume("certificates", (c) => c?.id === id, field, value);
   };
 
   return (

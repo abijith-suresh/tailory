@@ -1,0 +1,122 @@
+---
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+---
+
+<MarketingLayout
+  title="Privacy Policy — Tailory"
+  description="Tailory's privacy policy. The short version: we never see your data. Your resume stays on your device."
+>
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-8 pb-12 pt-24">
+    <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">Privacy</p>
+    <h1
+      class="max-w-2xl leading-[1.1] text-[#0e2418]"
+      style="font-family: 'Lora', Georgia, serif; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700"
+    >
+      Privacy Policy
+    </h1>
+    <div class="mt-8 h-px w-20 bg-[#ccddd4]"></div>
+  </section>
+
+  <!-- Content -->
+  <section class="mx-auto max-w-3xl px-8 pb-24">
+    <!-- Short version callout -->
+    <div class="mb-12 rounded-xl border border-[#1d6648]/30 bg-[#1d6648]/5 px-8 py-6">
+      <p class="text-lg font-semibold text-[#0e2418]">
+        Tailory never sees your data. Your resume stays on your device.
+      </p>
+    </div>
+
+    <!-- What we collect -->
+    <div class="mb-12 border-t border-[#ccddd4] pt-10">
+      <h2 class="mb-4 text-xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
+        What we collect
+      </h2>
+      <p class="text-base leading-relaxed text-[#3d6650]">
+        Nothing. Tailory does not collect any personal data. There are no analytics, no tracking
+        cookies, no form submissions, and no logging of any kind. We have no user accounts and no
+        database.
+      </p>
+    </div>
+
+    <!-- How your data is stored -->
+    <div class="mb-12 border-t border-[#ccddd4] pt-10">
+      <h2 class="mb-4 text-xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
+        How your data is stored
+      </h2>
+      <p class="mb-4 text-base leading-relaxed text-[#3d6650]">
+        When you edit your resume in Tailory, the data is saved to your browser's IndexedDB — a
+        local storage mechanism built into every modern browser. This storage:
+      </p>
+      <ul class="space-y-3 text-base leading-relaxed text-[#3d6650]">
+        <li class="flex gap-3">
+          <span class="mt-1 shrink-0 text-[#1d6648]">→</span>
+          <span>Lives entirely on your device. It never leaves your browser.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-1 shrink-0 text-[#1d6648]">→</span>
+          <span>Persists across browser sessions until you clear your browser data.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-1 shrink-0 text-[#1d6648]">→</span>
+          <span>Is only accessible to the Tailory page — other sites cannot read it.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-1 shrink-0 text-[#1d6648]">→</span>
+          <span>Can be deleted at any time by clearing your browser's site data.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Third-party services -->
+    <div class="mb-12 border-t border-[#ccddd4] pt-10">
+      <h2 class="mb-4 text-xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
+        Third-party services
+      </h2>
+      <p class="mb-4 text-base leading-relaxed text-[#3d6650]">
+        Tailory uses two external services:
+      </p>
+      <div class="space-y-4">
+        <div class="rounded-lg border border-[#ccddd4] bg-white px-5 py-4">
+          <p class="mb-1 text-sm font-semibold text-[#0e2418]">Google Fonts</p>
+          <p class="text-sm leading-relaxed text-[#3d6650]">
+            The Lora and DM Sans typefaces are loaded from Google Fonts on page load. Google may log
+            this request per their own privacy policy. If this concerns you, you can self-host
+            Tailory and serve the fonts locally.
+          </p>
+        </div>
+        <div class="rounded-lg border border-[#ccddd4] bg-white px-5 py-4">
+          <p class="mb-1 text-sm font-semibold text-[#0e2418]">GitHub Pages / Vercel</p>
+          <p class="text-sm leading-relaxed text-[#3d6650]">
+            Tailory's static files are hosted on a static hosting platform. The host may log
+            standard HTTP request metadata (IP address, user agent, timestamp) as part of normal
+            server operation. No resume content is ever transmitted.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="mb-12 border-t border-[#ccddd4] pt-10">
+      <h2 class="mb-4 text-xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
+        Contact
+      </h2>
+      <p class="text-base leading-relaxed text-[#3d6650]">
+        If you have any questions about this policy, please{" "}
+        <a
+          href="https://github.com/abijith-suresh/tailory/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[#1d6648] underline underline-offset-2 hover:no-underline"
+        >
+          open an issue on GitHub
+        </a>.
+      </p>
+    </div>
+
+    <!-- Effective date -->
+    <div class="border-t border-[#ccddd4] pt-10">
+      <p class="text-sm text-[#a0b8ab]">Effective date: January 2025</p>
+    </div>
+  </section>
+</MarketingLayout>

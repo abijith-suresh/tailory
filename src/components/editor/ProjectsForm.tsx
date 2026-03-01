@@ -1,4 +1,4 @@
-import { For, type Component } from "solid-js";
+import { type Component, For } from "solid-js";
 import { produce } from "solid-js/store";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeProject } from "@/types/resume";
@@ -33,14 +33,9 @@ const ProjectsForm: Component = () => {
   const updateField = <K extends keyof ResumeProject>(
     id: string,
     field: K,
-    value: ResumeProject[K],
+    value: ResumeProject[K]
   ) => {
-    setResume(
-      "projects",
-      (p) => p?.id === id,
-      field,
-      value,
-    );
+    setResume("projects", (p) => p?.id === id, field, value);
   };
 
   const addHighlight = (id: string) => {
@@ -50,7 +45,7 @@ const ProjectsForm: Component = () => {
       produce((p: ResumeProject) => {
         if (!p.highlights) p.highlights = [];
         p.highlights.push("");
-      }),
+      })
     );
   };
 
@@ -64,7 +59,7 @@ const ProjectsForm: Component = () => {
       (p) => p?.id === id,
       produce((p: ResumeProject) => {
         p.highlights?.splice(idx, 1);
-      }),
+      })
     );
   };
 

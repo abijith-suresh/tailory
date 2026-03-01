@@ -1,0 +1,109 @@
+---
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+
+const releases = [
+  {
+    version: "v0.4",
+    date: "Mar 2025",
+    changes: [
+      "Added three resume templates: Modern, Minimal, and Compact ATS",
+      "Template switcher in the editor toolbar — switch without leaving the editor",
+      "Each template tuned separately for ATS compatibility and visual quality",
+    ],
+  },
+  {
+    version: "v0.3",
+    date: "Feb 2025",
+    changes: [
+      "IndexedDB draft storage — resume autosaves after every change",
+      "Named draft saves: save and load multiple versions by name",
+      "Fully offline — no data ever leaves the browser",
+    ],
+  },
+  {
+    version: "v0.2",
+    date: "Jan 2025",
+    changes: [
+      "PDF export via pdfmake — entirely client-side, no server",
+      "ATS-safe output: machine-readable text, no images or tables",
+      "Consistent output across Chrome, Firefox, Safari, and Edge",
+    ],
+  },
+  {
+    version: "v0.1",
+    date: "Dec 2024",
+    changes: [
+      "Initial release",
+      "PDF and DOCX upload with client-side text extraction (PDF.js + Mammoth)",
+      "Heuristic auto-parser: maps extracted text to JSON Resume schema fields",
+      "Live split-pane preview — editor on the left, rendered resume on the right",
+    ],
+  },
+];
+---
+
+<MarketingLayout
+  title="Changelog — Tailory"
+  description="Tailory version history — what changed and when."
+>
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+    <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">Changelog</p>
+    <h1
+      class="max-w-2xl leading-[1.1] text-[#0e2418]"
+      style="font-family: 'Lora', Georgia, serif; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700"
+    >
+      What's changed.
+    </h1>
+    <div class="mt-8 h-px w-20 bg-[#ccddd4]"></div>
+  </section>
+
+  <!-- Changelog entries -->
+  <section class="mx-auto max-w-4xl px-8 pb-24">
+    <div class="relative">
+      <!-- Vertical line -->
+      <div
+        class="absolute left-[88px] top-0 hidden h-full w-px bg-[#ccddd4] md:block"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="space-y-0">
+        {
+          releases.map((release, i) => (
+            <div class="flex flex-col gap-6 border-t border-[#ccddd4] py-12 md:flex-row md:gap-12">
+              {/* Left: date + version */}
+              <div class="relative shrink-0 md:w-24">
+                {/* Circle on the line */}
+                <div class="absolute -right-6 top-1 hidden h-3 w-3 rounded-full border-2 border-[#1d6648] bg-[#f4f8f5] md:block" />
+                <p class="text-xs font-medium text-[#a0b8ab]">{release.date}</p>
+                <p
+                  class="mt-1 text-base font-bold text-[#1d6648]"
+                  style="font-family: 'Lora', Georgia, serif"
+                >
+                  {release.version}
+                </p>
+                {i === 0 && (
+                  <span class="mt-2 inline-block rounded-full bg-[#1d6648]/10 px-2.5 py-0.5 text-xs font-medium text-[#1d6648]">
+                    Latest
+                  </span>
+                )}
+              </div>
+              {/* Right: changes */}
+              <div class="flex-1 md:pl-6">
+                <ul class="space-y-3">
+                  {release.changes.map((change) => (
+                    <li class="flex gap-3 text-base leading-relaxed text-[#3d6650]">
+                      <span class="mt-1 shrink-0 text-xs text-[#1d6648]">→</span>
+                      <span>{change}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</MarketingLayout>

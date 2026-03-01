@@ -1,4 +1,4 @@
-import { For, Show, type Component } from "solid-js";
+import { type Component, For, Show } from "solid-js";
 import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 import type { TemplateId } from "@/types/resume";
 import { exportPDF } from "@/lib/export/pdf-export";
@@ -73,8 +73,7 @@ const HtmlPreview: Component<HtmlPreviewProps> = (props) => {
         ? "mb-2"
         : "mb-6";
 
-  const sectionClass = () =>
-    props.template === "compact-ats" ? "mb-3" : "mb-5";
+  const sectionClass = () => (props.template === "compact-ats" ? "mb-3" : "mb-5");
 
   const titleClass = () =>
     props.template === "modern"
@@ -83,16 +82,13 @@ const HtmlPreview: Component<HtmlPreviewProps> = (props) => {
         ? "text-xs font-bold uppercase underline mb-1"
         : "text-xs font-bold uppercase tracking-widest text-gray-500 mb-1";
 
-  const nameSize = () =>
-    props.template === "compact-ats" ? "text-lg" : "text-2xl";
+  const nameSize = () => (props.template === "compact-ats" ? "text-lg" : "text-2xl");
 
   return (
     <div class="text-gray-900">
       {/* Header */}
       <div class={headerClass()}>
-        <h1 class={`font-bold ${nameSize()} leading-tight`}>
-          {resume.basics.name || "Your Name"}
-        </h1>
+        <h1 class={`font-bold ${nameSize()} leading-tight`}>{resume.basics.name || "Your Name"}</h1>
         <Show when={resume.basics.label}>
           <p class="text-gray-500 text-xs mt-0.5">{resume.basics.label}</p>
         </Show>
@@ -138,9 +134,7 @@ const HtmlPreview: Component<HtmlPreviewProps> = (props) => {
                 </Show>
                 <Show when={(job.highlights?.length ?? 0) > 0}>
                   <ul class="mt-1 space-y-0.5 list-disc list-inside text-gray-700">
-                    <For each={job.highlights}>
-                      {(h) => <li class="leading-snug">{h}</li>}
-                    </For>
+                    <For each={job.highlights}>{(h) => <li class="leading-snug">{h}</li>}</For>
                   </ul>
                 </Show>
               </div>
@@ -177,9 +171,7 @@ const HtmlPreview: Component<HtmlPreviewProps> = (props) => {
       <Show when={(resume.skills?.length ?? 0) > 0}>
         <div class={sectionClass()}>
           <h2 class={titleClass()}>Skills</h2>
-          <p class="text-gray-700">
-            {resume.skills!.map((s) => s.name).join(" · ")}
-          </p>
+          <p class="text-gray-700">{resume.skills!.map((s) => s.name).join(" · ")}</p>
         </div>
       </Show>
 
@@ -199,9 +191,7 @@ const HtmlPreview: Component<HtmlPreviewProps> = (props) => {
                 </Show>
                 <Show when={(proj.highlights?.length ?? 0) > 0}>
                   <ul class="mt-0.5 list-disc list-inside text-gray-700 space-y-0.5">
-                    <For each={proj.highlights}>
-                      {(h) => <li class="leading-snug">{h}</li>}
-                    </For>
+                    <For each={proj.highlights}>{(h) => <li class="leading-snug">{h}</li>}</For>
                   </ul>
                 </Show>
               </div>

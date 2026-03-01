@@ -1,4 +1,4 @@
-import { ErrorBoundary as SolidErrorBoundary, type Component, type JSX } from "solid-js";
+import { type Component, type JSX, ErrorBoundary as SolidErrorBoundary } from "solid-js";
 
 interface ErrorBoundaryProps {
   children: JSX.Element;
@@ -7,10 +7,7 @@ interface ErrorBoundaryProps {
 
 const ErrorBoundary: Component<ErrorBoundaryProps> = (props) => {
   const defaultFallback = (err: Error, reset: () => void) => (
-    <div
-      role="alert"
-      class="rounded-lg border border-red-200 bg-red-50 p-6 text-center"
-    >
+    <div role="alert" class="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
       <p class="mb-2 font-semibold text-red-700">Something went wrong</p>
       <p class="mb-4 text-sm text-red-600">{err.message}</p>
       <button

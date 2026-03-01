@@ -1,4 +1,4 @@
-import { createSignal, type Component, type JSX } from "solid-js";
+import { type Component, createSignal, type JSX } from "solid-js";
 import BasicsForm from "./BasicsForm";
 import SummaryForm from "./SummaryForm";
 import WorkForm from "./WorkForm";
@@ -54,11 +54,7 @@ const EditorShell: Component = () => {
       </div>
 
       {/* Panel */}
-      <div
-        id={`panel-${activeTab()}`}
-        role="tabpanel"
-        class="flex-1 overflow-y-auto p-6"
-      >
+      <div id={`panel-${activeTab()}`} role="tabpanel" class="flex-1 overflow-y-auto p-6">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-gray-800">{currentTab()?.label}</h2>
           <DraftManager />
