@@ -3,187 +3,264 @@ import Layout from "@/layouts/Layout.astro";
 
 const features = [
   {
-    name: "PDF & DOCX Upload",
-    desc: "Drop any resume format — Tailory extracts the text entirely in your browser.",
+    term: "PDF & DOCX Upload",
+    def: "Drop any resume format — Tailory handles text extraction entirely in your browser.",
   },
   {
-    name: "Auto-Parsing",
-    desc: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
+    term: "Auto-Parsing",
+    def: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
   },
   {
-    name: "Live Preview",
-    desc: "See your resume rendered in real time as you make edits — no reload needed.",
+    term: "Live Preview",
+    def: "See your resume rendered in real time as you make edits — no save required.",
   },
   {
-    name: "Three Templates",
-    desc: "Modern, Minimal, and Compact ATS — each optimised for different contexts.",
+    term: "Three Templates",
+    def: "Modern, Minimal, and Compact ATS — each optimised for a different context.",
   },
   {
-    name: "ATS-Safe Export",
-    desc: "Machine-readable PDFs with no images or tables to confuse applicant systems.",
+    term: "ATS-Safe Export",
+    def: "Machine-readable PDFs with no images or tables to trip up applicant tracking systems.",
   },
   {
-    name: "Draft Storage",
-    desc: "Auto-saved to your browser's IndexedDB — never to any server.",
+    term: "Draft Storage",
+    def: "Your work saves automatically to your browser's IndexedDB — never to a server.",
   },
 ];
 
-const chips = ["100% client-side", "No account required", "Open source · MIT"];
-
 const steps = [
   {
+    n: "01",
     title: "Upload",
-    desc: "Drop your existing PDF or DOCX resume, or begin from a blank form. Extraction happens instantly, locally.",
+    desc: "Drop your existing PDF or DOCX resume, or begin from a blank form.",
   },
   {
+    n: "02",
     title: "Edit",
-    desc: "Refine every field in a structured editor. Basics, work history, education, skills — everything in one place.",
+    desc: "Refine every field in a clean structured editor. No formatting fights.",
   },
-  {
-    title: "Export",
-    desc: "Download a polished, ATS-compatible PDF in one click. No account, no watermark, no friction.",
-  },
+  { n: "03", title: "Export", desc: "Download a polished, ATS-compatible PDF in one click." },
+];
+
+const tabs = ["Basics", "Summary", "Work", "Education"];
+const formFields = [
+  { label: "Full name", val: "Alex Johnson" },
+  { label: "Email", val: "alex@example.com" },
+  { label: "Location", val: "San Francisco, CA" },
 ];
 ---
 
 <Layout
-  title="Tailory — Aperture"
+  title="Tailory — Chalk"
   description="A fully client-side resume editor. No server, no account, no data leaves your device."
 >
   <Fragment slot="head">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
   </Fragment>
 
   <div
-    class="min-h-screen bg-[#070d1a] text-[#c8d4e8]"
-    style="font-family: 'Instrument Sans', system-ui, sans-serif"
+    class="min-h-screen bg-white text-[#1a1a17]"
+    style="font-family: 'Bricolage Grotesque', system-ui, sans-serif"
   >
     <!-- Nav -->
-    <header class="border-b border-[#101828]">
-      <nav class="mx-auto flex max-w-5xl items-center justify-between px-8 py-5">
-        <span
-          class="text-2xl font-bold text-[#e8604a]"
-          style="font-family: 'Fraunces', Georgia, serif; font-style: italic"
-        >
-          Tailory
-        </span>
+    <header class="border-b border-[#e5e5e0]">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+        <span class="text-xl font-bold tracking-tight text-[#1a1a17]">Tailory</span>
         <a
           href="https://github.com/abijith-suresh/tailory"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-sm text-[#4a5878] transition-colors hover:text-[#e8604a]"
+          class="text-sm text-[#6b6b63] transition-colors hover:text-[#b84c27]"
         >
           GitHub ↗
         </a>
       </nav>
     </header>
 
-    <!-- Hero — centered, large italic Fraunces -->
-    <section class="mx-auto max-w-5xl px-8 pb-24 pt-28 text-center">
+    <!-- Hero -->
+    <section class="mx-auto max-w-6xl px-8 pb-24 pt-24">
       <h1
-        class="mx-auto mb-8 max-w-3xl leading-[0.95] text-[#e8f0ff]"
-        style="font-family: 'Fraunces', Georgia, serif; font-size: clamp(58px, 8vw, 96px); font-style: italic; font-weight: 700"
+        class="mb-8 max-w-4xl leading-[0.9] tracking-tight text-[#1a1a17]"
+        style="font-size: clamp(56px, 8vw, 90px); font-weight: 800"
       >
-        Your resume editor.<br />
-        <span style="color: #e8604a">No strings attached.</span>
+        Resume editing,<br />
+        <span style="color: #b84c27">done right.</span>
       </h1>
-      <p class="mx-auto mb-10 max-w-lg text-lg leading-relaxed text-[#4a5878]">
-        Upload a PDF or DOCX, edit every field, preview live, export an ATS-safe PDF. All in your
-        browser. Nothing leaves your device.
+      <div class="mb-10 h-0.5 w-20 bg-[#e5e5e0]"></div>
+      <p class="mb-10 max-w-xl text-lg leading-relaxed text-[#6b6b63]">
+        Upload a PDF or DOCX, edit every field in a clean interface, and export an ATS-safe PDF —
+        without sending a single byte to a server.
       </p>
+      <div class="flex flex-wrap items-center gap-4">
+        <a
+          href="/editor"
+          class="inline-block bg-[#b84c27] px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9a3c1e]"
+        >
+          Open the editor →
+        </a>
+        <div class="flex flex-wrap gap-3">
+          {
+            ["No account", "Local only", "Open source"].map((chip) => (
+              <span class="rounded-full border border-[#e5e5e0] bg-[#fafaf8] px-4 py-1.5 text-xs font-medium text-[#6b6b63]">
+                {chip}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </section>
 
-      <!-- Trust chips -->
-      <div class="mb-10 flex flex-wrap justify-center gap-3">
+    <!-- App Preview Mockup -->
+    <section class="mx-auto max-w-6xl px-8 pb-24">
+      <p class="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#b0b0a8]">
+        Editor preview
+      </p>
+      <div class="overflow-hidden rounded-lg border border-[#e5e5e0] shadow-lg shadow-black/5">
+        <!-- Top bar -->
+        <div class="flex items-center border-b border-[#e5e5e0] bg-[#fafaf8] px-4 py-2.5">
+          <span class="mr-6 text-sm font-bold text-[#1a1a17]">Tailory</span>
+          <div class="flex">
+            {
+              tabs.map((tab, i) => (
+                <div
+                  class:list={[
+                    "border-b-2 px-4 py-2 text-xs font-semibold transition-colors",
+                    i === 0
+                      ? "border-[#b84c27] text-[#b84c27]"
+                      : "border-transparent text-[#b0b0a8]",
+                  ]}
+                >
+                  {tab}
+                </div>
+              ))
+            }
+          </div>
+          <div class="ml-auto">
+            <span class="rounded bg-[#b84c27] px-3 py-1 text-xs font-semibold text-white"
+              >Export PDF</span
+            >
+          </div>
+        </div>
+        <!-- Split pane -->
+        <div class="flex" style="height: 260px">
+          <!-- Left: Editor panel -->
+          <div class="w-1/2 overflow-hidden border-r border-[#e5e5e0] bg-white p-5">
+            <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#b0b0a8]">
+              Basics
+            </p>
+            {
+              formFields.map((field) => (
+                <div class="mb-3">
+                  <p class="mb-1 text-[11px] font-semibold text-[#6b6b63]">{field.label}</p>
+                  <div class="rounded border border-[#e5e5e0] bg-[#fafaf8] px-3 py-2 text-xs text-[#1a1a17]">
+                    {field.val}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+          <!-- Right: Preview panel -->
+          <div class="w-1/2 bg-white p-5">
+            <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#b0b0a8]">
+              Preview
+            </p>
+            <div class="rounded border border-[#e5e5e0] bg-[#fafaf8] p-4">
+              <div class="mb-2 h-3 w-28 rounded bg-[#b84c27]/20"></div>
+              <div class="mb-4 h-2 w-20 rounded bg-[#e5e5e0]"></div>
+              <div class="mb-1.5 h-2 w-full rounded bg-[#e5e5e0]"></div>
+              <div class="mb-1.5 h-2 w-5/6 rounded bg-[#e5e5e0]"></div>
+              <div class="mb-4 h-2 w-4/5 rounded bg-[#e5e5e0]"></div>
+              <div class="mb-1 h-2 w-16 rounded bg-[#b84c27]/40"></div>
+              <div class="mb-1.5 h-2 w-full rounded bg-[#e5e5e0]"></div>
+              <div class="h-2 w-3/4 rounded bg-[#e5e5e0]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t border-[#e5e5e0] px-8"></div>
+
+    <!-- Features — 2-column with strong labels -->
+    <section class="mx-auto max-w-6xl px-8 py-24">
+      <p class="mb-16 text-xs font-semibold uppercase tracking-[0.2em] text-[#b0b0a8]">
+        What it does
+      </p>
+      <dl class="grid grid-cols-1 gap-x-16 gap-y-0 md:grid-cols-2">
         {
-          chips.map((chip) => (
-            <span class="rounded-full border border-[#1a2438] px-4 py-1.5 text-xs font-medium tracking-wide text-[#4a5878]">
-              {chip}
-            </span>
+          features.map((f) => (
+            <div class="border-t border-[#e5e5e0] py-7">
+              <dt class="mb-2 text-base font-bold text-[#1a1a17]">{f.term}</dt>
+              <dd class="text-sm leading-relaxed text-[#6b6b63]">{f.def}</dd>
+            </div>
           ))
         }
-      </div>
-
-      <a
-        href="/editor"
-        class="inline-block bg-[#e8604a] px-8 py-3.5 text-sm font-semibold text-[#070d1a] transition-opacity hover:opacity-90"
-      >
-        Open the editor →
-      </a>
+      </dl>
     </section>
 
-    <!-- Features grid with coral top border -->
-    <section class="border-t border-[#101828]">
-      <div class="mx-auto max-w-5xl px-8 py-24">
-        <p class="mb-16 text-xs uppercase tracking-[0.2em] text-[#4a5878]">What it does</p>
-        <div class="grid grid-cols-1 gap-x-12 gap-y-0 md:grid-cols-2">
-          {
-            features.map((f) => (
-              <div class="border-b border-[#101828] py-8 first:border-t md:[&:nth-child(2)]:border-t">
-                <div class="mb-3 h-0.5 w-8 bg-[#e8604a]" />
-                <h3 class="mb-2 text-base font-semibold text-[#c8d4e8]">{f.name}</h3>
-                <p class="text-sm leading-relaxed text-[#4a5878]">{f.desc}</p>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </section>
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t border-[#e5e5e0] px-8"></div>
 
     <!-- How it works -->
-    <section class="border-t border-[#101828]">
-      <div class="mx-auto max-w-5xl px-8 py-24">
-        <p class="mb-16 text-xs uppercase tracking-[0.2em] text-[#4a5878]">How it works</p>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-          {
-            steps.map((s, i) => (
-              <div>
-                <p
-                  class="mb-4 leading-none text-[#101828]"
-                  style="font-family: 'Fraunces', Georgia, serif; font-size: 4rem; font-style: italic; font-weight: 700"
-                >
-                  0{i + 1}
-                </p>
-                <h3 class="mb-3 text-lg font-semibold text-[#c8d4e8]">{s.title}</h3>
-                <p class="text-sm leading-relaxed text-[#4a5878]">{s.desc}</p>
-              </div>
-            ))
-          }
-        </div>
+    <section class="mx-auto max-w-6xl px-8 py-24">
+      <p class="mb-16 text-xs font-semibold uppercase tracking-[0.2em] text-[#b0b0a8]">
+        How it works
+      </p>
+      <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
+        {
+          steps.map((s) => (
+            <div>
+              <p class="mb-4 font-extrabold leading-none text-[#e5e5e0]" style="font-size: 4rem">
+                {s.n}
+              </p>
+              <h3 class="mb-3 text-xl font-bold text-[#1a1a17]">{s.title}</h3>
+              <p class="text-sm leading-relaxed text-[#6b6b63]">{s.desc}</p>
+            </div>
+          ))
+        }
       </div>
     </section>
 
     <!-- Privacy callout -->
-    <div class="border-y border-[#101828] bg-[#050a12]">
-      <div class="mx-auto max-w-5xl px-8 py-20">
-        <div class="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
-          <h2
-            class="max-w-lg leading-tight text-[#e8f0ff]"
-            style="font-family: 'Fraunces', Georgia, serif; font-size: clamp(28px, 3.5vw, 44px); font-style: italic"
-          >
-            Your data never leaves your device.
-          </h2>
-          <p class="max-w-sm text-base leading-relaxed text-[#4a5878]">
-            No telemetry. No cloud sync. No accounts. Tailory runs entirely in your browser — there
-            is no server to send your resume to.
-          </p>
+    <div class="bg-[#fafaf8]">
+      <div class="mx-auto max-w-6xl border-t border-[#e5e5e0] px-8 py-20">
+        <div class="flex flex-col gap-2 md:flex-row md:items-start md:gap-16">
+          <div class="md:w-1/2">
+            <p class="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#b0b0a8]">
+              Privacy
+            </p>
+            <h2
+              class="font-extrabold leading-tight text-[#1a1a17]"
+              style="font-size: clamp(26px, 3vw, 40px)"
+            >
+              Your resume is your business. We have no way of seeing it.
+            </h2>
+          </div>
+          <div class="md:w-1/2 md:pt-10">
+            <p class="text-base leading-relaxed text-[#6b6b63]">
+              No telemetry. No cloud sync. No accounts required. Tailory runs entirely in your
+              browser — your data stays exactly where it belongs.
+            </p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <footer class="mx-auto flex max-w-5xl items-center justify-between px-8 py-10">
-      <p class="text-sm text-[#1a2438]">© 2025 Tailory — MIT licensed</p>
+    <footer class="mx-auto flex max-w-6xl items-center justify-between px-8 py-10">
+      <p class="text-sm text-[#b0b0a8]">© 2025 Tailory — MIT licensed</p>
       <nav class="flex gap-8 text-sm">
-        <a href="/features" class="text-[#4a5878] transition-colors hover:text-[#e8604a]"
+        <a href="/features" class="text-[#6b6b63] transition-colors hover:text-[#b84c27]"
           >Features</a
         >
-        <a href="/about" class="text-[#4a5878] transition-colors hover:text-[#e8604a]">About</a>
-        <a href="/faq" class="text-[#4a5878] transition-colors hover:text-[#e8604a]">FAQ</a>
+        <a href="/about" class="text-[#6b6b63] transition-colors hover:text-[#b84c27]">About</a>
+        <a href="/faq" class="text-[#6b6b63] transition-colors hover:text-[#b84c27]">FAQ</a>
       </nav>
     </footer>
   </div>
