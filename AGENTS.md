@@ -1,4 +1,4 @@
-# Agent & Contributor Instructions — agentic-astro
+# Agent & Contributor Instructions — Tailory
 
 This is the canonical instruction file for AI agents and contributors. `CLAUDE.md` is a symlink to this file.
 
@@ -6,7 +6,11 @@ This is the canonical instruction file for AI agents and contributors. `CLAUDE.m
 
 ## Project Overview
 
-This is **agentic-astro** — an Astro 5 starter kit built for AI-assisted development. It uses Tailwind CSS v4, TypeScript strict mode, and Bun as the package manager. The stack is intentionally minimal and opinionated so that an AI coding agent can onboard instantly with zero ambiguity.
+**Tailory** is a client-side resume editor built with Astro 5, SolidJS, Tailwind CSS v4, TypeScript strict mode, and Bun. Users upload a PDF or DOCX resume, Tailory parses it into structured JSON, they edit it in a form-based UI, preview it live, and export a polished PDF — all without any server or account.
+
+- **Live**: https://tailory-nine.vercel.app
+- **Repo**: https://github.com/abijith-suresh/tailory
+- **Deploy**: Vercel (static build, no SSR adapter)
 
 ---
 
@@ -14,16 +18,99 @@ This is **agentic-astro** — an Astro 5 starter kit built for AI-assisted devel
 
 ```
 src/
-├── layouts/
-│   └── Layout.astro       # Base HTML shell — extend this for all pages
-├── pages/
-│   └── index.astro        # Entry point
+├── components/
+│   ├── upload/
+│   │   └── FileUpload.tsx          SolidJS island — file drop zone + parse trigger
+│   ├── editor/
+│   │   ├── EditorShell.tsx         Top-level editor layout (SolidJS)
+│   │   ├── DraftManager.tsx        Save/load/delete drafts via idb (SolidJS)
+│   │   ├── BasicsForm.tsx          Name, contact, summary fields (SolidJS)
+│   │   ├── WorkForm.tsx            Work experience entries (SolidJS)
+│   │   ├── EducationForm.tsx       Education entries (SolidJS)
+│   │   ├── SkillsForm.tsx          Skills list (SolidJS)
+│   │   ├── ProjectsForm.tsx        Projects entries (SolidJS)
+│   │   └── CertificatesForm.tsx    Certificates entries (SolidJS)
+│   ├── preview/
+│   │   └── ResumePreview.tsx       Live HTML preview + template switcher (SolidJS)
+│   └── ui/
+│       ├── FormField.tsx           Label + input wrapper
+│       ├── Input.tsx               Controlled text input
+│       ├── Textarea.tsx            Controlled textarea
+│       ├── ReorderableList.tsx     Drag-to-reorder list
+│       ├── ProcessingIndicator.tsx Spinner/status during parse
+│       └── ErrorBoundary.tsx       SolidJS error boundary
+├── lib/
+│   ├── extraction/
+│   │   ├── pdf.ts                  pdfjs-dist text extraction
+│   │   └── docx.ts                 mammoth DOCX → plain text
+│   ├── parser/
+│   │   └── resume-parser.ts        Heuristic section detector + field extractor
+│   ├── storage/
+│   │   └── db.ts                   idb CRUD — DB: "tailory", store: "drafts", key: "autosave"
+│   ├── export/
+│   │   └── pdf-export.ts           pdfmake dynamic import + PDF download
+│   └── templates/
+│       ├── modern.ts               Modern template definition
+│       ├── minimal.ts              Minimal template definition
+│       └── compact-ats.ts          Compact ATS-safe template definition
+├── types/
+│   └── resume.ts                   JSON Resume schema types + TemplateId union type
+├── store/
+│   └── resume.ts                   createStore<ResumeSchema> + selectedTemplate signal
 ├── styles/
-│   └── global.css         # Global styles — Tailwind is imported here
+│   └── global.css                  Global styles — Tailwind imported here
+├── layouts/
+│   └── Layout.astro                Base HTML shell
+├── pages/
+│   ├── index.astro                 Landing page
+│   └── editor.astro                Editor + preview split layout
 ├── test/
-│   └── setup.ts           # Vitest setup — imports @testing-library/jest-dom
-└── env.d.ts               # Astro type reference
+│   └── setup.ts                    Vitest setup — imports @testing-library/jest-dom
+└── env.d.ts                        Astro type reference
 ```
+
+---
+
+## Critical Agent Rules
+
+### SolidJS Islands
+
+- All interactive UI is SolidJS components with `client:only="solid-js"` in `.astro` files
+- Static Astro pages (landing, marketing) use no islands — pure Astro/HTML/CSS only
+- Never use React or Vue — this project uses SolidJS exclusively
+
+### pdfmake — MUST be dynamically imported
+
+```ts
+// CORRECT — inside an event handler or async function:
+const pdfmake = await import("pdfmake/build/pdfmake");
+
+// WRONG — never at module level:
+import pdfmake from "pdfmake/build/pdfmake"; // ❌ breaks SSR/build
+```
+
+pdfmake accesses `window` on import, so it must be deferred to browser runtime.
+
+### PDF.js Worker
+
+The worker file is served statically:
+
+```ts
+import { GlobalWorkerOptions } from "pdfjs-dist";
+GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+```
+
+The file lives at `public/pdf.worker.min.mjs` and must NOT be moved or renamed.
+
+### Path Alias
+
+`@/` maps to `src/` — always use this alias, never relative paths like `../../`.
+
+Configured in **both** `astro.config.ts` AND `vitest.config.ts` — if you add a new config file that needs path resolution, add the alias there too.
+
+### ESLint — Ignored Files
+
+`public/pdf.worker.min.mjs` is in the ESLint ignore list. Never remove it — it's a vendored minified file.
 
 ---
 
@@ -39,7 +126,7 @@ src/
 | `bun run lint:fix`     | Run ESLint with auto-fix           |
 | `bun run format`       | Format all files with Prettier     |
 | `bun run format:check` | Check formatting without writing   |
-| `bun run test`         | Run tests once                     |
+| `bun run test`         | Run tests once (Vitest)            |
 | `bun run test:watch`   | Run tests in watch mode            |
 | `bun run test:ui`      | Open Vitest UI                     |
 
@@ -54,7 +141,7 @@ This project uses **Tailwind CSS v4**, which has a different setup from v3:
 - **Vite plugin**: `@tailwindcss/vite` in `astro.config.ts` (not an Astro integration)
 - **Custom theme**: Use `@theme` block in CSS instead of `theme.extend` in JS config
 
-Example custom theme in CSS:
+Example:
 
 ```css
 @import "tailwindcss";
@@ -70,8 +157,7 @@ Example custom theme in CSS:
 ## TypeScript
 
 - **Strict mode** via `astro/tsconfigs/strict`
-- **Path alias**: `@` maps to `src/` — use `@/components/Foo.astro` instead of relative paths
-- `tsconfig.json` paths: `"@/*": ["src/*"]`
+- **Path alias**: `@` maps to `src/` — configured in `tsconfig.json` as `"@/*": ["src/*"]`
 
 ---
 
@@ -116,16 +202,20 @@ Config: `vitest.config.ts`
 - **Globals**: enabled (no need to import `describe`, `it`, `expect`)
 - **Setup file**: `src/test/setup.ts` (imports `@testing-library/jest-dom`)
 - **Test files**: `src/**/*.{test,spec}.{js,ts}`
+- **Run with**: `bun run test` — NOT `bun test` (that runs Bun's native test runner, not Vitest)
 
-Example test:
+### Mocking pdfjs-dist in tests
+
+pdfjs-dist must always be mocked — it has a bundled worker that cannot run in jsdom:
 
 ```ts
-import { expect, it } from "vitest";
-
-it("adds numbers", () => {
-  expect(1 + 1).toBe(2);
-});
+vi.mock("pdfjs-dist", () => ({
+  getDocument: vi.fn(),
+  GlobalWorkerOptions: { workerSrc: "" },
+}));
 ```
+
+Current test count: 11 (9 parser + 1 pdf module export + 1 docx module export)
 
 ---
 
@@ -144,8 +234,8 @@ Examples:
 ```
 feat: add hero section
 fix: correct mobile nav z-index
-docs: update README with setup steps
-chore: upgrade astro to v5.18
+docs: update AGENTS.md for Tailory
+chore: remove stale deploy workflow
 ```
 
 ### Branch Naming
@@ -166,7 +256,7 @@ chore/<short-description>
 
 1. Create a branch from `main`
 2. Make changes and commit with conventional commit format
-3. Open a PR against `main`
+3. Open a PR against `main` with `gh pr create`
 4. CI must pass before merging
 5. Squash merge preferred
 
@@ -184,15 +274,13 @@ Triggered on push to `main` and all PRs. Runs:
 4. Test
 5. Build
 
-### `deploy.yml`
-
-Triggered on push to `main`. Deploys to GitHub Pages using `actions/configure-pages`, `actions/upload-pages-artifact`, and `actions/deploy-pages`.
-
-Requires: GitHub Pages enabled in Settings → Pages → Source: GitHub Actions.
-
 ### `audit.yml`
 
 Runs weekly (Monday 03:00 UTC) and on manual trigger. Audits production dependencies with `bun audit --prod`.
+
+### Deployment
+
+Tailory deploys to **Vercel** automatically on push to `main`. No manual deployment step needed. The Vercel project is named `tailory` (scope: `abijiths-projects-1`). Build: `bun run build`, install: `bun install`, output: `dist/`.
 
 ---
 
@@ -205,22 +293,3 @@ The `.devcontainer/` setup provides a consistent dev environment:
 - **Port**: 4321 forwarded for Astro dev server
 - **VSCode extensions**: Astro, ESLint, Prettier, Tailwind CSS IntelliSense, MDX, Path Intellisense, Auto Rename Tag, Code Spell Checker, Vitest Explorer
 - **Post-create**: `bun install` runs automatically
-
----
-
-## Post-Init Checklist
-
-After clicking "Use this template" on GitHub:
-
-1. **Clone** the new repo locally
-2. **Install dependencies**: `bun install`
-3. **Update `package.json`**: change `name` from `"agentic-astro"` to your project name
-4. **Update `astro.config.ts`**: set `site` and `base` for GitHub Pages
-   ```ts
-   site: "https://YOUR-USERNAME.github.io",
-   base: "/YOUR-REPO-NAME/",
-   ```
-5. **Update `.devcontainer/devcontainer.json`**: change the `name` field
-6. **Enable GitHub Pages**: Settings → Pages → Source: GitHub Actions
-7. **Replace this AGENTS.md**: with project-specific instructions (or keep and extend)
-8. **Make initial commit**: `git commit -m "chore: init from agentic-astro"`
