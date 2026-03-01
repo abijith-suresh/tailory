@@ -1,0 +1,8 @@
+{
+  "name": "Astro Template",
+  "short_name": "Astro",
+  "icons": [],
+  "theme_color": "#030712",
+  "background_color": "#030712",
+  "display": "standalone"
+}
