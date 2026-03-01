@@ -1,4 +1,4 @@
-import { For, type Component, type JSX } from "solid-js";
+import { type Component, For, type JSX } from "solid-js";
 
 interface ReorderableListProps<T extends { id: string }> {
   items: T[];
@@ -9,9 +9,7 @@ interface ReorderableListProps<T extends { id: string }> {
   onAdd?: () => void;
 }
 
-function ReorderableList<T extends { id: string }>(
-  props: ReorderableListProps<T>,
-): JSX.Element {
+function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T>): JSX.Element {
   const moveUp = (index: number) => {
     if (index === 0) return;
     const next = [...props.items];

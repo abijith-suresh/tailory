@@ -1,4 +1,4 @@
-import { createSignal, Show, type Component } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
 import { loadResume } from "@/store/resume";
 
@@ -41,9 +41,7 @@ const FileUpload: Component = () => {
     } catch (err) {
       console.error(err);
       setErrorMsg(
-        err instanceof Error
-          ? err.message
-          : "Failed to process file. Please try a different file.",
+        err instanceof Error ? err.message : "Failed to process file. Please try a different file."
       );
       setStatus("error");
     }
@@ -112,12 +110,8 @@ const FileUpload: Component = () => {
             </div>
           </div>
 
-          <p class="mb-2 text-base font-medium text-gray-200">
-            Drop your resume here
-          </p>
-          <p class="mb-6 text-sm text-gray-400">
-            PDF or DOCX · Max 10 MB
-          </p>
+          <p class="mb-2 text-base font-medium text-gray-200">Drop your resume here</p>
+          <p class="mb-6 text-sm text-gray-400">PDF or DOCX · Max 10 MB</p>
 
           <label
             for="file-input"

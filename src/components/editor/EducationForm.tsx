@@ -32,14 +32,9 @@ const EducationForm: Component = () => {
   const updateField = <K extends keyof ResumeEducation>(
     id: string,
     field: K,
-    value: ResumeEducation[K],
+    value: ResumeEducation[K]
   ) => {
-    setResume(
-      "education",
-      (e) => e?.id === id,
-      field,
-      value,
-    );
+    setResume("education", (e) => e?.id === id, field, value);
   };
 
   return (

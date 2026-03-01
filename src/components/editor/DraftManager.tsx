@@ -1,6 +1,6 @@
-import { createSignal, createEffect, For, Show, type Component } from "solid-js";
-import { resume, loadResume } from "@/store/resume";
-import { saveDraft, listDrafts, deleteDraft, type ResumeDraft } from "@/lib/storage/db";
+import { type Component, createEffect, createSignal, For, Show } from "solid-js";
+import { loadResume, resume } from "@/store/resume";
+import { deleteDraft, listDrafts, type ResumeDraft, saveDraft } from "@/lib/storage/db";
 
 type Status = "idle" | "saving" | "saved";
 
@@ -103,18 +103,12 @@ const DraftManager: Component = () => {
           <div class="max-h-64 overflow-y-auto">
             <Show
               when={drafts().length > 0}
-              fallback={
-                <p class="px-4 py-6 text-center text-xs text-gray-400">No saved drafts</p>
-              }
+              fallback={<p class="px-4 py-6 text-center text-xs text-gray-400">No saved drafts</p>}
             >
               <For each={drafts()}>
                 {(draft) => (
                   <div class="flex w-full items-center justify-between px-4 py-2.5 hover:bg-gray-50">
-                    <button
-                      type="button"
-                      onClick={() => loadDraft(draft)}
-                      class="flex-1 text-left"
-                    >
+                    <button type="button" onClick={() => loadDraft(draft)} class="flex-1 text-left">
                       <p class="text-xs font-medium text-gray-800">{draft.name}</p>
                       <p class="text-xs text-gray-400">
                         {new Date(draft.updatedAt).toLocaleString()}

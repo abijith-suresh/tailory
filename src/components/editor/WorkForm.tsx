@@ -1,4 +1,4 @@
-import { For, type Component } from "solid-js";
+import { type Component, For } from "solid-js";
 import { produce } from "solid-js/store";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeWork } from "@/types/resume";
@@ -32,12 +32,7 @@ const WorkForm: Component = () => {
   };
 
   const updateField = <K extends keyof ResumeWork>(id: string, field: K, value: ResumeWork[K]) => {
-    setResume(
-      "work",
-      (w) => w?.id === id,
-      field,
-      value,
-    );
+    setResume("work", (w) => w?.id === id, field, value);
   };
 
   const addHighlight = (id: string) => {
@@ -47,18 +42,12 @@ const WorkForm: Component = () => {
       produce((w: ResumeWork) => {
         if (!w.highlights) w.highlights = [];
         w.highlights.push("");
-      }),
+      })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume(
-      "work",
-      (w) => w?.id === id,
-      "highlights",
-      idx,
-      value,
-    );
+    setResume("work", (w) => w?.id === id, "highlights", idx, value);
   };
 
   const removeHighlight = (id: string, idx: number) => {
@@ -67,7 +56,7 @@ const WorkForm: Component = () => {
       (w) => w?.id === id,
       produce((w: ResumeWork) => {
         w.highlights?.splice(idx, 1);
-      }),
+      })
     );
   };
 
