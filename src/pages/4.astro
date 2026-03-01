@@ -1,224 +1,243 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 
-const features = [
+const col1Features = [
   {
     name: "PDF & DOCX Upload",
-    desc: "Text extraction from both formats via pdfjs-dist and mammoth.",
+    desc: "Drop any resume format — Tailory extracts the text entirely in your browser, with no upload to any server.",
   },
-  { name: "Auto-Parsing", desc: "Section detection and field mapping — no manual copy-paste." },
-  { name: "Live Preview", desc: "Immediate visual feedback. What you edit is what you get." },
   {
-    name: "3 Templates",
-    desc: "Modern. Minimal. Compact ATS. All text-only, all machine-readable.",
+    name: "Auto-Parsing",
+    desc: "Heuristic section detection maps raw extracted text into structured JSON Resume fields automatically.",
+  },
+  {
+    name: "Live Preview",
+    desc: "See your resume rendered in real time alongside the editor. No save, no reload, no delay.",
+  },
+];
+
+const col2Features = [
+  {
+    name: "Three Templates",
+    desc: "Modern, Minimal, and Compact ATS — switch between them instantly in the live preview panel.",
   },
   {
     name: "ATS-Safe Export",
-    desc: "pdfmake generates strictly compliant PDFs — no images, no tables.",
+    desc: "pdfmake generates machine-readable PDFs with no images or tables — compatible with every major ATS.",
   },
   {
     name: "Draft Storage",
-    desc: "IndexedDB auto-save. Persists across sessions, stays local.",
+    desc: "Auto-saved to IndexedDB in your browser. Your work persists across sessions, locally.",
+  },
+];
+
+const steps = [
+  {
+    n: "1.",
+    title: "Upload your resume",
+    desc: "Drop a PDF or DOCX file — or start from a blank form. Text extraction runs immediately, in your browser.",
+  },
+  {
+    n: "2.",
+    title: "Edit every field",
+    desc: "Work through each section in a structured editor. See the live preview update as you type.",
+  },
+  {
+    n: "3.",
+    title: "Export your PDF",
+    desc: "Download an ATS-optimised PDF in one click. Ready to submit anywhere, immediately.",
   },
 ];
 ---
 
-<Layout title="Tailory" description="A fully client-side resume editor.">
+<Layout
+  title="Tailory — Broadsheet"
+  description="A fully client-side resume editor. No server, no account, no data leaves your device."
+>
   <Fragment slot="head">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap"
       rel="stylesheet"
     />
   </Fragment>
 
   <div
-    class="min-h-screen bg-[#f4f4f0] text-[#0f0f0f]"
-    style="font-family: 'IBM Plex Sans', system-ui, sans-serif;"
+    class="min-h-screen bg-[#f7f5f0] text-[#1a1410]"
+    style="font-family: 'Source Sans 3', system-ui, sans-serif"
   >
-    <!-- Nav -->
-    <header class="border-b-2 border-[#0f0f0f]">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <span
-          class="text-base font-bold tracking-tight text-[#0f0f0f]"
-          style="font-family: 'IBM Plex Mono', monospace;"
-        >
-          TAILORY
-        </span>
-        <div class="flex items-center">
-          <a
-            href="https://github.com/abijith-suresh/tailory"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="border-l-2 border-[#0f0f0f] px-4 py-2 text-xs text-[#0f0f0f] transition-colors hover:bg-[#0f0f0f] hover:text-[#f4f4f0]"
-            style="font-family: 'IBM Plex Mono', monospace;"
+    <!-- Nav — masthead style -->
+    <header class="border-b-4 border-[#1a1410]">
+      <div class="mx-auto max-w-6xl px-8">
+        <div class="flex items-center justify-between py-4">
+          <span
+            class="text-3xl font-bold uppercase tracking-widest text-[#1a1410]"
+            style="font-family: 'Libre Baskerville', Georgia, serif; letter-spacing: 0.15em"
           >
-            GITHUB ↗
-          </a>
-          <a
-            href="/editor"
-            class="border-l-2 border-[#0f0f0f] bg-[#0f0f0f] px-4 py-2 text-xs text-[#f4f4f0] transition-colors hover:bg-[#333]"
-            style="font-family: 'IBM Plex Mono', monospace;"
-          >
-            OPEN EDITOR →
-          </a>
+            Tailory
+          </span>
+          <div class="flex items-center gap-8 text-sm text-[#6b5e52]">
+            <span class="hidden md:block">Vol. I · Est. 2025</span>
+            <a
+              href="https://github.com/abijith-suresh/tailory"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="transition-colors hover:text-[#b32c1e]"
+            >
+              GitHub ↗
+            </a>
+          </div>
         </div>
-      </nav>
+        <div
+          class="border-t border-[#c8bfb0] py-2 text-center text-xs uppercase tracking-[0.2em] text-[#6b5e52]"
+        >
+          Client-side resume editor · No account · No data leaves your browser
+        </div>
+      </div>
     </header>
 
-    <!-- Hero -->
-    <section class="mx-auto max-w-7xl border-b-2 border-[#0f0f0f] px-6 py-20">
-      <div class="grid grid-cols-1 items-end gap-12 md:grid-cols-2">
-        <div>
-          <p
-            class="mb-6 text-xs uppercase tracking-widest text-[#666]"
-            style="font-family: 'IBM Plex Mono', monospace;"
-          >
-            v0.1.0 — Client-side only
+    <!-- Hero — newspaper front page -->
+    <section class="mx-auto max-w-6xl px-8 py-16">
+      <h1
+        class="mb-6 leading-[0.88] tracking-tight text-[#1a1410]"
+        style="font-family: 'Libre Baskerville', Georgia, serif; font-size: clamp(52px, 9vw, 112px); font-weight: 700"
+      >
+        The resume editor<br />
+        <span style="color: #b32c1e">that works for you,</span><br />
+        not against you.
+      </h1>
+      <!-- Thick rule -->
+      <div class="mb-8 h-1 w-full bg-[#1a1410]"></div>
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div class="md:col-span-2">
+          <p class="text-xl leading-relaxed text-[#3a2e24]">
+            Tailory is a fully client-side resume editor. Upload a PDF or DOCX, edit every field in
+            a structured form, preview live, and export an ATS-safe PDF — all in your browser.
+            Nothing leaves your device.
           </p>
-          <h1
-            class="mb-8 text-5xl font-bold text-[#0f0f0f]"
-            style="font-family: 'IBM Plex Mono', monospace; line-height: 1.1;"
-          >
-            Resume editor.<br />
-            No server.<br />
-            No nonsense.
-          </h1>
+        </div>
+        <div class="flex items-start md:justify-end">
           <a
             href="/editor"
-            class="inline-block bg-[#0f0f0f] px-6 py-3 text-sm font-medium text-[#f4f4f0] transition-colors hover:bg-[#333]"
-            style="font-family: 'IBM Plex Mono', monospace;"
+            class="inline-block border-2 border-[#b32c1e] bg-[#b32c1e] px-8 py-3 text-base font-semibold text-[#f7f5f0] transition-all hover:bg-transparent hover:text-[#b32c1e]"
+            style="font-family: 'Libre Baskerville', Georgia, serif"
           >
-            GET STARTED →
+            Open the editor →
           </a>
         </div>
-        <div class="border-2 border-[#0f0f0f] p-8">
-          <p
-            class="mb-4 text-xs uppercase tracking-widest text-[#666]"
-            style="font-family: 'IBM Plex Mono', monospace;"
-          >
-            What it is
-          </p>
-          <p class="text-base leading-relaxed text-[#333]">
-            Upload a PDF or DOCX resume. Tailory parses it into structured fields. Edit in a clean
-            form. Preview in real time. Export an ATS-compatible PDF. Zero network requests. Zero
-            accounts. Your data, your browser, full stop.
-          </p>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t border-[#c8bfb0] px-8"></div>
+
+    <!-- Features — 2-column newspaper layout -->
+    <section class="mx-auto max-w-6xl px-8 py-20">
+      <h2
+        class="mb-8 text-xs uppercase tracking-[0.25em] text-[#b32c1e]"
+        style="font-family: 'Libre Baskerville', Georgia, serif"
+      >
+        Features
+      </h2>
+      <div class="grid grid-cols-1 gap-x-16 md:grid-cols-2">
+        <!-- Column 1 -->
+        <div class="space-y-0">
+          {
+            col1Features.map((f) => (
+              <div class="border-t border-[#c8bfb0] py-7">
+                <h3
+                  class="mb-3 text-xl font-bold text-[#1a1410]"
+                  style="font-family: 'Libre Baskerville', Georgia, serif"
+                >
+                  {f.name}
+                </h3>
+                <p class="text-base leading-relaxed text-[#6b5e52]">{f.desc}</p>
+              </div>
+            ))
+          }
+        </div>
+        <!-- Column 2 -->
+        <div class="space-y-0">
+          {
+            col2Features.map((f) => (
+              <div class="border-t border-[#c8bfb0] py-7">
+                <h3
+                  class="mb-3 text-xl font-bold text-[#1a1410]"
+                  style="font-family: 'Libre Baskerville', Georgia, serif"
+                >
+                  {f.name}
+                </h3>
+                <p class="text-base leading-relaxed text-[#6b5e52]">{f.desc}</p>
+              </div>
+            ))
+          }
         </div>
       </div>
     </section>
 
-    <!-- Features -->
-    <section class="mx-auto max-w-7xl border-b-2 border-[#0f0f0f] px-6 py-20">
-      <p
-        class="mb-12 text-xs uppercase tracking-widest text-[#666]"
-        style="font-family: 'IBM Plex Mono', monospace;"
-      >
-        Capabilities
-      </p>
-      <div class="grid grid-cols-1 border-t-2 border-[#0f0f0f] sm:grid-cols-2 lg:grid-cols-3">
-        {
-          features.map((f) => (
-            <div class="border-b-2 border-r-0 border-[#0f0f0f] py-8 pr-8 last:border-b-0 sm:border-r-2 lg:border-b-0">
-              <h3
-                class="mb-3 text-sm font-semibold text-[#0f0f0f]"
-                style="font-family: 'IBM Plex Mono', monospace;"
-              >
-                {f.name}
-              </h3>
-              <p class="text-sm font-light leading-relaxed text-[#555]">{f.desc}</p>
-            </div>
-          ))
-        }
-      </div>
-    </section>
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t-2 border-[#1a1410] px-8"></div>
 
     <!-- How it works -->
-    <section class="mx-auto max-w-7xl border-b-2 border-[#0f0f0f] px-6 py-20">
-      <p
-        class="mb-12 text-xs uppercase tracking-widest text-[#666]"
-        style="font-family: 'IBM Plex Mono', monospace;"
+    <section class="mx-auto max-w-6xl px-8 py-20">
+      <h2
+        class="mb-12 text-xs uppercase tracking-[0.25em] text-[#b32c1e]"
+        style="font-family: 'Libre Baskerville', Georgia, serif"
       >
-        Process
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-3">
+        How it works
+      </h2>
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-3">
         {
-          [
-            { n: "01", title: "Upload", desc: "Drop a PDF or DOCX. Or start from scratch." },
-            {
-              n: "02",
-              title: "Edit",
-              desc: "Structured fields. Live preview. No formatting fights.",
-            },
-            { n: "03", title: "Export", desc: "ATS-safe PDF. Download. Done." },
-          ].map((s, i) => (
-            <div
-              class:list={`py-10 pr-12 ${i < 2 ? "border-b-2 border-[#0f0f0f] md:border-b-0 md:border-r-2" : ""}`}
-            >
+          steps.map((s) => (
+            <div class="border-t-2 border-[#1a1410] pt-6">
               <p
-                class="mb-8 text-6xl font-bold text-[#ddd]"
-                style="font-family: 'IBM Plex Mono', monospace;"
+                class="mb-4 text-4xl font-bold text-[#b32c1e]"
+                style="font-family: 'Libre Baskerville', Georgia, serif"
               >
                 {s.n}
               </p>
               <h3
-                class="mb-3 text-lg font-semibold text-[#0f0f0f]"
-                style="font-family: 'IBM Plex Mono', monospace;"
+                class="mb-3 text-xl font-bold text-[#1a1410]"
+                style="font-family: 'Libre Baskerville', Georgia, serif"
               >
                 {s.title}
               </h3>
-              <p class="text-sm font-light leading-relaxed text-[#555]">{s.desc}</p>
+              <p class="text-base leading-relaxed text-[#6b5e52]">{s.desc}</p>
             </div>
           ))
         }
       </div>
     </section>
 
-    <!-- Privacy callout -->
-    <section class="bg-[#0f0f0f] text-[#f4f4f0]">
-      <div class="mx-auto max-w-7xl px-6 py-20">
-        <h2
-          class="mb-6 max-w-2xl text-4xl font-bold"
-          style="font-family: 'IBM Plex Mono', monospace; line-height: 1.1;"
-        >
-          ZERO DATA COLLECTION.<br />
-          ZERO EXCEPTIONS.
-        </h2>
-        <p class="max-w-lg text-base font-light leading-relaxed text-[#888]">
-          Tailory is a static web app. There is no server receiving your data, no analytics tracking
-          your session, no account to create. Your resume lives in your browser and nowhere else.
-        </p>
+    <!-- Privacy callout — dramatic inversion -->
+    <div class="bg-[#1a1410]">
+      <div class="mx-auto max-w-6xl px-8 py-20">
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
+          <h2
+            class="leading-tight text-[#f7f5f0]"
+            style="font-family: 'Libre Baskerville', Georgia, serif; font-size: clamp(28px, 3.5vw, 48px); font-weight: 700"
+          >
+            Your data never leaves your device.
+          </h2>
+          <p class="text-lg leading-relaxed text-[#8a7a6e]">
+            No telemetry. No cloud sync. No account required. Tailory is a fully client-side
+            application — there is no server, so your resume data cannot reach one.
+          </p>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="border-t-2 border-[#0f0f0f]">
-      <div
-        class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row"
-      >
-        <p class="text-xs text-[#999]" style="font-family: 'IBM Plex Mono', monospace;">
-          © 2025 TAILORY — MIT LICENSE
+    <!-- Footer — newspaper dateline style -->
+    <footer class="border-t-4 border-[#1a1410]">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-8 py-8">
+        <p class="text-sm text-[#6b5e52]" style="font-family: 'Libre Baskerville', Georgia, serif">
+          © 2025 Tailory · MIT License
         </p>
-        <nav class="flex text-xs" style="font-family: 'IBM Plex Mono', monospace;">
-          <a
-            href="/features"
-            class="border-l-2 border-[#ddd] px-4 py-2 text-[#0f0f0f] transition-colors hover:bg-[#0f0f0f] hover:text-[#f4f4f0]"
-          >
-            FEATURES
-          </a>
-          <a
-            href="/about"
-            class="border-l-2 border-[#ddd] px-4 py-2 text-[#0f0f0f] transition-colors hover:bg-[#0f0f0f] hover:text-[#f4f4f0]"
-          >
-            ABOUT
-          </a>
-          <a
-            href="/faq"
-            class="border-l-2 border-[#ddd] px-4 py-2 text-[#0f0f0f] transition-colors hover:bg-[#0f0f0f] hover:text-[#f4f4f0]"
-          >
-            FAQ
-          </a>
+        <nav class="flex gap-8 text-sm text-[#6b5e52]">
+          <a href="/features" class="transition-colors hover:text-[#b32c1e]">Features</a>
+          <a href="/about" class="transition-colors hover:text-[#b32c1e]">About</a>
+          <a href="/faq" class="transition-colors hover:text-[#b32c1e]">FAQ</a>
         </nav>
       </div>
     </footer>

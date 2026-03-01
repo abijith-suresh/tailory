@@ -3,57 +3,81 @@ import Layout from "@/layouts/Layout.astro";
 
 const features = [
   {
-    name: "PDF & DOCX Upload",
-    desc: "Drop any resume format — Tailory handles the text extraction.",
+    term: "PDF & DOCX Upload",
+    def: "Drop any resume format — Tailory handles the text extraction entirely in your browser.",
   },
   {
-    name: "Auto-Parsing",
-    desc: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
-  },
-  { name: "Live Preview", desc: "See your resume rendered in real time as you make edits." },
-  {
-    name: "3 Templates",
-    desc: "Modern, Minimal, and Compact ATS — pick the one that fits your field.",
+    term: "Auto-Parsing",
+    def: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
   },
   {
-    name: "ATS-Safe Export",
-    desc: "Machine-readable PDFs with no images or tables to confuse applicant tracking systems.",
+    term: "Live Preview",
+    def: "See your resume rendered in real time as you make edits — no save required.",
   },
   {
-    name: "Draft Storage",
-    desc: "Your work saves automatically to your browser's local IndexedDB storage.",
+    term: "Three Templates",
+    def: "Modern, Minimal, and Compact ATS — each optimised for a different context.",
+  },
+  {
+    term: "ATS-Safe Export",
+    def: "Machine-readable PDFs with no images or tables to confuse applicant tracking systems.",
+  },
+  {
+    term: "Draft Storage",
+    def: "Your work saves automatically to your browser's IndexedDB — never to a server.",
   },
 ];
 
 const steps = [
   {
-    n: "01",
+    n: "I",
     title: "Upload",
-    desc: "Drop your existing PDF or DOCX resume, or start from a blank form.",
+    desc: "Drop your existing PDF or DOCX resume, or begin from a blank form.",
   },
   {
-    n: "02",
+    n: "II",
     title: "Edit",
-    desc: "Refine every field in a clean, structured editor. No formatting fights.",
+    desc: "Refine every field in a structured editor. No formatting fights, no surprises.",
   },
-  { n: "03", title: "Export", desc: "Download a polished, ATS-compatible PDF in one click." },
+  {
+    n: "III",
+    title: "Export",
+    desc: "Download a polished, ATS-compatible PDF in one click.",
+  },
 ];
 ---
 
 <Layout
-  title="Tailory — Dark Editorial"
-  description="A fully client-side resume editor. No server, no account."
+  title="Tailory — Inkwell"
+  description="A fully client-side resume editor. No server, no account, no data leaves your device."
 >
-  <div class="min-h-screen bg-[#0a0a0f] font-serif text-[#e8e9f0]">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div
+    class="min-h-screen bg-[#110c08] text-[#c9b89a]"
+    style="font-family: 'Crimson Pro', Georgia, serif"
+  >
     <!-- Nav -->
-    <header class="sticky top-0 z-50 border-b border-[#1e1e2a] bg-[#0a0a0f]">
-      <nav class="mx-auto flex max-w-5xl items-center justify-between px-8 py-5">
-        <span class="text-xl font-semibold tracking-tight text-[#c8cbec]">Tailory</span>
+    <header class="border-b border-[#2a1c0d]">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+        <span
+          class="text-2xl font-bold tracking-tight text-[#c4913a]"
+          style="font-family: 'Cormorant Garamond', Georgia, serif"
+        >
+          Tailory
+        </span>
         <a
           href="https://github.com/abijith-suresh/tailory"
           target="_blank"
           rel="noopener noreferrer"
-          class="font-mono text-sm text-[#6b7098] transition-colors hover:text-[#c8cbec]"
+          class="text-base text-[#6b4f35] transition-colors hover:text-[#c4913a]"
         >
           GitHub ↗
         </a>
@@ -61,55 +85,77 @@ const steps = [
     </header>
 
     <!-- Hero -->
-    <section class="mx-auto max-w-5xl px-8 pb-24 pt-28">
-      <p class="mb-8 font-mono text-xs uppercase tracking-[0.15em] text-[#6b7098]">
+    <section class="mx-auto max-w-6xl px-8 pb-20 pt-24">
+      <p class="mb-10 text-xs uppercase tracking-[0.25em] text-[#6b4f35]">
         Client-side resume editor
       </p>
-      <h1 class="mb-8 max-w-3xl text-6xl font-bold leading-[1.08] tracking-tight text-[#e8e9f0]">
-        The resume editor that<br />
-        <em class="not-italic text-[#9ea6d4]">respects your browser.</em>
+      <h1
+        class="mb-6 max-w-4xl leading-[0.95] tracking-tight text-[#e8d8bc]"
+        style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(64px, 8vw, 100px); font-weight: 700"
+      >
+        The resume editor<br />that belongs<br />
+        <em style="color: #c4913a">to you alone.</em>
       </h1>
-      <p class="mb-10 max-w-xl font-sans text-lg leading-relaxed text-[#8b8fa8]">
+      <!-- Gold rule -->
+      <div class="mb-10 h-px w-24 bg-[#c4913a]"></div>
+      <p class="mb-10 max-w-lg text-xl leading-relaxed text-[#8a6e52]">
         No server. No account. No data leaves your device. Upload a PDF or DOCX, edit in a
-        structured form, and export an ATS-safe PDF — entirely in your browser.
+        structured form, export an ATS-safe PDF — entirely in your browser.
       </p>
       <a
         href="/editor"
-        class="inline-block bg-[#9ea6d4] px-7 py-3 font-sans text-sm font-semibold text-[#0a0a0f] transition-opacity hover:opacity-90"
+        class="inline-block border border-[#c4913a] px-8 py-3 text-base tracking-wide text-[#c4913a] transition-all hover:bg-[#c4913a] hover:text-[#110c08]"
       >
-        Get Started →
+        Open the editor →
       </a>
     </section>
 
-    <div class="mx-auto max-w-5xl border-t border-[#1e1e2a] px-8"></div>
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t border-[#2a1c0d] px-8"></div>
 
-    <!-- Features -->
-    <section class="mx-auto max-w-5xl px-8 py-24">
-      <p class="mb-16 font-mono text-xs uppercase tracking-[0.15em] text-[#6b7098]">What it does</p>
-      <div class="grid grid-cols-1 gap-x-16 gap-y-12 md:grid-cols-2">
+    <!-- Features — definition list layout -->
+    <section class="mx-auto max-w-6xl px-8 py-24">
+      <p class="mb-16 text-xs uppercase tracking-[0.25em] text-[#6b4f35]">What it does</p>
+      <dl class="grid grid-cols-1 gap-x-20 gap-y-10 md:grid-cols-2">
         {
           features.map((f) => (
-            <div>
-              <h3 class="mb-2 text-lg font-semibold tracking-tight text-[#c8cbec]">{f.name}</h3>
-              <p class="font-sans text-sm leading-relaxed text-[#6b7098]">{f.desc}</p>
+            <div class="border-t border-[#2a1c0d] pt-6">
+              <dt
+                class="mb-2 text-xl font-semibold text-[#c9b89a]"
+                style="font-family: 'Cormorant Garamond', Georgia, serif"
+              >
+                {f.term}
+              </dt>
+              <dd class="text-base leading-relaxed text-[#6b4f35]">{f.def}</dd>
             </div>
           ))
         }
-      </div>
+      </dl>
     </section>
 
-    <div class="mx-auto max-w-5xl border-t border-[#1e1e2a] px-8"></div>
+    <!-- Divider -->
+    <div class="mx-auto max-w-6xl border-t border-[#2a1c0d] px-8"></div>
 
     <!-- How it works -->
-    <section class="mx-auto max-w-5xl px-8 py-24">
-      <p class="mb-16 font-mono text-xs uppercase tracking-[0.15em] text-[#6b7098]">How it works</p>
-      <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
+    <section class="mx-auto max-w-6xl px-8 py-24">
+      <p class="mb-16 text-xs uppercase tracking-[0.25em] text-[#6b4f35]">How it works</p>
+      <div class="grid grid-cols-1 gap-16 md:grid-cols-3">
         {
           steps.map((s) => (
             <div>
-              <p class="mb-6 font-mono text-5xl font-bold text-[#1e2035]">{s.n}</p>
-              <h3 class="mb-2 text-xl font-semibold text-[#c8cbec]">{s.title}</h3>
-              <p class="font-sans text-sm leading-relaxed text-[#6b7098]">{s.desc}</p>
+              <p
+                class="mb-5 leading-none text-[#2a1c0d]"
+                style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 5rem; font-weight: 700"
+              >
+                {s.n}
+              </p>
+              <h3
+                class="mb-3 text-2xl font-semibold text-[#c9b89a]"
+                style="font-family: 'Cormorant Garamond', Georgia, serif"
+              >
+                {s.title}
+              </h3>
+              <p class="text-base leading-relaxed text-[#6b4f35]">{s.desc}</p>
             </div>
           ))
         }
@@ -117,29 +163,31 @@ const steps = [
     </section>
 
     <!-- Privacy callout -->
-    <div class="border-b border-t border-[#1e1e2a] bg-[#0d0d16]">
-      <div class="mx-auto max-w-5xl px-8 py-20 text-center">
-        <h2 class="mb-4 text-3xl font-bold tracking-tight text-[#9ea6d4]">
-          Your data never leaves your device.
+    <div class="border-b border-t border-[#2a1c0d]">
+      <div class="mx-auto max-w-6xl px-8 py-20">
+        <p class="mb-4 text-xs uppercase tracking-[0.25em] text-[#6b4f35]">Privacy</p>
+        <h2
+          class="mb-5 max-w-3xl leading-tight text-[#e8d8bc]"
+          style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(32px, 4vw, 52px); font-weight: 700"
+        >
+          Your resume is your business. We have no way of seeing it.
         </h2>
-        <p class="mx-auto max-w-md font-sans text-base leading-relaxed text-[#6b7098]">
-          No telemetry. No cloud sync. No accounts. Tailory runs entirely in your browser — your
-          resume stays exactly where it belongs: with you.
+        <p class="max-w-lg text-lg leading-relaxed text-[#6b4f35]">
+          No telemetry. No cloud sync. No accounts required. Tailory runs entirely in your browser —
+          your data stays exactly where it belongs.
         </p>
       </div>
     </div>
 
     <!-- Footer -->
-    <footer
-      class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-8 py-12 sm:flex-row"
-    >
-      <p class="font-sans text-sm text-[#3a3a52]">© 2025 Tailory</p>
-      <nav class="flex gap-6 font-sans text-sm">
-        <a href="/features" class="text-[#6b7098] transition-colors hover:text-[#c8cbec]"
+    <footer class="mx-auto flex max-w-6xl items-center justify-between px-8 py-10">
+      <p class="text-sm text-[#3a2618]">© 2025 Tailory — MIT licensed</p>
+      <nav class="flex gap-8 text-sm">
+        <a href="/features" class="text-[#6b4f35] transition-colors hover:text-[#c4913a]"
           >Features</a
         >
-        <a href="/about" class="text-[#6b7098] transition-colors hover:text-[#c8cbec]">About</a>
-        <a href="/faq" class="text-[#6b7098] transition-colors hover:text-[#c8cbec]">FAQ</a>
+        <a href="/about" class="text-[#6b4f35] transition-colors hover:text-[#c4913a]">About</a>
+        <a href="/faq" class="text-[#6b4f35] transition-colors hover:text-[#c4913a]">FAQ</a>
       </nav>
     </footer>
   </div>
