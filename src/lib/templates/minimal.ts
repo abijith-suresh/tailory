@@ -132,7 +132,6 @@ export function minimalTemplate(resume: ResumeSchema): TDocumentDefinitions {
         fontSize: 9,
         bold: true,
         color: "#374151",
-        letterSpacing: 2,
         margin: [0, 10, 0, 4],
       },
       entryTitle: { fontSize: 10, bold: true, color: "#111827" },

@@ -16,5 +16,8 @@ export default defineConfig({
     optimizeDeps: {
       include: ["pdfmake/build/pdfmake", "pdfmake/build/vfs_fonts"],
     },
+    build: {
+      chunkSizeWarningLimit: 1200,
+    },
   },
 });

@@ -151,7 +151,6 @@ export function modernTemplate(resume: ResumeSchema): TDocumentDefinitions {
         fontSize: 10,
         bold: true,
         color: COLORS.accent,
-        letterSpacing: 1,
         margin: [0, 8, 0, 3],
       },
       entryTitle: { fontSize: 11, bold: true, color: COLORS.text },
