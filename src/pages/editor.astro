@@ -4,25 +4,44 @@ import EditorShell from "@/components/editor/EditorShell";
 import ResumePreview from "@/components/preview/ResumePreview";
 ---
 
-<Layout title="Editor — Tailory">
+<Layout
+  title="Editor — Tailory"
+  description="Edit your resume in a structured form and preview it live. Export an ATS-safe PDF when ready."
+>
   <div class="flex h-screen flex-col overflow-hidden bg-gray-50">
     <!-- Top bar -->
     <header
-      class="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3 shadow-sm"
+      class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm sm:px-6"
     >
-      <a href="/" class="text-lg font-semibold tracking-tight text-indigo-700">Tailory</a>
-      <span class="text-sm text-gray-500">Resume Editor</span>
+      <a
+        href="/"
+        class="text-base font-semibold tracking-tight text-indigo-700 hover:text-indigo-900 focus:outline-none focus-visible:underline"
+        aria-label="Tailory home"
+      >
+        Tailory
+      </a>
+      <span class="text-sm text-gray-400" aria-label="Current page: Resume Editor"
+        >Resume Editor</span
+      >
     </header>
 
-    <!-- Editor + Preview split -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Left: Editor -->
-      <div class="w-full max-w-xl overflow-y-auto border-r border-gray-200 bg-white lg:w-1/2">
+    <!-- Mobile: stacked layout; Desktop: side-by-side -->
+    <div class="flex flex-1 flex-col overflow-hidden lg:flex-row">
+      <!-- Editor panel -->
+      <div
+        class="w-full overflow-y-auto border-b border-gray-200 bg-white lg:max-w-xl lg:border-b-0 lg:border-r"
+        role="region"
+        aria-label="Resume editor"
+      >
         <EditorShell client:only="solid-js" />
       </div>
 
-      <!-- Right: Preview -->
-      <div class="hidden flex-1 overflow-y-auto bg-gray-100 lg:flex lg:flex-col">
+      <!-- Preview panel (hidden on mobile, shown on desktop) -->
+      <div
+        class="hidden flex-1 overflow-y-auto bg-gray-100 lg:flex lg:flex-col"
+        role="region"
+        aria-label="Resume preview"
+      >
         <ResumePreview client:only="solid-js" />
       </div>
     </div>
