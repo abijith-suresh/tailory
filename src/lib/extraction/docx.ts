@@ -1,6 +1,10 @@
-// DOCX text extraction using mammoth
-// Stub — will be fully implemented in Phase 3
+import mammoth from "mammoth";
 
-export async function extractTextFromDOCX(_file: File): Promise<string> {
-  throw new Error("Not implemented yet");
+/**
+ * Extract plain text from a DOCX file using mammoth.
+ */
+export async function extractTextFromDOCX(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  return result.value;
 }
