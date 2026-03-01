@@ -2,18 +2,20 @@
 import "../styles/global.css";
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
   ogImage?: string;
   canonicalUrl?: string;
 }
 
 const {
-  title,
-  description = "An opinionated Astro 5 starter template with Tailwind CSS v4, TypeScript strict mode, and more.",
+  title = "Tailory",
+  description = "A fully client-side resume editor. Upload a PDF or DOCX, edit, preview live, and export an ATS-compatible PDF — all in your browser.",
   ogImage,
   canonicalUrl = Astro.url.href,
 } = Astro.props;
+
+const pageTitle = title === "Tailory" ? "Tailory" : `${title} — Tailory`;
 ---
 
 <!doctype html>
@@ -24,18 +26,18 @@ const {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#030712" />
+    <meta name="theme-color" content="#1e1b4b" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     {ogImage && <meta property="og:image" content={ogImage} />}
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
@@ -45,10 +47,10 @@ const {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <title>{title}</title>
+    <title>{pageTitle}</title>
     <slot name="head" />
   </head>
-  <body>
+  <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
     <slot />
   </body>
 </html>

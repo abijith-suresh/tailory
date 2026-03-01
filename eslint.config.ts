@@ -53,6 +53,6 @@ export default [
 
   // Ignore patterns
   {
-    ignores: ["dist/", ".astro/", "node_modules/"],
+    ignores: ["dist/", ".astro/", "node_modules/", "public/pdf.worker.min.mjs"],
   },
 ];

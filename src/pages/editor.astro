@@ -1,0 +1,30 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import EditorShell from "@/components/editor/EditorShell";
+import ResumePreview from "@/components/preview/ResumePreview";
+---
+
+<Layout title="Editor — Tailory">
+  <div class="flex h-screen flex-col overflow-hidden bg-gray-50">
+    <!-- Top bar -->
+    <header
+      class="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3 shadow-sm"
+    >
+      <a href="/" class="text-lg font-semibold tracking-tight text-indigo-700">Tailory</a>
+      <span class="text-sm text-gray-500">Resume Editor</span>
+    </header>
+
+    <!-- Editor + Preview split -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Left: Editor -->
+      <div class="w-full max-w-xl overflow-y-auto border-r border-gray-200 bg-white lg:w-1/2">
+        <EditorShell client:only="solid-js" />
+      </div>
+
+      <!-- Right: Preview -->
+      <div class="hidden flex-1 overflow-y-auto bg-gray-100 lg:flex lg:flex-col">
+        <ResumePreview client:only="solid-js" />
+      </div>
+    </div>
+  </div>
+</Layout>
