@@ -142,6 +142,15 @@ export interface ResumeSchema {
 
 export type TemplateId = "modern" | "minimal" | "compact-ats";
 
+export type SectionId =
+  | "basics"
+  | "summary"
+  | "work"
+  | "education"
+  | "skills"
+  | "projects"
+  | "certs";
+
 export const EMPTY_RESUME: ResumeSchema = {
   basics: {
     name: "",
