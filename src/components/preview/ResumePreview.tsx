@@ -42,14 +42,7 @@ const ResumePreview: Component = () => {
           aria-label={`${completedCount()} of ${TOTAL_SECTIONS} sections complete`}
         >
           <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
-            <circle
-              cx="16"
-              cy="16"
-              r="14"
-              fill="none"
-              stroke="#ccddd4"
-              stroke-width="3"
-            />
+            <circle cx="16" cy="16" r="14" fill="none" stroke="#ccddd4" stroke-width="3" />
             <circle
               cx="16"
               cy="16"

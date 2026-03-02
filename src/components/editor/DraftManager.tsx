@@ -87,11 +87,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
         >
           {status() === "saving" ? "Saving…" : status() === "saved" ? "Saved ✓" : "Save draft"}
         </button>
-        <button
-          type="button"
-          onClick={loadDraftsList}
-          class={btnClass()}
-        >
+        <button type="button" onClick={loadDraftsList} class={btnClass()}>
           Drafts
         </button>
       </div>

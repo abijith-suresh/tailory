@@ -52,9 +52,19 @@ const CommandBar: Component = () => {
       </a>
 
       {/* Completion ring */}
-      <div class="flex shrink-0 items-center gap-1.5" aria-label={`${completedCount()} of ${TOTAL} sections complete`}>
+      <div
+        class="flex shrink-0 items-center gap-1.5"
+        aria-label={`${completedCount()} of ${TOTAL} sections complete`}
+      >
         <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
-          <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" />
+          <circle
+            cx="16"
+            cy="16"
+            r="14"
+            fill="none"
+            stroke="rgba(255,255,255,0.15)"
+            stroke-width="3"
+          />
           <circle
             cx="16"
             cy="16"
@@ -92,10 +102,7 @@ const CommandBar: Component = () => {
               aria-pressed={activeSection() === section.id}
               class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors"
               style={{
-                background:
-                  activeSection() === section.id
-                    ? "#1d6648"
-                    : "rgba(255,255,255,0.08)",
+                background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
                 color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
                 border:
                   activeSection() === section.id

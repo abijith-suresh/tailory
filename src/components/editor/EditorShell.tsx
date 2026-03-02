@@ -71,7 +71,10 @@ const EditorShell: Component = () => {
         class="shrink-0 border-b px-6 py-4"
         style={{ background: "#ffffff", "border-color": "#ccddd4" }}
       >
-        <h2 class="text-base font-semibold" style={{ color: "#0e2418", "font-family": "'Lora', serif" }}>
+        <h2
+          class="text-base font-semibold"
+          style={{ color: "#0e2418", "font-family": "'Lora', serif" }}
+        >
           {currentSection()?.label}
         </h2>
         <p class="mt-0.5 text-xs" style={{ color: "#5a7a68" }}>
