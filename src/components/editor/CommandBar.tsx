@@ -1,5 +1,5 @@
 import { type Component, For } from "solid-js";
-import { resume, selectedTemplate, activeSection, setActiveSection } from "@/store/resume";
+import { activeSection, resume, selectedTemplate, setActiveSection } from "@/store/resume";
 import { exportPDF } from "@/lib/export/pdf-export";
 import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
