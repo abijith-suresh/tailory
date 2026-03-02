@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import CommandBar from "@/components/editor/CommandBar";
 import EditorShell from "@/components/editor/EditorShell";
 import ResumePreview from "@/components/preview/ResumePreview";
 ---
@@ -8,37 +9,38 @@ import ResumePreview from "@/components/preview/ResumePreview";
   title="Editor — Tailory"
   description="Edit your resume in a structured form and preview it live. Export an ATS-safe PDF when ready."
 >
-  <div class="flex h-screen flex-col overflow-hidden bg-gray-50">
-    <!-- Top bar -->
-    <header
-      class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm sm:px-6"
-    >
-      <a
-        href="/"
-        class="text-base font-semibold tracking-tight text-indigo-700 hover:text-indigo-900 focus:outline-none focus-visible:underline"
-        aria-label="Tailory home"
-      >
-        Tailory
-      </a>
-      <span class="text-sm text-gray-400" aria-label="Current page: Resume Editor"
-        >Resume Editor</span
-      >
-    </header>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
 
-    <!-- Mobile: stacked layout; Desktop: side-by-side -->
-    <div class="flex flex-1 flex-col overflow-hidden lg:flex-row">
+  <div
+    class="flex h-screen flex-col overflow-hidden"
+    style="background: #f4f8f5; font-family: 'DM Sans', sans-serif;"
+  >
+    <!-- Command bar -->
+    <CommandBar client:only="solid-js" />
+
+    <!-- Editor / Preview split -->
+    <div class="flex flex-1 overflow-hidden">
       <!-- Editor panel -->
       <div
-        class="w-full overflow-y-auto border-b border-gray-200 bg-white lg:max-w-xl lg:border-b-0 lg:border-r"
+        class="flex flex-col overflow-hidden"
+        style="width: 50%; border-right: 1px solid #ccddd4;"
         role="region"
         aria-label="Resume editor"
       >
         <EditorShell client:only="solid-js" />
       </div>
 
-      <!-- Preview panel (hidden on mobile, shown on desktop) -->
+      <!-- Preview panel -->
       <div
-        class="hidden flex-1 overflow-y-auto bg-gray-100 lg:flex lg:flex-col"
+        class="flex flex-col overflow-hidden"
+        style="width: 50%;"
         role="region"
         aria-label="Resume preview"
       >
