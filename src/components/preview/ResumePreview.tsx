@@ -1,7 +1,6 @@
 import { type Component, For, Show } from "solid-js";
 import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 import type { TemplateId } from "@/types/resume";
-import { exportPDF } from "@/lib/export/pdf-export";
 
 const TEMPLATES: { id: TemplateId; label: string; description: string }[] = [
   { id: "modern", label: "Modern", description: "Two-tone header, section dividers" },
@@ -9,16 +8,71 @@ const TEMPLATES: { id: TemplateId; label: string; description: string }[] = [
   { id: "compact-ats", label: "Compact ATS", description: "Dense, keyword-optimized" },
 ];
 
+const TOTAL_SECTIONS = 7;
+const CIRCUMFERENCE = 2 * Math.PI * 14;
+
 const ResumePreview: Component = () => {
-  const handleExport = async () => {
-    await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
+  const completedCount = () => {
+    let count = 0;
+    if (resume.basics.name) count++;
+    if (resume.basics.summary) count++;
+    if ((resume.work?.length ?? 0) > 0) count++;
+    if ((resume.education?.length ?? 0) > 0) count++;
+    if ((resume.skills?.length ?? 0) > 0) count++;
+    if ((resume.projects?.length ?? 0) > 0) count++;
+    if ((resume.certificates?.length ?? 0) > 0) count++;
+    return count;
+  };
+
+  const ringDash = () => {
+    const filled = (completedCount() / TOTAL_SECTIONS) * CIRCUMFERENCE;
+    return `${filled} ${CIRCUMFERENCE - filled}`;
   };
 
   return (
     <div class="flex h-full flex-col">
       {/* Controls */}
-      <div class="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-6 py-3">
-        <div class="flex gap-2">
+      <div
+        class="flex flex-wrap items-center gap-3 border-b px-6 py-3"
+        style={{ background: "#ffffff", "border-color": "#ccddd4" }}
+      >
+        {/* Completeness ring */}
+        <div
+          class="flex items-center gap-2"
+          aria-label={`${completedCount()} of ${TOTAL_SECTIONS} sections complete`}
+        >
+          <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" fill="none" stroke="#ccddd4" stroke-width="3" />
+            <circle
+              cx="16"
+              cy="16"
+              r="14"
+              fill="none"
+              stroke="#1d6648"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-dasharray={ringDash()}
+              transform="rotate(-90 16 16)"
+            />
+            <text
+              x="16"
+              y="16"
+              text-anchor="middle"
+              dominant-baseline="central"
+              fill="#0e2418"
+              font-size="9"
+              font-family="'DM Sans', sans-serif"
+              font-weight="600"
+            >
+              {completedCount()}/{TOTAL_SECTIONS}
+            </text>
+          </svg>
+          <span class="text-xs" style={{ color: "#5a7a68" }}>
+            complete
+          </span>
+        </div>
+
+        <div class="flex gap-1.5">
           <For each={TEMPLATES}>
             {(tpl) => (
               <button
@@ -26,24 +80,18 @@ const ResumePreview: Component = () => {
                 onClick={() => setSelectedTemplate(tpl.id)}
                 aria-pressed={selectedTemplate() === tpl.id}
                 title={tpl.description}
-                class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                style={
                   selectedTemplate() === tpl.id
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                    ? { background: "#1d6648", color: "#ffffff" }
+                    : { background: "#f4f8f5", color: "#3d5c49", border: "1px solid #ccddd4" }
+                }
               >
                 {tpl.label}
               </button>
             )}
           </For>
         </div>
-        <button
-          type="button"
-          onClick={handleExport}
-          class="ml-auto rounded-md bg-green-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-green-500"
-        >
-          Export PDF
-        </button>
       </div>
 
       {/* Preview */}

@@ -4,9 +4,13 @@ import { deleteDraft, listDrafts, type ResumeDraft, saveDraft } from "@/lib/stor
 
 type Status = "idle" | "saving" | "saved";
 
+interface DraftManagerProps {
+  dark?: boolean;
+}
+
 let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
-const DraftManager: Component = () => {
+const DraftManager: Component<DraftManagerProps> = (props) => {
   const [status, setStatus] = createSignal<Status>("idle");
   const [drafts, setDrafts] = createSignal<ResumeDraft[]>([]);
   const [showList, setShowList] = createSignal(false);
@@ -67,6 +71,11 @@ const DraftManager: Component = () => {
     setDrafts(all.filter((d) => d.id !== "autosave"));
   };
 
+  const btnClass = () =>
+    props.dark
+      ? "rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
+      : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50";
+
   return (
     <div class="relative">
       <div class="flex gap-2">
@@ -74,15 +83,11 @@ const DraftManager: Component = () => {
           type="button"
           onClick={saveNamedDraft}
           disabled={status() === "saving"}
-          class="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+          class={btnClass()}
         >
           {status() === "saving" ? "Saving…" : status() === "saved" ? "Saved ✓" : "Save draft"}
         </button>
-        <button
-          type="button"
-          onClick={loadDraftsList}
-          class="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200"
-        >
+        <button type="button" onClick={loadDraftsList} class={btnClass()}>
           Drafts
         </button>
       </div>
