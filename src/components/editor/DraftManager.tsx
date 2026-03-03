@@ -93,7 +93,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
       </div>
 
       <Show when={showList()}>
-        <div class="absolute right-0 top-8 z-20 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div class="draft-popup-enter absolute right-0 top-8 z-20 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
           <div class="flex items-center justify-between border-b border-gray-100 px-4 py-2">
             <span class="text-xs font-semibold text-gray-700">Saved Drafts</span>
             <button

@@ -53,7 +53,7 @@ const formFields = [
   description="A fully client-side resume editor. Upload a PDF or DOCX, edit, preview live, and export an ATS-compatible PDF — all in your browser."
 >
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-20 pt-24">
+  <section class="mx-auto max-w-6xl px-8 pb-20 pt-24" data-reveal>
     <p class="mb-8 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">
       Client-side resume editor
     </p>
@@ -71,7 +71,7 @@ const formFields = [
     <div class="flex flex-wrap items-center gap-4">
       <a
         href="/editor"
-        class="inline-block bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-colors hover:bg-[#155236]"
+        class="inline-block bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-all hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
       >
         Open the editor →
       </a>
@@ -88,7 +88,7 @@ const formFields = [
   </section>
 
   <!-- App Preview Mockup -->
-  <section class="mx-auto max-w-6xl px-8 pb-24">
+  <section class="mx-auto max-w-6xl px-8 pb-24" data-reveal data-reveal-delay="100">
     <p class="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-[#a0b8ab]">Editor preview</p>
     <div class="overflow-hidden rounded-xl border border-[#ccddd4] shadow-lg shadow-[#1d6648]/5">
       <!-- Top bar -->
@@ -165,8 +165,12 @@ const formFields = [
     <p class="mb-16 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">What it does</p>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
       {
-        features.map((f) => (
-          <div class="flex gap-6 border-t border-[#ccddd4] pt-6">
+        features.map((f, i) => (
+          <div
+            class="flex gap-6 border-t border-[#ccddd4] pt-6"
+            data-reveal
+            data-reveal-delay={String(Math.min(i * 100, 400))}
+          >
             <span class="shrink-0 text-sm font-medium text-[#a0b8ab]">{f.n}</span>
             <div>
               <h3 class="mb-1.5 text-base font-semibold text-[#0e2418]">{f.term}</h3>
@@ -187,7 +191,7 @@ const formFields = [
     <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
       {
         steps.map((s, i) => (
-          <div>
+          <div data-reveal data-reveal-delay={String(i * 100)}>
             <div class="mb-5 flex h-9 w-9 items-center justify-center rounded-full border border-[#1d6648] text-sm font-semibold text-[#1d6648]">
               {i + 1}
             </div>
@@ -206,7 +210,7 @@ const formFields = [
 
   <!-- Privacy callout -->
   <div class="bg-[#0e2418]">
-    <div class="mx-auto max-w-6xl px-8 py-20">
+    <div class="mx-auto max-w-6xl px-8 py-20" data-reveal>
       <p class="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-[#3d6650]">Privacy</p>
       <h2
         class="mb-5 max-w-3xl leading-tight text-white"

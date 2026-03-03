@@ -36,8 +36,9 @@ const FileUpload: Component = () => {
 
       loadResume(result.data);
 
-      // Navigate to editor
-      window.location.href = "/editor";
+      // Navigate to editor with client-side transition
+      const { navigate } = await import("astro:transitions/client");
+      navigate("/editor");
     } catch (err) {
       console.error(err);
       setErrorMsg(
@@ -67,8 +68,9 @@ const FileUpload: Component = () => {
 
   const handleDragLeave = () => setIsDragOver(false);
 
-  const startFromScratch = () => {
-    window.location.href = "/editor";
+  const startFromScratch = async () => {
+    const { navigate } = await import("astro:transitions/client");
+    navigate("/editor");
   };
 
   return (

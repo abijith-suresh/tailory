@@ -100,7 +100,7 @@ const CommandBar: Component = () => {
               type="button"
               onClick={() => setActiveSection(section.id)}
               aria-pressed={activeSection() === section.id}
-              class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors"
+              class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95"
               style={{
                 background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
                 color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
@@ -123,7 +123,7 @@ const CommandBar: Component = () => {
         <button
           type="button"
           onClick={handleExport}
-          class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-colors"
+          class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95"
           style={{ background: "#1d6648", border: "1px solid #2d9469" }}
         >
           Export PDF
