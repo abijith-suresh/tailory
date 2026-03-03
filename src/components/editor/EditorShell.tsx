@@ -1,4 +1,5 @@
-import { type Component, type JSX } from "solid-js";
+import { type Component, type JSX, Show } from "solid-js";
+import { Transition } from "solid-transition-group";
 import { activeSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
@@ -87,9 +88,13 @@ const EditorShell: Component = () => {
         id={`panel-${activeSection()}`}
         role="tabpanel"
         aria-label={currentSection()?.label}
-        class="flex-1 overflow-y-auto p-6"
+        class="relative flex-1 overflow-y-auto"
       >
-        {currentSection()?.component()}
+        <Transition name="section" mode="outin">
+          <Show when={currentSection()} keyed>
+            {(section) => <div class="p-6">{section.component()}</div>}
+          </Show>
+        </Transition>
       </div>
     </div>
   );
