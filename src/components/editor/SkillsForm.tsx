@@ -46,7 +46,7 @@ const SkillsForm: Component = () => {
         <button
           type="button"
           onClick={addSkill}
-          class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
+          class="rounded-md bg-[#1d6648] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#155236]"
         >
           Add
         </button>
@@ -61,7 +61,7 @@ const SkillsForm: Component = () => {
                 type="button"
                 onClick={() => removeSkill(skill.id)}
                 aria-label={`Remove ${skill.name}`}
-                class="text-indigo-500 hover:text-indigo-700"
+                class="text-red-400 hover:text-red-600"
               >
                 ✕
               </button>
