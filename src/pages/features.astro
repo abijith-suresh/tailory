@@ -52,7 +52,7 @@ const features = [
   description="Everything Tailory does — PDF & DOCX upload, auto-parsing, live preview, three templates, ATS-safe PDF export, and offline draft storage."
 >
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
     <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">Features</p>
     <h1
       class="max-w-2xl leading-[1.1] text-[#0e2418]"
@@ -67,7 +67,11 @@ const features = [
   <div class="mx-auto max-w-6xl px-8 pb-24">
     {
       features.map((f, i) => (
-        <div class="grid grid-cols-1 gap-12 border-t border-[#ccddd4] py-20 md:grid-cols-2">
+        <div
+          class="grid grid-cols-1 gap-12 border-t border-[#ccddd4] py-20 md:grid-cols-2"
+          data-reveal
+          data-reveal-delay={String(Math.min(i * 100, 300))}
+        >
           {/* Text: always left on even, right on odd */}
           <div class:list={["flex flex-col justify-center", i % 2 !== 0 ? "md:order-2" : ""]}>
             <span class="mb-4 text-xs font-medium text-[#a0b8ab]">{f.n}</span>
@@ -213,7 +217,7 @@ const features = [
 
   <!-- CTA bar -->
   <div class="border-t border-[#ccddd4] bg-white">
-    <div class="mx-auto max-w-6xl px-8 py-20 text-center">
+    <div class="mx-auto max-w-6xl px-8 py-20 text-center" data-reveal>
       <h2
         class="mb-6 text-[#0e2418]"
         style="font-family: 'Lora', Georgia, serif; font-size: clamp(24px, 3vw, 38px); font-weight: 700"
@@ -223,7 +227,7 @@ const features = [
       <p class="mb-8 text-base text-[#3d6650]">No account needed. Works in any modern browser.</p>
       <a
         href="/editor"
-        class="inline-block bg-[#1d6648] px-8 py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#155236]"
+        class="inline-block bg-[#1d6648] px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
       >
         Open the editor →
       </a>

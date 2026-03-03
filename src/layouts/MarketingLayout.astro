@@ -28,6 +28,7 @@ const navLinks = [
   <div
     class="min-h-screen bg-[#f4f8f5] text-[#0e2418]"
     style="font-family: 'DM Sans', system-ui, sans-serif"
+    transition:animate="slide"
   >
     <!-- Nav -->
     <header class="border-b border-[#ccddd4] bg-[#f4f8f5]">
@@ -44,7 +45,7 @@ const navLinks = [
             navLinks.map((link) => (
               <a
                 href={link.href}
-                class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+                class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -54,13 +55,13 @@ const navLinks = [
             href="https://github.com/abijith-suresh/tailory"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+            class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
           >
             GitHub ↗
           </a>
           <a
             href="/editor"
-            class="inline-block bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#155236]"
+            class="inline-block bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
           >
             Open Editor →
           </a>
@@ -70,6 +71,28 @@ const navLinks = [
 
     <!-- Page content -->
     <slot />
+
+    <!-- Scroll reveal observer -->
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+      );
+
+      const setupReveal = () => {
+        document.querySelectorAll("[data-reveal]").forEach((el) => observer.observe(el));
+      };
+
+      setupReveal();
+      document.addEventListener("astro:page-load", setupReveal);
+    </script>
 
     <!-- Footer -->
     <footer class="border-t border-[#ccddd4] bg-[#f4f8f5]">

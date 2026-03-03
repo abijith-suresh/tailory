@@ -28,7 +28,7 @@ const techCards = [
   description="Tailory is a privacy-first, fully client-side resume editor. Everything runs in your browser. No server ever touches your data."
 >
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
     <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">About</p>
     <h1
       class="max-w-2xl leading-[1.1] text-[#0e2418]"
@@ -40,7 +40,7 @@ const techCards = [
   </section>
 
   <!-- Mission -->
-  <section class="mx-auto max-w-6xl px-8 pb-24">
+  <section class="mx-auto max-w-6xl px-8 pb-24" data-reveal>
     <div class="max-w-2xl">
       <p class="mb-6 text-lg leading-relaxed text-[#3d6650]">
         Tailory was built on a simple principle: your resume is yours. It contains your career
@@ -71,8 +71,12 @@ const techCards = [
     </p>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
       {
-        techCards.map((card) => (
-          <div class="rounded-xl border border-[#ccddd4] bg-white p-8">
+        techCards.map((card, i) => (
+          <div
+            class="rounded-xl border border-[#ccddd4] bg-white p-8 transition-all hover:shadow-md hover:-translate-y-0.5"
+            data-reveal
+            data-reveal-delay={String(i * 150)}
+          >
             <p
               class="mb-1 text-lg font-bold text-[#0e2418]"
               style="font-family: 'Lora', Georgia, serif"
@@ -93,7 +97,7 @@ const techCards = [
   <div class="mx-auto max-w-6xl border-t border-[#ccddd4] px-8"></div>
 
   <!-- Open source -->
-  <section class="mx-auto max-w-6xl px-8 py-24">
+  <section class="mx-auto max-w-6xl px-8 py-24" data-reveal>
     <div class="flex flex-col gap-10 md:flex-row md:items-start">
       <div class="max-w-xl">
         <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">
@@ -114,7 +118,7 @@ const techCards = [
           href="https://github.com/abijith-suresh/tailory"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-colors hover:bg-[#1d6648] hover:text-white"
+          class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-all hover:bg-[#1d6648] hover:text-white hover:-translate-y-px active:scale-95 active:translate-y-0"
         >
           View on GitHub ↗
         </a>

@@ -50,7 +50,7 @@ const faqs = [
   description="Frequently asked questions about Tailory — privacy, file formats, ATS compatibility, offline use, and more."
 >
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24">
+  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
     <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">FAQ</p>
     <h1
       class="max-w-2xl leading-[1.1] text-[#0e2418]"
@@ -64,8 +64,12 @@ const faqs = [
   <!-- FAQ accordion -->
   <section class="mx-auto max-w-3xl px-8 pb-24">
     {
-      faqs.map((item) => (
-        <details class="group border-t border-[#ccddd4]">
+      faqs.map((item, i) => (
+        <details
+          class="group border-t border-[#ccddd4]"
+          data-reveal
+          data-reveal-delay={String(Math.min(i * 60, 300))}
+        >
           <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-medium text-[#0e2418] hover:text-[#1d6648]">
             {item.q}
             <span class="shrink-0 text-[#a0b8ab] transition-transform group-open:rotate-180">
@@ -90,7 +94,7 @@ const faqs = [
         href="https://github.com/abijith-suresh/tailory/issues"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-colors hover:bg-[#1d6648] hover:text-white"
+        class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-all hover:bg-[#1d6648] hover:text-white hover:-translate-y-px active:scale-95 active:translate-y-0"
       >
         Open an issue ↗
       </a>
