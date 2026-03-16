@@ -18,7 +18,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "astro": "^5.17.3",
+    "astro": "^6.0.4",
     "geist": "^1.7.0",
     "idb": "^8.0.3",
     "mammoth": "^1.11.0",
@@ -29,7 +29,7 @@
     "tailwindcss": "^4.2.0"
   },
   "devDependencies": {
-    "@astrojs/solid-js": "^5.1.3",
+    "@astrojs/solid-js": "^6.0.0",
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
     "@eslint/js": "^10.0.1",
