@@ -1,5 +1,6 @@
 import { createStore } from "solid-js/store";
 import { createSignal } from "solid-js";
+import { normalizeResume } from "@/lib/resume/normalize";
 import type { ResumeSchema, SectionId, TemplateId } from "@/types/resume";
 import { EMPTY_RESUME } from "@/types/resume";
 
@@ -13,9 +14,9 @@ export const [selectedTemplate, setSelectedTemplate] = createSignal<TemplateId>(
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
 
 export function loadResume(data: ResumeSchema) {
-  setResume(JSON.parse(JSON.stringify(data)));
+  setResume(normalizeResume(data));
 }
 
 export function resetResume() {
-  setResume(JSON.parse(JSON.stringify(EMPTY_RESUME)));
+  setResume(normalizeResume(EMPTY_RESUME));
 }

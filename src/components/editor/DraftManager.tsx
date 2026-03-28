@@ -1,8 +1,24 @@
-import { type Component, createEffect, createSignal, For, Show } from "solid-js";
+import {
+  type Component,
+  createEffect,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js";
 import { loadResume, resume } from "@/store/resume";
-import { deleteDraft, listDrafts, type ResumeDraft, saveDraft } from "@/lib/storage/db";
+import {
+  AUTOSAVE_DRAFT_ID,
+  deleteDraft,
+  listDrafts,
+  type ResumeDraft,
+  saveDraft,
+} from "@/lib/storage/db";
+import { serializeNormalizedResume } from "@/lib/resume/normalize";
+import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
 
-type Status = "idle" | "saving" | "saved";
+type Status = "idle" | "saving" | "saved" | "error";
 
 interface DraftManagerProps {
   dark?: boolean;
@@ -14,11 +30,41 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [status, setStatus] = createSignal<Status>("idle");
   const [drafts, setDrafts] = createSignal<ResumeDraft[]>([]);
   const [showList, setShowList] = createSignal(false);
+  const [storageAvailable, setStorageAvailable] = createSignal(true);
+  const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
+  const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
+  let saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const queueStatusReset = () => {
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    saveStatusTimer = setTimeout(() => setStatus("idle"), 2000);
+  };
+
+  onMount(async () => {
+    const restored = await restoreAutosaveDraft();
+    setStorageAvailable(restored.available);
+
+    if (!restored.available) {
+      setStatus("error");
+      return;
+    }
+
+    if (restored.draft) {
+      setLastAutosaveSnapshot(restored.snapshotJson);
+      loadResume(restored.draft.resumeData);
+    }
+
+    setHasHydratedAutosave(true);
+  });
 
   // Auto-save on store changes (debounced 2s)
   createEffect(() => {
+    if (!hasHydratedAutosave() || !storageAvailable()) return;
+
     // Reactive read of the resume store fields that trigger saves
-    const snapshot = JSON.stringify(resume);
+    const snapshot = serializeNormalizedResume(resume);
+    if (snapshot === lastAutosaveSnapshot()) return;
+
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(async () => {
       await performSave(snapshot);
@@ -27,35 +73,49 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   const performSave = async (snapshotJson?: string) => {
     setStatus("saving");
-    const data = snapshotJson ? JSON.parse(snapshotJson) : JSON.parse(JSON.stringify(resume));
-    await saveDraft({
-      id: "autosave",
-      name: data.basics?.name || "Untitled",
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      resumeData: data,
-    });
+    const snapshot = snapshotJson ?? serializeNormalizedResume(resume);
+    const saved = await saveAutosaveDraft(snapshot);
+
+    if (!saved) {
+      setStorageAvailable(false);
+      setStatus("error");
+      return;
+    }
+
+    setLastAutosaveSnapshot(snapshot);
     setStatus("saved");
-    setTimeout(() => setStatus("idle"), 2000);
+    queueStatusReset();
   };
 
   const saveNamedDraft = async () => {
+    if (!storageAvailable()) {
+      setStatus("error");
+      return;
+    }
+
     setStatus("saving");
     const draftName = resume.basics.name || "Untitled";
-    await saveDraft({
+    const saved = await saveDraft({
       id: `draft-${Date.now()}`,
       name: draftName,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      resumeData: JSON.parse(JSON.stringify(resume)),
+      resumeData: cloneResumeData(resume),
     });
+
+    if (!saved) {
+      setStorageAvailable(false);
+      setStatus("error");
+      return;
+    }
+
     setStatus("saved");
-    setTimeout(() => setStatus("idle"), 2000);
+    queueStatusReset();
   };
 
   const loadDraftsList = async () => {
     const all = await listDrafts();
-    setDrafts(all.filter((d) => d.id !== "autosave"));
+    setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
     setShowList(true);
   };
 
@@ -66,10 +126,21 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   const removeDraft = async (e: MouseEvent, id: string) => {
     e.stopPropagation();
-    await deleteDraft(id);
+    const deleted = await deleteDraft(id);
+    if (!deleted) {
+      setStorageAvailable(false);
+      setStatus("error");
+      return;
+    }
+
     const all = await listDrafts();
-    setDrafts(all.filter((d) => d.id !== "autosave"));
+    setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
   };
+
+  onCleanup(() => {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+  });
 
   const btnClass = () =>
     props.dark
@@ -82,12 +153,23 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
         <button
           type="button"
           onClick={saveNamedDraft}
-          disabled={status() === "saving"}
+          disabled={status() === "saving" || !storageAvailable()}
           class={btnClass()}
         >
-          {status() === "saving" ? "Saving…" : status() === "saved" ? "Saved ✓" : "Save draft"}
+          {status() === "saving"
+            ? "Saving..."
+            : status() === "saved"
+              ? "Saved"
+              : status() === "error"
+                ? "Drafts unavailable"
+                : "Save draft"}
         </button>
-        <button type="button" onClick={loadDraftsList} class={btnClass()}>
+        <button
+          type="button"
+          onClick={loadDraftsList}
+          disabled={!storageAvailable()}
+          class={btnClass()}
+        >
           Drafts
         </button>
       </div>

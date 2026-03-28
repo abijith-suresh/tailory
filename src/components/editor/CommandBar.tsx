@@ -1,4 +1,4 @@
-import { type Component, For } from "solid-js";
+import { type Component, createSignal, For, Show } from "solid-js";
 import { activeSection, resume, selectedTemplate, setActiveSection } from "@/store/resume";
 import { exportPDF } from "@/lib/export/pdf-export";
 import type { SectionId } from "@/types/resume";
@@ -24,6 +24,7 @@ const TOTAL = SECTIONS.length;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
+  const [exportError, setExportError] = createSignal("");
   const completedCount = () => SECTIONS.filter((s) => s.isDone()).length;
 
   const ringDash = () => {
@@ -32,7 +33,12 @@ const CommandBar: Component = () => {
   };
 
   const handleExport = async () => {
-    await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
+    try {
+      setExportError("");
+      await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : "Unable to export this resume yet.");
+    }
   };
 
   return (
@@ -118,16 +124,23 @@ const CommandBar: Component = () => {
       </nav>
 
       {/* Draft manager + export */}
-      <div class="flex shrink-0 items-center gap-2">
-        <DraftManager dark />
-        <button
-          type="button"
-          onClick={handleExport}
-          class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95"
-          style={{ background: "#1d6648", border: "1px solid #2d9469" }}
-        >
-          Export PDF
-        </button>
+      <div class="flex shrink-0 flex-col items-end gap-1.5">
+        <Show when={exportError()}>
+          <p class="max-w-56 text-right text-[11px] leading-snug text-red-200" role="alert">
+            {exportError()}
+          </p>
+        </Show>
+        <div class="flex items-center gap-2">
+          <DraftManager dark />
+          <button
+            type="button"
+            onClick={handleExport}
+            class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95"
+            style={{ background: "#1d6648", border: "1px solid #2d9469" }}
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
     </header>
   );
