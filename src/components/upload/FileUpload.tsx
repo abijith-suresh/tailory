@@ -1,7 +1,9 @@
 import { type Component, createSignal, Show } from "solid-js";
+
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { loadResume } from "@/store/resume";
+import { processUploadedFile } from "@/lib/upload/process-file";
+import { loadResume, setImportFeedback } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
 
@@ -11,6 +13,7 @@ const FileUpload: Component = () => {
   const [isDragOver, setIsDragOver] = createSignal(false);
 
   const processFile = async (file: File) => {
+    // Fast synchronous validation first — keeps error visible alongside the drop zone
     const validation = validateUploadFile(file);
     if (!validation.ok) {
       setErrorMsg(validation.error);
@@ -18,37 +21,30 @@ const FileUpload: Component = () => {
       return;
     }
 
-    const { extension } = validation;
-
     setStatus("processing");
     setErrorMsg("");
 
-    try {
-      let rawText: string;
-
-      if (extension === "pdf") {
-        const { extractTextFromPDF } = await import("@/lib/extraction/pdf");
-        rawText = await extractTextFromPDF(file);
-      } else {
-        const { extractTextFromDOCX } = await import("@/lib/extraction/docx");
-        rawText = await extractTextFromDOCX(file);
-      }
-
-      const { parseResume } = await import("@/lib/parser/resume-parser");
-      const result = await parseResume(rawText);
-
-      loadResume(result.data);
-
-      // Navigate to editor with client-side transition
-      const { navigate } = await import("astro:transitions/client");
-      navigate("/editor");
-    } catch (err) {
-      console.error(err);
-      setErrorMsg(
-        err instanceof Error ? err.message : "Failed to process file. Please try a different file."
-      );
+    const outcome = await processUploadedFile(file, validation.extension);
+    if (!outcome.success) {
+      setErrorMsg(outcome.error);
       setStatus("error");
+      return;
     }
+
+    const { result } = outcome;
+    setImportFeedback({
+      confidence: result.confidence,
+      work: result.data.work?.length ?? 0,
+      education: result.data.education?.length ?? 0,
+      skills: result.data.skills?.length ?? 0,
+      projects: result.data.projects?.length ?? 0,
+      certificates: result.data.certificates?.length ?? 0,
+    });
+    loadResume(result.data);
+
+    // Navigate to editor with client-side transition
+    const { navigate } = await import("astro:transitions/client");
+    navigate("/editor");
   };
 
   const handleFileInput = (e: Event) => {

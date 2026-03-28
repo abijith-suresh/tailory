@@ -1,6 +1,16 @@
 import { type Component, createSignal, For, Show } from "solid-js";
-import { activeSection, resume, selectedTemplate, setActiveSection } from "@/store/resume";
+
 import { exportPDF } from "@/lib/export/pdf-export";
+import { validateUploadFile } from "@/lib/upload/guardrails";
+import { processUploadedFile } from "@/lib/upload/process-file";
+import {
+  activeSection,
+  loadResume,
+  resume,
+  selectedTemplate,
+  setActiveSection,
+  setImportFeedback,
+} from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
 
@@ -25,6 +35,10 @@ const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
   const [exportError, setExportError] = createSignal("");
+  const [importError, setImportError] = createSignal("");
+  const [isImporting, setIsImporting] = createSignal(false);
+  let fileInputRef: HTMLInputElement | undefined;
+
   const completedCount = () => SECTIONS.filter((s) => s.isDone()).length;
 
   const ringDash = () => {
@@ -39,6 +53,46 @@ const CommandBar: Component = () => {
     } catch (error) {
       setExportError(error instanceof Error ? error.message : "Unable to export this resume yet.");
     }
+  };
+
+  const handleImportFile = async (file: File) => {
+    const validation = validateUploadFile(file);
+    if (!validation.ok) {
+      setImportError(validation.error);
+      setTimeout(() => setImportError(""), 5000);
+      return;
+    }
+
+    setIsImporting(true);
+    setImportError("");
+
+    const outcome = await processUploadedFile(file, validation.extension);
+    setIsImporting(false);
+
+    if (!outcome.success) {
+      setImportError(outcome.error);
+      setTimeout(() => setImportError(""), 5000);
+      return;
+    }
+
+    const { result } = outcome;
+    setImportFeedback({
+      confidence: result.confidence,
+      work: result.data.work?.length ?? 0,
+      education: result.data.education?.length ?? 0,
+      skills: result.data.skills?.length ?? 0,
+      projects: result.data.projects?.length ?? 0,
+      certificates: result.data.certificates?.length ?? 0,
+    });
+    loadResume(result.data);
+  };
+
+  const handleImportInput = (e: Event) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) handleImportFile(file);
+    // Reset so the same file can be re-imported
+    input.value = "";
   };
 
   return (
@@ -123,14 +177,67 @@ const CommandBar: Component = () => {
         </For>
       </nav>
 
-      {/* Draft manager + export */}
+      {/* Import + Draft manager + export */}
       <div class="flex shrink-0 flex-col items-end gap-1.5">
-        <Show when={exportError()}>
+        <Show when={exportError() || importError()}>
           <p class="max-w-56 text-right text-[11px] leading-snug text-red-200" role="alert">
-            {exportError()}
+            {exportError() || importError()}
           </p>
         </Show>
         <div class="flex items-center gap-2">
+          {/* Hidden file input for import */}
+          <input
+            ref={(el) => (fileInputRef = el)}
+            type="file"
+            accept=".pdf,.docx"
+            class="sr-only"
+            aria-label="Import resume file"
+            onInput={handleImportInput}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef?.click()}
+            disabled={isImporting()}
+            title="Import a PDF or DOCX resume"
+            aria-label="Import resume from file"
+            class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
+          >
+            <Show
+              when={!isImporting()}
+              fallback={
+                <svg
+                  class="animate-spin"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+              }
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </Show>
+            <span class="hidden sm:inline">{isImporting() ? "Importing…" : "Import"}</span>
+          </button>
+
           <DraftManager dark />
           <button
             type="button"
