@@ -1,23 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import CommandBar from "@/components/editor/CommandBar";
-import EditorShell from "@/components/editor/EditorShell";
-import ResumePreview from "@/components/preview/ResumePreview";
+import EditorLayout from "@/components/editor/EditorLayout";
 ---
 
 <Layout
   title="Editor — Tailory"
   description="Edit your resume in a structured form and preview it live. Export an ATS-safe PDF when ready."
 >
-  <Fragment slot="head">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-  </Fragment>
-
   <div
     class="flex h-screen flex-col overflow-hidden"
     style="background: #f4f8f5; font-family: 'DM Sans', sans-serif;"
@@ -26,27 +16,6 @@ import ResumePreview from "@/components/preview/ResumePreview";
     <!-- Command bar -->
     <CommandBar client:only="solid-js" />
 
-    <!-- Editor / Preview split -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Editor panel -->
-      <div
-        class="flex flex-col overflow-hidden"
-        style="width: 50%; border-right: 1px solid #ccddd4;"
-        role="region"
-        aria-label="Resume editor"
-      >
-        <EditorShell client:only="solid-js" />
-      </div>
-
-      <!-- Preview panel -->
-      <div
-        class="flex flex-col overflow-hidden"
-        style="width: 50%;"
-        role="region"
-        aria-label="Resume preview"
-      >
-        <ResumePreview client:only="solid-js" />
-      </div>
-    </div>
+    <EditorLayout client:only="solid-js" />
   </div>
 </Layout>

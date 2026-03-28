@@ -16,15 +16,6 @@ const navLinks = [
 ---
 
 <Layout title={title} description={description}>
-  <Fragment slot="head">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,700;1,600&family=DM+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-  </Fragment>
-
   <div
     class="min-h-screen bg-[#f4f8f5] text-[#0e2418]"
     style="font-family: 'DM Sans', system-ui, sans-serif"
@@ -61,7 +52,7 @@ const navLinks = [
           </a>
           <a
             href="/editor"
-            class="inline-block bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
+            class="inline-block rounded-md bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
           >
             Open Editor →
           </a>
@@ -117,15 +108,17 @@ const navLinks = [
               <nav class="flex flex-col gap-2">
                 <a
                   href="/features"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Features</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >Features</a
                 >
                 <a
                   href="/changelog"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Changelog</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >Changelog</a
                 >
                 <a
                   href="/editor"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
                   >Open Editor</a
                 >
               </nav>
@@ -137,16 +130,20 @@ const navLinks = [
               <nav class="flex flex-col gap-2">
                 <a
                   href="/about"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">About</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >About</a
                 >
-                <a href="/faq" class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]"
+                <a
+                  href="/faq"
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
                   >FAQ</a
                 >
                 <a
                   href="https://github.com/abijith-suresh/tailory"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">GitHub ↗</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >GitHub ↗</a
                 >
               </nav>
             </div>
@@ -157,11 +154,13 @@ const navLinks = [
               <nav class="flex flex-col gap-2">
                 <a
                   href="/privacy"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Privacy</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >Privacy</a
                 >
                 <a
                   href="/terms"
-                  class="text-sm text-[#3d6650] transition-colors hover:text-[#1d6648]">Terms</a
+                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
+                  >Terms</a
                 >
               </nav>
             </div>

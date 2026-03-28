@@ -1,6 +1,18 @@
 import { type Component, createSignal, For, Show } from "solid-js";
-import { activeSection, resume, selectedTemplate, setActiveSection } from "@/store/resume";
+
 import { exportPDF } from "@/lib/export/pdf-export";
+import { validateUploadFile } from "@/lib/upload/guardrails";
+import { processUploadedFile } from "@/lib/upload/process-file";
+import {
+  activeSection,
+  loadResume,
+  resume,
+  selectedTemplate,
+  setActiveSection,
+  setExportError,
+  setImportError,
+  setImportFeedback,
+} from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
 
@@ -24,7 +36,10 @@ const TOTAL = SECTIONS.length;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
-  const [exportError, setExportError] = createSignal("");
+  const [isExporting, setIsExporting] = createSignal(false);
+  const [isImporting, setIsImporting] = createSignal(false);
+  let fileInputRef: HTMLInputElement | undefined;
+
   const completedCount = () => SECTIONS.filter((s) => s.isDone()).length;
 
   const ringDash = () => {
@@ -35,15 +50,70 @@ const CommandBar: Component = () => {
   const handleExport = async () => {
     try {
       setExportError("");
+      setIsExporting(true);
       await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
     } catch (error) {
-      setExportError(error instanceof Error ? error.message : "Unable to export this resume yet.");
+      const msg = error instanceof Error ? error.message : "Unable to export this resume yet.";
+      setExportError(msg);
+      // Navigate to the relevant section so the user can fix the issue
+      if (msg.toLowerCase().includes("name")) {
+        setActiveSection("basics");
+      } else if (
+        msg.toLowerCase().includes("summary") ||
+        msg.toLowerCase().includes("experience") ||
+        msg.toLowerCase().includes("education") ||
+        msg.toLowerCase().includes("skill") ||
+        msg.toLowerCase().includes("project") ||
+        msg.toLowerCase().includes("certif")
+      ) {
+        setActiveSection("summary");
+      }
+    } finally {
+      setIsExporting(false);
     }
+  };
+
+  const handleImportFile = async (file: File) => {
+    const validation = validateUploadFile(file);
+    if (!validation.ok) {
+      setImportError(validation.error);
+      return;
+    }
+
+    setIsImporting(true);
+    setImportError("");
+
+    const outcome = await processUploadedFile(file, validation.extension);
+    setIsImporting(false);
+
+    if (!outcome.success) {
+      setImportError(outcome.error);
+      return;
+    }
+
+    const { result } = outcome;
+    setImportFeedback({
+      confidence: result.confidence,
+      work: result.data.work?.length ?? 0,
+      education: result.data.education?.length ?? 0,
+      skills: result.data.skills?.length ?? 0,
+      projects: result.data.projects?.length ?? 0,
+      certificates: result.data.certificates?.length ?? 0,
+    });
+    loadResume(result.data);
+  };
+
+  const handleImportInput = (e: Event) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) handleImportFile(file);
+    // Reset so the same file can be re-imported
+    input.value = "";
   };
 
   return (
     <header
-      class="flex shrink-0 items-center gap-4 px-4 py-2.5"
+      class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0 px-4 py-2.5"
       style={{ background: "#0e2418" }}
       role="banner"
     >
@@ -59,7 +129,7 @@ const CommandBar: Component = () => {
 
       {/* Completion ring */}
       <div
-        class="flex shrink-0 items-center gap-1.5"
+        class="hidden shrink-0 items-center gap-1.5 md:flex"
         aria-label={`${completedCount()} of ${TOTAL} sections complete`}
       >
         <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
@@ -99,48 +169,132 @@ const CommandBar: Component = () => {
       </div>
 
       {/* Section chips */}
-      <nav class="flex flex-1 items-center gap-1.5 overflow-x-auto" aria-label="Resume sections">
-        <For each={SECTIONS}>
-          {(section) => (
-            <button
-              type="button"
-              onClick={() => setActiveSection(section.id)}
-              aria-pressed={activeSection() === section.id}
-              class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95"
-              style={{
-                background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
-                color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
-                border:
-                  activeSection() === section.id
-                    ? "1px solid #2d9469"
-                    : "1px solid rgba(255,255,255,0.12)",
-              }}
-            >
-              <span aria-hidden="true">{section.isDone() ? "✓" : "○"}</span>
-              {section.label}
-            </button>
-          )}
-        </For>
+      <nav class="hidden md:flex md:flex-1 md:items-center md:gap-1.5" aria-label="Resume sections">
+        <div class="flex items-center gap-1.5">
+          <For each={SECTIONS}>
+            {(section) => (
+              <button
+                type="button"
+                onClick={() => setActiveSection(section.id)}
+                aria-pressed={activeSection() === section.id}
+                class="flex shrink-0 items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-[background-color,transform] active:scale-95 hover:bg-white/15"
+                style={{
+                  background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
+                  color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
+                  border:
+                    activeSection() === section.id
+                      ? "1px solid #2d9469"
+                      : "1px solid rgba(255,255,255,0.12)",
+                }}
+              >
+                <span aria-hidden="true">{section.isDone() ? "✓" : "○"}</span>
+                {section.label}
+              </button>
+            )}
+          </For>
+        </div>
       </nav>
 
-      {/* Draft manager + export */}
-      <div class="flex shrink-0 flex-col items-end gap-1.5">
-        <Show when={exportError()}>
-          <p class="max-w-56 text-right text-[11px] leading-snug text-red-200" role="alert">
-            {exportError()}
-          </p>
-        </Show>
-        <div class="flex items-center gap-2">
-          <DraftManager dark />
-          <button
-            type="button"
-            onClick={handleExport}
-            class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95"
-            style={{ background: "#1d6648", border: "1px solid #2d9469" }}
+      {/* Import + Draft manager + export */}
+      <div class="ml-auto flex shrink-0 items-center gap-2">
+        {/* Hidden file input for import */}
+        <input
+          ref={(el) => (fileInputRef = el)}
+          type="file"
+          accept=".pdf,.docx"
+          class="sr-only"
+          aria-label="Import resume file"
+          onInput={handleImportInput}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef?.click()}
+          disabled={isImporting()}
+          title="Import a PDF or DOCX resume"
+          aria-label="Import resume from file"
+          class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Show
+            when={!isImporting()}
+            fallback={
+              <svg
+                class="animate-spin"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            }
           >
-            Export PDF
-          </button>
-        </div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M12 12v6" />
+              <path d="m9 15 3-3 3 3" />
+            </svg>
+          </Show>
+          <span class="hidden sm:inline">{isImporting() ? "Importing…" : "Import"}</span>
+        </button>
+
+        <DraftManager dark />
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={isExporting()}
+          class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-[background-color,transform] active:scale-95 hover:bg-[#155236] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: "#1d6648", border: "1px solid #2d9469" }}
+        >
+          <Show
+            when={!isExporting()}
+            fallback={
+              <svg
+                class="animate-spin"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            }
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M12 12v6" />
+              <path d="m15 18-3 3-3-3" />
+            </svg>
+          </Show>
+          <span class="hidden sm:inline">{isExporting() ? "Exporting…" : "Export PDF"}</span>
+        </button>
       </div>
     </header>
   );

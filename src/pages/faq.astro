@@ -70,7 +70,7 @@ const faqs = [
           data-reveal
           data-reveal-delay={String(Math.min(i * 60, 300))}
         >
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-medium text-[#0e2418] hover:text-[#1d6648]">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-medium text-[#0e2418] transition-colors duration-150 hover:text-[#1d6648]">
             {item.q}
             <span class="shrink-0 text-[#a0b8ab] transition-transform group-open:rotate-180">
               ↓
@@ -94,7 +94,7 @@ const faqs = [
         href="https://github.com/abijith-suresh/tailory/issues"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-block border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-all hover:bg-[#1d6648] hover:text-white hover:-translate-y-px active:scale-95 active:translate-y-0"
+        class="inline-block rounded-md border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-[background-color,transform] hover:bg-[#1d6648] hover:text-white hover:-translate-y-px active:scale-95 active:translate-y-0"
       >
         Open an issue ↗
       </a>

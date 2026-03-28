@@ -1,7 +1,9 @@
 import { type Component, createSignal, Show } from "solid-js";
+
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { loadResume } from "@/store/resume";
+import { processUploadedFile } from "@/lib/upload/process-file";
+import { loadResume, setImportFeedback } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
 
@@ -11,6 +13,7 @@ const FileUpload: Component = () => {
   const [isDragOver, setIsDragOver] = createSignal(false);
 
   const processFile = async (file: File) => {
+    // Fast synchronous validation first — keeps error visible alongside the drop zone
     const validation = validateUploadFile(file);
     if (!validation.ok) {
       setErrorMsg(validation.error);
@@ -18,37 +21,30 @@ const FileUpload: Component = () => {
       return;
     }
 
-    const { extension } = validation;
-
     setStatus("processing");
     setErrorMsg("");
 
-    try {
-      let rawText: string;
-
-      if (extension === "pdf") {
-        const { extractTextFromPDF } = await import("@/lib/extraction/pdf");
-        rawText = await extractTextFromPDF(file);
-      } else {
-        const { extractTextFromDOCX } = await import("@/lib/extraction/docx");
-        rawText = await extractTextFromDOCX(file);
-      }
-
-      const { parseResume } = await import("@/lib/parser/resume-parser");
-      const result = await parseResume(rawText);
-
-      loadResume(result.data);
-
-      // Navigate to editor with client-side transition
-      const { navigate } = await import("astro:transitions/client");
-      navigate("/editor");
-    } catch (err) {
-      console.error(err);
-      setErrorMsg(
-        err instanceof Error ? err.message : "Failed to process file. Please try a different file."
-      );
+    const outcome = await processUploadedFile(file, validation.extension);
+    if (!outcome.success) {
+      setErrorMsg(outcome.error);
       setStatus("error");
+      return;
     }
+
+    const { result } = outcome;
+    setImportFeedback({
+      confidence: result.confidence,
+      work: result.data.work?.length ?? 0,
+      education: result.data.education?.length ?? 0,
+      skills: result.data.skills?.length ?? 0,
+      projects: result.data.projects?.length ?? 0,
+      certificates: result.data.certificates?.length ?? 0,
+    });
+    loadResume(result.data);
+
+    // Navigate to editor with client-side transition
+    const { navigate } = await import("astro:transitions/client");
+    navigate("/editor");
   };
 
   const handleFileInput = (e: Event) => {
@@ -89,12 +85,12 @@ const FileUpload: Component = () => {
           onDragLeave={handleDragLeave}
           class={`relative rounded-2xl border-2 border-dashed p-12 text-center transition-colors ${
             isDragOver()
-              ? "border-indigo-400 bg-indigo-950/20"
-              : "border-white/20 bg-white/5 hover:border-indigo-500/50"
+              ? "border-[#2d9469] bg-[#1d6648]/10"
+              : "border-white/20 bg-white/5 hover:border-[#1d6648]/50"
           }`}
         >
           <div class="mb-4 flex justify-center">
-            <div class="rounded-full bg-indigo-900/50 p-4">
+            <div class="rounded-full bg-[#1d6648]/50 p-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -105,7 +101,7 @@ const FileUpload: Component = () => {
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="text-indigo-400"
+                class="text-[#4ade80]"
                 aria-hidden="true"
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -120,7 +116,7 @@ const FileUpload: Component = () => {
 
           <label
             for="file-input"
-            class="cursor-pointer rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
+            class="cursor-pointer rounded-lg bg-[#1d6648] px-6 py-2.5 text-sm font-medium text-white transition-colors active:scale-[0.98] hover:bg-[#155236] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1d6648] focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
           >
             Choose file
             <input
@@ -147,7 +143,7 @@ const FileUpload: Component = () => {
           <button
             type="button"
             onClick={startFromScratch}
-            class="ml-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+            class="ml-2 text-sm font-medium text-[#4ade80] transition-colors hover:text-white hover:underline"
           >
             start from scratch
           </button>

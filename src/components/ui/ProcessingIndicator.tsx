@@ -10,7 +10,7 @@ const ProcessingIndicator: Component<ProcessingIndicatorProps> = (props) => (
     role="status"
     aria-live="polite"
   >
-    <div class="h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+    <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#ccddd4] border-t-[#1d6648]" />
     <p class="text-sm font-medium text-gray-600">{props.message ?? "Processing resume…"}</p>
   </div>
 );

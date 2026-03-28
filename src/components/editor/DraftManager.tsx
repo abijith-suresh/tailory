@@ -7,7 +7,7 @@ import {
   onMount,
   Show,
 } from "solid-js";
-import { loadResume, resume } from "@/store/resume";
+
 import {
   AUTOSAVE_DRAFT_ID,
   deleteDraft,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/storage/db";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
+import { loadResume, resume } from "@/store/resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -33,7 +34,16 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [storageAvailable, setStorageAvailable] = createSignal(true);
   const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
   const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
+  const [popupTop, setPopupTop] = createSignal(0);
+  const [popupRight, setPopupRight] = createSignal(0);
   let saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const computePopupPosition = () => {
+    if (!containerRef) return;
+    const rect = containerRef.getBoundingClientRect();
+    setPopupTop(rect.bottom + 4);
+    setPopupRight(window.innerWidth - rect.right);
+  };
 
   const queueStatusReset = () => {
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
@@ -114,6 +124,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   const loadDraftsList = async () => {
+    computePopupPosition();
     const all = await listDrafts();
     setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
     setShowList(true);
@@ -137,6 +148,19 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
   };
 
+  // Click-outside: close the drafts popup when user clicks elsewhere
+  let containerRef: HTMLDivElement | undefined;
+  createEffect(() => {
+    if (!showList()) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as Node)) {
+        setShowList(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    onCleanup(() => document.removeEventListener("mousedown", handler));
+  });
+
   onCleanup(() => {
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
@@ -144,18 +168,67 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   const btnClass = () =>
     props.dark
-      ? "rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
-      : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50";
+      ? "rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+      : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
-    <div class="relative">
-      <div class="flex gap-2">
+    <div class="relative" ref={(el) => (containerRef = el)}>
+      {/* Mobile compact button — only in dark (CommandBar) mode */}
+      <Show when={props.dark}>
+        <button
+          type="button"
+          onClick={
+            showList()
+              ? () => setShowList(false)
+              : () => {
+                  computePopupPosition();
+                  loadDraftsList();
+                }
+          }
+          disabled={!storageAvailable()}
+          title="Drafts"
+          aria-label="Open saved drafts"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50 sm:hidden"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+        </button>
+      </Show>
+      <div class="hidden gap-2 sm:flex">
         <button
           type="button"
           onClick={saveNamedDraft}
           disabled={status() === "saving" || !storageAvailable()}
-          class={btnClass()}
+          class={`flex items-center gap-1.5 ${btnClass()}`}
         >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
           {status() === "saving"
             ? "Saving..."
             : status() === "saved"
@@ -166,22 +239,42 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
         </button>
         <button
           type="button"
-          onClick={loadDraftsList}
+          onClick={() => (showList() ? setShowList(false) : loadDraftsList())}
           disabled={!storageAvailable()}
-          class={btnClass()}
+          class={`flex items-center gap-1.5 ${btnClass()}`}
         >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
           Drafts
         </button>
       </div>
 
       <Show when={showList()}>
-        <div class="draft-popup-enter absolute right-0 top-8 z-20 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div
+          class="draft-popup-enter z-50 w-72 rounded-lg border border-gray-200 bg-white shadow-lg"
+          style={{
+            position: "fixed",
+            top: `${popupTop()}px`,
+            right: `${popupRight()}px`,
+          }}
+        >
           <div class="flex items-center justify-between border-b border-gray-100 px-4 py-2">
             <span class="text-xs font-semibold text-gray-700">Saved Drafts</span>
             <button
               type="button"
               onClick={() => setShowList(false)}
-              class="text-gray-400 hover:text-gray-600"
+              class="rounded-md text-gray-400 transition-colors hover:text-gray-600"
               aria-label="Close"
             >
               ✕
@@ -194,7 +287,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             >
               <For each={drafts()}>
                 {(draft) => (
-                  <div class="flex w-full items-center justify-between px-4 py-2.5 hover:bg-gray-50">
+                  <div class="flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2.5 transition-colors hover:bg-gray-50">
                     <button type="button" onClick={() => loadDraft(draft)} class="flex-1 text-left">
                       <p class="text-xs font-medium text-gray-800">{draft.name}</p>
                       <p class="text-xs text-gray-400">
@@ -205,7 +298,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
                       type="button"
                       onClick={(e) => removeDraft(e, draft.id)}
                       aria-label="Delete draft"
-                      class="ml-2 text-red-400 hover:text-red-600"
+                      class="ml-2 rounded-md text-red-400 transition-colors hover:text-red-600"
                     >
                       ✕
                     </button>
