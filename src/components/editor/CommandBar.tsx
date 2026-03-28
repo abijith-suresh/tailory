@@ -53,7 +53,21 @@ const CommandBar: Component = () => {
       setIsExporting(true);
       await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
     } catch (error) {
-      setExportError(error instanceof Error ? error.message : "Unable to export this resume yet.");
+      const msg = error instanceof Error ? error.message : "Unable to export this resume yet.";
+      setExportError(msg);
+      // Navigate to the relevant section so the user can fix the issue
+      if (msg.toLowerCase().includes("name")) {
+        setActiveSection("basics");
+      } else if (
+        msg.toLowerCase().includes("summary") ||
+        msg.toLowerCase().includes("experience") ||
+        msg.toLowerCase().includes("education") ||
+        msg.toLowerCase().includes("skill") ||
+        msg.toLowerCase().includes("project") ||
+        msg.toLowerCase().includes("certif")
+      ) {
+        setActiveSection("summary");
+      }
     } finally {
       setIsExporting(false);
     }
