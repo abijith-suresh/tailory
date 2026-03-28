@@ -9,6 +9,7 @@ import {
   resume,
   selectedTemplate,
   setActiveSection,
+  setExportError,
   setImportFeedback,
 } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
@@ -34,7 +35,6 @@ const TOTAL = SECTIONS.length;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
-  const [exportError, setExportError] = createSignal("");
   const [importError, setImportError] = createSignal("");
   const [isExporting, setIsExporting] = createSignal(false);
   const [isImporting, setIsImporting] = createSignal(false);
@@ -199,14 +199,12 @@ const CommandBar: Component = () => {
 
       {/* Import + Draft manager + export */}
       <div class="ml-auto flex shrink-0 flex-col items-end gap-1.5">
-        <Show when={exportError() || importError()}>
+        <Show when={importError()}>
           <div
             class="max-w-56 rounded-md bg-red-900/20 border border-red-800/40 px-2.5 py-1.5"
             role="alert"
           >
-            <p class="text-right text-xs leading-snug text-red-300">
-              {exportError() || importError()}
-            </p>
+            <p class="text-right text-xs leading-snug text-red-300">{importError()}</p>
           </div>
         </Show>
         <div class="flex items-center gap-2">

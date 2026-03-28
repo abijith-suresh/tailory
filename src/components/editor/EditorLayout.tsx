@@ -1,10 +1,76 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import EditorShell from "@/components/editor/EditorShell";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
+import { exportError, setExportError } from "@/store/resume";
 
 type Pane = "editor" | "preview";
+
+function ExportErrorToast() {
+  createEffect(() => {
+    const err = exportError();
+    if (!err) return;
+    const timer = setTimeout(() => setExportError(""), 5000);
+    onCleanup(() => clearTimeout(timer));
+  });
+
+  return (
+    <Show when={exportError()}>
+      <div
+        role="alert"
+        aria-live="assertive"
+        style={{
+          position: "fixed",
+          top: "60px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          "z-index": "9999",
+        }}
+        class="flex w-full max-w-md items-start gap-3 rounded-lg border border-red-200 bg-white px-4 py-3 shadow-xl shadow-black/10"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#b91c1c"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="mt-0.5 shrink-0"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p class="flex-1 text-sm leading-snug text-red-700">{exportError()}</p>
+        <button
+          type="button"
+          onClick={() => setExportError("")}
+          class="shrink-0 text-red-400 transition-colors hover:text-red-600"
+          aria-label="Dismiss"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </Show>
+  );
+}
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -33,6 +99,7 @@ export default function EditorLayout() {
         "min-height": "0",
       }}
     >
+      <ExportErrorToast />
       {/* Panels row */}
       <div
         style={{
