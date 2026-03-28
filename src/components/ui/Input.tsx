@@ -10,7 +10,7 @@ type InputProps = {
 };
 
 const inputClass =
-  "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500";
+  "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-[#1d6648] focus:outline-none focus:ring-1 focus:ring-[#1d6648]/30";
 
 const Input: Component<InputProps> = (props) => (
   <input

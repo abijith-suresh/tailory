@@ -127,7 +127,7 @@ const ProjectsForm: Component = () => {
               <button
                 type="button"
                 onClick={() => addHighlight(item.id)}
-                class="text-xs text-indigo-600 hover:underline"
+                class="text-xs text-[#1d6648] hover:underline"
               >
                 + Add highlight
               </button>

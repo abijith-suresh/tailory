@@ -89,12 +89,12 @@ const FileUpload: Component = () => {
           onDragLeave={handleDragLeave}
           class={`relative rounded-2xl border-2 border-dashed p-12 text-center transition-colors ${
             isDragOver()
-              ? "border-indigo-400 bg-indigo-950/20"
-              : "border-white/20 bg-white/5 hover:border-indigo-500/50"
+              ? "border-[#2d9469] bg-[#1d6648]/10"
+              : "border-white/20 bg-white/5 hover:border-[#1d6648]/50"
           }`}
         >
           <div class="mb-4 flex justify-center">
-            <div class="rounded-full bg-indigo-900/50 p-4">
+            <div class="rounded-full bg-[#1d6648]/50 p-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -105,7 +105,7 @@ const FileUpload: Component = () => {
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="text-indigo-400"
+                class="text-[#4ade80]"
                 aria-hidden="true"
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -120,7 +120,7 @@ const FileUpload: Component = () => {
 
           <label
             for="file-input"
-            class="cursor-pointer rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
+            class="cursor-pointer rounded-lg bg-[#1d6648] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#155236] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1d6648] focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
           >
             Choose file
             <input
@@ -147,7 +147,7 @@ const FileUpload: Component = () => {
           <button
             type="button"
             onClick={startFromScratch}
-            class="ml-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+            class="ml-2 text-sm font-medium text-[#4ade80] hover:text-white hover:underline"
           >
             start from scratch
           </button>

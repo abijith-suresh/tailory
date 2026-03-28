@@ -41,7 +41,7 @@ const SkillsForm: Component = () => {
           onInput={(e) => setInputValue(e.currentTarget.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a skill and press Enter or comma…"
-          class="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          class="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#1d6648] focus:outline-none focus:ring-1 focus:ring-[#1d6648]/30"
         />
         <button
           type="button"
@@ -55,7 +55,7 @@ const SkillsForm: Component = () => {
       <div class="flex flex-wrap gap-2">
         <For each={resume.skills ?? []}>
           {(skill) => (
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-800">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#edf4f0] px-3 py-1 text-sm font-medium text-[#1d6648]">
               {skill.name}
               <button
                 type="button"

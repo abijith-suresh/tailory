@@ -67,7 +67,7 @@ function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T
         <button
           type="button"
           onClick={props.onAdd}
-          class="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-2 text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600"
+          class="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-2 text-sm text-gray-500 hover:border-[#1d6648] hover:text-[#1d6648]"
         >
           + {props.addLabel ?? "Add entry"}
         </button>
