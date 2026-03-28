@@ -115,7 +115,7 @@ const CommandBar: Component = () => {
 
   return (
     <header
-      class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0 px-4 pt-2.5 pb-0"
+      class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0 px-4 py-2.5"
       style={{ background: "#0e2418" }}
       role="banner"
     >
@@ -171,11 +171,7 @@ const CommandBar: Component = () => {
       </div>
 
       {/* Section chips */}
-      <nav
-        class="order-2 w-full overflow-x-auto border-t py-1.5 md:order-none md:w-auto md:flex-1 md:border-none md:py-0"
-        style={{ "border-color": "rgba(255,255,255,0.10)" }}
-        aria-label="Resume sections"
-      >
+      <nav class="hidden md:flex md:flex-1 md:items-center md:gap-1.5" aria-label="Resume sections">
         <div class="flex items-center gap-1.5">
           <For each={SECTIONS}>
             {(section) => (
