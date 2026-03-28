@@ -36,6 +36,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 14;
 const CommandBar: Component = () => {
   const [exportError, setExportError] = createSignal("");
   const [importError, setImportError] = createSignal("");
+  const [isExporting, setIsExporting] = createSignal(false);
   const [isImporting, setIsImporting] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
 
@@ -49,9 +50,12 @@ const CommandBar: Component = () => {
   const handleExport = async () => {
     try {
       setExportError("");
+      setIsExporting(true);
       await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
     } catch (error) {
       setExportError(error instanceof Error ? error.message : "Unable to export this resume yet.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -180,7 +184,7 @@ const CommandBar: Component = () => {
       {/* Import + Draft manager + export */}
       <div class="flex shrink-0 flex-col items-end gap-1.5">
         <Show when={exportError() || importError()}>
-          <p class="max-w-56 text-right text-[11px] leading-snug text-red-200" role="alert">
+          <p class="max-w-56 text-right text-xs leading-snug text-red-300" role="alert">
             {exportError() || importError()}
           </p>
         </Show>
@@ -242,10 +246,44 @@ const CommandBar: Component = () => {
           <button
             type="button"
             onClick={handleExport}
-            class="rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95"
+            disabled={isExporting()}
+            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95 disabled:opacity-60"
             style={{ background: "#1d6648", border: "1px solid #2d9469" }}
           >
-            Export PDF
+            <Show
+              when={!isExporting()}
+              fallback={
+                <svg
+                  class="animate-spin"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+              }
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </Show>
+            {isExporting() ? "Exporting…" : "Export PDF"}
           </button>
         </div>
       </div>
