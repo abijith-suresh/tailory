@@ -23,6 +23,10 @@ export interface ImportFeedback {
   certificates: number;
 }
 
+export const [exportError, setExportError] = createSignal("");
+
+export const [importError, setImportError] = createSignal("");
+
 export const [importFeedback, setImportFeedback] = createSignal<ImportFeedback | null>(null);
 
 export function loadResume(data: ResumeSchema) {

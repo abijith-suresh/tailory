@@ -10,6 +10,7 @@ import {
   selectedTemplate,
   setActiveSection,
   setExportError,
+  setImportError,
   setImportFeedback,
 } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
@@ -35,7 +36,6 @@ const TOTAL = SECTIONS.length;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
-  const [importError, setImportError] = createSignal("");
   const [isExporting, setIsExporting] = createSignal(false);
   const [isImporting, setIsImporting] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
@@ -77,7 +77,6 @@ const CommandBar: Component = () => {
     const validation = validateUploadFile(file);
     if (!validation.ok) {
       setImportError(validation.error);
-      setTimeout(() => setImportError(""), 5000);
       return;
     }
 
@@ -89,7 +88,6 @@ const CommandBar: Component = () => {
 
     if (!outcome.success) {
       setImportError(outcome.error);
-      setTimeout(() => setImportError(""), 5000);
       return;
     }
 
@@ -198,115 +196,105 @@ const CommandBar: Component = () => {
       </nav>
 
       {/* Import + Draft manager + export */}
-      <div class="ml-auto flex shrink-0 flex-col items-end gap-1.5">
-        <Show when={importError()}>
-          <div
-            class="max-w-56 rounded-md bg-red-900/20 border border-red-800/40 px-2.5 py-1.5"
-            role="alert"
-          >
-            <p class="text-right text-xs leading-snug text-red-300">{importError()}</p>
-          </div>
-        </Show>
-        <div class="flex items-center gap-2">
-          {/* Hidden file input for import */}
-          <input
-            ref={(el) => (fileInputRef = el)}
-            type="file"
-            accept=".pdf,.docx"
-            class="sr-only"
-            aria-label="Import resume file"
-            onInput={handleImportInput}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef?.click()}
-            disabled={isImporting()}
-            title="Import a PDF or DOCX resume"
-            aria-label="Import resume from file"
-            class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Show
-              when={!isImporting()}
-              fallback={
-                <svg
-                  class="animate-spin"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
-              }
-            >
+      <div class="ml-auto flex shrink-0 items-center gap-2">
+        {/* Hidden file input for import */}
+        <input
+          ref={(el) => (fileInputRef = el)}
+          type="file"
+          accept=".pdf,.docx"
+          class="sr-only"
+          aria-label="Import resume file"
+          onInput={handleImportInput}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef?.click()}
+          disabled={isImporting()}
+          title="Import a PDF or DOCX resume"
+          aria-label="Import resume from file"
+          class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Show
+            when={!isImporting()}
+            fallback={
               <svg
+                class="animate-spin"
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
                 aria-hidden="true"
               >
-                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                <path d="M12 12v6" />
-                <path d="m9 15 3-3 3 3" />
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
               </svg>
-            </Show>
-            <span class="hidden sm:inline">{isImporting() ? "Importing…" : "Import"}</span>
-          </button>
-
-          <DraftManager dark />
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting()}
-            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-[background-color,transform] active:scale-95 hover:bg-[#155236] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: "#1d6648", border: "1px solid #2d9469" }}
+            }
           >
-            <Show
-              when={!isExporting()}
-              fallback={
-                <svg
-                  class="animate-spin"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  aria-hidden="true"
-                >
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
-              }
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
             >
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M12 12v6" />
+              <path d="m9 15 3-3 3 3" />
+            </svg>
+          </Show>
+          <span class="hidden sm:inline">{isImporting() ? "Importing…" : "Import"}</span>
+        </button>
+
+        <DraftManager dark />
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={isExporting()}
+          class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-[background-color,transform] active:scale-95 hover:bg-[#155236] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: "#1d6648", border: "1px solid #2d9469" }}
+        >
+          <Show
+            when={!isExporting()}
+            fallback={
               <svg
+                class="animate-spin"
                 width="12"
                 height="12"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
                 aria-hidden="true"
               >
-                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                <path d="M12 12v6" />
-                <path d="m15 18-3 3-3-3" />
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
               </svg>
-            </Show>
-            <span class="hidden sm:inline">{isExporting() ? "Exporting…" : "Export PDF"}</span>
-          </button>
-        </div>
+            }
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M12 12v6" />
+              <path d="m15 18-3 3-3-3" />
+            </svg>
+          </Show>
+          <span class="hidden sm:inline">{isExporting() ? "Exporting…" : "Export PDF"}</span>
+        </button>
       </div>
     </header>
   );

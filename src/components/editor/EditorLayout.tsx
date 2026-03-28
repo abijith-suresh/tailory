@@ -3,9 +3,40 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import EditorShell from "@/components/editor/EditorShell";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
-import { exportError, setExportError } from "@/store/resume";
+import {
+  exportError,
+  importError,
+  importFeedback,
+  setExportError,
+  setImportError,
+  setImportFeedback,
+} from "@/store/resume";
 
 type Pane = "editor" | "preview";
+
+const MOBILE_BREAKPOINT = 768;
+
+// ── Confidence helpers ────────────────────────────────────────────────────────
+
+function confidenceLabel(score: number): string {
+  if (score >= 0.8) return "High confidence";
+  if (score >= 0.5) return "Medium confidence";
+  return "Low confidence — review carefully";
+}
+
+function confidenceAccent(score: number): string {
+  if (score >= 0.8) return "#1d6648";
+  if (score >= 0.5) return "#b45309";
+  return "#b91c1c";
+}
+
+function confidenceBorder(score: number): string {
+  if (score >= 0.8) return "#ccddd4";
+  if (score >= 0.5) return "#fcd34d";
+  return "#fca5a5";
+}
+
+// ── Toast components ──────────────────────────────────────────────────────────
 
 function ExportErrorToast() {
   createEffect(() => {
@@ -20,14 +51,8 @@ function ExportErrorToast() {
       <div
         role="alert"
         aria-live="assertive"
-        style={{
-          position: "fixed",
-          top: "60px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          "z-index": "9999",
-        }}
-        class="flex w-full max-w-md items-start gap-3 rounded-lg border border-red-200 bg-white px-4 py-3 shadow-xl shadow-black/10"
+        class="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-white px-4 py-3 shadow-xl shadow-black/10"
+        style={{ "pointer-events": "auto" }}
       >
         <svg
           width="16"
@@ -72,7 +97,164 @@ function ExportErrorToast() {
   );
 }
 
-const MOBILE_BREAKPOINT = 768;
+function ImportErrorToast() {
+  createEffect(() => {
+    const err = importError();
+    if (!err) return;
+    const timer = setTimeout(() => setImportError(""), 5000);
+    onCleanup(() => clearTimeout(timer));
+  });
+
+  return (
+    <Show when={importError()}>
+      <div
+        role="alert"
+        aria-live="assertive"
+        class="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-white px-4 py-3 shadow-xl shadow-black/10"
+        style={{ "pointer-events": "auto" }}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#b91c1c"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="mt-0.5 shrink-0"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p class="flex-1 text-sm leading-snug text-red-700">{importError()}</p>
+        <button
+          type="button"
+          onClick={() => setImportError("")}
+          class="shrink-0 text-red-400 transition-colors hover:text-red-600"
+          aria-label="Dismiss"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </Show>
+  );
+}
+
+function ImportSuccessToast() {
+  createEffect(() => {
+    const fb = importFeedback();
+    if (!fb) return;
+    const timer = setTimeout(() => setImportFeedback(null), 5000);
+    onCleanup(() => clearTimeout(timer));
+  });
+
+  return (
+    <Show when={importFeedback()}>
+      {(_) => {
+        const fb = importFeedback()!;
+        const parts: string[] = [];
+        if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
+        if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);
+        if (fb.skills > 0) parts.push(`${fb.skills} skill${fb.skills > 1 ? "s" : ""}`);
+        if (fb.projects > 0) parts.push(`${fb.projects} project${fb.projects > 1 ? "s" : ""}`);
+        if (fb.certificates > 0)
+          parts.push(`${fb.certificates} cert${fb.certificates > 1 ? "s" : ""}`);
+
+        return (
+          <div
+            role="status"
+            aria-live="polite"
+            class="flex w-full items-start gap-3 rounded-lg border bg-white px-4 py-3 shadow-xl shadow-black/10"
+            style={{
+              "border-color": confidenceBorder(fb.confidence),
+              "pointer-events": "auto",
+            }}
+          >
+            {/* Colored left accent bar */}
+            <div
+              class="mt-0.5 h-4 w-1 shrink-0 rounded-full"
+              style={{ background: confidenceAccent(fb.confidence) }}
+              aria-hidden="true"
+            />
+            <div class="flex-1 text-sm leading-snug">
+              <span class="font-semibold" style={{ color: confidenceAccent(fb.confidence) }}>
+                {confidenceLabel(fb.confidence)}
+              </span>
+              <span class="ml-1 text-gray-500">
+                {parts.length > 0
+                  ? `— imported ${parts.join(", ")}.`
+                  : "— check each section for accuracy."}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setImportFeedback(null)}
+              class="shrink-0 text-gray-400 transition-colors hover:text-gray-600"
+              aria-label="Dismiss"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        );
+      }}
+    </Show>
+  );
+}
+
+function ToastContainer() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "60px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        "z-index": "9999",
+        display: "flex",
+        "flex-direction": "column",
+        gap: "8px",
+        width: "calc(100% - 2rem)",
+        "max-width": "28rem",
+        "pointer-events": "none",
+      }}
+    >
+      <ExportErrorToast />
+      <ImportErrorToast />
+      <ImportSuccessToast />
+    </div>
+  );
+}
+
+// ── EditorLayout ──────────────────────────────────────────────────────────────
 
 export default function EditorLayout() {
   const [activePane, setActivePane] = createSignal<Pane>("editor");
@@ -99,7 +281,8 @@ export default function EditorLayout() {
         "min-height": "0",
       }}
     >
-      <ExportErrorToast />
+      <ToastContainer />
+
       {/* Panels row */}
       <div
         style={{

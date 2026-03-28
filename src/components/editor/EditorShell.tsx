@@ -1,7 +1,7 @@
-import { type Component, createEffect, createSignal, type JSX, Show } from "solid-js";
+import { type Component, type JSX, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
-import { activeSection, importFeedback, setActiveSection, setImportFeedback } from "@/store/resume";
+import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
 import CertificatesForm from "./CertificatesForm";
@@ -62,100 +62,6 @@ const SECTIONS: SectionMeta[] = [
     component: () => <CertificatesForm />,
   },
 ];
-
-// ── Confidence Toast ─────────────────────────────────────────────────────────
-
-function confidenceLabel(score: number): string {
-  if (score >= 0.8) return "High confidence";
-  if (score >= 0.5) return "Medium confidence";
-  return "Low confidence — review carefully";
-}
-
-function confidenceColor(score: number): string {
-  if (score >= 0.8) return "#1d6648";
-  if (score >= 0.5) return "#b45309";
-  return "#b91c1c";
-}
-
-function confidenceBg(score: number): string {
-  if (score >= 0.8) return "#edf4f0";
-  if (score >= 0.5) return "#fffbeb";
-  return "#fef2f2";
-}
-
-function confidenceBorder(score: number): string {
-  if (score >= 0.8) return "#ccddd4";
-  if (score >= 0.5) return "#fcd34d";
-  return "#fca5a5";
-}
-
-const ImportToast: Component = () => {
-  const [visible, setVisible] = createSignal(false);
-
-  createEffect(() => {
-    const fb = importFeedback();
-    if (!fb) {
-      setVisible(false);
-      return;
-    }
-    setVisible(true);
-    const timer = setTimeout(() => {
-      setVisible(false);
-      setImportFeedback(null);
-    }, 5000);
-    return () => clearTimeout(timer);
-  });
-
-  return (
-    <Show when={visible() && importFeedback()}>
-      {(_) => {
-        const fb = importFeedback()!;
-        const parts: string[] = [];
-        if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
-        if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);
-        if (fb.skills > 0) parts.push(`${fb.skills} skill${fb.skills > 1 ? "s" : ""}`);
-        if (fb.projects > 0) parts.push(`${fb.projects} project${fb.projects > 1 ? "s" : ""}`);
-        if (fb.certificates > 0)
-          parts.push(`${fb.certificates} cert${fb.certificates > 1 ? "s" : ""}`);
-
-        return (
-          <div
-            role="status"
-            aria-live="polite"
-            class="mx-6 mt-4 flex items-start justify-between gap-3 rounded-md px-3.5 py-2.5 text-xs leading-snug"
-            style={{
-              background: confidenceBg(fb.confidence),
-              border: `1px solid ${confidenceBorder(fb.confidence)}`,
-              color: confidenceColor(fb.confidence),
-            }}
-          >
-            <div>
-              <span class="font-semibold">{confidenceLabel(fb.confidence)}</span>
-              {parts.length > 0 && (
-                <span class="ml-1 opacity-80">— imported {parts.join(", ")}.</span>
-              )}
-              {parts.length === 0 && (
-                <span class="ml-1 opacity-80">— check each section for accuracy.</span>
-              )}
-            </div>
-            <button
-              type="button"
-              aria-label="Dismiss"
-              onClick={() => {
-                setVisible(false);
-                setImportFeedback(null);
-              }}
-              class="shrink-0 opacity-60 transition-opacity hover:opacity-100"
-              style={{ color: confidenceColor(fb.confidence) }}
-            >
-              ✕
-            </button>
-          </div>
-        );
-      }}
-    </Show>
-  );
-};
 
 // ── EditorShell ──────────────────────────────────────────────────────────────
 
@@ -239,9 +145,6 @@ const EditorShell: Component = () => {
           </div>
         </div>
       </div>
-
-      {/* Import confidence toast */}
-      <ImportToast />
 
       {/* Form area */}
       <div
