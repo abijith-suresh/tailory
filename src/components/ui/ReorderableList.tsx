@@ -30,7 +30,7 @@ function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T
         {(item, index) => (
           <div class="group relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             {/* Reorder controls */}
-            <div class="absolute right-2 top-2 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <div class="absolute right-2 top-2 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100">
               <button
                 type="button"
                 onClick={() => moveUp(index())}
