@@ -158,8 +158,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   const btnClass = () =>
     props.dark
-      ? "rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
-      : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50";
+      ? "rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+      : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div class="relative" ref={(el) => (containerRef = el)}>
@@ -222,7 +222,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             <button
               type="button"
               onClick={() => setShowList(false)}
-              class="text-gray-400 hover:text-gray-600"
+              class="rounded-md text-gray-400 transition-colors hover:text-gray-600"
               aria-label="Close"
             >
               ✕
@@ -235,7 +235,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             >
               <For each={drafts()}>
                 {(draft) => (
-                  <div class="flex w-full items-center justify-between px-4 py-2.5 hover:bg-gray-50">
+                  <div class="flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2.5 transition-colors hover:bg-gray-50">
                     <button type="button" onClick={() => loadDraft(draft)} class="flex-1 text-left">
                       <p class="text-xs font-medium text-gray-800">{draft.name}</p>
                       <p class="text-xs text-gray-400">
@@ -246,7 +246,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
                       type="button"
                       onClick={(e) => removeDraft(e, draft.id)}
                       aria-label="Delete draft"
-                      class="ml-2 text-red-400 hover:text-red-600"
+                      class="ml-2 rounded-md text-red-400 transition-colors hover:text-red-600"
                     >
                       ✕
                     </button>

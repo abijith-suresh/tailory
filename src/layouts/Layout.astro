@@ -48,6 +48,14 @@ const pageTitle = title === "Tailory" ? "Tailory" : `${title} — Tailory`;
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Google Fonts — Lora (serif) + DM Sans (UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,700;1,600&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <ClientRouter />
     <title>{pageTitle}</title>
     <slot name="head" />

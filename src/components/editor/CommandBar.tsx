@@ -183,7 +183,7 @@ const CommandBar: Component = () => {
                 type="button"
                 onClick={() => setActiveSection(section.id)}
                 aria-pressed={activeSection() === section.id}
-                class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95"
+                class="flex shrink-0 items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-[background-color,transform] active:scale-95 hover:bg-white/15"
                 style={{
                   background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
                   color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
@@ -204,9 +204,14 @@ const CommandBar: Component = () => {
       {/* Import + Draft manager + export */}
       <div class="flex shrink-0 flex-col items-end gap-1.5">
         <Show when={exportError() || importError()}>
-          <p class="max-w-56 text-right text-xs leading-snug text-red-300" role="alert">
-            {exportError() || importError()}
-          </p>
+          <div
+            class="max-w-56 rounded-md bg-red-900/20 border border-red-800/40 px-2.5 py-1.5"
+            role="alert"
+          >
+            <p class="text-right text-xs leading-snug text-red-300">
+              {exportError() || importError()}
+            </p>
+          </div>
         </Show>
         <div class="flex items-center gap-2">
           {/* Hidden file input for import */}
@@ -224,7 +229,7 @@ const CommandBar: Component = () => {
             disabled={isImporting()}
             title="Import a PDF or DOCX resume"
             aria-label="Import resume from file"
-            class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50"
+            class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Show
               when={!isImporting()}
@@ -267,7 +272,7 @@ const CommandBar: Component = () => {
             type="button"
             onClick={handleExport}
             disabled={isExporting()}
-            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95 disabled:opacity-60"
+            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white transition-[background-color,transform] active:scale-95 hover:bg-[#155236] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: "#1d6648", border: "1px solid #2d9469" }}
           >
             <Show

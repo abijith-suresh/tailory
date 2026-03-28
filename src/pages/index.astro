@@ -71,14 +71,17 @@ const formFields = [
     <div class="flex flex-wrap items-center gap-4">
       <a
         href="/editor"
-        class="inline-block bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-all hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
+        class="inline-block rounded-md bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
       >
         Open the editor →
       </a>
       <div class="flex flex-wrap gap-3">
         {
           ["No account", "Local only", "Open source"].map((chip) => (
-            <span class="rounded-full border border-[#ccddd4] bg-white px-4 py-1.5 text-xs font-medium text-[#3d6650]">
+            <span
+              aria-hidden="true"
+              class="rounded-full border border-[#ccddd4] bg-white px-4 py-1.5 text-xs font-medium text-[#3d6650]"
+            >
               {chip}
             </span>
           ))
@@ -90,7 +93,11 @@ const formFields = [
   <!-- App Preview Mockup -->
   <section class="mx-auto max-w-6xl px-8 pb-24" data-reveal data-reveal-delay="100">
     <p class="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-[#a0b8ab]">Editor preview</p>
-    <div class="overflow-hidden rounded-xl border border-[#ccddd4] shadow-lg shadow-[#1d6648]/5">
+    <a
+      href="/editor"
+      class="block overflow-hidden rounded-xl border border-[#ccddd4] shadow-lg shadow-[#1d6648]/5 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
+      aria-label="Open the editor"
+    >
       <!-- Top bar -->
       <div class="flex items-center border-b border-[#ccddd4] bg-white px-4 py-2.5">
         <span
@@ -154,7 +161,7 @@ const formFields = [
           </div>
         </div>
       </div>
-    </div>
+    </a>
   </section>
 
   <!-- Divider -->
@@ -167,7 +174,7 @@ const formFields = [
       {
         features.map((f, i) => (
           <div
-            class="flex gap-6 border-t border-[#ccddd4] pt-6"
+            class="flex gap-6 border-t border-[#ccddd4] pt-6 transition-all duration-200 hover:border-[#ccddd4] hover:-translate-y-0.5"
             data-reveal
             data-reveal-delay={String(Math.min(i * 100, 400))}
           >

@@ -34,18 +34,33 @@ export default function EditorLayout() {
       }}
     >
       {/* Panels row */}
-      <div style={{ display: "flex", flex: "1", overflow: "hidden", "min-height": "0" }}>
+      <div
+        style={{
+          display: "flex",
+          flex: "1",
+          overflow: "hidden",
+          "min-height": "0",
+          position: "relative",
+        }}
+      >
         {/* Editor panel */}
         <div
           style={{
-            display: showEditor() ? "flex" : "none",
+            display: "flex",
             width: isMobile() ? "100%" : "50%",
             "flex-direction": "column",
             "border-right": isMobile() ? "none" : "1px solid #ccddd4",
             overflow: "hidden",
+            opacity: showEditor() ? "1" : "0",
+            "pointer-events": showEditor() ? "auto" : "none",
+            transform: showEditor() ? "translateX(0)" : "translateX(-12px)",
+            transition: "opacity 180ms ease, transform 180ms ease",
+            position: isMobile() ? "absolute" : "relative",
+            inset: isMobile() ? "0" : "auto",
           }}
           role="region"
           aria-label="Resume editor"
+          aria-hidden={!showEditor()}
         >
           <ErrorBoundary>
             <EditorShell />
@@ -55,13 +70,20 @@ export default function EditorLayout() {
         {/* Preview panel */}
         <div
           style={{
-            display: showPreview() ? "flex" : "none",
+            display: "flex",
             width: isMobile() ? "100%" : "50%",
             "flex-direction": "column",
             overflow: "hidden",
+            opacity: showPreview() ? "1" : "0",
+            "pointer-events": showPreview() ? "auto" : "none",
+            transform: showPreview() ? "translateX(0)" : "translateX(12px)",
+            transition: "opacity 180ms ease, transform 180ms ease",
+            position: isMobile() ? "absolute" : "relative",
+            inset: isMobile() ? "0" : "auto",
           }}
           role="region"
           aria-label="Resume preview"
+          aria-hidden={!showPreview()}
         >
           <ErrorBoundary>
             <ResumePreview />
@@ -79,7 +101,7 @@ export default function EditorLayout() {
             <button
               role="tab"
               aria-selected={activePane() === "editor"}
-              class="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-colors"
+              class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"
               style={{
                 color: activePane() === "editor" ? "#1d6648" : "#5a7a68",
                 "background-color": activePane() === "editor" ? "#edf4f0" : "transparent",
@@ -106,7 +128,7 @@ export default function EditorLayout() {
             <button
               role="tab"
               aria-selected={activePane() === "preview"}
-              class="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-colors"
+              class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"
               style={{
                 color: activePane() === "preview" ? "#1d6648" : "#5a7a68",
                 "background-color": activePane() === "preview" ? "#edf4f0" : "transparent",

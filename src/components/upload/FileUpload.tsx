@@ -116,7 +116,7 @@ const FileUpload: Component = () => {
 
           <label
             for="file-input"
-            class="cursor-pointer rounded-lg bg-[#1d6648] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#155236] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1d6648] focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
+            class="cursor-pointer rounded-lg bg-[#1d6648] px-6 py-2.5 text-sm font-medium text-white transition-colors active:scale-[0.98] hover:bg-[#155236] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1d6648] focus-within:ring-offset-2 focus-within:ring-offset-gray-900"
           >
             Choose file
             <input
@@ -143,7 +143,7 @@ const FileUpload: Component = () => {
           <button
             type="button"
             onClick={startFromScratch}
-            class="ml-2 text-sm font-medium text-[#4ade80] hover:text-white hover:underline"
+            class="ml-2 text-sm font-medium text-[#4ade80] transition-colors hover:text-white hover:underline"
           >
             start from scratch
           </button>

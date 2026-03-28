@@ -1,4 +1,6 @@
 import { type Component, createSignal, For } from "solid-js";
+
+import { inputClass } from "@/components/ui/Input";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeSkill } from "@/types/resume";
 
@@ -41,7 +43,7 @@ const SkillsForm: Component = () => {
           onInput={(e) => setInputValue(e.currentTarget.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a skill and press Enter or comma…"
-          class="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#1d6648] focus:outline-none focus:ring-1 focus:ring-[#1d6648]/30"
+          class={`flex-1 ${inputClass}`}
         />
         <button
           type="button"

@@ -1,11 +1,12 @@
 import { type Component, For } from "solid-js";
 import { produce } from "solid-js/store";
-import { resume, setResume } from "@/store/resume";
-import type { ResumeProject } from "@/types/resume";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
+import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { resume, setResume } from "@/store/resume";
+import type { ResumeProject } from "@/types/resume";
 
 function newProject(): ResumeProject {
   return {
@@ -117,7 +118,7 @@ const ProjectsForm: Component = () => {
                       type="button"
                       onClick={() => removeHighlight(item.id, idx())}
                       aria-label="Remove highlight"
-                      class="mt-1 flex-shrink-0 text-red-400 hover:text-red-600"
+                      class="mt-1 flex-shrink-0 text-red-400 transition-colors active:opacity-70 hover:text-red-600"
                     >
                       ✕
                     </button>
@@ -127,7 +128,7 @@ const ProjectsForm: Component = () => {
               <button
                 type="button"
                 onClick={() => addHighlight(item.id)}
-                class="text-xs text-[#1d6648] hover:underline"
+                class="text-xs text-[#1d6648] transition-colors hover:underline"
               >
                 + Add highlight
               </button>

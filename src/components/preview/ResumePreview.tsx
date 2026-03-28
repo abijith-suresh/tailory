@@ -90,11 +90,15 @@ const ResumePreview: Component = () => {
                 onClick={() => setSelectedTemplate(tpl.id)}
                 aria-pressed={selectedTemplate() === tpl.id}
                 title={tpl.description}
-                class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${selectedTemplate() === tpl.id ? "" : "hover:bg-[#e6f0ea]"}`}
                 style={
                   selectedTemplate() === tpl.id
                     ? { background: "#1d6648", color: "#ffffff" }
-                    : { background: "#f4f8f5", color: "#3d5c49", border: "1px solid #ccddd4" }
+                    : {
+                        background: "#f4f8f5",
+                        color: "#3d5c49",
+                        border: "1px solid #ccddd4",
+                      }
                 }
               >
                 {tpl.label}
