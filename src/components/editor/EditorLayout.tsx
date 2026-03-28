@@ -1,6 +1,7 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import EditorShell from "@/components/editor/EditorShell";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
 
 type Pane = "editor" | "preview";
@@ -46,7 +47,9 @@ export default function EditorLayout() {
           role="region"
           aria-label="Resume editor"
         >
-          <EditorShell />
+          <ErrorBoundary>
+            <EditorShell />
+          </ErrorBoundary>
         </div>
 
         {/* Preview panel */}
@@ -60,7 +63,9 @@ export default function EditorLayout() {
           role="region"
           aria-label="Resume preview"
         >
-          <ResumePreview />
+          <ErrorBoundary>
+            <ResumePreview />
+          </ErrorBoundary>
         </div>
       </div>
 

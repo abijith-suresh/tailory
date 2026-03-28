@@ -7,7 +7,7 @@ import {
   onMount,
   Show,
 } from "solid-js";
-import { loadResume, resume } from "@/store/resume";
+
 import {
   AUTOSAVE_DRAFT_ID,
   deleteDraft,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/storage/db";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
+import { loadResume, resume } from "@/store/resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -137,6 +138,19 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
   };
 
+  // Click-outside: close the drafts popup when user clicks elsewhere
+  let containerRef: HTMLDivElement | undefined;
+  createEffect(() => {
+    if (!showList()) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef && !containerRef.contains(e.target as Node)) {
+        setShowList(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    onCleanup(() => document.removeEventListener("mousedown", handler));
+  });
+
   onCleanup(() => {
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
@@ -148,7 +162,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
       : "rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50";
 
   return (
-    <div class="relative">
+    <div class="relative" ref={(el) => (containerRef = el)}>
       <div class="flex gap-2">
         <button
           type="button"
