@@ -1,5 +1,6 @@
 import { type Component, createSignal, Show } from "solid-js";
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
+import { validateUploadFile } from "@/lib/upload/guardrails";
 import { loadResume } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
@@ -10,12 +11,14 @@ const FileUpload: Component = () => {
   const [isDragOver, setIsDragOver] = createSignal(false);
 
   const processFile = async (file: File) => {
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (ext !== "pdf" && ext !== "docx" && ext !== "doc") {
-      setErrorMsg("Unsupported file type. Please upload a PDF or DOCX file.");
+    const validation = validateUploadFile(file);
+    if (!validation.ok) {
+      setErrorMsg(validation.error);
       setStatus("error");
       return;
     }
+
+    const { extension } = validation;
 
     setStatus("processing");
     setErrorMsg("");
@@ -23,7 +26,7 @@ const FileUpload: Component = () => {
     try {
       let rawText: string;
 
-      if (ext === "pdf") {
+      if (extension === "pdf") {
         const { extractTextFromPDF } = await import("@/lib/extraction/pdf");
         rawText = await extractTextFromPDF(file);
       } else {
@@ -123,7 +126,7 @@ const FileUpload: Component = () => {
             <input
               id="file-input"
               type="file"
-              accept=".pdf,.docx,.doc"
+              accept=".pdf,.docx"
               onInput={handleFileInput}
               class="sr-only"
             />

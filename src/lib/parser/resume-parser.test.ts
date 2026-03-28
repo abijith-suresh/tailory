@@ -102,4 +102,106 @@ describe("parseResume", () => {
     expect(result.data.basics.name).toBeDefined();
     expect(result.confidence).toBeGreaterThanOrEqual(0);
   });
+
+  it("detects decorated section headings", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+=== Professional Experience ===
+Acme Corp
+Senior Engineer
+2021 - Present
+• Shipped core platform updates
+
+*** Technical Skills ***
+TypeScript | SolidJS | PostgreSQL
+`);
+
+    expect(result.rawSections).toHaveProperty("work");
+    expect(result.rawSections).toHaveProperty("skills");
+    expect(result.data.work?.[0]?.name).toBe("Acme Corp");
+    expect(result.data.skills?.map((skill) => skill.name)).toEqual([
+      "TypeScript",
+      "SolidJS",
+      "PostgreSQL",
+    ]);
+  });
+
+  it("splits single-newline work entries when each entry is contiguous", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+EXPERIENCE
+Acme Corp
+Senior Engineer
+Jan 2021 - Present
+• Led migration to Astro
+Beta Labs
+Software Engineer
+Jun 2018 - Dec 2020
+• Built internal tooling
+`);
+
+    expect(result.data.work).toHaveLength(2);
+    expect(result.data.work?.[0]).toMatchObject({
+      name: "Acme Corp",
+      position: "Senior Engineer",
+      startDate: "Jan 2021",
+      endDate: "Present",
+    });
+    expect(result.data.work?.[1]).toMatchObject({
+      name: "Beta Labs",
+      position: "Software Engineer",
+      startDate: "Jun 2018",
+      endDate: "Dec 2020",
+    });
+  });
+
+  it("tokenizes noisy skills blocks without keeping category labels", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+SKILLS
+Languages: TypeScript / JavaScript / SQL
+Frameworks: SolidJS, Astro; Tailwind CSS
+• Testing: Vitest | Playwright
+`);
+
+    expect(result.data.skills?.map((skill) => skill.name)).toEqual([
+      "TypeScript",
+      "JavaScript",
+      "SQL",
+      "SolidJS",
+      "Astro",
+      "Tailwind CSS",
+      "Vitest",
+      "Playwright",
+    ]);
+  });
+
+  it("parses certificate issuer and date from common formats", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+CERTIFICATIONS
+AWS Certified Solutions Architect - Amazon Web Services - 2022
+Professional Scrum Master by Scrum.org, Jan 2023
+`);
+
+    expect(result.data.certificates).toHaveLength(2);
+    expect(result.data.certificates?.[0]).toMatchObject({
+      name: "AWS Certified Solutions Architect",
+      issuer: "Amazon Web Services",
+      date: "2022",
+    });
+    expect(result.data.certificates?.[1]).toMatchObject({
+      name: "Professional Scrum Master",
+      issuer: "Scrum.org",
+      date: "Jan 2023",
+    });
+  });
 });
