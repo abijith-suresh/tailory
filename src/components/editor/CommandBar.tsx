@@ -115,7 +115,7 @@ const CommandBar: Component = () => {
 
   return (
     <header
-      class="flex shrink-0 items-center gap-4 px-4 py-2.5"
+      class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0 px-4 pt-2.5 pb-0"
       style={{ background: "#0e2418" }}
       role="banner"
     >
@@ -131,7 +131,7 @@ const CommandBar: Component = () => {
 
       {/* Completion ring */}
       <div
-        class="flex shrink-0 items-center gap-1.5"
+        class="hidden shrink-0 items-center gap-1.5 md:flex"
         aria-label={`${completedCount()} of ${TOTAL} sections complete`}
       >
         <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
@@ -171,28 +171,34 @@ const CommandBar: Component = () => {
       </div>
 
       {/* Section chips */}
-      <nav class="flex flex-1 items-center gap-1.5 overflow-x-auto" aria-label="Resume sections">
-        <For each={SECTIONS}>
-          {(section) => (
-            <button
-              type="button"
-              onClick={() => setActiveSection(section.id)}
-              aria-pressed={activeSection() === section.id}
-              class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95"
-              style={{
-                background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
-                color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
-                border:
-                  activeSection() === section.id
-                    ? "1px solid #2d9469"
-                    : "1px solid rgba(255,255,255,0.12)",
-              }}
-            >
-              <span aria-hidden="true">{section.isDone() ? "✓" : "○"}</span>
-              {section.label}
-            </button>
-          )}
-        </For>
+      <nav
+        class="order-2 w-full overflow-x-auto border-t py-1.5 md:order-none md:w-auto md:flex-1 md:border-none md:py-0"
+        style={{ "border-color": "rgba(255,255,255,0.10)" }}
+        aria-label="Resume sections"
+      >
+        <div class="flex items-center gap-1.5">
+          <For each={SECTIONS}>
+            {(section) => (
+              <button
+                type="button"
+                onClick={() => setActiveSection(section.id)}
+                aria-pressed={activeSection() === section.id}
+                class="flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95"
+                style={{
+                  background: activeSection() === section.id ? "#1d6648" : "rgba(255,255,255,0.08)",
+                  color: activeSection() === section.id ? "#ffffff" : "rgba(255,255,255,0.7)",
+                  border:
+                    activeSection() === section.id
+                      ? "1px solid #2d9469"
+                      : "1px solid rgba(255,255,255,0.12)",
+                }}
+              >
+                <span aria-hidden="true">{section.isDone() ? "✓" : "○"}</span>
+                {section.label}
+              </button>
+            )}
+          </For>
+        </div>
       </nav>
 
       {/* Import + Draft manager + export */}
@@ -297,7 +303,7 @@ const CommandBar: Component = () => {
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
             </Show>
-            {isExporting() ? "Exporting…" : "Export PDF"}
+            <span class="hidden sm:inline">{isExporting() ? "Exporting…" : "Export PDF"}</span>
           </button>
         </div>
       </div>
