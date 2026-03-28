@@ -24,6 +24,7 @@ function normalize(text: string): string {
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .replace(/\u00a0/g, " ") // non-breaking space
+    .replace(/[\u2000-\u200b\u202f\u205f\u3000]/g, " ")
     .replace(/[^\S\n]+/g, " ") // collapse inline whitespace
     .replace(/\n{3,}/g, "\n\n") // max two blank lines
     .trim();
@@ -35,7 +36,9 @@ function isSectionHeading(line: string): SectionType | null {
   const cleaned = line
     .trim()
     .toLowerCase()
-    .replace(/[:\-–—]+$/, "")
+    .replace(/^[^a-z0-9]+|[^a-z0-9]+$/gi, "")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   if (!cleaned) return null;
   for (const [sectionType, keywords] of Object.entries(SECTION_KEYWORDS)) {
@@ -89,8 +92,15 @@ function splitIntoSections(text: string): Record<string, string> {
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i;
 const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}|\+\d{1,3}[\s.-]\d{4,14}/;
 const URL_RE = /https?:\/\/[^\s,)]+|(?:www|linkedin|github)\.[^\s,)]+/i;
-const DATE_RE =
-  /(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)[\s,]+\d{4}|\d{4}\s*[-–—]\s*(?:\d{4}|Present|Current|Now|present|current)/gi;
+const MONTH_PATTERN =
+  "(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)";
+const DATE_TOKEN_PATTERN = `${MONTH_PATTERN}[\\s,]+\\d{4}|\\d{4}|Present|Current|Now|present|current|now`;
+const DATE_RE = new RegExp(DATE_TOKEN_PATTERN, "gi");
+const DATE_RANGE_RE = new RegExp(
+  `(${DATE_TOKEN_PATTERN})\\s*[-–—]\\s*(${DATE_TOKEN_PATTERN})`,
+  "i"
+);
+const BULLET_RE = /^[•\-*]\s*/;
 
 function extractEmail(text: string): string {
   return EMAIL_RE.exec(text)?.[0] ?? "";
@@ -105,6 +115,14 @@ function extractUrl(text: string): string {
 }
 
 function extractDates(text: string): { startDate: string; endDate: string } {
+  const rangeMatch = text.match(DATE_RANGE_RE);
+  if (rangeMatch) {
+    return {
+      startDate: rangeMatch[1]?.trim() ?? "",
+      endDate: rangeMatch[2]?.trim() ?? "",
+    };
+  }
+
   const matches = [...text.matchAll(DATE_RE)].map((m) => m[0]);
   if (matches.length === 0) return { startDate: "", endDate: "" };
 
@@ -114,6 +132,144 @@ function extractDates(text: string): { startDate: string; endDate: string } {
     return { startDate: rangeParts[0]?.trim() ?? "", endDate: rangeParts[1]?.trim() ?? "" };
   }
   return { startDate: first, endDate: matches[1] ?? "" };
+}
+
+function isBulletLine(line: string): boolean {
+  return BULLET_RE.test(line);
+}
+
+function isDateLine(line: string): boolean {
+  return !!line.match(DATE_RE);
+}
+
+function isUrlLine(line: string): boolean {
+  return URL_RE.test(line);
+}
+
+function isLikelyEntryTitle(line: string): boolean {
+  return !isBulletLine(line) && !isDateLine(line) && !isUrlLine(line) && line.length <= 120;
+}
+
+function splitEntryBlocks(text: string): string[] {
+  const rawLines = text.split("\n");
+  const blocks: string[] = [];
+  let current: string[] = [];
+
+  const flush = () => {
+    const content = current.join("\n").trim();
+    if (content) blocks.push(content);
+    current = [];
+  };
+
+  const shouldStartNewBlock = (line: string, nextLine: string) => {
+    if (!current.length || !isLikelyEntryTitle(line) || !isLikelyEntryTitle(nextLine)) {
+      return false;
+    }
+
+    const nonBulletLines = current.filter((entryLine) => !isBulletLine(entryLine));
+    const currentLooksComplete =
+      current.some(
+        (entryLine) => isBulletLine(entryLine) || isDateLine(entryLine) || isUrlLine(entryLine)
+      ) || nonBulletLines.length >= 3;
+
+    return currentLooksComplete;
+  };
+
+  for (let index = 0; index < rawLines.length; index++) {
+    const line = rawLines[index]?.trim() ?? "";
+    const nextLine = rawLines[index + 1]?.trim() ?? "";
+
+    if (!line) {
+      flush();
+      continue;
+    }
+
+    if (shouldStartNewBlock(line, nextLine)) {
+      flush();
+    }
+
+    current.push(line);
+  }
+
+  flush();
+  return blocks;
+}
+
+function extractNonBulletLines(lines: string[]): string[] {
+  return lines.filter((line) => !isBulletLine(line) && !isDateLine(line) && !isUrlLine(line));
+}
+
+function cleanListValue(value: string): string {
+  return value.replace(BULLET_RE, "").replace(/\s+/g, " ").trim();
+}
+
+function tokenizeSkills(text: string): string[] {
+  const tokens = text
+    .split(/\n+/)
+    .flatMap((line) => line.split(/[|,;•]+/))
+    .flatMap((part) => part.split(/\s\/\s/))
+    .map((part) => part.replace(BULLET_RE, "").trim())
+    .map((part) => part.replace(/^[A-Za-z][A-Za-z\s/&]+:\s*/, "").trim())
+    .map((part) =>
+      part
+        .replace(/\s+/g, " ")
+        .replace(/[.:;,]+$/, "")
+        .trim()
+    )
+    .filter((part) => part.length > 1 && part.length <= 50)
+    .filter((part) => part.split(/\s+/).length <= 5)
+    .filter((part) => !/[.!?]$/.test(part));
+
+  const seen = new Set<string>();
+
+  return tokens.filter((token) => {
+    const key = token.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function parseCertificateLine(line: string): Pick<ResumeCertificate, "name" | "issuer" | "date"> {
+  const dates = extractDates(line);
+  const date = dates.startDate || dates.endDate;
+  const withoutDates = line
+    .replace(new RegExp(DATE_RE.source, "gi"), "")
+    .replace(/\(\s*\)/g, "")
+    .replace(/[|,–—-]+$/, "")
+    .trim();
+
+  let name = withoutDates;
+  let issuer = "";
+
+  const byMatch = withoutDates.match(/^(.*)\s+by\s+(.+)$/i);
+  if (byMatch) {
+    name = byMatch[1]?.trim() ?? withoutDates;
+    issuer = byMatch[2]?.trim() ?? "";
+  } else {
+    const delimiterMatch = withoutDates.match(/^(.*?)\s(?:[|–—-])\s(.*)$/);
+    if (delimiterMatch) {
+      name = delimiterMatch[1]?.trim() ?? withoutDates;
+      issuer = delimiterMatch[2]?.trim() ?? "";
+    } else {
+      const commaIndex = withoutDates.lastIndexOf(",");
+      if (commaIndex > -1) {
+        name = withoutDates.slice(0, commaIndex).trim();
+        issuer = withoutDates.slice(commaIndex + 1).trim();
+      }
+    }
+  }
+
+  issuer = issuer
+    .replace(/^issued by\s+/i, "")
+    .replace(/[|,–—-]+$/, "")
+    .trim();
+
+  return {
+    name: name.replace(/[|,–—-]+$/, "").trim(),
+    issuer,
+    date,
+  };
 }
 
 // ─── Section parsers ───────────────────────────────────────────────────────
@@ -141,8 +297,7 @@ function parseHeader(text: string): ResumeBasics {
 
 function parseWork(text: string): ResumeWork[] {
   const entries: ResumeWork[] = [];
-  // Split on double newlines as entry boundaries
-  const blocks = text.split(/\n\n+/);
+  const blocks = splitEntryBlocks(text);
 
   for (const block of blocks) {
     if (!block.trim()) continue;
@@ -153,15 +308,16 @@ function parseWork(text: string): ResumeWork[] {
     if (lines.length === 0) continue;
 
     const dates = extractDates(block);
+    const detailLines = extractNonBulletLines(lines);
     const highlights = lines
-      .filter((l) => /^[•\-*]/.test(l))
-      .map((l) => l.replace(/^[•\-*]\s*/, "").trim())
+      .filter((line) => isBulletLine(line))
+      .map((line) => cleanListValue(line))
       .filter(Boolean);
 
     entries.push({
       id: crypto.randomUUID(),
-      name: lines[0] ?? "",
-      position: lines[1] ?? "",
+      name: detailLines[0] ?? lines[0] ?? "",
+      position: detailLines[1] ?? "",
       startDate: dates.startDate,
       endDate: dates.endDate,
       highlights,
@@ -173,7 +329,7 @@ function parseWork(text: string): ResumeWork[] {
 
 function parseEducation(text: string): ResumeEducation[] {
   const entries: ResumeEducation[] = [];
-  const blocks = text.split(/\n\n+/);
+  const blocks = splitEntryBlocks(text);
 
   for (const block of blocks) {
     if (!block.trim()) continue;
@@ -184,12 +340,13 @@ function parseEducation(text: string): ResumeEducation[] {
     if (lines.length === 0) continue;
 
     const dates = extractDates(block);
+    const detailLines = extractNonBulletLines(lines);
 
     entries.push({
       id: crypto.randomUUID(),
-      institution: lines[0] ?? "",
-      studyType: lines[1] ?? "",
-      area: lines[2] ?? "",
+      institution: detailLines[0] ?? lines[0] ?? "",
+      studyType: detailLines[1] ?? "",
+      area: detailLines[2] ?? "",
       startDate: dates.startDate,
       endDate: dates.endDate,
     });
@@ -199,11 +356,7 @@ function parseEducation(text: string): ResumeEducation[] {
 }
 
 function parseSkills(text: string): ResumeSkill[] {
-  // Skills may be comma/bullet/newline separated
-  const items = text
-    .split(/[,\n•\-*|]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 1 && s.length < 60);
+  const items = tokenizeSkills(text);
 
   return items.map((name) => ({
     id: crypto.randomUUID(),
@@ -214,7 +367,7 @@ function parseSkills(text: string): ResumeSkill[] {
 
 function parseProjects(text: string): ResumeProject[] {
   const entries: ResumeProject[] = [];
-  const blocks = text.split(/\n\n+/);
+  const blocks = splitEntryBlocks(text);
 
   for (const block of blocks) {
     if (!block.trim()) continue;
@@ -224,15 +377,16 @@ function parseProjects(text: string): ResumeProject[] {
       .filter(Boolean);
     if (lines.length === 0) continue;
 
+    const detailLines = extractNonBulletLines(lines);
     const highlights = lines
-      .filter((l) => /^[•\-*]/.test(l))
-      .map((l) => l.replace(/^[•\-*]\s*/, "").trim())
+      .filter((line) => isBulletLine(line))
+      .map((line) => cleanListValue(line))
       .filter(Boolean);
 
     entries.push({
       id: crypto.randomUUID(),
-      name: lines[0] ?? "",
-      description: lines[1] ?? "",
+      name: detailLines[0] ?? lines[0] ?? "",
+      description: detailLines[1] ?? "",
       highlights,
       url: extractUrl(block),
     });
@@ -250,14 +404,12 @@ function parseCertificates(text: string): ResumeCertificate[] {
 
   for (const line of lines) {
     if (line.length < 3) continue;
-    const dates = extractDates(line);
+    const parsed = parseCertificateLine(line);
     entries.push({
       id: crypto.randomUUID(),
-      name: line
-        .replace(new RegExp(DATE_RE.source, "gi"), "")
-        .replace(/[,–—-]+$/, "")
-        .trim(),
-      date: dates.startDate || dates.endDate,
+      name: parsed.name,
+      issuer: parsed.issuer,
+      date: parsed.date,
     });
   }
 

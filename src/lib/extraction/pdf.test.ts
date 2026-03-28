@@ -1,18 +1,69 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// pdfjs-dist requires browser APIs (DOMMatrix etc.) unavailable in jsdom.
-// We test that the module exports the correct function signature by mocking
-// the pdfjs-dist dependency.
+const getDocument = vi.fn();
 
 vi.mock("pdfjs-dist", () => ({
   default: {},
   GlobalWorkerOptions: { workerSrc: "" },
-  getDocument: vi.fn(),
+  getDocument,
 }));
 
-describe("pdf extraction module", () => {
-  it("exports extractTextFromPDF function", async () => {
-    const mod = await import("./pdf");
-    expect(typeof mod.extractTextFromPDF).toBe("function");
+describe("extractTextFromPDF", () => {
+  beforeEach(() => {
+    getDocument.mockReset();
+  });
+
+  it("preserves page and line boundaries while skipping empty items", async () => {
+    getDocument.mockReturnValue({
+      promise: Promise.resolve({
+        numPages: 2,
+        getPage: vi
+          .fn()
+          .mockResolvedValueOnce({
+            getTextContent: vi.fn().mockResolvedValue({
+              items: [
+                { str: "Jane Doe", hasEOL: true },
+                { str: "Software Engineer", hasEOL: false },
+                { str: "", hasEOL: false },
+              ],
+            }),
+          })
+          .mockResolvedValueOnce({
+            getTextContent: vi.fn().mockResolvedValue({
+              items: [
+                { str: "Built APIs", hasEOL: false },
+                { str: "at Acme", hasEOL: true },
+              ],
+            }),
+          }),
+      }),
+    });
+
+    const { extractTextFromPDF } = await import("./pdf");
+    const file = new File(["pdf"], "resume.pdf", { type: "application/pdf" });
+
+    await expect(extractTextFromPDF(file)).resolves.toBe(
+      "Jane Doe\nSoftware Engineer\n\nBuilt APIs at Acme"
+    );
+  });
+
+  it("fails with a scanned PDF hint when pages contain no text", async () => {
+    getDocument.mockReturnValue({
+      promise: Promise.resolve({
+        numPages: 1,
+        getPage: vi.fn().mockResolvedValue({
+          getTextContent: vi.fn().mockResolvedValue({
+            items: [{ str: "   ", hasEOL: false }],
+          }),
+        }),
+      }),
+    });
+
+    const { extractTextFromPDF } = await import("./pdf");
+    const file = new File(["pdf"], "empty.pdf", { type: "application/pdf" });
+
+    await expect(extractTextFromPDF(file)).rejects.toThrow(
+      "No selectable text was found in this PDF. It may be a scanned PDF, so try a text-based PDF or DOCX file."
+    );
   });
 });
