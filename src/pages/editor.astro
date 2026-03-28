@@ -1,8 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import CommandBar from "@/components/editor/CommandBar";
-import EditorShell from "@/components/editor/EditorShell";
-import ResumePreview from "@/components/preview/ResumePreview";
+import EditorLayout from "@/components/editor/EditorLayout";
 ---
 
 <Layout
@@ -26,27 +25,6 @@ import ResumePreview from "@/components/preview/ResumePreview";
     <!-- Command bar -->
     <CommandBar client:only="solid-js" />
 
-    <!-- Editor / Preview split -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Editor panel -->
-      <div
-        class="flex flex-col overflow-hidden"
-        style="width: 50%; border-right: 1px solid #ccddd4;"
-        role="region"
-        aria-label="Resume editor"
-      >
-        <EditorShell client:only="solid-js" />
-      </div>
-
-      <!-- Preview panel -->
-      <div
-        class="flex flex-col overflow-hidden"
-        style="width: 50%;"
-        role="region"
-        aria-label="Resume preview"
-      >
-        <ResumePreview client:only="solid-js" />
-      </div>
-    </div>
+    <EditorLayout client:only="solid-js" />
   </div>
 </Layout>
