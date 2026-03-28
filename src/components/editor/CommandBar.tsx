@@ -198,7 +198,7 @@ const CommandBar: Component = () => {
       </nav>
 
       {/* Import + Draft manager + export */}
-      <div class="flex shrink-0 flex-col items-end gap-1.5">
+      <div class="ml-auto flex shrink-0 flex-col items-end gap-1.5">
         <Show when={exportError() || importError()}>
           <div
             class="max-w-56 rounded-md bg-red-900/20 border border-red-800/40 px-2.5 py-1.5"
@@ -255,9 +255,10 @@ const CommandBar: Component = () => {
                 stroke-linejoin="round"
                 aria-hidden="true"
               >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                <path d="M12 12v6" />
+                <path d="m9 15 3-3 3 3" />
               </svg>
             </Show>
             <span class="hidden sm:inline">{isImporting() ? "Importing…" : "Import"}</span>
@@ -299,9 +300,10 @@ const CommandBar: Component = () => {
                 stroke-linejoin="round"
                 aria-hidden="true"
               >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                <path d="M12 12v6" />
+                <path d="m15 18-3 3-3-3" />
               </svg>
             </Show>
             <span class="hidden sm:inline">{isExporting() ? "Exporting…" : "Export PDF"}</span>

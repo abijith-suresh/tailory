@@ -34,7 +34,16 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [storageAvailable, setStorageAvailable] = createSignal(true);
   const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
   const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
+  const [popupTop, setPopupTop] = createSignal(0);
+  const [popupRight, setPopupRight] = createSignal(0);
   let saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const computePopupPosition = () => {
+    if (!containerRef) return;
+    const rect = containerRef.getBoundingClientRect();
+    setPopupTop(rect.bottom + 4);
+    setPopupRight(window.innerWidth - rect.right);
+  };
 
   const queueStatusReset = () => {
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
@@ -115,6 +124,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   const loadDraftsList = async () => {
+    computePopupPosition();
     const all = await listDrafts();
     setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
     setShowList(true);
@@ -167,7 +177,14 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
       <Show when={props.dark}>
         <button
           type="button"
-          onClick={showList() ? () => setShowList(false) : loadDraftsList}
+          onClick={
+            showList()
+              ? () => setShowList(false)
+              : () => {
+                  computePopupPosition();
+                  loadDraftsList();
+                }
+          }
           disabled={!storageAvailable()}
           title="Drafts"
           aria-label="Open saved drafts"
@@ -195,8 +212,23 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
           type="button"
           onClick={saveNamedDraft}
           disabled={status() === "saving" || !storageAvailable()}
-          class={btnClass()}
+          class={`flex items-center gap-1.5 ${btnClass()}`}
         >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
           {status() === "saving"
             ? "Saving..."
             : status() === "saved"
@@ -207,16 +239,36 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
         </button>
         <button
           type="button"
-          onClick={loadDraftsList}
+          onClick={() => (showList() ? setShowList(false) : loadDraftsList())}
           disabled={!storageAvailable()}
-          class={btnClass()}
+          class={`flex items-center gap-1.5 ${btnClass()}`}
         >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
           Drafts
         </button>
       </div>
 
       <Show when={showList()}>
-        <div class="draft-popup-enter absolute right-0 top-8 z-20 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div
+          class="draft-popup-enter z-50 w-72 rounded-lg border border-gray-200 bg-white shadow-lg"
+          style={{
+            position: "fixed",
+            top: `${popupTop()}px`,
+            right: `${popupRight()}px`,
+          }}
+        >
           <div class="flex items-center justify-between border-b border-gray-100 px-4 py-2">
             <span class="text-xs font-semibold text-gray-700">Saved Drafts</span>
             <button
