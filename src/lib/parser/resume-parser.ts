@@ -30,6 +30,10 @@ function normalize(text: string): string {
     .trim();
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // ─── Section detection ─────────────────────────────────────────────────────
 
 function isSectionHeading(line: string): SectionType | null {
@@ -48,6 +52,34 @@ function isSectionHeading(line: string): SectionType | null {
       }
     }
   }
+  return null;
+}
+
+function detectSectionStart(line: string): { remainder: string; section: SectionType } | null {
+  const trimmed = line.trim();
+  const directMatch = isSectionHeading(trimmed);
+
+  if (directMatch && trimmed.length < 60) {
+    return { section: directMatch, remainder: "" };
+  }
+
+  for (const [sectionType, keywords] of Object.entries(SECTION_KEYWORDS)) {
+    for (const keyword of keywords) {
+      const pattern = new RegExp(
+        `^[^A-Za-z0-9]*${escapeRegExp(keyword)}\\s*[:-|–—]+\\s*(.+)$`,
+        "i"
+      );
+      const match = trimmed.match(pattern);
+
+      if (match) {
+        return {
+          section: sectionType as SectionType,
+          remainder: match[1]?.trim() ?? "",
+        };
+      }
+    }
+  }
+
   return null;
 }
 
@@ -72,12 +104,15 @@ function splitIntoSections(text: string): Record<string, string> {
 
   for (const line of lines) {
     const trimmed = line.trim();
-    // Only trigger a new section on known keyword headings (short lines)
-    const detected = isSectionHeading(trimmed);
+    const detected = detectSectionStart(trimmed);
 
-    if (detected && trimmed.length < 60) {
+    if (detected) {
       flush();
-      currentSection = detected;
+      currentSection = detected.section;
+
+      if (detected.remainder) {
+        currentLines.push(detected.remainder);
+      }
     } else {
       currentLines.push(line);
     }
@@ -146,8 +181,82 @@ function isUrlLine(line: string): boolean {
   return URL_RE.test(line);
 }
 
+function stripDates(text: string): string {
+  return text
+    .replace(new RegExp(DATE_RANGE_RE.source, "gi"), " ")
+    .replace(new RegExp(DATE_RE.source, "gi"), " ")
+    .replace(/\s*[|,–—-]+\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function isLikelyEntryTitle(line: string): boolean {
-  return !isBulletLine(line) && !isDateLine(line) && !isUrlLine(line) && line.length <= 120;
+  const cleaned = cleanListValue(stripDates(line));
+  return (
+    Boolean(cleaned) &&
+    !isBulletLine(line) &&
+    !isUrlLine(line) &&
+    cleaned.length <= 120 &&
+    !/[.!?]$/.test(cleaned) &&
+    !/^[a-z]/.test(cleaned)
+  );
+}
+
+function isLikelyEducationTitle(line: string): boolean {
+  const cleaned = cleanListValue(stripDates(line));
+  return Boolean(cleaned) && cleaned.length <= 140;
+}
+
+function parseEntryContent(lines: string[]): { detailLines: string[]; highlights: string[] } {
+  const detailLines: string[] = [];
+  const highlights: string[] = [];
+  let activeHighlight = -1;
+
+  for (const line of lines) {
+    if (isBulletLine(line)) {
+      highlights.push(cleanListValue(line));
+      activeHighlight = highlights.length - 1;
+      continue;
+    }
+
+    if (activeHighlight >= 0 && !isUrlLine(line) && !isLikelyEntryTitle(line)) {
+      const continuation = cleanListValue(line);
+      if (continuation) {
+        highlights[activeHighlight] = `${highlights[activeHighlight]} ${continuation}`.trim();
+        continue;
+      }
+    }
+
+    activeHighlight = -1;
+
+    if (isUrlLine(line)) {
+      continue;
+    }
+
+    const detail = cleanListValue(stripDates(line));
+    if (detail) {
+      detailLines.push(detail);
+    }
+  }
+
+  return { detailLines, highlights };
+}
+
+function parseWorkHeader(line: string): { name: string; position: string } {
+  const cleaned = cleanListValue(stripDates(line));
+  const parts = cleaned
+    .split(/\s+[—-]\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    return {
+      position: parts[0] ?? "",
+      name: parts.slice(1).join(" — "),
+    };
+  }
+
+  return { name: cleaned, position: "" };
 }
 
 function splitEntryBlocks(text: string): string[] {
@@ -162,7 +271,7 @@ function splitEntryBlocks(text: string): string[] {
   };
 
   const shouldStartNewBlock = (line: string, nextLine: string) => {
-    if (!current.length || !isLikelyEntryTitle(line) || !isLikelyEntryTitle(nextLine)) {
+    if (!current.length || !isLikelyEntryTitle(line)) {
       return false;
     }
 
@@ -172,7 +281,15 @@ function splitEntryBlocks(text: string): string[] {
         (entryLine) => isBulletLine(entryLine) || isDateLine(entryLine) || isUrlLine(entryLine)
       ) || nonBulletLines.length >= 3;
 
-    return currentLooksComplete;
+    if (!currentLooksComplete) {
+      return false;
+    }
+
+    if (isLikelyEntryTitle(nextLine)) {
+      return true;
+    }
+
+    return current.some((entryLine) => isBulletLine(entryLine) || isDateLine(entryLine));
   };
 
   for (let index = 0; index < rawLines.length; index++) {
@@ -196,7 +313,7 @@ function splitEntryBlocks(text: string): string[] {
 }
 
 function extractNonBulletLines(lines: string[]): string[] {
-  return lines.filter((line) => !isBulletLine(line) && !isDateLine(line) && !isUrlLine(line));
+  return parseEntryContent(lines).detailLines;
 }
 
 function cleanListValue(value: string): string {
@@ -216,7 +333,7 @@ function tokenizeSkills(text: string): string[] {
         .replace(/[.:;,]+$/, "")
         .trim()
     )
-    .filter((part) => part.length > 1 && part.length <= 50)
+    .filter((part) => part.length > 0 && part.length <= 50)
     .filter((part) => part.split(/\s+/).length <= 5)
     .filter((part) => !/[.!?]$/.test(part));
 
@@ -279,10 +396,32 @@ function parseHeader(text: string): ResumeBasics {
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  const name = lines[0] ?? "";
-  // label is the second line if it's not contact info
-  const label = lines[1] && !EMAIL_RE.test(lines[1]) && !PHONE_RE.test(lines[1]) ? lines[1] : "";
   const remaining = lines.join(" ");
+  const contactFragments = new Set(
+    lines
+      .flatMap((line) => line.split(/[|•·]/))
+      .map((fragment) => fragment.trim())
+      .filter(
+        (fragment) => EMAIL_RE.test(fragment) || PHONE_RE.test(fragment) || URL_RE.test(fragment)
+      )
+  );
+  const nonContactLines = lines.filter((line) => {
+    if (!line) return false;
+    if (EMAIL_RE.test(line) || PHONE_RE.test(line) || URL_RE.test(line)) {
+      return false;
+    }
+
+    const fragments = line.split(/[|•·]/).map((fragment) => fragment.trim());
+    return fragments.some((fragment) => fragment && !contactFragments.has(fragment));
+  });
+  const name =
+    nonContactLines.find(
+      (line) => !/[a-z]/.test(line) && line.replace(/[^A-Za-z]/g, "").length >= 6
+    ) ??
+    nonContactLines[0] ??
+    lines[0] ??
+    "";
+  const label = nonContactLines.find((line) => line !== name) ?? "";
 
   return {
     name,
@@ -308,16 +447,14 @@ function parseWork(text: string): ResumeWork[] {
     if (lines.length === 0) continue;
 
     const dates = extractDates(block);
-    const detailLines = extractNonBulletLines(lines);
-    const highlights = lines
-      .filter((line) => isBulletLine(line))
-      .map((line) => cleanListValue(line))
-      .filter(Boolean);
+    const { detailLines, highlights } = parseEntryContent(lines);
+    const parsedHeader = parseWorkHeader(detailLines[0] ?? lines[0] ?? "");
 
     entries.push({
       id: crypto.randomUUID(),
-      name: detailLines[0] ?? lines[0] ?? "",
-      position: detailLines[1] ?? "",
+      name: detailLines.length > 1 ? (detailLines[0] ?? parsedHeader.name) : parsedHeader.name,
+      position:
+        detailLines.length > 1 ? (detailLines[1] ?? parsedHeader.position) : parsedHeader.position,
       startDate: dates.startDate,
       endDate: dates.endDate,
       highlights,
@@ -329,7 +466,13 @@ function parseWork(text: string): ResumeWork[] {
 
 function parseEducation(text: string): ResumeEducation[] {
   const entries: ResumeEducation[] = [];
-  const blocks = splitEntryBlocks(text);
+  const hasBulletTitles = text.split("\n").some((line) => isBulletLine(line));
+  const blocks = hasBulletTitles
+    ? text
+        .split(/\n(?=\s*[•\-*]\s)/)
+        .map((block) => block.trim())
+        .filter(Boolean)
+    : splitEntryBlocks(text);
 
   for (const block of blocks) {
     if (!block.trim()) continue;
@@ -341,12 +484,21 @@ function parseEducation(text: string): ResumeEducation[] {
 
     const dates = extractDates(block);
     const detailLines = extractNonBulletLines(lines);
+    const titleLine = hasBulletTitles
+      ? lines.find((line) => isBulletLine(line) && isLikelyEducationTitle(line))
+      : undefined;
+    const normalizedTitle = cleanListValue(stripDates(titleLine ?? ""));
+    const institutionLine = hasBulletTitles
+      ? (detailLines.find((line) => line !== normalizedTitle) ?? "")
+      : (detailLines[0] ?? lines[0] ?? "");
 
     entries.push({
       id: crypto.randomUUID(),
-      institution: detailLines[0] ?? lines[0] ?? "",
-      studyType: detailLines[1] ?? "",
-      area: detailLines[2] ?? "",
+      institution: institutionLine,
+      studyType: hasBulletTitles ? normalizedTitle : (detailLines[1] ?? ""),
+      area: hasBulletTitles
+        ? (detailLines.find((line) => line !== institutionLine && line !== normalizedTitle) ?? "")
+        : (detailLines[2] ?? ""),
       startDate: dates.startDate,
       endDate: dates.endDate,
     });
@@ -377,11 +529,7 @@ function parseProjects(text: string): ResumeProject[] {
       .filter(Boolean);
     if (lines.length === 0) continue;
 
-    const detailLines = extractNonBulletLines(lines);
-    const highlights = lines
-      .filter((line) => isBulletLine(line))
-      .map((line) => cleanListValue(line))
-      .filter(Boolean);
+    const { detailLines, highlights } = parseEntryContent(lines);
 
     entries.push({
       id: crypto.randomUUID(),
