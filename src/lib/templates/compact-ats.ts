@@ -1,6 +1,10 @@
 import type { ResumeSchema } from "@/types/resume";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
+interface TemplateOptions {
+  fontFamily: string;
+}
+
 // Compact ATS template: single column, dense layout, maximum keyword density.
 // Optimized for Applicant Tracking Systems: no tables, no images, standard fonts.
 
@@ -11,7 +15,10 @@ function divider(): Content {
   };
 }
 
-export function compactAtsTemplate(resume: ResumeSchema): TDocumentDefinitions {
+export function compactAtsTemplate(
+  resume: ResumeSchema,
+  options: TemplateOptions
+): TDocumentDefinitions {
   const content: Content[] = [];
 
   // Header — all on one line to save space
@@ -124,7 +131,7 @@ export function compactAtsTemplate(resume: ResumeSchema): TDocumentDefinitions {
       date: { fontSize: 9, color: "#6b7280" },
       body: { fontSize: 9.5, color: "#111827", lineHeight: 1.35 },
     },
-    defaultStyle: { font: "Helvetica", fontSize: 9.5 },
+    defaultStyle: { font: options.fontFamily, fontSize: 9.5 },
     pageMargins: [36, 36, 36, 36],
   };
 }
