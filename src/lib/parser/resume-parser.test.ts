@@ -204,4 +204,64 @@ Professional Scrum Master by Scrum.org, Jan 2023
       date: "Jan 2023",
     });
   });
+
+  it("parses inline section headings and merged contact headers", async () => {
+    const result = await parseResume(`
+JANE DOE - Senior Software Engineer
+jane.doe@email.com | +1 555-123-4567 | github.com/janedoe
+SUMMARY: Product-minded engineer building web apps.
+SKILLS: TypeScript | SolidJS | PostgreSQL
+`);
+
+    expect(result.data.basics.name).toBe("JANE DOE - Senior Software Engineer");
+    expect(result.data.basics.email).toBe("jane.doe@email.com");
+    expect(result.rawSections.summary).toBe("Product-minded engineer building web apps.");
+    expect(result.data.skills?.map((skill) => skill.name)).toEqual([
+      "TypeScript",
+      "SolidJS",
+      "PostgreSQL",
+    ]);
+  });
+
+  it("splits compact project and education entries without blank lines", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+PROJECTS
+Project One
+• Built feature one
+Project Two
+• Built feature two
+
+EDUCATION
+• M.Tech in Artificial Intelligence and Data Science
+Alliance School of Advanced Computing 2025-2027
+• B.Tech in Computer Science and Engineering
+Adi Shankara Institute of Engineering and Technology 2021-2025
+`);
+
+    expect(result.data.projects).toHaveLength(2);
+    expect(result.data.projects?.[0]).toMatchObject({
+      name: "Project One",
+      highlights: ["Built feature one"],
+    });
+    expect(result.data.projects?.[1]).toMatchObject({
+      name: "Project Two",
+      highlights: ["Built feature two"],
+    });
+    expect(result.data.education).toHaveLength(2);
+    expect(result.data.education?.[0]).toMatchObject({
+      studyType: "M.Tech in Artificial Intelligence and Data Science",
+      institution: "Alliance School of Advanced Computing",
+      startDate: "2025",
+      endDate: "2027",
+    });
+    expect(result.data.education?.[1]).toMatchObject({
+      studyType: "B.Tech in Computer Science and Engineering",
+      institution: "Adi Shankara Institute of Engineering and Technology",
+      startDate: "2021",
+      endDate: "2025",
+    });
+  });
 });

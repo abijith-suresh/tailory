@@ -1,6 +1,10 @@
 import type { ResumeSchema } from "@/types/resume";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
+interface TemplateOptions {
+  fontFamily: string;
+}
+
 const COLORS = {
   primary: "#312e81", // indigo-900
   accent: "#4f46e5", // indigo-600
@@ -30,7 +34,10 @@ function bulletList(items: string[]): Content {
   };
 }
 
-export function modernTemplate(resume: ResumeSchema): TDocumentDefinitions {
+export function modernTemplate(
+  resume: ResumeSchema,
+  options: TemplateOptions
+): TDocumentDefinitions {
   const content: Content[] = [];
 
   // ── Header ───────────────────────────────────────────────────────────────
@@ -160,7 +167,7 @@ export function modernTemplate(resume: ResumeSchema): TDocumentDefinitions {
       bullet: { fontSize: 10, color: COLORS.text, lineHeight: 1.4 },
       link: { fontSize: 9, color: COLORS.accent, decoration: "underline" },
     },
-    defaultStyle: { font: "Helvetica", fontSize: 10 },
+    defaultStyle: { font: options.fontFamily, fontSize: 10 },
     pageMargins: [45, 45, 45, 45],
   };
 }

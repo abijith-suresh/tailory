@@ -1,6 +1,10 @@
 import type { ResumeSchema } from "@/types/resume";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
+interface TemplateOptions {
+  fontFamily: string;
+}
+
 function section(title: string, body: Content[]): Content {
   return {
     stack: [
@@ -11,7 +15,10 @@ function section(title: string, body: Content[]): Content {
   };
 }
 
-export function minimalTemplate(resume: ResumeSchema): TDocumentDefinitions {
+export function minimalTemplate(
+  resume: ResumeSchema,
+  options: TemplateOptions
+): TDocumentDefinitions {
   const content: Content[] = [];
 
   // Header
@@ -138,7 +145,7 @@ export function minimalTemplate(resume: ResumeSchema): TDocumentDefinitions {
       date: { fontSize: 9, color: "#9ca3af" },
       body: { fontSize: 10, color: "#374151", lineHeight: 1.4 },
     },
-    defaultStyle: { font: "Helvetica", fontSize: 10 },
+    defaultStyle: { font: options.fontFamily, fontSize: 10 },
     pageMargins: [50, 50, 50, 50],
   };
 }
