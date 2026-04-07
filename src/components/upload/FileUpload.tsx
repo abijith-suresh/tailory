@@ -1,8 +1,8 @@
 import { type Component, createSignal, Show } from "solid-js";
 
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { processUploadedFile } from "@/lib/upload/process-file";
 import { loadResume, setImportFeedback } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
@@ -24,23 +24,17 @@ const FileUpload: Component = () => {
     setStatus("processing");
     setErrorMsg("");
 
-    const outcome = await processUploadedFile(file, validation.extension);
+    const outcome = await importResumeFile(file, validation.extension);
     if (!outcome.success) {
       setErrorMsg(outcome.error);
       setStatus("error");
       return;
     }
 
-    const { result } = outcome;
-    setImportFeedback({
-      confidence: result.confidence,
-      work: result.data.work?.length ?? 0,
-      education: result.data.education?.length ?? 0,
-      skills: result.data.skills?.length ?? 0,
-      projects: result.data.projects?.length ?? 0,
-      certificates: result.data.certificates?.length ?? 0,
-    });
-    loadResume(result.data);
+    if (outcome.feedback) {
+      setImportFeedback(outcome.feedback);
+    }
+    loadResume(outcome.resume);
 
     // Navigate to editor with client-side transition
     const { navigate } = await import("astro:transitions/client");
@@ -112,7 +106,7 @@ const FileUpload: Component = () => {
           </div>
 
           <p class="mb-2 text-base font-medium text-gray-200">Drop your resume here</p>
-          <p class="mb-6 text-sm text-gray-400">PDF or DOCX · Max 10 MB</p>
+          <p class="mb-6 text-sm text-gray-400">PDF, DOCX, or JSON · Max 10 MB</p>
 
           <label
             for="file-input"
@@ -122,7 +116,7 @@ const FileUpload: Component = () => {
             <input
               id="file-input"
               type="file"
-              accept=".pdf,.docx"
+              accept=".pdf,.docx,.json"
               onInput={handleFileInput}
               class="sr-only"
             />
