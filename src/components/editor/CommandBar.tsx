@@ -1,8 +1,9 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 
 import { exportBrowserPrint } from "@/lib/export/print-export";
+import { exportJsonResumeString } from "@/lib/resume/json";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { processUploadedFile } from "@/lib/upload/process-file";
 import {
   activeSection,
   loadResume,
@@ -38,6 +39,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
   const [isExporting, setIsExporting] = createSignal(false);
+  const [isExportingJson, setIsExportingJson] = createSignal(false);
   const [isImporting, setIsImporting] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
 
@@ -86,7 +88,7 @@ const CommandBar: Component = () => {
     setIsImporting(true);
     setImportError("");
 
-    const outcome = await processUploadedFile(file, validation.extension);
+    const outcome = await importResumeFile(file, validation.extension);
     setIsImporting(false);
 
     if (!outcome.success) {
@@ -94,16 +96,32 @@ const CommandBar: Component = () => {
       return;
     }
 
-    const { result } = outcome;
-    setImportFeedback({
-      confidence: result.confidence,
-      work: result.data.work?.length ?? 0,
-      education: result.data.education?.length ?? 0,
-      skills: result.data.skills?.length ?? 0,
-      projects: result.data.projects?.length ?? 0,
-      certificates: result.data.certificates?.length ?? 0,
-    });
-    loadResume(result.data);
+    if (outcome.feedback) {
+      setImportFeedback(outcome.feedback);
+    }
+    loadResume(outcome.resume);
+  };
+
+  const handleExportJson = async () => {
+    try {
+      setExportError("");
+      setIsExportingJson(true);
+      const contents = exportJsonResumeString(JSON.parse(JSON.stringify(resume)));
+      const filename = `${resume.basics.name.trim().replace(/\s+/g, "_") || "resume"}.json`;
+      const blob = new Blob([contents], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(
+        error instanceof Error ? error.message : "Unable to export this resume as JSON right now."
+      );
+    } finally {
+      setIsExportingJson(false);
+    }
   };
 
   const handleImportInput = (e: Event) => {
@@ -204,7 +222,7 @@ const CommandBar: Component = () => {
         <input
           ref={(el) => (fileInputRef = el)}
           type="file"
-          accept=".pdf,.docx"
+          accept=".pdf,.docx,.json"
           class="sr-only"
           aria-label="Import resume file"
           onInput={handleImportInput}
@@ -213,7 +231,7 @@ const CommandBar: Component = () => {
           type="button"
           onClick={() => fileInputRef?.click()}
           disabled={isImporting()}
-          title="Import a PDF or DOCX resume"
+          title="Import a PDF, DOCX, or JSON resume"
           aria-label="Import resume from file"
           class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -255,6 +273,47 @@ const CommandBar: Component = () => {
         </button>
 
         <DraftManager dark />
+        <button
+          type="button"
+          onClick={handleExportJson}
+          disabled={isExportingJson()}
+          class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-white/80 transition-[background-color,transform] active:scale-95 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Show
+            when={!isExportingJson()}
+            fallback={
+              <svg
+                class="animate-spin"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            }
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </Show>
+          <span class="hidden sm:inline">{isExportingJson() ? "Exporting..." : "Export JSON"}</span>
+        </button>
         <button
           type="button"
           onClick={handleExport}

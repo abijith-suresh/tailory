@@ -4,6 +4,7 @@ import type {
   ResumeBasics,
   ResumeCertificate,
   ResumeEducation,
+  ResumeLocation,
   ResumeProject,
   ResumeSchema,
   ResumeSkill,
@@ -136,6 +137,25 @@ const DATE_RANGE_RE = new RegExp(
   "i"
 );
 const BULLET_RE = /^[•\-*]\s*/;
+const LOCATION_SPLIT_RE = /[|•·]/;
+const LOCATION_REJECT_RE =
+  /\b(remote|hybrid|relocate|engineer|developer|manager|director|lead|university|college|school|corp|inc|llc|ltd|company)\b/i;
+const EDUCATION_SCORE_PATTERNS = [
+  /\b(?:cgpa|gpa|score)\b\s*[:=-]?\s*(\d{1,3}(?:\.\d{1,2})?(?:\s*\/\s*\d{1,3}(?:\.\d{1,2})?)?%?)/i,
+  /(\d{1,3}(?:\.\d{1,2})?(?:\s*\/\s*\d{1,3}(?:\.\d{1,2})?)?%?)\s*(?:cgpa|gpa)\b/i,
+];
+const COUNTRY_CODE_ALIASES: Record<string, string> = {
+  australia: "AU",
+  canada: "CA",
+  france: "FR",
+  germany: "DE",
+  greatbritain: "GB",
+  india: "IN",
+  uk: "GB",
+  unitedkingdom: "GB",
+  unitedstates: "US",
+  usa: "US",
+};
 
 function extractEmail(text: string): string {
   return EMAIL_RE.exec(text)?.[0] ?? "";
@@ -188,6 +208,149 @@ function stripDates(text: string): string {
     .replace(/\s*[|,–—-]+\s*$/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+function cleanLocationFragment(fragment: string): string {
+  return fragment
+    .replace(/^[\s,;:|•·-]+|[\s,;:|•·-]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeCountryCode(value: string, allowTwoLetterCode = false): string {
+  const key = value.replace(/[^a-z]/gi, "").toLowerCase();
+
+  if (!key) {
+    return "";
+  }
+
+  if (COUNTRY_CODE_ALIASES[key]) {
+    return COUNTRY_CODE_ALIASES[key];
+  }
+
+  if (allowTwoLetterCode && /^[a-z]{2}$/i.test(value.trim())) {
+    return value.trim().toUpperCase();
+  }
+
+  return "";
+}
+
+function parseLocationFragment(fragment: string): ResumeLocation | null {
+  const cleaned = cleanLocationFragment(fragment);
+
+  if (
+    !cleaned ||
+    !cleaned.includes(",") ||
+    EMAIL_RE.test(cleaned) ||
+    PHONE_RE.test(cleaned) ||
+    URL_RE.test(cleaned) ||
+    /\d/.test(cleaned) ||
+    cleaned.length > 60 ||
+    LOCATION_REJECT_RE.test(cleaned)
+  ) {
+    return null;
+  }
+
+  const parts = cleaned
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length < 2 || parts.length > 3) {
+    return null;
+  }
+
+  const city = parts[0] ?? "";
+  const location: ResumeLocation = { city };
+
+  if (parts.length === 2) {
+    const second = parts[1] ?? "";
+    const countryCode = normalizeCountryCode(second);
+
+    if (countryCode) {
+      location.countryCode = countryCode;
+    } else {
+      location.region = second;
+    }
+
+    return city && (location.region || location.countryCode) ? location : null;
+  }
+
+  const region = parts[1] ?? "";
+  const countryCode = normalizeCountryCode(parts[2] ?? "", true);
+
+  if (!region && !countryCode) {
+    return null;
+  }
+
+  if (region) {
+    location.region = region;
+  }
+
+  if (countryCode) {
+    location.countryCode = countryCode;
+  }
+
+  return location;
+}
+
+function extractLocationFromHeader(lines: string[]): ResumeLocation {
+  for (const line of lines) {
+    for (const fragment of line.split(LOCATION_SPLIT_RE)) {
+      const parsed = parseLocationFragment(fragment);
+      if (parsed) {
+        return parsed;
+      }
+    }
+
+    const parsed = parseLocationFragment(line);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  return {};
+}
+
+function isLocationLine(line: string): boolean {
+  const fragments = line
+    .split(LOCATION_SPLIT_RE)
+    .map((fragment) => fragment.trim())
+    .filter(Boolean);
+
+  if (fragments.length === 0) {
+    return false;
+  }
+
+  return fragments.every((fragment) => Boolean(parseLocationFragment(fragment)));
+}
+
+function normalizeEducationScore(value: string): string {
+  return value
+    .replace(/\s*\/\s*/g, "/")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractEducationScore(text: string): string {
+  for (const pattern of EDUCATION_SCORE_PATTERNS) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      return normalizeEducationScore(match[1]);
+    }
+  }
+
+  return "";
+}
+
+function stripEducationScore(text: string): string {
+  return EDUCATION_SCORE_PATTERNS.reduce((current, pattern) => {
+    const stripped = current.replace(pattern, " ");
+    return stripped
+      .replace(/\s+[|,–—-]+\s+/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }, text);
 }
 
 function isLikelyEntryTitle(line: string): boolean {
@@ -405,6 +568,7 @@ function parseHeader(text: string): ResumeBasics {
         (fragment) => EMAIL_RE.test(fragment) || PHONE_RE.test(fragment) || URL_RE.test(fragment)
       )
   );
+  const location = extractLocationFromHeader(lines);
   const nonContactLines = lines.filter((line) => {
     if (!line) return false;
     if (EMAIL_RE.test(line) || PHONE_RE.test(line) || URL_RE.test(line)) {
@@ -414,14 +578,16 @@ function parseHeader(text: string): ResumeBasics {
     const fragments = line.split(/[|•·]/).map((fragment) => fragment.trim());
     return fragments.some((fragment) => fragment && !contactFragments.has(fragment));
   });
+  const contentLines = nonContactLines.filter((line) => !isLocationLine(line));
   const name =
-    nonContactLines.find(
+    contentLines.find(
       (line) => !/[a-z]/.test(line) && line.replace(/[^A-Za-z]/g, "").length >= 6
     ) ??
+    contentLines[0] ??
     nonContactLines[0] ??
     lines[0] ??
     "";
-  const label = nonContactLines.find((line) => line !== name) ?? "";
+  const label = contentLines.find((line) => line !== name) ?? "";
 
   return {
     name,
@@ -429,7 +595,7 @@ function parseHeader(text: string): ResumeBasics {
     email: extractEmail(remaining),
     phone: extractPhone(remaining),
     url: extractUrl(remaining),
-    location: {},
+    location,
     profiles: [],
   };
 }
@@ -483,9 +649,11 @@ function parseEducation(text: string): ResumeEducation[] {
     if (lines.length === 0) continue;
 
     const dates = extractDates(block);
-    const detailLines = extractNonBulletLines(lines);
+    const score = extractEducationScore(block);
+    const sanitizedLines = lines.map((line) => stripEducationScore(line)).filter(Boolean);
+    const detailLines = extractNonBulletLines(sanitizedLines);
     const titleLine = hasBulletTitles
-      ? lines.find((line) => isBulletLine(line) && isLikelyEducationTitle(line))
+      ? sanitizedLines.find((line) => isBulletLine(line) && isLikelyEducationTitle(line))
       : undefined;
     const normalizedTitle = cleanListValue(stripDates(titleLine ?? ""));
     const institutionLine = hasBulletTitles
@@ -501,6 +669,7 @@ function parseEducation(text: string): ResumeEducation[] {
         : (detailLines[2] ?? ""),
       startDate: dates.startDate,
       endDate: dates.endDate,
+      score,
     });
   }
 

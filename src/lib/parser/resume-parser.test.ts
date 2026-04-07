@@ -264,4 +264,83 @@ Adi Shankara Institute of Engineering and Technology 2021-2025
       endDate: "2025",
     });
   });
+
+  it("extracts location from contact fragments in the header", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com | +1 555-123-4567 | Austin, TX | github.com/janedoe
+
+EXPERIENCE
+Acme Corp
+Senior Engineer
+2021 - Present
+`);
+
+    expect(result.data.basics.location).toMatchObject({
+      city: "Austin",
+      region: "TX",
+    });
+  });
+
+  it("extracts city, region, and country code from standalone header lines", async () => {
+    const result = await parseResume(`
+JANE DOE
+Senior Engineer
+Bengaluru, Karnataka, India
+jane.doe@email.com
+
+EXPERIENCE
+Acme Corp
+Senior Engineer
+2021 - Present
+`);
+
+    expect(result.data.basics.label).toBe("Senior Engineer");
+    expect(result.data.basics.location).toMatchObject({
+      city: "Bengaluru",
+      region: "Karnataka",
+      countryCode: "IN",
+    });
+  });
+
+  it("extracts GPA and keeps it out of other education fields", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+EDUCATION
+University of Technology
+Bachelor of Science in Computer Science
+GPA: 3.8/4.0
+2014 - 2018
+`);
+
+    expect(result.data.education?.[0]).toMatchObject({
+      institution: "University of Technology",
+      studyType: "Bachelor of Science in Computer Science",
+      score: "3.8/4.0",
+      startDate: "2014",
+      endDate: "2018",
+    });
+    expect(result.data.education?.[0]?.area).toBe("");
+  });
+
+  it("extracts CGPA from compact education lines", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+EDUCATION
+• B.Tech in Computer Science
+Adi Shankara Institute of Engineering and Technology CGPA 8.9 2021-2025
+`);
+
+    expect(result.data.education?.[0]).toMatchObject({
+      studyType: "B.Tech in Computer Science",
+      institution: "Adi Shankara Institute of Engineering and Technology",
+      score: "8.9",
+      startDate: "2021",
+      endDate: "2025",
+    });
+  });
 });

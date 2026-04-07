@@ -1,9 +1,9 @@
 export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 
 const LEGACY_DOC_MIME_TYPES = new Set(["application/msword"]);
-const SUPPORTED_UPLOAD_EXTENSIONS = new Set(["pdf", "docx"]);
+const SUPPORTED_UPLOAD_EXTENSIONS = new Set(["pdf", "docx", "json"]);
 
-export type SupportedUploadExtension = "pdf" | "docx";
+export type SupportedUploadExtension = "pdf" | "docx" | "json";
 
 interface UploadValidationSuccess {
   ok: true;
@@ -38,14 +38,14 @@ export function validateUploadFile(
   if (!SUPPORTED_UPLOAD_EXTENSIONS.has(extension)) {
     return {
       ok: false,
-      error: "Unsupported file type. Please upload a PDF or DOCX file.",
+      error: "Unsupported file type. Please upload a PDF, DOCX, or JSON file.",
     };
   }
 
   if (file.size > MAX_UPLOAD_SIZE_BYTES) {
     return {
       ok: false,
-      error: "File is too large. Please upload a PDF or DOCX file under 10 MB.",
+      error: "File is too large. Please upload a PDF, DOCX, or JSON file under 10 MB.",
     };
   }
 

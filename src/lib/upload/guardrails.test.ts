@@ -12,6 +12,16 @@ describe("validateUploadFile", () => {
     ).toEqual({ ok: true, extension: "pdf" });
   });
 
+  it("accepts JSON files within the size limit", () => {
+    expect(
+      validateUploadFile({
+        name: "resume.json",
+        size: MAX_UPLOAD_SIZE_BYTES,
+        type: "application/json",
+      })
+    ).toEqual({ ok: true, extension: "json" });
+  });
+
   it("rejects files larger than 10 MB", () => {
     expect(
       validateUploadFile({
@@ -21,7 +31,7 @@ describe("validateUploadFile", () => {
       })
     ).toEqual({
       ok: false,
-      error: "File is too large. Please upload a PDF or DOCX file under 10 MB.",
+      error: "File is too large. Please upload a PDF, DOCX, or JSON file under 10 MB.",
     });
   });
 
@@ -62,7 +72,7 @@ describe("validateUploadFile", () => {
       })
     ).toEqual({
       ok: false,
-      error: "Unsupported file type. Please upload a PDF or DOCX file.",
+      error: "Unsupported file type. Please upload a PDF, DOCX, or JSON file.",
     });
   });
 });
