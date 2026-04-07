@@ -1,12 +1,13 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 
-import { exportPDF } from "@/lib/export/pdf-export";
+import { exportBrowserPrint } from "@/lib/export/print-export";
 import { validateUploadFile } from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
 import {
   activeSection,
   loadResume,
   resume,
+  selectedAccentColor,
   selectedTemplate,
   setActiveSection,
   setExportError,
@@ -51,7 +52,9 @@ const CommandBar: Component = () => {
     try {
       setExportError("");
       setIsExporting(true);
-      await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate());
+      await exportBrowserPrint(JSON.parse(JSON.stringify(resume)), selectedTemplate(), {
+        accentColor: selectedAccentColor(),
+      });
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unable to export this resume yet.";
       setExportError(msg);

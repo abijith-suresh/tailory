@@ -71,6 +71,85 @@ textarea {
   resize: vertical;
 }
 
+.resume-document {
+  color: #111827;
+}
+
+.resume-document__page {
+  box-sizing: border-box;
+}
+
+.resume-document__section-title {
+  break-after: avoid-page;
+}
+
+.resume-document__section,
+.resume-document__entry,
+.resume-document__entry-header,
+.resume-document__highlights {
+  break-inside: avoid-page;
+}
+
+.resume-document__highlights {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.resume-document__skills,
+.resume-document__entry-text,
+.resume-document__entry-subtitle,
+.resume-document__contact,
+.resume-document__link {
+  overflow-wrap: anywhere;
+}
+
+.resume-document__link {
+  color: var(--resume-accent);
+}
+
+.resume-document--modern .resume-document__section-title,
+.resume-document--minimal .resume-document__section-title {
+  color: var(--resume-accent);
+}
+
+.resume-document--modern .resume-document__header {
+  border-color: var(--resume-accent);
+}
+
+@page {
+  margin: 12mm;
+  size: A4;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-root,
+  .resume-print-shell {
+    background: #ffffff !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .resume-document__page {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 auto;
+    min-height: auto !important;
+  }
+}
+
 /* ── Scroll reveal ───────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: no-preference) {

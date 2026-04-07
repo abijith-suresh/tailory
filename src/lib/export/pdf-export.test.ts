@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
+import { createTemplateFixture } from "@/lib/templates/template-fixtures";
+
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>
     ? DeepPartial<U>[]
@@ -57,6 +59,18 @@ function createResume(overrides?: DeepPartial<ResumeSchema>): ResumeSchema {
       },
     },
   };
+}
+
+function collectNestedValues(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => [entry, ...collectNestedValues(entry)]);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.values(value).flatMap((entry) => [entry, ...collectNestedValues(entry)]);
+  }
+
+  return [];
 }
 
 describe("exportPDF", () => {
@@ -132,4 +146,28 @@ describe("exportPDF", () => {
       defaultStyle: expect.objectContaining({ font: "Helvetica" }),
     });
   });
+
+  it.each(["modern", "minimal", "compact-ats"] as const)(
+    "creates a valid pdf definition for %s",
+    async (template) => {
+      const { exportPDF } = await import("./pdf-export");
+
+      await exportPDF(createTemplateFixture(), template);
+
+      expect(createPdf).toHaveBeenCalledTimes(1);
+      expect(download).toHaveBeenCalledWith("Jane_Doe_resume.pdf");
+
+      const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0] as {
+        content: unknown[];
+        defaultStyle: { font: string };
+        styles: object;
+      };
+
+      expect(docDefinition.content.length).toBeGreaterThan(0);
+      expect(docDefinition.styles).toBeTruthy();
+      expect(docDefinition.defaultStyle.font).toBe("Helvetica");
+      expect(collectNestedValues(docDefinition.content)).not.toContain(null);
+      expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
+    }
+  );
 });

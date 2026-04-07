@@ -2,15 +2,21 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { normalizeResume } from "@/lib/resume/normalize";
+import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
 import { EMPTY_RESUME } from "@/types/resume";
-import type { ResumeSchema, SectionId, TemplateId } from "@/types/resume";
+import type { ResumeSchema, SectionId } from "@/types/resume";
+
+const DEFAULT_ACCENT_COLOR = "#1d6648";
 
 // Deep clone to avoid sharing the same reference
 const defaultResume: ResumeSchema = JSON.parse(JSON.stringify(EMPTY_RESUME));
 
 export const [resume, setResume] = createStore<ResumeSchema>(defaultResume);
 
-export const [selectedTemplate, setSelectedTemplate] = createSignal<TemplateId>("modern");
+export const [selectedTemplate, setSelectedTemplate] =
+  createSignal<TemplateId>(DEFAULT_TEMPLATE_ID);
+
+export const [selectedAccentColor, setSelectedAccentColor] = createSignal(DEFAULT_ACCENT_COLOR);
 
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
 
