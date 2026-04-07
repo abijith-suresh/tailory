@@ -34,7 +34,7 @@ describe("print job storage", () => {
   it("stores a normalized print job payload", async () => {
     const { createPrintJob, readPrintJob } = await import("./print-job");
 
-    const jobId = createPrintJob(
+    const { jobId } = createPrintJob(
       createResume({
         basics: {
           name: "  Jane Doe  ",
@@ -67,7 +67,7 @@ describe("print job storage", () => {
 
     const { createPrintJob, purgeExpiredPrintJobs, readPrintJob } = await import("./print-job");
 
-    const activeJobId = createPrintJob(
+    const { jobId: activeJobId } = createPrintJob(
       createResume({
         basics: { name: "Jane Doe" },
         skills: [{ id: "skill-1", name: "TypeScript" }],

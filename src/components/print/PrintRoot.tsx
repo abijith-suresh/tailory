@@ -1,12 +1,19 @@
 import { type Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import ResumeDocument from "@/components/resume/ResumeDocument";
-import { deletePrintJob, purgeExpiredPrintJobs, readPrintJob } from "@/lib/export/print-job";
+import { waitForSharedPrintJob } from "@/lib/export/print-channel";
+import {
+  deletePrintJob,
+  persistPrintJob,
+  type PrintJobPayload,
+  purgeExpiredPrintJobs,
+  readPrintJob,
+} from "@/lib/export/print-job";
 
 const PrintRoot: Component = () => {
   const [error, setError] = createSignal("");
   const [jobId, setJobId] = createSignal("");
-  const [job, setJob] = createSignal<ReturnType<typeof readPrintJob>>(null);
+  const [job, setJob] = createSignal<PrintJobPayload | null>(null);
   let hasPrinted = false;
 
   const cleanup = () => {
@@ -27,6 +34,14 @@ const PrintRoot: Component = () => {
     }
 
     setJobId(nextJobId);
+
+    const stopWaitingForChannel = waitForSharedPrintJob(nextJobId, (sharedJob) => {
+      persistPrintJob(nextJobId, sharedJob);
+      setJob(sharedJob);
+      document.title = sharedJob.filename;
+      setError("");
+    });
+    onCleanup(stopWaitingForChannel);
 
     for (let attempt = 0; attempt < 20; attempt++) {
       const nextJob = readPrintJob(nextJobId);

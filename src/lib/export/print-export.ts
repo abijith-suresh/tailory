@@ -1,5 +1,6 @@
+import { sharePrintJob } from "./print-channel";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
-import { createPrintJob, purgeExpiredPrintJobs } from "@/lib/export/print-job";
+import { createPrintJob, deletePrintJob, purgeExpiredPrintJobs } from "@/lib/export/print-job";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
 
 interface PrintExportOptions {
@@ -29,7 +30,10 @@ export async function exportBrowserPrint(
 
   let jobId: string;
   try {
-    jobId = createPrintJob(validation.normalizedResume, template, options.accentColor);
+    const printJob = createPrintJob(validation.normalizedResume, template, options.accentColor);
+    jobId = printJob.jobId;
+    const stopSharing = sharePrintJob(printJob.jobId, printJob.payload);
+    window.setTimeout(stopSharing, 5000);
   } catch {
     throw new Error("Print storage is unavailable in this browser.");
   }
@@ -39,7 +43,6 @@ export async function exportBrowserPrint(
   if (!printWindow) {
     if (jobId) {
       try {
-        const { deletePrintJob } = await import("./print-job");
         deletePrintJob(jobId);
       } catch {
         // Ignore cleanup failures if storage is already unavailable.

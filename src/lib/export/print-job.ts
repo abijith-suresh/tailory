@@ -34,7 +34,7 @@ export function createPrintJob(
   resume: ResumeSchema,
   template: TemplateId,
   accentColor: string
-): string {
+): { jobId: string; payload: PrintJobPayload } {
   const storage = getStorage();
   const normalizedResume = normalizeResume(resume);
   const createdAt = Date.now();
@@ -49,7 +49,11 @@ export function createPrintJob(
   };
 
   storage.setItem(getStorageKey(jobId), JSON.stringify(payload));
-  return jobId;
+  return { jobId, payload };
+}
+
+export function persistPrintJob(jobId: string, payload: PrintJobPayload): void {
+  getStorage().setItem(getStorageKey(jobId), JSON.stringify(payload));
 }
 
 export function readPrintJob(jobId: string): PrintJobPayload | null {
