@@ -1,13 +1,8 @@
 import { type Component, For, Show } from "solid-js";
 
+import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 import type { TemplateId } from "@/types/resume";
-
-const TEMPLATES: { description: string; id: TemplateId; label: string }[] = [
-  { id: "modern", label: "Modern", description: "Two-tone header, section dividers" },
-  { id: "minimal", label: "Minimal", description: "Clean whitespace, no decoration" },
-  { id: "compact-ats", label: "Compact ATS", description: "Dense, keyword-optimized" },
-];
 
 const TOTAL_SECTIONS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
@@ -83,7 +78,7 @@ const ResumePreview: Component = () => {
         </div>
 
         <div class="flex gap-1.5">
-          <For each={TEMPLATES}>
+          <For each={TEMPLATE_OPTIONS}>
             {(tpl) => (
               <button
                 type="button"

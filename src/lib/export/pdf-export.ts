@@ -1,11 +1,9 @@
 import { DEFAULT_PDF_FONT, getPdfFont, type PdfFontId, type PdfMakeFontRuntime } from "./fonts";
+import type { PdfTemplateOptions } from "./template-types";
+import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-
-interface TemplateOptions {
-  fontFamily: string;
-}
 
 let fontRegistrationPromise: Promise<void> | null = null;
 
@@ -31,19 +29,10 @@ function getFilename(resume: ResumeSchema): string {
 async function getDocDef(
   resume: ResumeSchema,
   template: TemplateId,
-  options: TemplateOptions
+  options: PdfTemplateOptions
 ): Promise<TDocumentDefinitions> {
-  if (template === "modern") {
-    const { modernTemplate } = await import("@/lib/templates/modern");
-    return modernTemplate(resume, options);
-  }
-  if (template === "minimal") {
-    const { minimalTemplate } = await import("@/lib/templates/minimal");
-    return minimalTemplate(resume, options);
-  }
-  // compact-ats (default)
-  const { compactAtsTemplate } = await import("@/lib/templates/compact-ats");
-  return compactAtsTemplate(resume, options);
+  const renderTemplate = await loadPdfTemplateRenderer(template);
+  return renderTemplate(resume, options);
 }
 
 export async function exportPDF(
