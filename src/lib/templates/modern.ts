@@ -1,91 +1,92 @@
 import type { ResumeSchema } from "@/types/resume";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
-interface TemplateOptions {
-  fontFamily: string;
-}
+import {
+  buildProjectMetadata,
+  formatContactLine,
+  formatDateRange,
+  formatDisplayUrl,
+  formatSkillsText,
+  renderBulletLines,
+  renderDivider,
+  renderEntryHeader,
+  spacing,
+} from "@/lib/export/template-helpers";
+import type { PdfMargin, PdfTemplateOptions } from "@/lib/export/template-types";
 
 const COLORS = {
   primary: "#312e81", // indigo-900
   accent: "#4f46e5", // indigo-600
   text: "#111827",
   muted: "#6b7280",
-  divider: "#e5e7eb",
 };
+
+const PAGE_MARGINS: PdfMargin = [45, 45, 45, 45];
 
 function sectionTitle(title: string): Content {
   return {
     stack: [
       { text: title.toUpperCase(), style: "sectionTitle" },
-      {
-        canvas: [
-          { type: "line", x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: COLORS.accent },
-        ],
-      },
-      { text: "", margin: [0, 6, 0, 0] },
+      renderDivider({
+        color: COLORS.accent,
+        lineWidth: 1,
+        margin: spacing.before(6),
+        pageMargins: PAGE_MARGINS,
+      }),
     ],
-  };
-}
-
-function bulletList(items: string[]): Content {
-  return {
-    ul: items.map((item) => ({ text: item, style: "bullet" })),
-    margin: [0, 2, 0, 0],
   };
 }
 
 export function modernTemplate(
   resume: ResumeSchema,
-  options: TemplateOptions
+  options: PdfTemplateOptions
 ): TDocumentDefinitions {
   const content: Content[] = [];
+  const contactLine = formatContactLine(resume.basics, {
+    includeEmail: true,
+    includeLocation: true,
+    includePhone: true,
+  });
+  const displayUrl = formatDisplayUrl(resume.basics.url);
+  const skillsText = formatSkillsText(resume.skills, { groupSeparator: " | " });
 
   // ── Header ───────────────────────────────────────────────────────────────
   content.push({
     stack: [
       { text: resume.basics.name, style: "name" },
       resume.basics.label ? { text: resume.basics.label, style: "label" } : null,
-      {
-        text: [
-          resume.basics.email,
-          resume.basics.phone ? ` | ${resume.basics.phone}` : "",
-          resume.basics.location?.city
-            ? ` | ${resume.basics.location.city}${resume.basics.location.region ? ", " + resume.basics.location.region : ""}`
-            : "",
-        ]
-          .filter(Boolean)
-          .join(""),
-        style: "contactLine",
-      },
-      resume.basics.url ? { text: resume.basics.url, style: "contactLine" } : null,
+      contactLine ? { text: contactLine, style: "contactLine" } : null,
+      displayUrl ? { text: displayUrl, style: "contactLine" } : null,
     ].filter(Boolean) as Content[],
-    margin: [0, 0, 0, 16],
+    margin: spacing.after(16),
   });
 
   // ── Summary ───────────────────────────────────────────────────────────────
   if (resume.basics.summary) {
     content.push(sectionTitle("Summary"));
-    content.push({ text: resume.basics.summary, style: "body", margin: [0, 0, 0, 12] });
+    content.push({ text: resume.basics.summary, style: "body", margin: spacing.after(12) });
   }
 
   // ── Work ─────────────────────────────────────────────────────────────────
   if (resume.work && resume.work.length > 0) {
     content.push(sectionTitle("Experience"));
     for (const job of resume.work) {
-      content.push({
-        columns: [
-          { text: job.name, style: "entryTitle", width: "*" },
-          {
-            text: [job.startDate, job.endDate ? " – " + job.endDate : ""].filter(Boolean).join(""),
-            style: "dateRange",
-            width: "auto",
-          },
-        ],
-        margin: [0, 6, 0, 0],
-      });
-      if (job.position) content.push({ text: job.position, style: "entrySubtitle" });
-      if (job.highlights && job.highlights.length > 0) content.push(bulletList(job.highlights));
-      content.push({ text: "", margin: [0, 6, 0, 0] });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "dateRange",
+          dateText: formatDateRange(job.startDate, job.endDate),
+          margin: spacing.before(6),
+          pageMargins: PAGE_MARGINS,
+          subtitle: job.position,
+          subtitleMode: "stacked",
+          subtitleStyle: "entrySubtitle",
+          title: job.name,
+          titleStyle: "entryTitle",
+        })
+      );
+      if (job.summary) content.push({ text: job.summary, style: "body" });
+      content.push(...renderBulletLines(job.highlights, { style: "bullet" }));
+      content.push({ text: "", margin: spacing.after(6) });
     }
   }
 
@@ -93,31 +94,31 @@ export function modernTemplate(
   if (resume.education && resume.education.length > 0) {
     content.push(sectionTitle("Education"));
     for (const edu of resume.education) {
-      content.push({
-        columns: [
-          { text: edu.institution, style: "entryTitle", width: "*" },
-          {
-            text: [edu.startDate, edu.endDate ? " – " + edu.endDate : ""].filter(Boolean).join(""),
-            style: "dateRange",
-            width: "auto",
-          },
-        ],
-        margin: [0, 6, 0, 0],
-      });
-      const degreeText = [edu.studyType, edu.area].filter(Boolean).join(", ");
-      if (degreeText) content.push({ text: degreeText, style: "entrySubtitle" });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "dateRange",
+          dateText: formatDateRange(edu.startDate, edu.endDate),
+          margin: spacing.before(6),
+          pageMargins: PAGE_MARGINS,
+          subtitle: [edu.studyType, edu.area].filter(Boolean).join(", "),
+          subtitleMode: "stacked",
+          subtitleStyle: "entrySubtitle",
+          title: edu.institution,
+          titleStyle: "entryTitle",
+        })
+      );
       if (edu.score) content.push({ text: `GPA: ${edu.score}`, style: "body" });
-      content.push({ text: "", margin: [0, 4, 0, 0] });
+      content.push({ text: "", margin: spacing.after(4) });
     }
   }
 
   // ── Skills ────────────────────────────────────────────────────────────────
-  if (resume.skills && resume.skills.length > 0) {
+  if (skillsText) {
     content.push(sectionTitle("Skills"));
     content.push({
-      text: resume.skills.map((s) => s.name).join(" · "),
+      text: skillsText,
       style: "body",
-      margin: [0, 0, 0, 12],
+      margin: spacing.after(12),
     });
   }
 
@@ -125,11 +126,20 @@ export function modernTemplate(
   if (resume.projects && resume.projects.length > 0) {
     content.push(sectionTitle("Projects"));
     for (const proj of resume.projects) {
-      content.push({ text: proj.name, style: "entryTitle", margin: [0, 6, 0, 0] });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "dateRange",
+          dateText: buildProjectMetadata(proj),
+          margin: spacing.before(6),
+          pageMargins: PAGE_MARGINS,
+          title: proj.name,
+          titleStyle: "entryTitle",
+        })
+      );
       if (proj.description) content.push({ text: proj.description, style: "body" });
-      if (proj.highlights && proj.highlights.length > 0) content.push(bulletList(proj.highlights));
-      if (proj.url) content.push({ text: proj.url, style: "link" });
-      content.push({ text: "", margin: [0, 4, 0, 0] });
+      content.push(...renderBulletLines(proj.highlights, { style: "bullet" }));
+      if (proj.url) content.push({ text: formatDisplayUrl(proj.url) ?? proj.url, style: "link" });
+      content.push({ text: "", margin: spacing.after(4) });
     }
   }
 
@@ -137,14 +147,19 @@ export function modernTemplate(
   if (resume.certificates && resume.certificates.length > 0) {
     content.push(sectionTitle("Certifications"));
     for (const cert of resume.certificates) {
-      content.push({
-        columns: [
-          { text: cert.name, style: "entryTitle", width: "*" },
-          { text: cert.date ?? "", style: "dateRange", width: "auto" },
-        ],
-        margin: [0, 4, 0, 0],
-      });
-      if (cert.issuer) content.push({ text: cert.issuer, style: "entrySubtitle" });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "dateRange",
+          dateText: cert.date,
+          margin: spacing.before(4),
+          pageMargins: PAGE_MARGINS,
+          subtitle: cert.issuer,
+          subtitleMode: "stacked",
+          subtitleStyle: "entrySubtitle",
+          title: cert.name,
+          titleStyle: "entryTitle",
+        })
+      );
     }
   }
 
@@ -168,6 +183,6 @@ export function modernTemplate(
       link: { fontSize: 9, color: COLORS.accent, decoration: "underline" },
     },
     defaultStyle: { font: options.fontFamily, fontSize: 10 },
-    pageMargins: [45, 45, 45, 45],
+    pageMargins: PAGE_MARGINS,
   };
 }

@@ -1,116 +1,141 @@
 import type { ResumeSchema } from "@/types/resume";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
-interface TemplateOptions {
-  fontFamily: string;
-}
+import {
+  buildProjectMetadata,
+  formatContactLine,
+  formatDateRange,
+  formatSkillsText,
+  renderBulletLines,
+  renderDivider,
+  renderEntryHeader,
+  spacing,
+} from "@/lib/export/template-helpers";
+import type { PdfMargin, PdfTemplateOptions } from "@/lib/export/template-types";
 
 // Compact ATS template: single column, dense layout, maximum keyword density.
 // Optimized for Applicant Tracking Systems: no tables, no images, standard fonts.
 
-function divider(): Content {
-  return {
-    canvas: [{ type: "line", x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: "#d1d5db" }],
-    margin: [0, 4, 0, 4],
-  };
-}
+const PAGE_MARGINS: PdfMargin = [36, 36, 36, 36];
 
 export function compactAtsTemplate(
   resume: ResumeSchema,
-  options: TemplateOptions
+  options: PdfTemplateOptions
 ): TDocumentDefinitions {
   const content: Content[] = [];
+  const contactLine = formatContactLine(resume.basics, {
+    includeEmail: true,
+    includeLabel: true,
+    includeLocation: true,
+    includePhone: true,
+    includeUrl: true,
+    separator: " | ",
+  });
+  const skillsText = formatSkillsText(resume.skills, { groupSeparator: " | " });
 
   // Header — all on one line to save space
   content.push({ text: resume.basics.name, style: "name" });
-  const contactParts = [
-    resume.basics.label,
-    resume.basics.email,
-    resume.basics.phone,
-    resume.basics.location?.city
-      ? `${resume.basics.location.city}${resume.basics.location.region ? ", " + resume.basics.location.region : ""}`
-      : null,
-    resume.basics.url,
-  ].filter(Boolean);
-
-  content.push({ text: contactParts.join(" | "), style: "contact", margin: [0, 1, 0, 8] });
-  content.push(divider());
+  if (contactLine) {
+    content.push({ text: contactLine, style: "contact", margin: spacing.y(1, 8) });
+  }
+  content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
 
   if (resume.basics.summary) {
     content.push({ text: "SUMMARY", style: "sectionTitle" });
-    content.push({ text: resume.basics.summary, style: "body", margin: [0, 0, 0, 6] });
-    content.push(divider());
+    content.push({ text: resume.basics.summary, style: "body", margin: spacing.after(6) });
+    content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
   }
 
   if (resume.work && resume.work.length > 0) {
     content.push({ text: "PROFESSIONAL EXPERIENCE", style: "sectionTitle" });
     for (const job of resume.work) {
-      const dateStr = [job.startDate, job.endDate].filter(Boolean).join(" – ");
-      content.push({
-        columns: [
-          { text: job.name, style: "company", width: "*" },
-          { text: dateStr, style: "date", width: "auto" },
-        ],
-        margin: [0, 3, 0, 0],
-      });
-      if (job.position) content.push({ text: job.position, style: "role" });
-      for (const h of job.highlights ?? []) {
-        content.push({ text: `• ${h}`, style: "body", margin: [8, 1, 0, 0] });
-      }
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "date",
+          dateText: formatDateRange(job.startDate, job.endDate),
+          margin: spacing.before(3),
+          pageMargins: PAGE_MARGINS,
+          subtitle: job.position,
+          subtitleMode: "stacked",
+          subtitleStyle: "role",
+          title: job.name,
+          titleStyle: "company",
+        })
+      );
+      if (job.summary) content.push({ text: job.summary, style: "body" });
+      content.push(...renderBulletLines(job.highlights, { indent: 8, marker: "-", style: "body" }));
     }
-    content.push(divider());
+    content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
   }
 
   if (resume.education && resume.education.length > 0) {
     content.push({ text: "EDUCATION", style: "sectionTitle" });
     for (const edu of resume.education) {
-      const dateStr = [edu.startDate, edu.endDate].filter(Boolean).join(" – ");
-      content.push({
-        columns: [
-          { text: edu.institution, style: "company", width: "*" },
-          { text: dateStr, style: "date", width: "auto" },
-        ],
-        margin: [0, 3, 0, 0],
-      });
-      const degree = [edu.studyType, edu.area].filter(Boolean).join(", ");
-      if (degree) content.push({ text: degree, style: "role" });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "date",
+          dateText: formatDateRange(edu.startDate, edu.endDate),
+          margin: spacing.before(3),
+          pageMargins: PAGE_MARGINS,
+          subtitle: [edu.studyType, edu.area].filter(Boolean).join(", "),
+          subtitleMode: "stacked",
+          subtitleStyle: "role",
+          title: edu.institution,
+          titleStyle: "company",
+        })
+      );
       if (edu.score) content.push({ text: `GPA: ${edu.score}`, style: "body" });
     }
-    content.push(divider());
+    content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
   }
 
-  if (resume.skills && resume.skills.length > 0) {
+  if (skillsText) {
     content.push({ text: "TECHNICAL SKILLS", style: "sectionTitle" });
     content.push({
-      text: resume.skills.map((s) => s.name).join(" | "),
+      text: skillsText,
       style: "body",
-      margin: [0, 0, 0, 6],
+      margin: spacing.after(6),
     });
-    content.push(divider());
+    content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
   }
 
   if (resume.projects && resume.projects.length > 0) {
     content.push({ text: "PROJECTS", style: "sectionTitle" });
     for (const proj of resume.projects) {
-      content.push({ text: proj.name, style: "company", margin: [0, 3, 0, 0] });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "date",
+          dateText: buildProjectMetadata(proj),
+          margin: spacing.before(3),
+          pageMargins: PAGE_MARGINS,
+          title: proj.name,
+          titleStyle: "company",
+        })
+      );
       if (proj.description) content.push({ text: proj.description, style: "body" });
-      for (const h of proj.highlights ?? []) {
-        content.push({ text: `• ${h}`, style: "body", margin: [8, 1, 0, 0] });
-      }
+      content.push(
+        ...renderBulletLines(proj.highlights, { indent: 8, marker: "-", style: "body" })
+      );
     }
-    content.push(divider());
+    content.push(renderDivider({ pageMargins: PAGE_MARGINS }));
   }
 
   if (resume.certificates && resume.certificates.length > 0) {
     content.push({ text: "CERTIFICATIONS", style: "sectionTitle" });
     for (const cert of resume.certificates) {
-      content.push({
-        text: [cert.name, cert.issuer ? `(${cert.issuer})` : null, cert.date]
-          .filter(Boolean)
-          .join(" "),
-        style: "body",
-        margin: [0, 2, 0, 0],
-      });
+      content.push(
+        ...renderEntryHeader({
+          dateStyle: "date",
+          dateText: cert.date,
+          margin: spacing.before(2),
+          pageMargins: PAGE_MARGINS,
+          subtitle: cert.issuer,
+          subtitleMode: "stacked",
+          subtitleStyle: "role",
+          title: cert.name,
+          titleStyle: "body",
+        })
+      );
     }
   }
 
@@ -132,6 +157,6 @@ export function compactAtsTemplate(
       body: { fontSize: 9.5, color: "#111827", lineHeight: 1.35 },
     },
     defaultStyle: { font: options.fontFamily, fontSize: 9.5 },
-    pageMargins: [36, 36, 36, 36],
+    pageMargins: PAGE_MARGINS,
   };
 }
