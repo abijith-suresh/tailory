@@ -1,5 +1,5 @@
 {
-  "name": "Astro Template Dev Environment",
+  "name": "Tailory Dev Environment",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -10,6 +10,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
+        "editorconfig.editorconfig",
         "unifiedjs.vscode-mdx",
         "christian-kohler.path-intellisense",
         "formulahendry.auto-rename-tag",
