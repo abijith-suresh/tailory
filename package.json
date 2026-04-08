@@ -20,7 +20,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "astro": "^5.18.1",
+    "astro": "^6.1.5",
     "geist": "^1.7.0",
     "idb": "^8.0.3",
     "mammoth": "^1.11.0",
