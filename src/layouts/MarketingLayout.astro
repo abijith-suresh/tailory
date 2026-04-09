@@ -31,7 +31,9 @@ const navLinks = [
         >
           Tailory
         </a>
-        <div class="flex items-center gap-8">
+
+        <!-- Desktop nav links (md+) -->
+        <div class="hidden items-center gap-8 md:flex">
           {
             navLinks.map((link) => (
               <a
@@ -57,11 +59,142 @@ const navLinks = [
             Open Editor →
           </a>
         </div>
+
+        <!-- Mobile hamburger button (hidden on md+) -->
+        <button
+          id="nav-open-btn"
+          class="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-md md:hidden"
+          aria-label="Open navigation menu"
+          aria-expanded="false"
+          aria-controls="nav-drawer"
+        >
+          <span
+            class="line-top block h-[2px] w-5 origin-center rounded-full bg-[#1d6648] transition-transform duration-300"
+          ></span>
+          <span
+            class="line-mid block h-[2px] w-5 rounded-full bg-[#1d6648] transition-opacity duration-300"
+          ></span>
+          <span
+            class="line-bot block h-[2px] w-5 origin-center rounded-full bg-[#1d6648] transition-transform duration-300"
+          ></span>
+        </button>
       </nav>
     </header>
 
+    <!-- Mobile nav backdrop -->
+    <div
+      id="nav-backdrop"
+      class="fixed inset-0 z-40 bg-black/40 opacity-0 transition-opacity duration-300"
+      style="pointer-events: none"
+      aria-hidden="true"
+    >
+    </div>
+
+    <!-- Mobile side drawer -->
+    <div
+      id="nav-drawer"
+      class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col border-l border-[#ccddd4] bg-[#f4f8f5] shadow-xl transition-transform duration-300 ease-in-out"
+      aria-label="Navigation drawer"
+      role="dialog"
+      aria-modal="true"
+    >
+      <!-- Drawer header: close button -->
+      <div class="flex items-center justify-between border-b border-[#ccddd4] px-6 py-5">
+        <span class="text-lg font-bold text-[#1d6648]" style="font-family: 'Lora', Georgia, serif">
+          Tailory
+        </span>
+        <button
+          id="nav-close-btn"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[#3d6650] transition-colors hover:bg-[#ccddd4]/50 hover:text-[#1d6648]"
+          aria-label="Close navigation menu"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 2L14 14M14 2L2 14"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Drawer nav links -->
+      <nav class="flex flex-1 flex-col gap-1 px-6 py-6">
+        {
+          navLinks.map((link) => (
+            <a
+              href={link.href}
+              class="drawer-link block rounded-md px-3 py-3 text-base font-medium text-[#3d6650] transition-colors hover:bg-[#ccddd4]/40 hover:text-[#1d6648]"
+            >
+              {link.label}
+            </a>
+          ))
+        }
+        <a
+          href="https://github.com/abijith-suresh/tailory"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="drawer-link block rounded-md px-3 py-3 text-base font-medium text-[#3d6650] transition-colors hover:bg-[#ccddd4]/40 hover:text-[#1d6648]"
+        >
+          GitHub ↗
+        </a>
+      </nav>
+
+      <!-- Drawer CTA -->
+      <div class="border-t border-[#ccddd4] px-6 py-6">
+        <a
+          href="/editor"
+          class="drawer-link block w-full rounded-md bg-[#1d6648] px-5 py-3 text-center text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] active:scale-95"
+        >
+          Open Editor →
+        </a>
+      </div>
+    </div>
+
     <!-- Page content -->
     <slot />
+
+    <!-- Mobile nav toggle script -->
+    <script>
+      const setupNav = () => {
+        const openBtn = document.getElementById("nav-open-btn");
+        const closeBtn = document.getElementById("nav-close-btn");
+        const backdrop = document.getElementById("nav-backdrop");
+        const drawerLinks = document.querySelectorAll(".drawer-link");
+
+        const open = () => {
+          document.body.classList.add("nav-open");
+          openBtn?.setAttribute("aria-expanded", "true");
+        };
+
+        const close = () => {
+          document.body.classList.remove("nav-open");
+          openBtn?.setAttribute("aria-expanded", "false");
+        };
+
+        openBtn?.addEventListener("click", open);
+        closeBtn?.addEventListener("click", close);
+        backdrop?.addEventListener("click", close);
+
+        drawerLinks.forEach((link) => link.addEventListener("click", close));
+
+        const onKeydown = (e: KeyboardEvent) => {
+          if (e.key === "Escape") close();
+        };
+        document.removeEventListener("keydown", onKeydown as EventListener);
+        document.addEventListener("keydown", onKeydown as EventListener);
+      };
+
+      setupNav();
+      document.addEventListener("astro:page-load", setupNav);
+    </script>
 
     <!-- Scroll reveal observer -->
     <script>
@@ -170,3 +303,22 @@ const navLinks = [
     </footer>
   </div>
 </Layout>
+
+<style>
+  body.nav-open #nav-drawer {
+    transform: translateX(0);
+  }
+  body.nav-open #nav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  body.nav-open #nav-open-btn .line-top {
+    transform: translateY(7px) rotate(45deg);
+  }
+  body.nav-open #nav-open-btn .line-mid {
+    opacity: 0;
+  }
+  body.nav-open #nav-open-btn .line-bot {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+</style>
