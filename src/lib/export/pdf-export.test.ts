@@ -11,14 +11,19 @@ type DeepPartial<T> = {
       : T[K];
 };
 
-const addFontContainer = vi.fn();
+const addFonts = vi.fn();
 const addVirtualFileSystem = vi.fn();
-const download = vi.fn();
-const createPdf = vi.fn(() => ({ download }));
+const getBlob = vi.fn(async () => new Blob(["pdf"], { type: "application/pdf" }));
+const createPdf = vi.fn(() => ({ getBlob }));
+const share = vi.fn();
+const canShare = vi.fn(() => false);
+const createObjectURL = vi.fn(() => "blob:tailory-pdf");
+const revokeObjectURL = vi.fn();
+const click = vi.fn();
 
 vi.mock("pdfmake/build/pdfmake", () => ({
   default: {
-    addFontContainer,
+    addFonts,
     addVirtualFileSystem,
     createPdf,
   },
@@ -27,22 +32,9 @@ vi.mock("pdfmake/build/pdfmake", () => ({
 vi.mock("pdfmake/build/vfs_fonts", () => ({
   default: {
     "Roboto-Regular.ttf": "roboto-regular",
-  },
-}));
-
-vi.mock("pdfmake/build/standard-fonts/Helvetica", () => ({
-  default: {
-    fonts: {
-      Helvetica: {
-        normal: "Helvetica",
-        bold: "Helvetica-Bold",
-        italics: "Helvetica-Oblique",
-        bolditalics: "Helvetica-BoldOblique",
-      },
-    },
-    vfs: {
-      "data/Helvetica.afm": "helvetica-afm",
-    },
+    "Roboto-Medium.ttf": "roboto-medium",
+    "Roboto-Italic.ttf": "roboto-italic",
+    "Roboto-MediumItalic.ttf": "roboto-medium-italic",
   },
 }));
 
@@ -75,13 +67,47 @@ function collectNestedValues(value: unknown): unknown[] {
 
 describe("exportPDF", () => {
   beforeEach(() => {
-    addFontContainer.mockReset();
+    addFonts.mockReset();
     addVirtualFileSystem.mockReset();
-    download.mockReset();
+    getBlob.mockClear();
     createPdf.mockClear();
+    share.mockReset();
+    canShare.mockReset().mockReturnValue(false);
+    createObjectURL.mockReset().mockReturnValue("blob:tailory-pdf");
+    revokeObjectURL.mockReset();
+    click.mockReset();
+
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: {
+        canShare,
+        share,
+      },
+    });
+
+    Object.assign(globalThis.URL, {
+      createObjectURL,
+      revokeObjectURL,
+    });
+
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: {
+        createElement: vi.fn(() => ({
+          click,
+        })),
+      },
+    });
+
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        setTimeout: vi.fn((fn: () => void) => fn()),
+      },
+    });
   });
 
-  it("registers export fonts before creating the pdf", async () => {
+  it("registers embedded Roboto fonts before creating the pdf", async () => {
     const { exportPDF } = await import("./pdf-export");
 
     await exportPDF(
@@ -92,11 +118,12 @@ describe("exportPDF", () => {
       "modern"
     );
 
-    expect(addVirtualFileSystem).toHaveBeenCalledWith({ "Roboto-Regular.ttf": "roboto-regular" });
-    expect(addFontContainer).toHaveBeenCalledWith(
+    expect(addVirtualFileSystem).toHaveBeenCalledWith(
+      expect.objectContaining({ "Roboto-Regular.ttf": "roboto-regular" })
+    );
+    expect(addFonts).toHaveBeenCalledWith(
       expect.objectContaining({
-        vfs: expect.objectContaining({ "data/Helvetica.afm": "helvetica-afm" }),
-        fonts: expect.objectContaining({ Helvetica: expect.any(Object) }),
+        Roboto: expect.objectContaining({ normal: "Roboto-Regular.ttf" }),
       })
     );
   });
@@ -117,7 +144,7 @@ describe("exportPDF", () => {
     expect(createPdf).not.toHaveBeenCalled();
   });
 
-  it("exports normalized resume content and filename", async () => {
+  it("exports normalized resume content and falls back to blob download", async () => {
     const { exportPDF } = await import("./pdf-export");
 
     await exportPDF(
@@ -132,7 +159,9 @@ describe("exportPDF", () => {
     );
 
     expect(createPdf).toHaveBeenCalledTimes(1);
-    expect(download).toHaveBeenCalledWith("Jane_Doe_resume.pdf");
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+
     const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0];
     expect(docDefinition).toMatchObject({
       content: expect.arrayContaining([
@@ -143,31 +172,50 @@ describe("exportPDF", () => {
           stack: expect.arrayContaining([expect.objectContaining({ text: "SKILLS" })]),
         }),
       ]),
-      defaultStyle: expect.objectContaining({ font: "Helvetica" }),
+      defaultStyle: expect.objectContaining({ font: "Roboto" }),
     });
   });
 
+  it("uses native share when files can be shared", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    canShare.mockReturnValue(true);
+
+    await exportPDF(createTemplateFixture(), "modern");
+
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(click).not.toHaveBeenCalled();
+  });
+
   it.each(["modern", "minimal", "compact-ats"] as const)(
-    "creates a valid pdf definition for %s",
+    "creates a valid pdf definition for %s and propagates options",
     async (template) => {
       const { exportPDF } = await import("./pdf-export");
 
-      await exportPDF(createTemplateFixture(), template);
+      await exportPDF(createTemplateFixture(), template, {
+        accentColor: "#7c3aed",
+        pageFormat: "Letter",
+      });
 
       expect(createPdf).toHaveBeenCalledTimes(1);
-      expect(download).toHaveBeenCalledWith("Jane_Doe_resume.pdf");
 
       const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0] as {
         content: unknown[];
         defaultStyle: { font: string };
-        styles: object;
+        pageSize: string;
+        styles: Record<string, { color?: string }>;
       };
 
       expect(docDefinition.content.length).toBeGreaterThan(0);
       expect(docDefinition.styles).toBeTruthy();
-      expect(docDefinition.defaultStyle.font).toBe("Helvetica");
+      expect(docDefinition.defaultStyle.font).toBe("Roboto");
+      expect(docDefinition.pageSize).toBe("LETTER");
       expect(collectNestedValues(docDefinition.content)).not.toContain(null);
       expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
+
+      if (template === "modern" || template === "minimal") {
+        expect(docDefinition.styles.sectionTitle?.color).toBe("#7c3aed");
+      }
     }
   );
 });

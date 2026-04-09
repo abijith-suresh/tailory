@@ -1,6 +1,6 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 
-import { exportBrowserPrint } from "@/lib/export/print-export";
+import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
 import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
@@ -54,7 +54,7 @@ const CommandBar: Component = () => {
     try {
       setExportError("");
       setIsExporting(true);
-      await exportBrowserPrint(JSON.parse(JSON.stringify(resume)), selectedTemplate(), {
+      await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate(), {
         accentColor: selectedAccentColor(),
       });
     } catch (error) {

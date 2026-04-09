@@ -1,6 +1,7 @@
 import { DEFAULT_PDF_FONT, getPdfFont, type PdfFontId, type PdfMakeFontRuntime } from "./fonts";
 import type { PdfTemplateOptions } from "./template-types";
 import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
+import type { PageFormat } from "@/lib/resume/design";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
@@ -10,10 +11,6 @@ let fontRegistrationPromise: Promise<void> | null = null;
 async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promise<void> {
   if (!fontRegistrationPromise) {
     fontRegistrationPromise = (async () => {
-      const vfsFonts = await import("pdfmake/build/vfs_fonts");
-      const robotoVfs = (vfsFonts.default ?? vfsFonts) as Record<string, string>;
-
-      pdfMake.addVirtualFileSystem(robotoVfs);
       await getPdfFont(DEFAULT_PDF_FONT).register(pdfMake);
     })();
   }
@@ -35,10 +32,63 @@ async function getDocDef(
   return renderTemplate(resume, options);
 }
 
+interface BrowserPdfDocument {
+  getBlob: () => Promise<Blob>;
+}
+
+interface PdfExportOptions {
+  accentColor?: string;
+  font?: PdfFontId;
+  pageFormat?: PageFormat;
+}
+
+async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
+  const nav = globalThis.navigator as Navigator & {
+    canShare?: (data?: ShareData) => boolean;
+    share?: (data?: ShareData) => Promise<void>;
+  };
+
+  if (typeof File === "undefined" || typeof nav.share !== "function") {
+    return false;
+  }
+
+  const file = new File([blob], filename, { type: "application/pdf" });
+  const shareData: ShareData = {
+    files: [file],
+    title: filename,
+  };
+
+  if (typeof nav.canShare === "function" && !nav.canShare(shareData)) {
+    return false;
+  }
+
+  try {
+    await nav.share(shareData);
+    return true;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return true;
+    }
+
+    return false;
+  }
+}
+
+function downloadPdfBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
 export async function exportPDF(
   resume: ResumeSchema,
   template: TemplateId,
-  font: PdfFontId = DEFAULT_PDF_FONT
+  options: PdfExportOptions = {}
 ): Promise<void> {
   const validation = validateResumeForExport(resume);
 
@@ -49,16 +99,23 @@ export async function exportPDF(
   // pdfmake accesses `window` on import — must be dynamic inside a browser callback
   const pdfMakeModule = await import("pdfmake/build/pdfmake");
   const pdfMake = pdfMakeModule.default as PdfMakeFontRuntime & {
-    createPdf: (docDefinition: TDocumentDefinitions) => { download: (filename: string) => void };
+    createPdf: (docDefinition: TDocumentDefinitions) => BrowserPdfDocument;
   };
-  const selectedFont = getPdfFont(font);
+  const selectedFont = getPdfFont(options.font ?? DEFAULT_PDF_FONT);
 
   await ensurePdfMakeFontsRegistered(pdfMake);
 
   const docDef = await getDocDef(validation.normalizedResume, template, {
+    accentColor: options.accentColor,
     fontFamily: selectedFont.family,
+    pageFormat: options.pageFormat,
   });
   const filename = getFilename(validation.normalizedResume);
+  const blob = await pdfMake.createPdf(docDef).getBlob();
 
-  pdfMake.createPdf(docDef).download(filename);
+  if (await maybeSharePdf(blob, filename)) {
+    return;
+  }
+
+  downloadPdfBlob(blob, filename);
 }

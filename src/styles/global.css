@@ -19,6 +19,7 @@
 @theme {
   --font-sans: "Geist", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-resume: "Roboto", "Geist", system-ui, sans-serif;
 }
 
 /* Focus-visible styles for keyboard accessibility */
@@ -106,48 +107,6 @@ textarea {
 
 .resume-document__link {
   color: var(--resume-accent);
-}
-
-.resume-document--modern .resume-document__section-title,
-.resume-document--minimal .resume-document__section-title {
-  color: var(--resume-accent);
-}
-
-.resume-document--modern .resume-document__header {
-  border-color: var(--resume-accent);
-}
-
-@page {
-  margin: 12mm;
-  size: A4;
-}
-
-@media print {
-  html,
-  body {
-    background: #ffffff !important;
-    color: #111827 !important;
-  }
-
-  body {
-    margin: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .print-root,
-  .resume-print-shell {
-    background: #ffffff !important;
-    margin: 0;
-    padding: 0;
-  }
-
-  .resume-document__page {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    margin: 0 auto;
-    min-height: auto !important;
-  }
 }
 
 /* ── Scroll reveal ───────────────────────────────────────────────────── */

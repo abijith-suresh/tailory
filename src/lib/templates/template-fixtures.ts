@@ -74,3 +74,27 @@ export function createTemplateFixture(): ResumeSchema {
     ],
   };
 }
+
+export function createUnicodeTemplateFixture(): ResumeSchema {
+  const resume = createTemplateFixture();
+
+  resume.basics.name = "Nandana Resume";
+  resume.basics.summary =
+    "Builds ATS-safe exports for multilingual resumes with bullets • accents like Jose, Chloe, and facade, plus symbols such as pi and checkmarks.";
+  resume.work = [
+    {
+      id: "work-unicode-1",
+      name: "Unicode Systems",
+      position: "Engineer",
+      startDate: "2022",
+      endDate: "Present",
+      summary: "Improved text fidelity for imported resume content.",
+      highlights: [
+        "Handled names like Jose Alvarez and Chloe Moreau without glyph corruption",
+        "Preserved bullets • and symbols such as pi and checkmarks in export text",
+      ],
+    },
+  ];
+
+  return resume;
+}
