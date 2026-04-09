@@ -2,6 +2,7 @@ import { type Component, For, Show } from "solid-js";
 
 import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import ResumeDocument from "@/components/resume/ResumeDocument";
+import { resolveResumeDesignSettings } from "@/lib/resume/design";
 import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 import { selectedAccentColor } from "@/store/resume";
 
@@ -18,6 +19,12 @@ const isEmpty = () =>
   (resume.certificates?.length ?? 0) === 0;
 
 const ResumePreview: Component = () => {
+  const design = () =>
+    resolveResumeDesignSettings({
+      template: selectedTemplate(),
+      accentColor: selectedAccentColor(),
+    });
+
   const completedCount = () => {
     let count = 0;
     if (resume.basics.name) count++;
@@ -155,13 +162,12 @@ const ResumePreview: Component = () => {
         <div class="flex-1 overflow-y-auto p-8">
           <div
             class="resume-document__page mx-auto max-w-[680px] rounded-sm bg-white p-10 text-xs leading-relaxed shadow-lg"
-            style={{ "font-family": "Helvetica, Arial, sans-serif", "min-height": "842px" }}
+            style={{
+              "font-family": design().previewFontFamily,
+              "min-height": `${design().previewPageMinHeight}px`,
+            }}
           >
-            <ResumeDocument
-              accentColor={selectedAccentColor()}
-              resume={resume}
-              template={selectedTemplate()}
-            />
+            <ResumeDocument design={design()} resume={resume} />
           </div>
         </div>
       </Show>

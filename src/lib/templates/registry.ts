@@ -1,13 +1,23 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
+import type { ResumeDesignSettings } from "@/lib/resume/design";
 import type { ResumeSchema } from "@/types/resume";
+import { buildCompactAtsRenderModel, compactAtsTemplate } from "@/lib/templates/compact-ats";
+import { buildMinimalRenderModel, minimalTemplate } from "@/lib/templates/minimal";
+import { buildModernRenderModel, modernTemplate } from "@/lib/templates/modern";
+import type { ResumeRenderModel } from "@/lib/templates/render-model";
 import { TEMPLATE_IDS, type TemplateId } from "@/types/template";
 
 type PdfTemplateRenderer = (
   resume: ResumeSchema,
   options: PdfTemplateOptions
 ) => TDocumentDefinitions;
+
+type TemplateModelBuilder = (
+  resume: ResumeSchema,
+  design: ResumeDesignSettings
+) => ResumeRenderModel;
 
 export interface TemplateMetadata {
   description: string;
@@ -16,7 +26,8 @@ export interface TemplateMetadata {
 }
 
 interface TemplateRegistryEntry extends TemplateMetadata {
-  loadPdfRenderer: () => Promise<PdfTemplateRenderer>;
+  buildRenderModel: TemplateModelBuilder;
+  renderPdf: PdfTemplateRenderer;
 }
 
 export const TEMPLATE_REGISTRY = {
@@ -24,28 +35,22 @@ export const TEMPLATE_REGISTRY = {
     id: "modern",
     label: "Modern",
     description: "Two-tone header, section dividers",
-    loadPdfRenderer: async () => {
-      const { modernTemplate } = await import("@/lib/templates/modern");
-      return modernTemplate;
-    },
+    buildRenderModel: buildModernRenderModel,
+    renderPdf: modernTemplate,
   },
   minimal: {
     id: "minimal",
     label: "Minimal",
     description: "Clean whitespace, no decoration",
-    loadPdfRenderer: async () => {
-      const { minimalTemplate } = await import("@/lib/templates/minimal");
-      return minimalTemplate;
-    },
+    buildRenderModel: buildMinimalRenderModel,
+    renderPdf: minimalTemplate,
   },
   "compact-ats": {
     id: "compact-ats",
     label: "Compact ATS",
     description: "Dense, keyword-optimized",
-    loadPdfRenderer: async () => {
-      const { compactAtsTemplate } = await import("@/lib/templates/compact-ats");
-      return compactAtsTemplate;
-    },
+    buildRenderModel: buildCompactAtsRenderModel,
+    renderPdf: compactAtsTemplate,
   },
 } satisfies Record<TemplateId, TemplateRegistryEntry>;
 
@@ -58,5 +63,12 @@ export const TEMPLATE_OPTIONS: TemplateMetadata[] = TEMPLATE_IDS.map((id) => ({
 export async function loadPdfTemplateRenderer(
   templateId: TemplateId
 ): Promise<PdfTemplateRenderer> {
-  return TEMPLATE_REGISTRY[templateId].loadPdfRenderer();
+  return TEMPLATE_REGISTRY[templateId].renderPdf;
+}
+
+export function buildResumeRenderModel(
+  resume: ResumeSchema,
+  design: ResumeDesignSettings
+): ResumeRenderModel {
+  return TEMPLATE_REGISTRY[design.template].buildRenderModel(resume, design);
 }

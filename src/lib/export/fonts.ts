@@ -1,13 +1,8 @@
-export type PdfFontId = "helvetica";
+export type PdfFontId = "roboto";
 
 export interface PdfMakeFontRuntime {
-  addFontContainer: (container: PdfMakeFontContainer) => void;
+  addFonts?: (fonts: Record<string, object>) => void;
   addVirtualFileSystem: (vfs: Record<string, string>) => void;
-}
-
-export interface PdfMakeFontContainer {
-  fonts: Record<string, object>;
-  vfs: Record<string, string>;
 }
 
 export interface PdfFontConfig {
@@ -17,21 +12,26 @@ export interface PdfFontConfig {
   register: (pdfMake: PdfMakeFontRuntime) => Promise<void>;
 }
 
-export const DEFAULT_PDF_FONT: PdfFontId = "helvetica";
-
-const loadHelveticaContainer = async (): Promise<PdfMakeFontContainer> => {
-  const helveticaModule = await import("pdfmake/build/standard-fonts/Helvetica");
-  return helveticaModule.default;
-};
+export const DEFAULT_PDF_FONT: PdfFontId = "roboto";
 
 export const PDF_FONTS: Record<PdfFontId, PdfFontConfig> = {
-  helvetica: {
-    id: "helvetica",
-    label: "Helvetica",
-    family: "Helvetica",
+  roboto: {
+    id: "roboto",
+    label: "Roboto",
+    family: "Roboto",
     register: async (pdfMake) => {
-      const helvetica = await loadHelveticaContainer();
-      pdfMake.addFontContainer(helvetica);
+      const vfsFonts = await import("pdfmake/build/vfs_fonts");
+      const robotoVfs = (vfsFonts.default ?? vfsFonts) as Record<string, string>;
+
+      pdfMake.addVirtualFileSystem(robotoVfs);
+      pdfMake.addFonts?.({
+        Roboto: {
+          normal: "Roboto-Regular.ttf",
+          bold: "Roboto-Medium.ttf",
+          italics: "Roboto-Italic.ttf",
+          bolditalics: "Roboto-MediumItalic.ttf",
+        },
+      });
     },
   },
 };
