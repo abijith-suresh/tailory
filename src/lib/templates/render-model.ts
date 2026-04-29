@@ -24,7 +24,19 @@ export interface ResumeEntryModel {
 export interface ResumeSectionModel {
   dividerAfter?: boolean;
   entries?: ResumeEntryModel[];
-  id: "summary" | "work" | "education" | "skills" | "projects" | "certificates";
+  id:
+    | "summary"
+    | "work"
+    | "volunteer"
+    | "education"
+    | "awards"
+    | "publications"
+    | "skills"
+    | "languages"
+    | "interests"
+    | "projects"
+    | "references"
+    | "certificates";
   kind: "text" | "entries";
   text?: string;
   title: string;

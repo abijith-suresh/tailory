@@ -139,7 +139,7 @@ describe("exportPDF", () => {
         "modern"
       )
     ).rejects.toThrow(
-      "Add a summary, experience, education, skills, project, or certification before exporting."
+      "Add a summary or at least one section like experience, volunteer work, education, awards, publications, skills, languages, interests, projects, references, or certifications before exporting."
     );
     expect(createPdf).not.toHaveBeenCalled();
   });

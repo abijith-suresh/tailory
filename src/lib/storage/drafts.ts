@@ -40,7 +40,14 @@ export async function restoreAutosaveDraft(): Promise<{
 }
 
 export async function saveAutosaveDraft(snapshotJson: string): Promise<boolean> {
-  const data: ResumeSchema = JSON.parse(snapshotJson);
+  let data: ResumeSchema;
+
+  try {
+    data = JSON.parse(snapshotJson) as ResumeSchema;
+  } catch {
+    return false;
+  }
+
   const normalizedData = cloneResumeData(data);
   const now = Date.now();
 

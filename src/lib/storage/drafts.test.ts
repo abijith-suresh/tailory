@@ -119,4 +119,11 @@ describe("autosave draft helpers", () => {
 
     nowSpy.mockRestore();
   });
+
+  it("returns false when autosave snapshot json is malformed", async () => {
+    const { saveAutosaveDraft } = await import("./drafts");
+
+    await expect(saveAutosaveDraft("{")).resolves.toBe(false);
+    expect(saveDraft).not.toHaveBeenCalled();
+  });
 });

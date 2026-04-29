@@ -6,6 +6,8 @@ import {
   formatContactLine,
   formatDateRange,
   formatDisplayUrl,
+  formatInterestsText,
+  formatLanguagesText,
   formatSkillsText,
 } from "@/lib/export/template-helpers";
 import { renderPdfResumeModel } from "@/lib/export/pdf-renderer";
@@ -25,6 +27,8 @@ export function buildModernRenderModel(
 ): ResumeRenderModel {
   const sections: ResumeSectionModel[] = [];
   const skillsText = formatSkillsText(resume.skills, { groupSeparator: " | " });
+  const languagesText = formatLanguagesText(resume.languages, { groupSeparator: " | " });
+  const interestsText = formatInterestsText(resume.interests, { groupSeparator: " | " });
 
   if (resume.basics.summary) {
     sections.push({ id: "summary", kind: "text", text: resume.basics.summary, title: "Summary" });
@@ -47,6 +51,23 @@ export function buildModernRenderModel(
     });
   }
 
+  if (resume.volunteer && resume.volunteer.length > 0) {
+    sections.push({
+      id: "volunteer",
+      kind: "entries",
+      title: "Volunteer",
+      entries: resume.volunteer.map((entry) => ({
+        title: entry.organization,
+        subtitle: entry.position,
+        subtitleMode: "stacked",
+        meta: formatDateRange(entry.startDate, entry.endDate),
+        body: entry.summary,
+        bullets: entry.highlights,
+        spacerAfter: 6,
+      })),
+    });
+  }
+
   if (resume.education && resume.education.length > 0) {
     sections.push({
       id: "education",
@@ -63,8 +84,49 @@ export function buildModernRenderModel(
     });
   }
 
+  if (resume.awards && resume.awards.length > 0) {
+    sections.push({
+      id: "awards",
+      kind: "entries",
+      title: "Awards",
+      entries: resume.awards.map((award) => ({
+        title: award.title,
+        subtitle: award.awarder,
+        subtitleMode: "stacked",
+        meta: award.date,
+        body: award.summary,
+        spacerAfter: 4,
+      })),
+    });
+  }
+
+  if (resume.publications && resume.publications.length > 0) {
+    sections.push({
+      id: "publications",
+      kind: "entries",
+      title: "Publications",
+      entries: resume.publications.map((publication) => ({
+        title: publication.name,
+        subtitle: publication.publisher,
+        subtitleMode: "stacked",
+        meta: publication.releaseDate,
+        body: publication.summary,
+        link: publication.url ? (formatDisplayUrl(publication.url) ?? publication.url) : undefined,
+        spacerAfter: 4,
+      })),
+    });
+  }
+
   if (skillsText) {
     sections.push({ id: "skills", kind: "text", text: skillsText, title: "Skills" });
+  }
+
+  if (languagesText) {
+    sections.push({ id: "languages", kind: "text", text: languagesText, title: "Languages" });
+  }
+
+  if (interestsText) {
+    sections.push({ id: "interests", kind: "text", text: interestsText, title: "Interests" });
   }
 
   if (resume.projects && resume.projects.length > 0) {
@@ -78,6 +140,19 @@ export function buildModernRenderModel(
         body: project.description,
         bullets: project.highlights,
         link: project.url ? (formatDisplayUrl(project.url) ?? project.url) : undefined,
+        spacerAfter: 4,
+      })),
+    });
+  }
+
+  if (resume.references && resume.references.length > 0) {
+    sections.push({
+      id: "references",
+      kind: "entries",
+      title: "References",
+      entries: resume.references.map((reference) => ({
+        title: reference.name,
+        body: reference.reference,
         spacerAfter: 4,
       })),
     });
