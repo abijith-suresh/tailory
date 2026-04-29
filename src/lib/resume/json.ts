@@ -3,9 +3,11 @@ import type {
   ResumeAward,
   ResumeCertificate,
   ResumeEducation,
+  ResumeInterest,
   ResumeLanguage,
   ResumeProject,
   ResumePublication,
+  ResumeReference,
   ResumeSchema,
   ResumeSkill,
   ResumeVolunteer,
@@ -169,6 +171,16 @@ export function parseJsonResumeDocument(document: unknown): ResumeSchema {
       language: parseString(entry.language),
       fluency: parseString(entry.fluency),
     })) as ResumeSchema["languages"],
+    interests: parseObjectArray(document.interests, "interests", (entry) => ({
+      name: parseString(entry.name),
+      keywords: Array.isArray(entry.keywords)
+        ? entry.keywords.filter((value): value is string => typeof value === "string")
+        : undefined,
+    })) as ResumeSchema["interests"],
+    references: parseObjectArray(document.references, "references", (entry) => ({
+      name: parseString(entry.name),
+      reference: parseString(entry.reference),
+    })) as ResumeSchema["references"],
     projects: parseObjectArray(document.projects, "projects", (entry) => ({
       name: parseString(entry.name),
       description: parseString(entry.description),
@@ -278,6 +290,8 @@ export function exportJsonResumeDocument(resume: ResumeSchema): Record<string, u
     publications: stripIds<ResumePublication>(normalized.publications),
     skills: stripIds<ResumeSkill>(normalized.skills),
     languages: stripIds<ResumeLanguage>(normalized.languages),
+    interests: stripIds<ResumeInterest>(normalized.interests),
+    references: stripIds<ResumeReference>(normalized.references),
     projects: stripIds<ResumeProject>(normalized.projects),
   });
 }

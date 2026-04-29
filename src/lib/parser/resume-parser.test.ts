@@ -343,4 +343,51 @@ Adi Shankara Institute of Engineering and Technology CGPA 8.9 2021-2025
       endDate: "2025",
     });
   });
+
+  it("maps volunteer, awards, and publications sections into the resume schema", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com
+
+VOLUNTEER EXPERIENCE
+Community Builders
+Mentor
+2022 - Present
+• Coached students on web development fundamentals
+
+AWARDS
+Builder of the Year
+Acme Corp
+2023
+Recognized for shipping the most reliable import pipeline of the year.
+
+PUBLICATIONS
+Designing Resilient Resume Imports
+Frontend Weekly
+2024
+Article about parser hardening and export parity.
+https://example.com/resume-imports
+`);
+
+    expect(result.data.volunteer?.[0]).toMatchObject({
+      organization: "Community Builders",
+      position: "Mentor",
+      startDate: "2022",
+      endDate: "Present",
+      highlights: ["Coached students on web development fundamentals"],
+    });
+    expect(result.data.awards?.[0]).toMatchObject({
+      title: "Builder of the Year",
+      awarder: "Acme Corp",
+      date: "2023",
+      summary: "Recognized for shipping the most reliable import pipeline of the year.",
+    });
+    expect(result.data.publications?.[0]).toMatchObject({
+      name: "Designing Resilient Resume Imports",
+      publisher: "Frontend Weekly",
+      releaseDate: "2024",
+      summary: "Article about parser hardening and export parity.",
+      url: "https://example.com/resume-imports",
+    });
+  });
 });

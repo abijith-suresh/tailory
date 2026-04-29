@@ -1,4 +1,11 @@
-import type { ResumeBasics, ResumeLocation, ResumeProject, ResumeSkill } from "@/types/resume";
+import type {
+  ResumeBasics,
+  ResumeInterest,
+  ResumeLanguage,
+  ResumeLocation,
+  ResumeProject,
+  ResumeSkill,
+} from "@/types/resume";
 import type { Content, Margins } from "pdfmake/interfaces";
 
 import type { PdfMargin } from "@/lib/resume/design";
@@ -214,6 +221,51 @@ export function formatSkillsText(
   const separator = options.groupSeparator ?? ", ";
   const parts = skills
     .map((skill) => joinDefined([skill.name, skill.keywords?.join(", ")], ": "))
+    .filter(Boolean) as string[];
+
+  return parts.length > 0 ? parts.join(separator) : undefined;
+}
+
+export interface LanguagesTextOptions {
+  groupSeparator?: string;
+}
+
+export function formatLanguagesText(
+  languages: ResumeLanguage[] | undefined,
+  options: LanguagesTextOptions = {}
+): string | undefined {
+  if (!languages || languages.length === 0) return undefined;
+
+  const separator = options.groupSeparator ?? ", ";
+  const parts = languages
+    .map((language) => {
+      const name = language.language.trim();
+      const fluency = language.fluency?.trim();
+
+      if (!name) {
+        return fluency;
+      }
+
+      return fluency ? `${name} (${fluency})` : name;
+    })
+    .filter(Boolean) as string[];
+
+  return parts.length > 0 ? parts.join(separator) : undefined;
+}
+
+export interface InterestsTextOptions {
+  groupSeparator?: string;
+}
+
+export function formatInterestsText(
+  interests: ResumeInterest[] | undefined,
+  options: InterestsTextOptions = {}
+): string | undefined {
+  if (!interests || interests.length === 0) return undefined;
+
+  const separator = options.groupSeparator ?? ", ";
+  const parts = interests
+    .map((interest) => joinDefined([interest.name, interest.keywords?.join(", ")], ": "))
     .filter(Boolean) as string[];
 
   return parts.length > 0 ? parts.join(separator) : undefined;

@@ -1,13 +1,16 @@
 import { SECTION_KEYWORDS } from "./section-keywords";
 import type { SectionType } from "./section-keywords";
 import type {
+  ResumeAward,
   ResumeBasics,
   ResumeCertificate,
   ResumeEducation,
   ResumeLocation,
   ResumeProject,
+  ResumePublication,
   ResumeSchema,
   ResumeSkill,
+  ResumeVolunteer,
   ResumeWork,
 } from "@/types/resume";
 import { EMPTY_RESUME } from "@/types/resume";
@@ -510,6 +513,44 @@ function tokenizeSkills(text: string): string[] {
   });
 }
 
+function splitPrimaryAndSecondary(line: string): { primary: string; secondary: string } {
+  const cleaned = cleanListValue(stripDates(line));
+  const byMatch = cleaned.match(/^(.*)\s+by\s+(.+)$/i);
+
+  if (byMatch) {
+    return {
+      primary: byMatch[1]?.trim() ?? cleaned,
+      secondary: byMatch[2]?.trim() ?? "",
+    };
+  }
+
+  const delimiterMatch = cleaned.match(/^(.*?)\s(?:[|–—-])\s(.*)$/);
+  if (delimiterMatch) {
+    return {
+      primary: delimiterMatch[1]?.trim() ?? cleaned,
+      secondary: delimiterMatch[2]?.trim() ?? "",
+    };
+  }
+
+  const commaIndex = cleaned.lastIndexOf(",");
+  if (commaIndex > -1) {
+    return {
+      primary: cleaned.slice(0, commaIndex).trim(),
+      secondary: cleaned.slice(commaIndex + 1).trim(),
+    };
+  }
+
+  return { primary: cleaned, secondary: "" };
+}
+
+function buildEntrySummary(lines: string[], highlights: string[]): string {
+  return [...lines, ...highlights]
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+}
+
 function parseCertificateLine(line: string): Pick<ResumeCertificate, "name" | "issuer" | "date"> {
   const dates = extractDates(line);
   const date = dates.startDate || dates.endDate;
@@ -518,35 +559,14 @@ function parseCertificateLine(line: string): Pick<ResumeCertificate, "name" | "i
     .replace(/\(\s*\)/g, "")
     .replace(/[|,–—-]+$/, "")
     .trim();
-
-  let name = withoutDates;
-  let issuer = "";
-
-  const byMatch = withoutDates.match(/^(.*)\s+by\s+(.+)$/i);
-  if (byMatch) {
-    name = byMatch[1]?.trim() ?? withoutDates;
-    issuer = byMatch[2]?.trim() ?? "";
-  } else {
-    const delimiterMatch = withoutDates.match(/^(.*?)\s(?:[|–—-])\s(.*)$/);
-    if (delimiterMatch) {
-      name = delimiterMatch[1]?.trim() ?? withoutDates;
-      issuer = delimiterMatch[2]?.trim() ?? "";
-    } else {
-      const commaIndex = withoutDates.lastIndexOf(",");
-      if (commaIndex > -1) {
-        name = withoutDates.slice(0, commaIndex).trim();
-        issuer = withoutDates.slice(commaIndex + 1).trim();
-      }
-    }
-  }
-
-  issuer = issuer
+  const { primary, secondary } = splitPrimaryAndSecondary(withoutDates);
+  const issuer = secondary
     .replace(/^issued by\s+/i, "")
     .replace(/[|,–—-]+$/, "")
     .trim();
 
   return {
-    name: name.replace(/[|,–—-]+$/, "").trim(),
+    name: primary.replace(/[|,–—-]+$/, "").trim(),
     issuer,
     date,
   };
@@ -630,6 +650,37 @@ function parseWork(text: string): ResumeWork[] {
   return entries;
 }
 
+function parseVolunteer(text: string): ResumeVolunteer[] {
+  const entries: ResumeVolunteer[] = [];
+  const blocks = splitEntryBlocks(text);
+
+  for (const block of blocks) {
+    if (!block.trim()) continue;
+    const lines = block
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length === 0) continue;
+
+    const dates = extractDates(block);
+    const { detailLines, highlights } = parseEntryContent(lines);
+    const parsedHeader = parseWorkHeader(detailLines[0] ?? lines[0] ?? "");
+
+    entries.push({
+      id: crypto.randomUUID(),
+      organization:
+        detailLines.length > 1 ? (detailLines[0] ?? parsedHeader.name) : parsedHeader.name,
+      position:
+        detailLines.length > 1 ? (detailLines[1] ?? parsedHeader.position) : parsedHeader.position,
+      startDate: dates.startDate,
+      endDate: dates.endDate,
+      highlights,
+    });
+  }
+
+  return entries;
+}
+
 function parseEducation(text: string): ResumeEducation[] {
   const entries: ResumeEducation[] = [];
   const hasBulletTitles = text.split("\n").some((line) => isBulletLine(line));
@@ -676,6 +727,41 @@ function parseEducation(text: string): ResumeEducation[] {
   return entries;
 }
 
+function parseAwards(text: string): ResumeAward[] {
+  const entries: ResumeAward[] = [];
+  const blocks = splitEntryBlocks(text);
+
+  for (const block of blocks) {
+    if (!block.trim()) continue;
+    const lines = block
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length === 0) continue;
+
+    const dates = extractDates(block);
+    const date = dates.startDate || dates.endDate;
+    const { detailLines, highlights } = parseEntryContent(lines);
+    const { primary, secondary } = splitPrimaryAndSecondary(detailLines[0] ?? lines[0] ?? "");
+    const hasSeparateOrganizationLine = !secondary && detailLines.length > 2;
+    const awarder = secondary || (hasSeparateOrganizationLine ? (detailLines[1] ?? "") : "");
+    const summary = buildEntrySummary(
+      detailLines.slice(hasSeparateOrganizationLine ? 2 : 1),
+      highlights
+    );
+
+    entries.push({
+      id: crypto.randomUUID(),
+      title: primary,
+      awarder,
+      date,
+      summary,
+    });
+  }
+
+  return entries;
+}
+
 function parseSkills(text: string): ResumeSkill[] {
   const items = tokenizeSkills(text);
 
@@ -684,6 +770,42 @@ function parseSkills(text: string): ResumeSkill[] {
     name,
     keywords: [],
   }));
+}
+
+function parsePublications(text: string): ResumePublication[] {
+  const entries: ResumePublication[] = [];
+  const blocks = splitEntryBlocks(text);
+
+  for (const block of blocks) {
+    if (!block.trim()) continue;
+    const lines = block
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length === 0) continue;
+
+    const dates = extractDates(block);
+    const releaseDate = dates.startDate || dates.endDate;
+    const { detailLines, highlights } = parseEntryContent(lines);
+    const { primary, secondary } = splitPrimaryAndSecondary(detailLines[0] ?? lines[0] ?? "");
+    const hasSeparatePublisherLine = !secondary && detailLines.length > 2;
+    const publisher = secondary || (hasSeparatePublisherLine ? (detailLines[1] ?? "") : "");
+    const summary = buildEntrySummary(
+      detailLines.slice(hasSeparatePublisherLine ? 2 : 1),
+      highlights
+    );
+
+    entries.push({
+      id: crypto.randomUUID(),
+      name: primary,
+      publisher,
+      releaseDate,
+      url: extractUrl(block),
+      summary,
+    });
+  }
+
+  return entries;
 }
 
 function parseProjects(text: string): ResumeProject[] {
@@ -770,9 +892,24 @@ export async function parseResume(rawText: string): Promise<ParseResult> {
     data.work = parseWork(rawSections.work);
   }
 
+  // Volunteer
+  if (rawSections.volunteer) {
+    data.volunteer = parseVolunteer(rawSections.volunteer);
+  }
+
   // Education
   if (rawSections.education) {
     data.education = parseEducation(rawSections.education);
+  }
+
+  // Awards
+  if (rawSections.awards) {
+    data.awards = parseAwards(rawSections.awards);
+  }
+
+  // Publications
+  if (rawSections.publications) {
+    data.publications = parsePublications(rawSections.publications);
   }
 
   // Skills

@@ -136,7 +136,7 @@ describe("validateResumeForExport", () => {
 
     expect(result.ok).toBe(false);
     expect(result.message).toBe(
-      "Add a summary, experience, education, skills, project, or certification before exporting."
+      "Add a summary or at least one section like experience, volunteer work, education, awards, publications, skills, languages, interests, projects, references, or certifications before exporting."
     );
   });
 
@@ -153,6 +153,26 @@ describe("validateResumeForExport", () => {
     expect(result.normalizedResume.projects?.[0]).toMatchObject({
       name: "Portfolio",
       url: "https://janedoe.dev",
+    });
+  });
+
+  it("accepts resumes that only have supplemental schema-backed sections", () => {
+    const result = validateResumeForExport(
+      createResume({
+        basics: { name: "Jane Doe" },
+        volunteer: [{ id: "vol-1", organization: "Code Club", position: "Mentor" }],
+        languages: [{ id: "lang-1", language: "English", fluency: "Native" }],
+      })
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.normalizedResume.volunteer?.[0]).toMatchObject({
+      organization: "Code Club",
+      position: "Mentor",
+    });
+    expect(result.normalizedResume.languages?.[0]).toMatchObject({
+      language: "English",
+      fluency: "Native",
     });
   });
 

@@ -555,13 +555,19 @@ function normalizeSection<T>(section: unknown, normalizer: (entry: unknown) => T
   return section.map((entry) => normalizer(entry)).filter(Boolean) as T[];
 }
 
-function countPrimarySectionEntries(resume: ResumeSchema): number {
+function countRenderableSectionEntries(resume: ResumeSchema): number {
   return (
     (resume.work?.length ?? 0) +
+    (resume.volunteer?.length ?? 0) +
     (resume.education?.length ?? 0) +
+    (resume.awards?.length ?? 0) +
+    (resume.certificates?.length ?? 0) +
+    (resume.publications?.length ?? 0) +
     (resume.skills?.length ?? 0) +
-    (resume.projects?.length ?? 0) +
-    (resume.certificates?.length ?? 0)
+    (resume.languages?.length ?? 0) +
+    (resume.interests?.length ?? 0) +
+    (resume.references?.length ?? 0) +
+    (resume.projects?.length ?? 0)
   );
 }
 
@@ -611,14 +617,14 @@ export function validateResumeForExport(data: ResumeSchema): ResumeExportValidat
   }
 
   const hasSummary = Boolean(normalizedResume.basics.summary);
-  const hasPrimaryContent = countPrimarySectionEntries(normalizedResume) > 0;
+  const hasRenderableContent = countRenderableSectionEntries(normalizedResume) > 0;
 
-  if (!hasSummary && !hasPrimaryContent) {
+  if (!hasSummary && !hasRenderableContent) {
     return {
       ok: false,
       normalizedResume,
       message:
-        "Add a summary, experience, education, skills, project, or certification before exporting.",
+        "Add a summary or at least one section like experience, volunteer work, education, awards, publications, skills, languages, interests, projects, references, or certifications before exporting.",
     };
   }
 

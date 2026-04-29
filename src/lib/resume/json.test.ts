@@ -48,6 +48,8 @@ describe("JSON Resume parsing", () => {
           highlights: [" Led launch ", ""],
         },
       ],
+      interests: [{ name: " Hiking ", keywords: [" trail running ", ""] }],
+      references: [{ name: "  Alex Smith  ", reference: "  Available on request.  " }],
       skills: [{ name: " TypeScript ", keywords: [" testing ", ""] }],
     });
 
@@ -63,6 +65,14 @@ describe("JSON Resume parsing", () => {
       highlights: ["Led launch"],
     });
     expect(parsed.work?.[0]?.id).toBeTruthy();
+    expect(parsed.interests?.[0]).toMatchObject({
+      name: "Hiking",
+      keywords: ["trail running"],
+    });
+    expect(parsed.references?.[0]).toMatchObject({
+      name: "Alex Smith",
+      reference: "Available on request.",
+    });
     expect(parsed.skills?.[0]).toMatchObject({
       name: "TypeScript",
       keywords: ["testing"],
@@ -113,6 +123,10 @@ describe("JSON Resume export", () => {
             highlights: [" Led launch "],
           },
         ],
+        interests: [{ id: "interest-1", name: " Hiking ", keywords: [" trail running "] }],
+        references: [
+          { id: "reference-1", name: " Alex Smith ", reference: " Available on request. " },
+        ],
         skills: [{ id: "skill-1", name: " TypeScript ", keywords: [" testing "] }],
       })
     );
@@ -130,6 +144,8 @@ describe("JSON Resume export", () => {
           highlights: ["Led launch"],
         },
       ],
+      interests: [{ name: "Hiking", keywords: ["trail running"] }],
+      references: [{ name: "Alex Smith", reference: "Available on request." }],
       skills: [{ name: "TypeScript", keywords: ["testing"] }],
     });
     expect(JSON.stringify(exported)).not.toContain('"id"');
@@ -142,7 +158,9 @@ describe("JSON Resume export", () => {
         label: "Senior Engineer",
         email: "jane@example.com",
       },
+      interests: [{ id: "interest-1", name: "Mentoring", keywords: ["community"] }],
       projects: [{ id: "project-1", name: "Portfolio", url: "janedoe.dev" }],
+      references: [{ id: "reference-1", name: "Alex Smith", reference: "Available on request" }],
     });
 
     const roundTripped = parseJsonResumeString(exportJsonResumeString(source));
@@ -152,10 +170,18 @@ describe("JSON Resume export", () => {
       label: "Senior Engineer",
       email: "jane@example.com",
     });
+    expect(roundTripped.interests?.[0]).toMatchObject({
+      name: "Mentoring",
+      keywords: ["community"],
+    });
     expect(roundTripped.projects?.[0]).toMatchObject({
       name: "Portfolio",
       url: "https://janedoe.dev",
     });
     expect(roundTripped.projects?.[0]?.id).toBeTruthy();
+    expect(roundTripped.references?.[0]).toMatchObject({
+      name: "Alex Smith",
+      reference: "Available on request",
+    });
   });
 });

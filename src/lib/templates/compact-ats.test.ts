@@ -34,4 +34,34 @@ describe("compactAtsTemplate", () => {
     expect(model.header.dividerAfter).toBe(true);
     expect(model.sections.filter((section) => section.dividerAfter).length).toBeGreaterThan(0);
   });
+
+  it("includes supplemental schema-backed sections in the ATS model", () => {
+    const resume = createTemplateFixture();
+    resume.volunteer = [{ id: "vol-1", organization: "Code Club", position: "Mentor" }];
+    resume.awards = [{ id: "award-1", title: "Builder Award", awarder: "Acme", date: "2024" }];
+    resume.publications = [{ id: "pub-1", name: "Resume Imports", publisher: "Frontend Weekly" }];
+    resume.languages = [{ id: "lang-1", language: "English", fluency: "Native" }];
+    resume.interests = [{ id: "interest-1", name: "Mentoring", keywords: ["community"] }];
+    resume.references = [{ id: "ref-1", name: "Alex Smith", reference: "Available on request" }];
+
+    const model = buildCompactAtsRenderModel(
+      resume,
+      resolveResumeDesignSettings({ template: "compact-ats", accentColor: "#1d6648" })
+    );
+
+    expect(model.sections.map((section) => section.id)).toEqual([
+      "summary",
+      "work",
+      "volunteer",
+      "education",
+      "awards",
+      "publications",
+      "skills",
+      "languages",
+      "interests",
+      "projects",
+      "references",
+      "certificates",
+    ]);
+  });
 });
