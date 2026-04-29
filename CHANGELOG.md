@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-04-29
+
+### Added
+
+- Direct test coverage for uploaded file processing and supplemental resume-section rendering across preview and export flows.
+
+### Fixed
+
+- Preserved volunteer, awards, publications, interests, and references across parser and JSON Resume round-trips.
+- Allowed export and preview rendering for supported non-core resume sections instead of treating them as empty content.
+- Hardened autosave snapshot parsing to fail safely on malformed draft payloads.
+
 ## [0.6.0] - 2026-04-07
 
 ### Added
@@ -65,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First usable resume editor with client-side PDF and DOCX extraction, heuristic parsing, structured editing, and live preview.
 
-[unreleased]: https://github.com/abijith-suresh/tailory/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/abijith-suresh/tailory/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/abijith-suresh/tailory/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/abijith-suresh/tailory/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/abijith-suresh/tailory/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/abijith-suresh/tailory/compare/v0.4.0...v0.4.1
