@@ -1,6 +1,7 @@
-import { type Component, For } from "solid-js";
+import { type Component, createSignal, For } from "solid-js";
 import { produce } from "solid-js/store";
 
+import { validateChronologicalDateRange } from "@/lib/editor/validation";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
@@ -20,12 +21,33 @@ function newWork(): ResumeWork {
 }
 
 const WorkForm: Component = () => {
+  const [dateErrors, setDateErrors] = createSignal<Record<string, string>>({});
+
+  const validateDates = (id: string) => {
+    const item = resume.work?.find((work) => work.id === id);
+    const error = item ? validateChronologicalDateRange(item.startDate, item.endDate) : "";
+
+    setDateErrors((current) => ({
+      ...current,
+      [id]: error,
+    }));
+  };
+
+  const clearDateError = (id: string) => {
+    setDateErrors((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+  };
+
   const addEntry = () => {
     setResume("work", (w) => [...(w ?? []), newWork()]);
   };
 
   const removeEntry = (id: string) => {
     setResume("work", (w) => (w ?? []).filter((e) => e.id !== id));
+    clearDateError(id);
   };
 
   const reorder = (items: ResumeWork[]) => {
@@ -34,6 +56,10 @@ const WorkForm: Component = () => {
 
   const updateField = <K extends keyof ResumeWork>(id: string, field: K, value: ResumeWork[K]) => {
     setResume("work", (w) => w?.id === id, field, value);
+
+    if ((field === "startDate" || field === "endDate") && dateErrors()[id]) {
+      validateDates(id);
+    }
   };
 
   const addHighlight = (id: string) => {
@@ -95,14 +121,19 @@ const WorkForm: Component = () => {
                 id={`work-start-${item.id}`}
                 value={item.startDate ?? ""}
                 onInput={(v) => updateField(item.id, "startDate", v)}
+                onBlur={() => validateDates(item.id)}
+                error={!!dateErrors()[item.id]}
                 placeholder="Jan 2021"
               />
             </FormField>
-            <FormField label="End Date" id={`work-end-${item.id}`}>
+            <FormField label="End Date" id={`work-end-${item.id}`} error={dateErrors()[item.id]}>
               <Input
                 id={`work-end-${item.id}`}
                 value={item.endDate ?? ""}
                 onInput={(v) => updateField(item.id, "endDate", v)}
+                onBlur={() => validateDates(item.id)}
+                error={!!dateErrors()[item.id]}
+                aria-describedby={dateErrors()[item.id] ? `work-end-${item.id}-error` : undefined}
                 placeholder="Present"
               />
             </FormField>

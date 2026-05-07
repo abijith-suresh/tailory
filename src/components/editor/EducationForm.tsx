@@ -1,9 +1,11 @@
-import type { Component } from "solid-js";
-import { resume, setResume } from "@/store/resume";
-import type { ResumeEducation } from "@/types/resume";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+import { type Component, createSignal } from "solid-js";
+
+import { validateChronologicalDateRange } from "@/lib/editor/validation";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
+import { ReorderableList } from "@/components/ui/ReorderableList";
+import { resume, setResume } from "@/store/resume";
+import type { ResumeEducation } from "@/types/resume";
 
 function newEducation(): ResumeEducation {
   return {
@@ -17,12 +19,33 @@ function newEducation(): ResumeEducation {
 }
 
 const EducationForm: Component = () => {
+  const [dateErrors, setDateErrors] = createSignal<Record<string, string>>({});
+
+  const validateDates = (id: string) => {
+    const item = resume.education?.find((education) => education.id === id);
+    const error = item ? validateChronologicalDateRange(item.startDate, item.endDate) : "";
+
+    setDateErrors((current) => ({
+      ...current,
+      [id]: error,
+    }));
+  };
+
+  const clearDateError = (id: string) => {
+    setDateErrors((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+  };
+
   const addEntry = () => {
     setResume("education", (e) => [...(e ?? []), newEducation()]);
   };
 
   const removeEntry = (id: string) => {
     setResume("education", (e) => (e ?? []).filter((edu) => edu.id !== id));
+    clearDateError(id);
   };
 
   const reorder = (items: ResumeEducation[]) => {
@@ -35,6 +58,10 @@ const EducationForm: Component = () => {
     value: ResumeEducation[K]
   ) => {
     setResume("education", (e) => e?.id === id, field, value);
+
+    if ((field === "startDate" || field === "endDate") && dateErrors()[id]) {
+      validateDates(id);
+    }
   };
 
   return (
@@ -80,14 +107,19 @@ const EducationForm: Component = () => {
                 id={`edu-start-${item.id}`}
                 value={item.startDate ?? ""}
                 onInput={(v) => updateField(item.id, "startDate", v)}
+                onBlur={() => validateDates(item.id)}
+                error={!!dateErrors()[item.id]}
                 placeholder="2018"
               />
             </FormField>
-            <FormField label="End Date" id={`edu-end-${item.id}`}>
+            <FormField label="End Date" id={`edu-end-${item.id}`} error={dateErrors()[item.id]}>
               <Input
                 id={`edu-end-${item.id}`}
                 value={item.endDate ?? ""}
                 onInput={(v) => updateField(item.id, "endDate", v)}
+                onBlur={() => validateDates(item.id)}
+                error={!!dateErrors()[item.id]}
+                aria-describedby={dateErrors()[item.id] ? `edu-end-${item.id}-error` : undefined}
                 placeholder="2022"
               />
             </FormField>

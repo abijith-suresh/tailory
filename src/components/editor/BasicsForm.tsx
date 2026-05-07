@@ -1,5 +1,6 @@
 import { type Component, createSignal } from "solid-js";
 
+import { validateOptionalPhone, validateRequiredName } from "@/lib/editor/validation";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { resume, setResume } from "@/store/resume";
@@ -24,16 +25,24 @@ function validateUrl(value: string): string {
 }
 
 const BasicsForm: Component = () => {
+  const [nameError, setNameError] = createSignal("");
   const [emailError, setEmailError] = createSignal("");
+  const [phoneError, setPhoneError] = createSignal("");
   const [urlError, setUrlError] = createSignal("");
 
   return (
     <div class="space-y-4">
-      <FormField label="Full Name" id="basics-name" required>
+      <FormField label="Full Name" id="basics-name" required error={nameError()}>
         <Input
           id="basics-name"
           value={resume.basics.name}
-          onInput={(v) => setResume("basics", "name", v)}
+          onInput={(v) => {
+            setResume("basics", "name", v);
+            if (nameError()) setNameError(validateRequiredName(v));
+          }}
+          onBlur={() => setNameError(validateRequiredName(resume.basics.name))}
+          error={!!nameError()}
+          aria-describedby={nameError() ? "basics-name-error" : undefined}
           placeholder="Jane Doe"
         />
       </FormField>
@@ -64,12 +73,18 @@ const BasicsForm: Component = () => {
           />
         </FormField>
 
-        <FormField label="Phone" id="basics-phone">
+        <FormField label="Phone" id="basics-phone" error={phoneError()}>
           <Input
             id="basics-phone"
             type="tel"
             value={resume.basics.phone ?? ""}
-            onInput={(v) => setResume("basics", "phone", v)}
+            onInput={(v) => {
+              setResume("basics", "phone", v);
+              if (phoneError()) setPhoneError(validateOptionalPhone(v));
+            }}
+            onBlur={() => setPhoneError(validateOptionalPhone(resume.basics.phone ?? ""))}
+            error={!!phoneError()}
+            aria-describedby={phoneError() ? "basics-phone-error" : undefined}
             placeholder="+1 555-123-4567"
           />
         </FormField>
