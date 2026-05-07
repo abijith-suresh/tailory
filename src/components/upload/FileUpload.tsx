@@ -3,7 +3,7 @@ import { type Component, createSignal, Show } from "solid-js";
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
 import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { loadResume, setImportFeedback } from "@/store/resume";
+import { clearImportReview, loadResume, showImportReview } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
 
@@ -32,7 +32,9 @@ const FileUpload: Component = () => {
     }
 
     if (outcome.feedback) {
-      setImportFeedback(outcome.feedback);
+      showImportReview(outcome.feedback);
+    } else {
+      clearImportReview();
     }
     loadResume(outcome.resume);
 
@@ -62,6 +64,7 @@ const FileUpload: Component = () => {
   const handleDragLeave = () => setIsDragOver(false);
 
   const startFromScratch = async () => {
+    clearImportReview();
     const { navigate } = await import("astro:transitions/client");
     navigate("/editor");
   };
