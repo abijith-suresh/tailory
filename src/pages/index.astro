@@ -4,8 +4,8 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 const features = [
   {
     n: "01",
-    term: "PDF & DOCX Upload",
-    def: "Drop any resume format — Tailory handles text extraction entirely in your browser.",
+    term: "PDF, DOCX & JSON Import",
+    def: "Bring in an existing resume as a PDF, DOCX, or JSON document without sending it to an application server.",
   },
   {
     n: "02",
@@ -24,8 +24,8 @@ const features = [
   },
   {
     n: "05",
-    term: "ATS-Safe Export",
-    def: "Machine-readable PDFs with no images or tables to trip up applicant tracking systems.",
+    term: "PDF & JSON Export",
+    def: "Download a machine-readable PDF for applications or export structured JSON for portability.",
   },
   {
     n: "06",
@@ -35,7 +35,10 @@ const features = [
 ];
 
 const steps = [
-  { title: "Upload", desc: "Drop your existing PDF or DOCX resume, or begin from a blank form." },
+  {
+    title: "Upload",
+    desc: "Import an existing PDF, DOCX, or JSON resume, or begin from a blank form.",
+  },
   { title: "Edit", desc: "Refine every field in a calm structured editor. No formatting fights." },
   { title: "Export", desc: "Download a polished, ATS-compatible PDF in one click." },
 ];
@@ -50,7 +53,7 @@ const formFields = [
 
 <MarketingLayout
   title="Tailory — Resume editor that belongs to you"
-  description="A fully client-side resume editor. Upload a PDF or DOCX, edit, preview live, and export an ATS-compatible PDF — all in your browser."
+  description="A fully client-side resume editor. Import PDF, DOCX, or JSON Resume data, edit it locally, preview live, and export PDF or JSON in your browser."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-6xl px-8 pb-20 pt-24" data-reveal>
@@ -65,8 +68,9 @@ const formFields = [
     </h1>
     <div class="mb-10 h-px w-20 bg-[#ccddd4]"></div>
     <p class="mb-10 max-w-xl text-lg leading-relaxed text-[#3d6650]">
-      Upload a PDF or DOCX, edit every field in a calm structured interface, and export an ATS-safe
-      PDF — without sending a single byte to a server.
+      Import a PDF, DOCX, or JSON resume, edit every field in a calm structured interface, and
+      export an ATS-safe PDF or structured JSON — without sending resume data to an application
+      server.
     </p>
     <div class="flex flex-wrap items-center gap-4">
       <a

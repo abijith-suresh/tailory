@@ -4,9 +4,9 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 const features = [
   {
     n: "01",
-    title: "PDF & DOCX Upload",
+    title: "PDF, DOCX & JSON Import",
     detail:
-      "Drag and drop any resume file — PDF or Word document — directly into the editor. Tailory extracts the text entirely in your browser using PDF.js and Mammoth. No file is ever transmitted to a server. Extraction happens instantly, locally, privately.",
+      "Bring in an existing resume as PDF, Word, or JSON. PDF and DOCX text extraction happen entirely in your browser with PDF.js and Mammoth, while JSON imports flow through Tailory's normalization layer for supported fields. No file is sent to an application server.",
     mockup: "upload",
   },
   {
@@ -20,14 +20,14 @@ const features = [
     n: "03",
     title: "Live Preview",
     detail:
-      "The editor and preview panels update in real time as you type. Switch between three templates without leaving the editor. What you see in the preview is exactly what will be exported — no surprises when you download.",
+      "The editor and preview panels update in real time as you type. You can switch between three templates without leaving the editor. The preview stays close to export output, while the generated PDF remains the final source of truth.",
     mockup: "preview",
   },
   {
     n: "04",
     title: "Three Templates",
     detail:
-      "Modern — a two-column layout with accent colour headers, suited for creative and tech roles. Minimal — clean single-column typesetting, widely readable. Compact ATS — dense single-column layout optimised for applicant tracking system parsing, zero decorative elements.",
+      "Modern uses a bold two-tone header with clear section dividers. Minimal keeps things quiet with clean spacing and little decoration. Compact ATS trims the layout down for dense, keyword-forward output.",
     mockup: "templates",
   },
   {
@@ -39,9 +39,9 @@ const features = [
   },
   {
     n: "06",
-    title: "Draft Storage",
+    title: "Local Draft Storage",
     detail:
-      "Tailory autosaves your resume to the browser's IndexedDB after every change. You can also save named drafts to load later. All storage is local — clearing your browser data is the only way to erase it. No cloud, no sync, no account.",
+      "Tailory autosaves your resume to the browser's IndexedDB after every change. You can also save named drafts to load later. Storage stays local to this browser profile — there is no cloud sync, no account, and clearing site data will remove local drafts.",
     mockup: "storage",
   },
 ];
@@ -49,7 +49,7 @@ const features = [
 
 <MarketingLayout
   title="Features — Tailory"
-  description="Everything Tailory does — PDF & DOCX upload, auto-parsing, live preview, three templates, ATS-safe PDF export, and offline draft storage."
+  description="Everything Tailory does today — PDF, DOCX, and JSON import, live preview, three templates, ATS-safe PDF export, and local browser draft storage."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
@@ -95,7 +95,7 @@ const features = [
                 <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-dashed border-[#ccddd4]">
                   <span class="text-3xl text-[#a0b8ab]">↑</span>
                 </div>
-                <p class="text-sm font-medium text-[#3d6650]">Drop PDF or DOCX here</p>
+                <p class="text-sm font-medium text-[#3d6650]">Drop PDF, DOCX, or JSON here</p>
                 <p class="mt-1 text-xs text-[#a0b8ab]">or click to browse</p>
                 <div class="mt-4 flex justify-center gap-2">
                   <span class="rounded-full border border-[#ccddd4] px-3 py-1 text-xs text-[#3d6650]">
@@ -103,6 +103,9 @@ const features = [
                   </span>
                   <span class="rounded-full border border-[#ccddd4] px-3 py-1 text-xs text-[#3d6650]">
                     .docx
+                  </span>
+                  <span class="rounded-full border border-[#ccddd4] px-3 py-1 text-xs text-[#3d6650]">
+                    .json
                   </span>
                 </div>
               </div>
