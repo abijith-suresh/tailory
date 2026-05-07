@@ -15,26 +15,8 @@ import {
   setImportError,
   setImportFeedback,
 } from "@/store/resume";
-import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
-
-interface Section {
-  id: SectionId;
-  label: string;
-  isDone: () => boolean;
-}
-
-const SECTIONS: Section[] = [
-  { id: "basics", label: "Basics", isDone: () => !!resume.basics.name },
-  { id: "summary", label: "Summary", isDone: () => !!resume.basics.summary },
-  { id: "work", label: "Work", isDone: () => (resume.work?.length ?? 0) > 0 },
-  { id: "education", label: "Education", isDone: () => (resume.education?.length ?? 0) > 0 },
-  { id: "skills", label: "Skills", isDone: () => (resume.skills?.length ?? 0) > 0 },
-  { id: "projects", label: "Projects", isDone: () => (resume.projects?.length ?? 0) > 0 },
-  { id: "certs", label: "Certs", isDone: () => (resume.certificates?.length ?? 0) > 0 },
-];
-
-const TOTAL = SECTIONS.length;
+import { EDITOR_SECTIONS, getSectionCompletionSummary } from "./section-registry";
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const CommandBar: Component = () => {
@@ -43,10 +25,12 @@ const CommandBar: Component = () => {
   const [isImporting, setIsImporting] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
 
-  const completedCount = () => SECTIONS.filter((s) => s.isDone()).length;
+  const completionSummary = () => getSectionCompletionSummary(resume);
+  const completedCount = () => completionSummary().completed;
+  const totalSections = () => completionSummary().total;
 
   const ringDash = () => {
-    const filled = (completedCount() / TOTAL) * CIRCUMFERENCE;
+    const filled = (completedCount() / totalSections()) * CIRCUMFERENCE;
     return `${filled} ${CIRCUMFERENCE - filled}`;
   };
 
@@ -151,7 +135,7 @@ const CommandBar: Component = () => {
       {/* Completion ring */}
       <div
         class="hidden shrink-0 items-center gap-1.5 md:flex"
-        aria-label={`${completedCount()} of ${TOTAL} sections complete`}
+        aria-label={`${completedCount()} of ${totalSections()} sections complete`}
       >
         <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
           <circle
@@ -184,7 +168,7 @@ const CommandBar: Component = () => {
             font-family="'DM Sans', sans-serif"
             font-weight="600"
           >
-            {completedCount()}/{TOTAL}
+            {completedCount()}/{totalSections()}
           </text>
         </svg>
       </div>
@@ -192,7 +176,7 @@ const CommandBar: Component = () => {
       {/* Section chips */}
       <nav class="hidden md:flex md:flex-1 md:items-center md:gap-1.5" aria-label="Resume sections">
         <div class="flex items-center gap-1.5">
-          <For each={SECTIONS}>
+          <For each={EDITOR_SECTIONS}>
             {(section) => (
               <button
                 type="button"
@@ -208,8 +192,10 @@ const CommandBar: Component = () => {
                       : "1px solid rgba(255,255,255,0.12)",
                 }}
               >
-                <span aria-hidden="true">{section.isDone() ? "✓" : "○"}</span>
-                {section.label}
+                <span aria-hidden="true">
+                  {completionSummary().completedSectionIds.includes(section.id) ? "✓" : "○"}
+                </span>
+                {section.navLabel}
               </button>
             )}
           </For>

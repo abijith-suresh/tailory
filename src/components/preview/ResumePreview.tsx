@@ -1,22 +1,15 @@
 import { type Component, For, Show } from "solid-js";
 
-import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import ResumeDocument from "@/components/resume/ResumeDocument";
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
-import { selectedAccentColor } from "@/store/resume";
+import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
+import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
+import {
+  getSectionCompletionSummary,
+  isResumeVisuallyEmpty,
+} from "@/components/editor/section-registry";
 
-const TOTAL_SECTIONS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
-
-const isEmpty = () =>
-  !resume.basics.name &&
-  !resume.basics.summary &&
-  (resume.work?.length ?? 0) === 0 &&
-  (resume.education?.length ?? 0) === 0 &&
-  (resume.skills?.length ?? 0) === 0 &&
-  (resume.projects?.length ?? 0) === 0 &&
-  (resume.certificates?.length ?? 0) === 0;
 
 const ResumePreview: Component = () => {
   const design = () =>
@@ -25,20 +18,11 @@ const ResumePreview: Component = () => {
       accentColor: selectedAccentColor(),
     });
 
-  const completedCount = () => {
-    let count = 0;
-    if (resume.basics.name) count++;
-    if (resume.basics.summary) count++;
-    if ((resume.work?.length ?? 0) > 0) count++;
-    if ((resume.education?.length ?? 0) > 0) count++;
-    if ((resume.skills?.length ?? 0) > 0) count++;
-    if ((resume.projects?.length ?? 0) > 0) count++;
-    if ((resume.certificates?.length ?? 0) > 0) count++;
-    return count;
-  };
+  const completionSummary = () => getSectionCompletionSummary(resume);
+  const completedCount = () => completionSummary().completed;
 
   const ringDash = () => {
-    const filled = (completedCount() / TOTAL_SECTIONS) * CIRCUMFERENCE;
+    const filled = (completedCount() / completionSummary().total) * CIRCUMFERENCE;
     return `${filled} ${CIRCUMFERENCE - filled}`;
   };
 
@@ -52,7 +36,7 @@ const ResumePreview: Component = () => {
         {/* Completeness ring */}
         <div
           class="flex items-center gap-2"
-          aria-label={`${completedCount()} of ${TOTAL_SECTIONS} sections complete`}
+          aria-label={`${completedCount()} of ${completionSummary().total} sections complete`}
         >
           <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
             <circle cx="16" cy="16" r="14" fill="none" stroke="#ccddd4" stroke-width="3" />
@@ -77,7 +61,7 @@ const ResumePreview: Component = () => {
               font-family="'DM Sans', sans-serif"
               font-weight="600"
             >
-              {completedCount()}/{TOTAL_SECTIONS}
+              {completedCount()}/{completionSummary().total}
             </text>
           </svg>
           <span class="text-xs" style={{ color: "#5a7a68" }}>
@@ -113,7 +97,7 @@ const ResumePreview: Component = () => {
 
       {/* Preview area */}
       <Show
-        when={!isEmpty()}
+        when={!isResumeVisuallyEmpty(resume)}
         fallback={
           <div class="flex flex-1 items-center justify-center p-8">
             <div class="max-w-xs text-center">
