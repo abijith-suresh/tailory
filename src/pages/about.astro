@@ -6,7 +6,7 @@ const techCards = [
     name: "Astro",
     role: "Static site framework",
     detail:
-      "Every marketing page is a zero-JS static HTML file. Only the editor page ships JavaScript — and only as much as the interactive islands need.",
+      "The marketing pages stay mostly static, with small client-side scripts for navigation and reveal effects. The heavier interactive runtime is reserved for the editor experience.",
   },
   {
     name: "SolidJS",
@@ -133,7 +133,7 @@ const techCards = [
           JSON Resume
         </p>
         <p class="text-sm leading-relaxed text-[#3d6650]">
-          Tailory stores resume data using the open{" "}
+          Tailory can import and export{" "}
           <a
             href="https://jsonresume.org"
             target="_blank"
@@ -142,8 +142,9 @@ const techCards = [
           >
             JSON Resume
           </a>{" "}
-          standard schema. This means your data is portable — not locked into a proprietary format. Any
-          tool that speaks JSON Resume can read what Tailory saves.
+          style documents through its normalization layer. Supported fields are portable today, but Tailory
+          does not yet claim full official-schema validation and some schema sections still render better
+          than they edit.
         </p>
       </div>
     </div>

@@ -12,7 +12,11 @@ const faqs = [
   },
   {
     q: "What file formats can I upload?",
-    a: "Tailory accepts PDF (.pdf) and Word documents (.docx). PDF text is extracted with PDF.js. DOCX text is extracted with Mammoth. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read.",
+    a: "Tailory accepts PDF (.pdf), Word (.docx), and JSON (.json) files. PDF text is extracted with PDF.js, DOCX text is extracted with Mammoth, and JSON imports are normalized as supported JSON Resume-style data. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read.",
+  },
+  {
+    q: "Can I import or export JSON Resume files?",
+    a: "Yes. Tailory can import and export JSON for the fields it currently supports. Supported data is normalized on import and exported without internal IDs, but Tailory does not yet claim full official-schema validation and some schema sections still render better than they edit in the form UI.",
   },
   {
     q: "Which browsers are supported?",
@@ -24,7 +28,7 @@ const faqs = [
   },
   {
     q: "What's the difference between the three templates?",
-    a: "Modern is a two-column layout with accent colour headings, suited for creative and tech roles. Minimal is a clean single-column layout that is widely readable across industries. Compact ATS is a dense single-column format with no decorative elements, maximising compatibility with automated screening tools.",
+    a: "Modern uses a strong two-tone header with clear section dividers. Minimal keeps decoration low and spacing generous. Compact ATS is the densest option and is tuned for plain, keyword-forward output.",
   },
   {
     q: "Where is my data stored between sessions?",
@@ -32,7 +36,7 @@ const faqs = [
   },
   {
     q: "Can I use Tailory offline?",
-    a: "The editor works offline once the page has loaded (fonts and assets are cached by the browser). PDF export and live preview work offline. Uploading a file works offline. The only feature that requires a connection is the initial page load.",
+    a: "Tailory has no server dependency for editing, parsing, previewing, or exporting once the app is loaded, but it is not packaged as an offline-first app and does not ship a service worker. Treat offline use as best-effort browser behavior rather than a guaranteed product feature.",
   },
   {
     q: "Can I start from scratch without uploading a file?",
@@ -47,7 +51,7 @@ const faqs = [
 
 <MarketingLayout
   title="FAQ — Tailory"
-  description="Frequently asked questions about Tailory — privacy, file formats, ATS compatibility, offline use, and more."
+  description="Frequently asked questions about Tailory — privacy, file formats, JSON Resume support, ATS compatibility, and offline limitations."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
