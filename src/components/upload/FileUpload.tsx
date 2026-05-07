@@ -1,9 +1,10 @@
 import { type Component, createSignal, Show } from "solid-js";
 
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
+import { queueEditorEntryMode } from "@/lib/editor/session-entry";
 import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
-import { loadResume, setImportFeedback } from "@/store/resume";
+import { loadResume, resetResume, setImportFeedback } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
 
@@ -31,9 +32,8 @@ const FileUpload: Component = () => {
       return;
     }
 
-    if (outcome.feedback) {
-      setImportFeedback(outcome.feedback);
-    }
+    queueEditorEntryMode("import");
+    setImportFeedback(outcome.feedback ?? null);
     loadResume(outcome.resume);
 
     // Navigate to editor with client-side transition
@@ -62,6 +62,10 @@ const FileUpload: Component = () => {
   const handleDragLeave = () => setIsDragOver(false);
 
   const startFromScratch = async () => {
+    queueEditorEntryMode("blank");
+    setImportFeedback(null);
+    resetResume();
+
     const { navigate } = await import("astro:transitions/client");
     navigate("/editor");
   };

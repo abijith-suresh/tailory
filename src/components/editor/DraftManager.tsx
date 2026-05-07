@@ -8,6 +8,8 @@ import {
   Show,
 } from "solid-js";
 
+import { initializeAutosaveSession } from "@/lib/editor/autosave-session";
+import { consumeEditorEntryMode } from "@/lib/editor/session-entry";
 import {
   AUTOSAVE_DRAFT_ID,
   deleteDraft,
@@ -16,7 +18,7 @@ import {
   saveDraft,
 } from "@/lib/storage/db";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
-import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
+import { cloneResumeData, saveAutosaveDraft } from "@/lib/storage/drafts";
 import { loadResume, resume } from "@/store/resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -51,7 +53,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   onMount(async () => {
-    const restored = await restoreAutosaveDraft();
+    const entryMode = consumeEditorEntryMode();
+    const restored = await initializeAutosaveSession(entryMode, resume);
     setStorageAvailable(restored.available);
 
     if (!restored.available) {
@@ -62,6 +65,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     if (restored.draft) {
       setLastAutosaveSnapshot(restored.snapshotJson);
       loadResume(restored.draft.resumeData);
+    } else if (restored.snapshotJson) {
+      setLastAutosaveSnapshot(restored.snapshotJson);
     }
 
     setHasHydratedAutosave(true);
