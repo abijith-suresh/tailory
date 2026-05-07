@@ -3,38 +3,19 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import EditorShell from "@/components/editor/EditorShell";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
+import { formatImportReviewCounts, getImportConfidenceState } from "@/lib/editor/import-review";
 import {
+  dismissImportReview,
   exportError,
   importError,
-  importFeedback,
+  importReview,
   setExportError,
   setImportError,
-  setImportFeedback,
 } from "@/store/resume";
 
 type Pane = "editor" | "preview";
 
 const MOBILE_BREAKPOINT = 768;
-
-// ── Confidence helpers ────────────────────────────────────────────────────────
-
-function confidenceLabel(score: number): string {
-  if (score >= 0.8) return "High confidence";
-  if (score >= 0.5) return "Medium confidence";
-  return "Low confidence — review carefully";
-}
-
-function confidenceAccent(score: number): string {
-  if (score >= 0.8) return "#1d6648";
-  if (score >= 0.5) return "#b45309";
-  return "#b91c1c";
-}
-
-function confidenceBorder(score: number): string {
-  if (score >= 0.8) return "#ccddd4";
-  if (score >= 0.5) return "#fcd34d";
-  return "#fca5a5";
-}
 
 // ── Toast components ──────────────────────────────────────────────────────────
 
@@ -156,80 +137,6 @@ function ImportErrorToast() {
   );
 }
 
-function ImportSuccessToast() {
-  createEffect(() => {
-    const fb = importFeedback();
-    if (!fb) return;
-    const timer = setTimeout(() => setImportFeedback(null), 5000);
-    onCleanup(() => clearTimeout(timer));
-  });
-
-  return (
-    <Show when={importFeedback()}>
-      {(_) => {
-        const fb = importFeedback()!;
-        const parts: string[] = [];
-        if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
-        if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);
-        if (fb.skills > 0) parts.push(`${fb.skills} skill${fb.skills > 1 ? "s" : ""}`);
-        if (fb.projects > 0) parts.push(`${fb.projects} project${fb.projects > 1 ? "s" : ""}`);
-        if (fb.certificates > 0)
-          parts.push(`${fb.certificates} cert${fb.certificates > 1 ? "s" : ""}`);
-
-        return (
-          <div
-            role="status"
-            aria-live="polite"
-            class="flex w-full items-start gap-3 rounded-lg border bg-white px-4 py-3 shadow-xl shadow-black/10"
-            style={{
-              "border-color": confidenceBorder(fb.confidence),
-              "pointer-events": "auto",
-            }}
-          >
-            {/* Colored left accent bar */}
-            <div
-              class="mt-0.5 h-4 w-1 shrink-0 rounded-full"
-              style={{ background: confidenceAccent(fb.confidence) }}
-              aria-hidden="true"
-            />
-            <div class="flex-1 text-sm leading-snug">
-              <span class="font-semibold" style={{ color: confidenceAccent(fb.confidence) }}>
-                {confidenceLabel(fb.confidence)}
-              </span>
-              <span class="ml-1 text-gray-500">
-                {parts.length > 0
-                  ? `— imported ${parts.join(", ")}.`
-                  : "— check each section for accuracy."}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setImportFeedback(null)}
-              class="shrink-0 text-gray-400 transition-colors hover:text-gray-600"
-              aria-label="Dismiss"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-        );
-      }}
-    </Show>
-  );
-}
-
 function ToastContainer() {
   return (
     <div
@@ -249,8 +156,57 @@ function ToastContainer() {
     >
       <ExportErrorToast />
       <ImportErrorToast />
-      <ImportSuccessToast />
     </div>
+  );
+}
+
+function ImportReviewCard() {
+  return (
+    <Show when={importReview() && !importReview()!.dismissed}>
+      {(_) => {
+        const review = importReview()!;
+        const confidence = getImportConfidenceState(review.feedback.confidence);
+
+        return (
+          <section
+            class="border-b px-6 py-4"
+            style={{ background: "#ffffff", "border-color": confidence.border }}
+          >
+            <div class="mx-auto flex max-w-6xl items-start gap-4">
+              <div
+                class="mt-0.5 h-12 w-1.5 shrink-0 rounded-full"
+                style={{ background: confidence.accent }}
+                aria-hidden="true"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-sm font-semibold" style={{ color: confidence.accent }}>
+                    {confidence.label}
+                  </p>
+                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                    {review.feedback.confidence}/100
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-slate-700">
+                  {formatImportReviewCounts(review.feedback)} Review each section before exporting.
+                </p>
+                <p class="mt-1 text-xs text-slate-500">
+                  This reflects parser confidence only — it is not an ATS guarantee.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={dismissImportReview}
+                class="shrink-0 rounded-md px-2 py-1 text-sm text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                aria-label="Dismiss import review card"
+              >
+                ✕
+              </button>
+            </div>
+          </section>
+        );
+      }}
+    </Show>
   );
 }
 
@@ -282,6 +238,7 @@ export default function EditorLayout() {
       }}
     >
       <ToastContainer />
+      <ImportReviewCard />
 
       {/* Panels row */}
       <div

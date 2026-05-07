@@ -6,6 +6,7 @@ import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
 import {
   activeSection,
+  clearImportReview,
   loadResume,
   resume,
   selectedAccentColor,
@@ -13,7 +14,7 @@ import {
   setActiveSection,
   setExportError,
   setImportError,
-  setImportFeedback,
+  showImportReview,
 } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
@@ -97,7 +98,9 @@ const CommandBar: Component = () => {
     }
 
     if (outcome.feedback) {
-      setImportFeedback(outcome.feedback);
+      showImportReview(outcome.feedback);
+    } else {
+      clearImportReview();
     }
     loadResume(outcome.resume);
   };

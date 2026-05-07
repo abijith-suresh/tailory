@@ -30,11 +30,31 @@ export interface ImportFeedback {
   certificates: number;
 }
 
+export interface ImportReviewState {
+  dismissed: boolean;
+  feedback: ImportFeedback;
+}
+
 export const [exportError, setExportError] = createSignal("");
 
 export const [importError, setImportError] = createSignal("");
 
-export const [importFeedback, setImportFeedback] = createSignal<ImportFeedback | null>(null);
+export const [importReview, setImportReview] = createSignal<ImportReviewState | null>(null);
+
+export function showImportReview(feedback: ImportFeedback) {
+  setImportReview({
+    feedback,
+    dismissed: false,
+  });
+}
+
+export function dismissImportReview() {
+  setImportReview((current) => (current ? { ...current, dismissed: true } : null));
+}
+
+export function clearImportReview() {
+  setImportReview(null);
+}
 
 export function loadResume(data: ResumeSchema) {
   setResume(normalizeResume(data));

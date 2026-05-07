@@ -17,7 +17,7 @@ import {
 } from "@/lib/storage/db";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
-import { loadResume, resume } from "@/store/resume";
+import { clearImportReview, loadResume, resume } from "@/store/resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -61,6 +61,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
     if (restored.draft) {
       setLastAutosaveSnapshot(restored.snapshotJson);
+      clearImportReview();
       loadResume(restored.draft.resumeData);
     }
 
@@ -131,6 +132,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   const loadDraft = (draft: ResumeDraft) => {
+    clearImportReview();
     loadResume(draft.resumeData);
     setShowList(false);
   };
