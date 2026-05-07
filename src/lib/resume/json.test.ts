@@ -94,6 +94,30 @@ describe("JSON Resume parsing", () => {
     ).toThrowError("Invalid JSON Resume: 'work' must be an array.");
   });
 
+  it("rejects unsupported top-level fields with actionable feedback", () => {
+    expect(() =>
+      parseJsonResumeDocument({
+        basics: { name: "Jane Doe" },
+        portfolio: { website: "https://janedoe.dev" },
+      })
+    ).toThrowError(
+      "Unsupported JSON Resume fields: portfolio. Tailory currently supports basics, work, volunteer, education, awards, certificates, publications, skills, languages, interests, references, and projects."
+    );
+  });
+
+  it("ignores JSON Resume metadata fields that Tailory does not store", () => {
+    const parsed = parseJsonResumeDocument({
+      $schema: "https://jsonresume.org/schema",
+      meta: { theme: "kendall" },
+      basics: { name: "Jane Doe", email: "jane@example.com" },
+    });
+
+    expect(parsed.basics).toMatchObject({
+      name: "Jane Doe",
+      email: "jane@example.com",
+    });
+  });
+
   it("rejects documents without basic identity fields", () => {
     expect(() =>
       parseJsonResumeDocument({

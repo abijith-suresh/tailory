@@ -27,6 +27,8 @@ Tailory can import and export JSON Resume-style documents for the fields it curr
 - unsupported or non-standard shapes may be rejected or normalized away
 - some fields Tailory can preserve or render are still not exposed in the editor UI
 
+Compatibility details live in [docs/json-resume.md](./docs/json-resume.md).
+
 ## Privacy and storage
 
 Tailory has no application backend, no accounts, and no server-side resume processing. Your resume data stays in your browser unless **you** choose to export or share it.
