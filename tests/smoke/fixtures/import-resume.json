@@ -1,0 +1,24 @@
+{
+  "basics": {
+    "name": "Jane Smoke",
+    "label": "Frontend Engineer",
+    "email": "jane@example.com",
+    "summary": "Imported resume used by the browser smoke suite.",
+    "url": "https://janesmoke.dev"
+  },
+  "work": [
+    {
+      "name": "Smoke Labs",
+      "position": "Engineer",
+      "startDate": "2023",
+      "endDate": "Present",
+      "summary": "Built browser-based regression coverage."
+    }
+  ],
+  "skills": [
+    {
+      "name": "TypeScript",
+      "keywords": ["testing", "playwright"]
+    }
+  ]
+}
