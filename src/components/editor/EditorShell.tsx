@@ -1,76 +1,17 @@
-import { type Component, type JSX, Show } from "solid-js";
+import { type Component, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
 import { activeSection, setActiveSection } from "@/store/resume";
-import type { SectionId } from "@/types/resume";
-import BasicsForm from "./BasicsForm";
-import CertificatesForm from "./CertificatesForm";
-import EducationForm from "./EducationForm";
-import ProjectsForm from "./ProjectsForm";
-import SkillsForm from "./SkillsForm";
-import SummaryForm from "./SummaryForm";
-import WorkForm from "./WorkForm";
-
-interface SectionMeta {
-  component: () => JSX.Element;
-  id: SectionId;
-  label: string;
-  subtitle: string;
-}
-
-const SECTIONS: SectionMeta[] = [
-  {
-    id: "basics",
-    label: "Basic Info",
-    subtitle: "Name, contact details, and headline",
-    component: () => <BasicsForm />,
-  },
-  {
-    id: "summary",
-    label: "Summary",
-    subtitle: "A brief professional overview",
-    component: () => <SummaryForm />,
-  },
-  {
-    id: "work",
-    label: "Work Experience",
-    subtitle: "Jobs, roles, and accomplishments",
-    component: () => <WorkForm />,
-  },
-  {
-    id: "education",
-    label: "Education",
-    subtitle: "Degrees, institutions, and dates",
-    component: () => <EducationForm />,
-  },
-  {
-    id: "skills",
-    label: "Skills",
-    subtitle: "Technical and professional skills",
-    component: () => <SkillsForm />,
-  },
-  {
-    id: "projects",
-    label: "Projects",
-    subtitle: "Personal and professional projects",
-    component: () => <ProjectsForm />,
-  },
-  {
-    id: "certs",
-    label: "Certifications",
-    subtitle: "Licenses, certificates, and credentials",
-    component: () => <CertificatesForm />,
-  },
-];
+import { EDITOR_SECTIONS, getEditorSectionDefinition } from "./section-registry";
 
 // ── EditorShell ──────────────────────────────────────────────────────────────
 
 const EditorShell: Component = () => {
-  const currentSection = () => SECTIONS.find((s) => s.id === activeSection());
-  const currentIndex = () => SECTIONS.findIndex((s) => s.id === activeSection());
-  const prevSection = () => (currentIndex() > 0 ? SECTIONS[currentIndex() - 1] : null);
+  const currentSection = () => getEditorSectionDefinition(activeSection());
+  const currentIndex = () => EDITOR_SECTIONS.findIndex((section) => section.id === activeSection());
+  const prevSection = () => (currentIndex() > 0 ? EDITOR_SECTIONS[currentIndex() - 1] : null);
   const nextSection = () =>
-    currentIndex() < SECTIONS.length - 1 ? SECTIONS[currentIndex() + 1] : null;
+    currentIndex() < EDITOR_SECTIONS.length - 1 ? EDITOR_SECTIONS[currentIndex() + 1] : null;
 
   return (
     <div class="flex h-full flex-col" style={{ background: "#f4f8f5" }}>
@@ -118,7 +59,7 @@ const EditorShell: Component = () => {
               </svg>
             </button>
             <span class="min-w-[3rem] text-center text-xs font-medium" style={{ color: "#5a7a68" }}>
-              {currentIndex() + 1}/{SECTIONS.length}
+              {currentIndex() + 1}/{EDITOR_SECTIONS.length}
             </span>
             <button
               type="button"

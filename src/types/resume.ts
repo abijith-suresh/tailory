@@ -142,14 +142,25 @@ export interface ResumeSchema {
   projects?: ResumeProject[];
 }
 
-export type SectionId =
+export type EditorSectionId =
   | "basics"
   | "summary"
   | "work"
   | "education"
   | "skills"
   | "projects"
-  | "certs";
+  | "certificates";
+
+export type SupportedSectionId =
+  | EditorSectionId
+  | "volunteer"
+  | "awards"
+  | "publications"
+  | "languages"
+  | "interests"
+  | "references";
+
+export type SectionId = EditorSectionId;
 
 export const EMPTY_RESUME: ResumeSchema = {
   basics: {

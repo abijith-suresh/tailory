@@ -5,7 +5,7 @@ import { DEFAULT_RESUME_ACCENT_COLOR } from "@/lib/resume/design";
 import { normalizeResume } from "@/lib/resume/normalize";
 import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
 import { EMPTY_RESUME } from "@/types/resume";
-import type { ResumeSchema, SectionId } from "@/types/resume";
+import type { EditorSectionId, ResumeSchema } from "@/types/resume";
 
 // Deep clone to avoid sharing the same reference
 const defaultResume: ResumeSchema = JSON.parse(JSON.stringify(EMPTY_RESUME));
@@ -19,7 +19,7 @@ export const [selectedAccentColor, setSelectedAccentColor] = createSignal(
   DEFAULT_RESUME_ACCENT_COLOR
 );
 
-export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
+export const [activeSection, setActiveSection] = createSignal<EditorSectionId>("basics");
 
 export interface ImportFeedback {
   confidence: number;
