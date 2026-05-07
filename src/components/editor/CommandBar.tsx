@@ -96,9 +96,7 @@ const CommandBar: Component = () => {
       return;
     }
 
-    if (outcome.feedback) {
-      setImportFeedback(outcome.feedback);
-    }
+    setImportFeedback(outcome.feedback ?? null);
     loadResume(outcome.resume);
   };
 
