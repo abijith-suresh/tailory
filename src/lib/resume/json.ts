@@ -14,6 +14,28 @@ import type {
   ResumeWork,
 } from "@/types/resume";
 
+export const JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS = [
+  "basics",
+  "work",
+  "volunteer",
+  "education",
+  "awards",
+  "certificates",
+  "publications",
+  "skills",
+  "languages",
+  "interests",
+  "references",
+  "projects",
+] as const;
+
+export const JSON_RESUME_IGNORED_TOP_LEVEL_FIELDS = ["$schema", "meta"] as const;
+
+const JSON_RESUME_ALLOWED_TOP_LEVEL_FIELDS = new Set<string>([
+  ...JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS,
+  ...JSON_RESUME_IGNORED_TOP_LEVEL_FIELDS,
+]);
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -100,9 +122,32 @@ export function parseJsonResumeString(source: string): ResumeSchema {
   return parseJsonResumeDocument(parsed);
 }
 
+function findUnsupportedTopLevelFields(document: Record<string, unknown>): string[] {
+  return Object.keys(document).filter((key) => !JSON_RESUME_ALLOWED_TOP_LEVEL_FIELDS.has(key));
+}
+
+function formatSupportedTopLevelFields(): string {
+  const fields = [...JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS];
+  const lastField = fields.pop();
+
+  if (!lastField) {
+    return "";
+  }
+
+  return fields.length > 0 ? `${fields.join(", ")}, and ${lastField}` : lastField;
+}
+
 export function parseJsonResumeDocument(document: unknown): ResumeSchema {
   if (!isRecord(document)) {
     throw new Error("Invalid JSON Resume: top-level document must be an object.");
+  }
+
+  const unsupportedFields = findUnsupportedTopLevelFields(document);
+
+  if (unsupportedFields.length > 0) {
+    throw new Error(
+      `Unsupported JSON Resume fields: ${unsupportedFields.join(", ")}. Tailory currently supports ${formatSupportedTopLevelFields()}.`
+    );
   }
 
   const normalized = normalizeResume({
