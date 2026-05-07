@@ -63,6 +63,8 @@ bun run test
 bun run build
 ```
 
+Release workflow notes live in [docs/releases.md](./docs/releases.md).
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).
