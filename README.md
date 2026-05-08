@@ -63,9 +63,11 @@ bun run lint
 bun run format:check
 bun run test
 bun run build
+bun run test:smoke
 ```
 
 Release workflow notes live in [docs/releases.md](./docs/releases.md).
+Browser smoke coverage notes live in [docs/browser-smoke.md](./docs/browser-smoke.md).
 
 ## License
 
