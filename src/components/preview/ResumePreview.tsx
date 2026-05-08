@@ -1,10 +1,16 @@
 import { type Component, For, Show } from "solid-js";
 
-import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import ResumeDocument from "@/components/resume/ResumeDocument";
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
-import { selectedAccentColor } from "@/store/resume";
+import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
+import {
+  resume,
+  selectedAccentColor,
+  selectedPageFormat,
+  selectedTemplate,
+  setSelectedPageFormat,
+  setSelectedTemplate,
+} from "@/store/resume";
 
 const TOTAL_SECTIONS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
@@ -23,6 +29,7 @@ const ResumePreview: Component = () => {
     resolveResumeDesignSettings({
       template: selectedTemplate(),
       accentColor: selectedAccentColor(),
+      pageFormat: selectedPageFormat(),
     });
 
   const completedCount = () => {
@@ -85,29 +92,54 @@ const ResumePreview: Component = () => {
           </span>
         </div>
 
-        <div class="flex gap-1.5">
-          <For each={TEMPLATE_OPTIONS}>
-            {(tpl) => (
-              <button
-                type="button"
-                onClick={() => setSelectedTemplate(tpl.id)}
-                aria-pressed={selectedTemplate() === tpl.id}
-                title={tpl.description}
-                class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${selectedTemplate() === tpl.id ? "" : "hover:bg-[#e6f0ea]"}`}
-                style={
-                  selectedTemplate() === tpl.id
-                    ? { background: "#1d6648", color: "#ffffff" }
-                    : {
-                        background: "#f4f8f5",
-                        color: "#3d5c49",
-                        border: "1px solid #ccddd4",
-                      }
-                }
-              >
-                {tpl.label}
-              </button>
-            )}
-          </For>
+        <div class="flex flex-wrap gap-3">
+          <div class="flex gap-1.5">
+            <For each={TEMPLATE_OPTIONS}>
+              {(tpl) => (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTemplate(tpl.id)}
+                  aria-pressed={selectedTemplate() === tpl.id}
+                  title={tpl.description}
+                  class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${selectedTemplate() === tpl.id ? "" : "hover:bg-[#e6f0ea]"}`}
+                  style={
+                    selectedTemplate() === tpl.id
+                      ? { background: "#1d6648", color: "#ffffff" }
+                      : {
+                          background: "#f4f8f5",
+                          color: "#3d5c49",
+                          border: "1px solid #ccddd4",
+                        }
+                  }
+                >
+                  {tpl.label}
+                </button>
+              )}
+            </For>
+          </div>
+
+          <div class="flex items-center gap-1 rounded-md border border-[#ccddd4] bg-[#f4f8f5] p-1">
+            <span class="px-2 text-[11px] font-medium uppercase tracking-wide text-[#5a7a68]">
+              Paper
+            </span>
+            <For each={["A4", "Letter"] as const}>
+              {(format) => (
+                <button
+                  type="button"
+                  onClick={() => setSelectedPageFormat(format)}
+                  aria-pressed={selectedPageFormat() === format}
+                  class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95"
+                  style={
+                    selectedPageFormat() === format
+                      ? { background: "#ffffff", color: "#0e2418", border: "1px solid #ccddd4" }
+                      : { color: "#5a7a68" }
+                  }
+                >
+                  {format}
+                </button>
+              )}
+            </For>
+          </div>
         </div>
       </div>
 
@@ -161,8 +193,9 @@ const ResumePreview: Component = () => {
       >
         <div class="flex-1 overflow-y-auto p-8">
           <div
-            class="resume-document__page mx-auto max-w-[680px] rounded-sm bg-white p-10 text-xs leading-relaxed shadow-lg"
+            class="resume-document__page mx-auto rounded-sm bg-white p-10 text-xs leading-relaxed shadow-lg"
             style={{
+              width: `min(100%, ${design().previewPageWidth}px)`,
               "font-family": design().previewFontFamily,
               "min-height": `${design().previewPageMinHeight}px`,
             }}

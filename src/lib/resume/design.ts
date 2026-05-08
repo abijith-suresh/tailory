@@ -57,7 +57,7 @@ const PAGE_FORMAT_DIMENSIONS: Record<
     pageSize: "LETTER",
     pageWidth: 612,
     pageHeight: 792,
-    previewPageWidth: 680,
+    previewPageWidth: 698,
     previewPageMinHeight: 816,
   },
 };
