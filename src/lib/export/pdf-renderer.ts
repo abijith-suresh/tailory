@@ -131,7 +131,7 @@ export function renderPdfResumeModel(
   model: ResumeRenderModel,
   options: PdfRenderOptions
 ): TDocumentDefinitions {
-  if (model.template === "modern") {
+  if (model.template === "modern" || model.template === "signal") {
     return {
       content: [
         {

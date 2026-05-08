@@ -3,9 +3,11 @@ import type { TDocumentDefinitions } from "pdfmake/interfaces";
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
 import type { ResumeDesignSettings } from "@/lib/resume/design";
 import type { ResumeSchema } from "@/types/resume";
+import { buildClassicRenderModel, classicTemplate } from "@/lib/templates/classic";
 import { buildCompactAtsRenderModel, compactAtsTemplate } from "@/lib/templates/compact-ats";
 import { buildMinimalRenderModel, minimalTemplate } from "@/lib/templates/minimal";
 import { buildModernRenderModel, modernTemplate } from "@/lib/templates/modern";
+import { buildSignalRenderModel, signalTemplate } from "@/lib/templates/signal";
 import type { ResumeRenderModel } from "@/lib/templates/render-model";
 import { TEMPLATE_IDS, type TemplateId } from "@/types/template";
 
@@ -51,6 +53,20 @@ export const TEMPLATE_REGISTRY = {
     description: "Dense, keyword-optimized",
     buildRenderModel: buildCompactAtsRenderModel,
     renderPdf: compactAtsTemplate,
+  },
+  classic: {
+    id: "classic",
+    label: "Classic",
+    description: "Traditional ordering, formal headings",
+    buildRenderModel: buildClassicRenderModel,
+    renderPdf: classicTemplate,
+  },
+  signal: {
+    id: "signal",
+    label: "Signal",
+    description: "Skills-forward, sharper emphasis",
+    buildRenderModel: buildSignalRenderModel,
+    renderPdf: signalTemplate,
   },
 } satisfies Record<TemplateId, TemplateRegistryEntry>;
 
