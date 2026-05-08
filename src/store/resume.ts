@@ -1,7 +1,11 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { DEFAULT_RESUME_ACCENT_COLOR } from "@/lib/resume/design";
+import {
+  DEFAULT_PAGE_FORMAT,
+  DEFAULT_RESUME_ACCENT_COLOR,
+  type PageFormat,
+} from "@/lib/resume/design";
 import { normalizeResume } from "@/lib/resume/normalize";
 import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
 import { EMPTY_RESUME } from "@/types/resume";
@@ -18,6 +22,9 @@ export const [selectedTemplate, setSelectedTemplate] =
 export const [selectedAccentColor, setSelectedAccentColor] = createSignal(
   DEFAULT_RESUME_ACCENT_COLOR
 );
+
+export const [selectedPageFormat, setSelectedPageFormat] =
+  createSignal<PageFormat>(DEFAULT_PAGE_FORMAT);
 
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
 
