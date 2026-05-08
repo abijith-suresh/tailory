@@ -1,13 +1,22 @@
 import { type Component, For, Show } from "solid-js";
 
-import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import ResumeDocument from "@/components/resume/ResumeDocument";
+import { getPdfFont, PDF_FONT_OPTIONS, type PdfFontId } from "@/lib/export/fonts";
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
-import { selectedAccentColor } from "@/store/resume";
+import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
+import {
+  resume,
+  selectedAccentColor,
+  selectedFontId,
+  selectedTemplate,
+  setSelectedAccentColor,
+  setSelectedFontId,
+  setSelectedTemplate,
+} from "@/store/resume";
 
 const TOTAL_SECTIONS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
+const ACCENT_COLOR_OPTIONS = ["#1d6648", "#2563eb", "#7c3aed", "#be185d", "#c2410c"];
 
 const isEmpty = () =>
   !resume.basics.name &&
@@ -23,6 +32,9 @@ const ResumePreview: Component = () => {
     resolveResumeDesignSettings({
       template: selectedTemplate(),
       accentColor: selectedAccentColor(),
+      typography: {
+        previewFontFamily: getPdfFont(selectedFontId()).previewFontFamily,
+      },
     });
 
   const completedCount = () => {
@@ -85,29 +97,74 @@ const ResumePreview: Component = () => {
           </span>
         </div>
 
-        <div class="flex gap-1.5">
-          <For each={TEMPLATE_OPTIONS}>
-            {(tpl) => (
-              <button
-                type="button"
-                onClick={() => setSelectedTemplate(tpl.id)}
-                aria-pressed={selectedTemplate() === tpl.id}
-                title={tpl.description}
-                class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${selectedTemplate() === tpl.id ? "" : "hover:bg-[#e6f0ea]"}`}
-                style={
-                  selectedTemplate() === tpl.id
-                    ? { background: "#1d6648", color: "#ffffff" }
-                    : {
-                        background: "#f4f8f5",
-                        color: "#3d5c49",
-                        border: "1px solid #ccddd4",
-                      }
-                }
-              >
-                {tpl.label}
-              </button>
-            )}
-          </For>
+        <div class="flex flex-wrap gap-3">
+          <div class="flex gap-1.5">
+            <For each={TEMPLATE_OPTIONS}>
+              {(tpl) => (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTemplate(tpl.id)}
+                  aria-pressed={selectedTemplate() === tpl.id}
+                  title={tpl.description}
+                  class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${selectedTemplate() === tpl.id ? "" : "hover:bg-[#e6f0ea]"}`}
+                  style={
+                    selectedTemplate() === tpl.id
+                      ? { background: "#1d6648", color: "#ffffff" }
+                      : {
+                          background: "#f4f8f5",
+                          color: "#3d5c49",
+                          border: "1px solid #ccddd4",
+                        }
+                  }
+                >
+                  {tpl.label}
+                </button>
+              )}
+            </For>
+          </div>
+
+          <div class="flex items-center gap-2 rounded-md border border-[#ccddd4] bg-[#f4f8f5] px-3 py-1.5">
+            <span class="text-[11px] font-medium uppercase tracking-wide text-[#5a7a68]">
+              Accent
+            </span>
+            <div class="flex items-center gap-1.5">
+              <For each={ACCENT_COLOR_OPTIONS}>
+                {(color) => (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAccentColor(color)}
+                    aria-label={`Use accent color ${color}`}
+                    aria-pressed={selectedAccentColor() === color}
+                    class="h-5 w-5 rounded-full border-2 transition-transform hover:scale-105"
+                    style={{
+                      background: color,
+                      "border-color": selectedAccentColor() === color ? "#0e2418" : "#ffffff",
+                    }}
+                  />
+                )}
+              </For>
+              <input
+                type="color"
+                value={selectedAccentColor()}
+                onInput={(event) => setSelectedAccentColor(event.currentTarget.value)}
+                aria-label="Choose custom accent color"
+                class="h-7 w-8 cursor-pointer rounded border border-[#ccddd4] bg-white p-0.5"
+              />
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 rounded-md border border-[#ccddd4] bg-[#f4f8f5] px-3 py-1.5 text-xs text-[#3d5c49]">
+            <span class="text-[11px] font-medium uppercase tracking-wide text-[#5a7a68]">Font</span>
+            <select
+              value={selectedFontId()}
+              onChange={(event) => setSelectedFontId(event.currentTarget.value as PdfFontId)}
+              class="rounded-md border border-[#ccddd4] bg-white px-2 py-1 text-xs text-[#0e2418]"
+            >
+              <For each={PDF_FONT_OPTIONS}>
+                {(font) => <option value={font.id}>{font.label}</option>}
+              </For>
+            </select>
+          </label>
         </div>
       </div>
 

@@ -187,6 +187,26 @@ describe("exportPDF", () => {
     expect(click).not.toHaveBeenCalled();
   });
 
+  it("registers and uses non-default font choices", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    await exportPDF(createTemplateFixture(), "modern", {
+      font: "helvetica",
+    });
+
+    expect(addFonts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        Helvetica: expect.objectContaining({ normal: "Helvetica" }),
+      })
+    );
+
+    const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0] as {
+      defaultStyle: { font: string };
+    };
+
+    expect(docDefinition.defaultStyle.font).toBe("Helvetica");
+  });
+
   it.each(["modern", "minimal", "compact-ats"] as const)(
     "creates a valid pdf definition for %s and propagates options",
     async (template) => {

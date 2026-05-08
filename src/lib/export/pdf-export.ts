@@ -6,16 +6,20 @@ import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
-let fontRegistrationPromise: Promise<void> | null = null;
+const fontRegistrationPromises = new Map<PdfFontId, Promise<void>>();
 
-async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promise<void> {
-  if (!fontRegistrationPromise) {
-    fontRegistrationPromise = (async () => {
-      await getPdfFont(DEFAULT_PDF_FONT).register(pdfMake);
-    })();
+async function ensurePdfMakeFontsRegistered(
+  pdfMake: PdfMakeFontRuntime,
+  fontId: PdfFontId
+): Promise<void> {
+  const existing = fontRegistrationPromises.get(fontId);
+  if (existing) {
+    return existing;
   }
 
-  return fontRegistrationPromise;
+  const registration = getPdfFont(fontId).register(pdfMake);
+  fontRegistrationPromises.set(fontId, registration);
+  return registration;
 }
 
 function getFilename(resume: ResumeSchema): string {
@@ -103,7 +107,7 @@ export async function exportPDF(
   };
   const selectedFont = getPdfFont(options.font ?? DEFAULT_PDF_FONT);
 
-  await ensurePdfMakeFontsRegistered(pdfMake);
+  await ensurePdfMakeFontsRegistered(pdfMake, selectedFont.id);
 
   const docDef = await getDocDef(validation.normalizedResume, template, {
     accentColor: options.accentColor,
