@@ -9,6 +9,7 @@ import {
   loadResume,
   resume,
   selectedAccentColor,
+  selectedFontId,
   selectedTemplate,
   setActiveSection,
   setExportError,
@@ -56,6 +57,7 @@ const CommandBar: Component = () => {
       setIsExporting(true);
       await exportPDF(JSON.parse(JSON.stringify(resume)), selectedTemplate(), {
         accentColor: selectedAccentColor(),
+        font: selectedFontId(),
       });
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unable to export this resume yet.";

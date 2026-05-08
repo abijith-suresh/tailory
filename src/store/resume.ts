@@ -2,6 +2,7 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { DEFAULT_RESUME_ACCENT_COLOR } from "@/lib/resume/design";
+import { DEFAULT_PDF_FONT, type PdfFontId } from "@/lib/export/fonts";
 import { normalizeResume } from "@/lib/resume/normalize";
 import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
 import { EMPTY_RESUME } from "@/types/resume";
@@ -18,6 +19,8 @@ export const [selectedTemplate, setSelectedTemplate] =
 export const [selectedAccentColor, setSelectedAccentColor] = createSignal(
   DEFAULT_RESUME_ACCENT_COLOR
 );
+
+export const [selectedFontId, setSelectedFontId] = createSignal<PdfFontId>(DEFAULT_PDF_FONT);
 
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
 
