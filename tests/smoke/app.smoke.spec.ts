@@ -31,10 +31,9 @@ test("imports a resume, allows an edit, and triggers PDF export", async ({ page 
   await page.getByLabel("Import resume file").setInputFiles(importFixturePath);
 
   await expect(page.getByLabel("Full Name")).toHaveValue("Jane Smoke");
-  await expect(page.getByLabel("Professional Summary")).toHaveValue(
-    "Imported resume used by the browser smoke suite."
-  );
+  await expect(page.getByText("Imported resume used by the browser smoke suite.")).toBeVisible();
 
+  await page.getByRole("button", { name: "Summary" }).click();
   await page.getByLabel("Professional Summary").fill("Updated browser smoke summary.");
   await expect(page.getByText("Updated browser smoke summary.")).toBeVisible();
 
