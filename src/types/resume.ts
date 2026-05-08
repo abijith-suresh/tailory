@@ -148,6 +148,9 @@ export type SectionId =
   | "work"
   | "education"
   | "skills"
+  | "languages"
+  | "interests"
+  | "references"
   | "projects"
   | "certs";
 

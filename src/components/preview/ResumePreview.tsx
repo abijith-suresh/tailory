@@ -6,7 +6,7 @@ import { resolveResumeDesignSettings } from "@/lib/resume/design";
 import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 import { selectedAccentColor } from "@/store/resume";
 
-const TOTAL_SECTIONS = 7;
+const TOTAL_SECTIONS = 10;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
 const isEmpty = () =>
@@ -15,6 +15,9 @@ const isEmpty = () =>
   (resume.work?.length ?? 0) === 0 &&
   (resume.education?.length ?? 0) === 0 &&
   (resume.skills?.length ?? 0) === 0 &&
+  (resume.languages?.length ?? 0) === 0 &&
+  (resume.interests?.length ?? 0) === 0 &&
+  (resume.references?.length ?? 0) === 0 &&
   (resume.projects?.length ?? 0) === 0 &&
   (resume.certificates?.length ?? 0) === 0;
 
@@ -32,6 +35,9 @@ const ResumePreview: Component = () => {
     if ((resume.work?.length ?? 0) > 0) count++;
     if ((resume.education?.length ?? 0) > 0) count++;
     if ((resume.skills?.length ?? 0) > 0) count++;
+    if ((resume.languages?.length ?? 0) > 0) count++;
+    if ((resume.interests?.length ?? 0) > 0) count++;
+    if ((resume.references?.length ?? 0) > 0) count++;
     if ((resume.projects?.length ?? 0) > 0) count++;
     if ((resume.certificates?.length ?? 0) > 0) count++;
     return count;
