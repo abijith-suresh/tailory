@@ -15,7 +15,7 @@ function renderSectionTitle(
   template: ResumeDesignSettings["template"],
   accentColor: string
 ) {
-  if (template === "modern") {
+  if (template === "modern" || template === "signal") {
     return (
       <h2
         class="resume-document__section-title mb-1 border-b pb-0.5 text-xs font-bold uppercase tracking-widest"
@@ -109,7 +109,7 @@ const ResumeDocument: Component<ResumeDocumentProps> = (props) => {
 
   const model = () => buildResumeRenderModel(local.resume, local.design);
   const headerClass = () =>
-    local.design.template === "modern"
+    local.design.template === "modern" || local.design.template === "signal"
       ? "resume-document__header mb-4 border-b-2 pb-3"
       : local.design.template === "compact-ats"
         ? "resume-document__header mb-2"
@@ -130,7 +130,9 @@ const ResumeDocument: Component<ResumeDocumentProps> = (props) => {
       <div
         class={headerClass()}
         style={
-          local.design.template === "modern" ? { "border-color": local.design.accentColor } : {}
+          local.design.template === "modern" || local.design.template === "signal"
+            ? { "border-color": local.design.accentColor }
+            : {}
         }
       >
         <h1 class={nameClass()}>{model().header.name || "Your Name"}</h1>
