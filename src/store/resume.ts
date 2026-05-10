@@ -30,11 +30,32 @@ export interface ImportFeedback {
   certificates: number;
 }
 
+export type EditorSessionMode = "edit" | "shared-readonly";
+
+export interface ShareNotice {
+  level: "error" | "info";
+  message: string;
+  url?: string;
+}
+
+export const [editorSessionMode, setEditorSessionMode] = createSignal<EditorSessionMode>("edit");
+
 export const [exportError, setExportError] = createSignal("");
 
 export const [importError, setImportError] = createSignal("");
 
 export const [importFeedback, setImportFeedback] = createSignal<ImportFeedback | null>(null);
+
+export const [shareNotice, setShareNotice] = createSignal<ShareNotice | null>(null);
+
+export function enterSharedReadOnlyMode(data: ResumeSchema) {
+  setEditorSessionMode("shared-readonly");
+  setResume(normalizeResume(data));
+}
+
+export function exitSharedReadOnlyMode() {
+  setEditorSessionMode("edit");
+}
 
 export function loadResume(data: ResumeSchema) {
   setResume(normalizeResume(data));

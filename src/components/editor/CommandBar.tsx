@@ -2,10 +2,13 @@ import { type Component, createSignal, For, Show } from "solid-js";
 
 import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
+import { buildSharedResumeUrl } from "@/lib/share/url-share";
 import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
 import {
   activeSection,
+  editorSessionMode,
+  exitSharedReadOnlyMode,
   loadResume,
   resume,
   selectedAccentColor,
@@ -14,6 +17,7 @@ import {
   setExportError,
   setImportError,
   setImportFeedback,
+  setShareNotice,
 } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
@@ -41,6 +45,7 @@ const CommandBar: Component = () => {
   const [isExporting, setIsExporting] = createSignal(false);
   const [isExportingJson, setIsExportingJson] = createSignal(false);
   const [isImporting, setIsImporting] = createSignal(false);
+  const [isSharing, setIsSharing] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
 
   const completedCount = () => SECTIONS.filter((s) => s.isDone()).length;
@@ -130,6 +135,42 @@ const CommandBar: Component = () => {
     if (file) handleImportFile(file);
     // Reset so the same file can be re-imported
     input.value = "";
+  };
+
+  const handleShareLink = async () => {
+    try {
+      setIsSharing(true);
+      const url = buildSharedResumeUrl(
+        `${window.location.origin}/editor`,
+        JSON.parse(JSON.stringify(resume))
+      );
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      }
+
+      setShareNotice({
+        level: "info",
+        message:
+          "Read-only link ready. URLs can leak through browser history, screenshots, and copied links. Large resumes may exceed practical URL limits.",
+        url,
+      });
+    } catch (error) {
+      setShareNotice({
+        level: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to create a shareable resume link right now.",
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleMakeCopy = () => {
+    exitSharedReadOnlyMode();
+    window.history.replaceState({}, "", "/editor");
   };
 
   return (
@@ -273,6 +314,81 @@ const CommandBar: Component = () => {
         </button>
 
         <DraftManager dark />
+
+        {/* Share / Make-a-copy buttons */}
+        <Show
+          when={editorSessionMode() !== "shared-readonly"}
+          fallback={
+            <button
+              type="button"
+              onClick={handleMakeCopy}
+              class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95"
+              title="Edit your own copy of this resume"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span class="hidden sm:inline">Make a copy</span>
+            </button>
+          }
+        >
+          <button
+            type="button"
+            onClick={handleShareLink}
+            disabled={isSharing()}
+            title="Generate a read-only share link"
+            class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Show
+              when={!isSharing()}
+              fallback={
+                <svg
+                  class="animate-spin"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+              }
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+            </Show>
+            <span class="hidden sm:inline">{isSharing() ? "Sharing…" : "Share"}</span>
+          </button>
+        </Show>
+
         <button
           type="button"
           onClick={handleExportJson}

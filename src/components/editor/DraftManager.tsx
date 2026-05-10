@@ -16,8 +16,16 @@ import {
   saveDraft,
 } from "@/lib/storage/db";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
+import { decodeSharedResumePayload, readSharedPayloadFromSearch } from "@/lib/share/url-share";
 import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
-import { loadResume, resume } from "@/store/resume";
+import {
+  editorSessionMode,
+  enterSharedReadOnlyMode,
+  exitSharedReadOnlyMode,
+  loadResume,
+  resume,
+  setShareNotice,
+} from "@/store/resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -51,6 +59,29 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   onMount(async () => {
+    const sharedPayload =
+      typeof window !== "undefined" ? readSharedPayloadFromSearch(window.location.search) : null;
+
+    if (sharedPayload) {
+      try {
+        const sharedResume = decodeSharedResumePayload(sharedPayload);
+        enterSharedReadOnlyMode(sharedResume);
+        setHasHydratedAutosave(true);
+        setStorageAvailable(true);
+        return;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "This shared resume link is invalid or corrupted.";
+        setShareNotice({
+          level: "error",
+          message,
+        });
+        exitSharedReadOnlyMode();
+      }
+    }
+
     const restored = await restoreAutosaveDraft();
     setStorageAvailable(restored.available);
 
@@ -69,7 +100,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   // Auto-save on store changes (debounced 2s)
   createEffect(() => {
-    if (!hasHydratedAutosave() || !storageAvailable()) return;
+    if (!hasHydratedAutosave() || !storageAvailable() || editorSessionMode() === "shared-readonly")
+      return;
 
     // Reactive read of the resume store fields that trigger saves
     const snapshot = serializeNormalizedResume(resume);
