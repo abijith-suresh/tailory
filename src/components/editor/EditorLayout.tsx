@@ -4,12 +4,15 @@ import EditorShell from "@/components/editor/EditorShell";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
 import {
+  editorSessionMode,
   exportError,
   importError,
   importFeedback,
   setExportError,
   setImportError,
   setImportFeedback,
+  setShareNotice,
+  shareNotice,
 } from "@/store/resume";
 
 type Pane = "editor" | "preview";
@@ -230,6 +233,98 @@ function ImportSuccessToast() {
   );
 }
 
+function ShareNoticeToast() {
+  createEffect(() => {
+    const notice = shareNotice();
+    if (!notice) return;
+    const timer = setTimeout(() => setShareNotice(null), 8000);
+    onCleanup(() => clearTimeout(timer));
+  });
+
+  return (
+    <Show when={shareNotice()}>
+      {(getNotice) => {
+        const notice = getNotice();
+        const isError = notice.level === "error";
+        return (
+          <div
+            role={isError ? "alert" : "status"}
+            aria-live={isError ? "assertive" : "polite"}
+            class="flex w-full items-start gap-3 rounded-lg border bg-white px-4 py-3 shadow-xl shadow-black/10"
+            style={{
+              "border-color": isError ? "#fca5a5" : "#93c5fd",
+              "pointer-events": "auto",
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={isError ? "#b91c1c" : "#1d6648"}
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mt-0.5 shrink-0"
+              aria-hidden="true"
+            >
+              <Show
+                when={!isError}
+                fallback={
+                  <>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </>
+                }
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </Show>
+            </svg>
+            <div class="flex-1 text-sm leading-snug">
+              <p style={{ color: isError ? "#b91c1c" : "#1d6648" }}>{notice.message}</p>
+              <Show when={notice.url}>
+                <input
+                  type="text"
+                  readOnly
+                  value={notice.url!}
+                  class="mt-2 w-full rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-600"
+                  onClick={(e) => (e.currentTarget as HTMLInputElement).select()}
+                />
+              </Show>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShareNotice(null)}
+              class="shrink-0 text-gray-400 transition-colors hover:text-gray-600"
+              aria-label="Dismiss"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        );
+      }}
+    </Show>
+  );
+}
+
 function ToastContainer() {
   return (
     <div
@@ -250,6 +345,7 @@ function ToastContainer() {
       <ExportErrorToast />
       <ImportErrorToast />
       <ImportSuccessToast />
+      <ShareNoticeToast />
     </div>
   );
 }
@@ -271,6 +367,8 @@ export default function EditorLayout() {
   const showEditor = () => !isMobile() || activePane() === "editor";
   const showPreview = () => !isMobile() || activePane() === "preview";
 
+  const isReadOnly = () => editorSessionMode() === "shared-readonly";
+
   return (
     <div
       style={{
@@ -283,6 +381,30 @@ export default function EditorLayout() {
     >
       <ToastContainer />
 
+      {/* Read-only banner */}
+      <Show when={isReadOnly()}>
+        <div
+          class="flex items-center justify-center gap-2 px-4 py-1.5 text-xs font-medium"
+          style={{ background: "#edf4f0", color: "#1d6648", "flex-shrink": "0" }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          Read-only view — click "Make a copy" in the toolbar to edit
+        </div>
+      </Show>
+
       {/* Panels row */}
       <div
         style={{
@@ -293,47 +415,49 @@ export default function EditorLayout() {
           position: "relative",
         }}
       >
-        {/* Editor panel */}
-        <div
-          style={{
-            display: "flex",
-            width: isMobile() ? "100%" : "50%",
-            "flex-direction": "column",
-            "border-right": isMobile() ? "none" : "1px solid #ccddd4",
-            overflow: "hidden",
-            opacity: showEditor() ? "1" : "0",
-            "pointer-events": showEditor() ? "auto" : "none",
-            transform: showEditor() ? "translateX(0)" : "translateX(-12px)",
-            transition: "opacity 180ms ease, transform 180ms ease",
-            position: isMobile() ? "absolute" : "relative",
-            inset: isMobile() ? "0" : "auto",
-          }}
-          role="region"
-          aria-label="Resume editor"
-          aria-hidden={!showEditor()}
-        >
-          <ErrorBoundary>
-            <EditorShell />
-          </ErrorBoundary>
-        </div>
+        {/* Editor panel — hidden in read-only mode */}
+        <Show when={!isReadOnly()}>
+          <div
+            style={{
+              display: "flex",
+              width: isMobile() ? "100%" : "50%",
+              "flex-direction": "column",
+              "border-right": isMobile() ? "none" : "1px solid #ccddd4",
+              overflow: "hidden",
+              opacity: showEditor() ? "1" : "0",
+              "pointer-events": showEditor() ? "auto" : "none",
+              transform: showEditor() ? "translateX(0)" : "translateX(-12px)",
+              transition: "opacity 180ms ease, transform 180ms ease",
+              position: isMobile() ? "absolute" : "relative",
+              inset: isMobile() ? "0" : "auto",
+            }}
+            role="region"
+            aria-label="Resume editor"
+            aria-hidden={!showEditor()}
+          >
+            <ErrorBoundary>
+              <EditorShell />
+            </ErrorBoundary>
+          </div>
+        </Show>
 
-        {/* Preview panel */}
+        {/* Preview panel — full-width in read-only mode */}
         <div
           style={{
             display: "flex",
-            width: isMobile() ? "100%" : "50%",
+            width: isReadOnly() ? "100%" : isMobile() ? "100%" : "50%",
             "flex-direction": "column",
             overflow: "hidden",
-            opacity: showPreview() ? "1" : "0",
-            "pointer-events": showPreview() ? "auto" : "none",
-            transform: showPreview() ? "translateX(0)" : "translateX(12px)",
+            opacity: showPreview() || isReadOnly() ? "1" : "0",
+            "pointer-events": showPreview() || isReadOnly() ? "auto" : "none",
+            transform: showPreview() || isReadOnly() ? "translateX(0)" : "translateX(12px)",
             transition: "opacity 180ms ease, transform 180ms ease",
-            position: isMobile() ? "absolute" : "relative",
-            inset: isMobile() ? "0" : "auto",
+            position: isMobile() && !isReadOnly() ? "absolute" : "relative",
+            inset: isMobile() && !isReadOnly() ? "0" : "auto",
           }}
           role="region"
           aria-label="Resume preview"
-          aria-hidden={!showPreview()}
+          aria-hidden={!(showPreview() || isReadOnly())}
         >
           <ErrorBoundary>
             <ResumePreview />
@@ -341,8 +465,8 @@ export default function EditorLayout() {
         </div>
       </div>
 
-      {/* Mobile tab bar — part of normal flow (not fixed), sits below panels */}
-      <Show when={isMobile()}>
+      {/* Mobile tab bar — hidden in read-only mode */}
+      <Show when={isMobile() && !isReadOnly()}>
         <div
           style={{ background: "#f4f8f5", "flex-shrink": "0" }}
           class="border-t border-[#ccddd4]"
