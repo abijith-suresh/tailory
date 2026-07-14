@@ -1,8 +1,8 @@
 import { type Component, createSignal, Show } from "solid-js";
 
 import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
-import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import { loadResume, setImportFeedback } from "@/store/resume";
 
 type Status = "idle" | "processing" | "error";
@@ -73,7 +73,8 @@ const FileUpload: Component = () => {
       </Show>
 
       <Show when={status() !== "processing"}>
-        <div
+        <button
+          type="button"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -121,7 +122,7 @@ const FileUpload: Component = () => {
               class="sr-only"
             />
           </label>
-        </div>
+        </button>
 
         <Show when={status() === "error"}>
           <div

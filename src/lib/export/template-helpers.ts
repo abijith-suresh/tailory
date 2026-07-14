@@ -1,3 +1,5 @@
+import type { Content, Margins } from "pdfmake/interfaces";
+import type { PdfMargin } from "@/lib/resume/design";
 import type {
   ResumeBasics,
   ResumeInterest,
@@ -6,9 +8,6 @@ import type {
   ResumeProject,
   ResumeSkill,
 } from "@/types/resume";
-import type { Content, Margins } from "pdfmake/interfaces";
-
-import type { PdfMargin } from "@/lib/resume/design";
 
 const A4_PAGE_WIDTH = 595.28;
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
+import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>

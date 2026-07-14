@@ -1,5 +1,5 @@
-import type { ResumeSchema } from "@/types/resume";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
+import { renderPdfResumeModel } from "@/lib/export/pdf-renderer";
 
 import {
   buildProjectMetadata,
@@ -9,12 +9,11 @@ import {
   formatLanguagesText,
   formatSkillsText,
 } from "@/lib/export/template-helpers";
-import { renderPdfResumeModel } from "@/lib/export/pdf-renderer";
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
 import {
+  type ResumeDesignSettings,
   resolvePageMargins,
   resolveResumeDesignSettings,
-  type ResumeDesignSettings,
 } from "@/lib/resume/design";
 import type { ResumeRenderModel, ResumeSectionModel } from "@/lib/templates/render-model";
 import {
@@ -28,6 +27,7 @@ import {
   buildVolunteerSection,
   buildWorkSection,
 } from "@/lib/templates/section-builders";
+import type { ResumeSchema } from "@/types/resume";
 
 const PAGE_MARGINS = [45, 45, 45, 45] as const;
 

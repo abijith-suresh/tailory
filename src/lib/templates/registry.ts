@@ -2,11 +2,11 @@ import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
 import type { ResumeDesignSettings } from "@/lib/resume/design";
-import type { ResumeSchema } from "@/types/resume";
 import { buildCompactAtsRenderModel, compactAtsTemplate } from "@/lib/templates/compact-ats";
 import { buildMinimalRenderModel, minimalTemplate } from "@/lib/templates/minimal";
 import { buildModernRenderModel, modernTemplate } from "@/lib/templates/modern";
 import type { ResumeRenderModel } from "@/lib/templates/render-model";
+import type { ResumeSchema } from "@/types/resume";
 import { TEMPLATE_IDS, type TemplateId } from "@/types/template";
 
 type PdfTemplateRenderer = (

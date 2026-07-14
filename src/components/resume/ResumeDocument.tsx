@@ -1,7 +1,6 @@
 import { type Component, For, type JSX, Show, splitProps } from "solid-js";
-
-import { buildResumeRenderModel } from "@/lib/templates/registry";
 import type { ResumeDesignSettings } from "@/lib/resume/design";
+import { buildResumeRenderModel } from "@/lib/templates/registry";
 import type { ResumeEntryModel, ResumeSectionModel } from "@/lib/templates/render-model";
 import type { ResumeSchema } from "@/types/resume";
 

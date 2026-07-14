@@ -2,8 +2,8 @@ import { type Component, createSignal, For, Show } from "solid-js";
 
 import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
-import { importResumeFile } from "@/lib/upload/import-resume";
 import { validateUploadFile } from "@/lib/upload/guardrails";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import {
   activeSection,
   loadResume,
@@ -136,7 +136,6 @@ const CommandBar: Component = () => {
     <header
       class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0 px-4 py-2.5"
       style={{ background: "#0e2418" }}
-      role="banner"
     >
       {/* Wordmark */}
       <a
@@ -151,6 +150,7 @@ const CommandBar: Component = () => {
       {/* Completion ring */}
       <div
         class="hidden shrink-0 items-center gap-1.5 md:flex"
+        role="status"
         aria-label={`${completedCount()} of ${TOTAL} sections complete`}
       >
         <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">

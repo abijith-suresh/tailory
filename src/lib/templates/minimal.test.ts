@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-
-import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-fixtures";
 import { buildMinimalRenderModel, minimalTemplate } from "./minimal";
+import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-fixtures";
 
 describe("minimalTemplate", () => {
   it("keeps exported contact url and avoids raw bullet glyph text", () => {
@@ -18,7 +17,7 @@ describe("minimalTemplate", () => {
 
   it("does not emit dangling auto date columns for missing dates", () => {
     const resume = createTemplateFixture();
-    resume.work = [{ ...resume.work![1]! }];
+    resume.work = [{ ...resume.work![1] }];
     const doc = minimalTemplate(resume, { fontFamily: "Roboto" });
     const serialized = JSON.stringify(doc);
 

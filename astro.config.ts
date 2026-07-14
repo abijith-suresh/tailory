@@ -1,13 +1,12 @@
+import solidJs from "@astrojs/solid-js";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
-import solidJs from "@astrojs/solid-js";
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [solidJs()],
   vite: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins: [tailwindcss() as any],
+    plugins: [tailwindcss() as unknown as import("vite").Plugin],
     resolve: {
       alias: {
         "@": "/src",

@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
-import { resume, setResume } from "@/store/resume";
 import FormField from "@/components/ui/FormField";
 import Textarea from "@/components/ui/Textarea";
+import { resume, setResume } from "@/store/resume";
 
 const SummaryForm: Component = () => (
   <div class="space-y-4">

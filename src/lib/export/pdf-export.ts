@@ -1,10 +1,10 @@
+import type { TDocumentDefinitions } from "pdfmake/interfaces";
+import type { PageFormat } from "@/lib/resume/design";
+import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
+import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
+import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { DEFAULT_PDF_FONT, getPdfFont, type PdfFontId, type PdfMakeFontRuntime } from "./fonts";
 import type { PdfTemplateOptions } from "./template-types";
-import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
-import type { PageFormat } from "@/lib/resume/design";
-import type { ResumeSchema, TemplateId } from "@/types/resume";
-import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
-import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
 let fontRegistrationPromise: Promise<void> | null = null;
 

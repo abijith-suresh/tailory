@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
-
 import { createTemplateFixture } from "@/lib/templates/template-fixtures";
+import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>
@@ -187,35 +186,36 @@ describe("exportPDF", () => {
     expect(click).not.toHaveBeenCalled();
   });
 
-  it.each(["modern", "minimal", "compact-ats"] as const)(
-    "creates a valid pdf definition for %s and propagates options",
-    async (template) => {
-      const { exportPDF } = await import("./pdf-export");
+  it.each([
+    "modern",
+    "minimal",
+    "compact-ats",
+  ] as const)("creates a valid pdf definition for %s and propagates options", async (template) => {
+    const { exportPDF } = await import("./pdf-export");
 
-      await exportPDF(createTemplateFixture(), template, {
-        accentColor: "#7c3aed",
-        pageFormat: "Letter",
-      });
+    await exportPDF(createTemplateFixture(), template, {
+      accentColor: "#7c3aed",
+      pageFormat: "Letter",
+    });
 
-      expect(createPdf).toHaveBeenCalledTimes(1);
+    expect(createPdf).toHaveBeenCalledTimes(1);
 
-      const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0] as {
-        content: unknown[];
-        defaultStyle: { font: string };
-        pageSize: string;
-        styles: Record<string, { color?: string }>;
-      };
+    const docDefinition = (createPdf.mock.calls as unknown[][]).at(0)?.[0] as {
+      content: unknown[];
+      defaultStyle: { font: string };
+      pageSize: string;
+      styles: Record<string, { color?: string }>;
+    };
 
-      expect(docDefinition.content.length).toBeGreaterThan(0);
-      expect(docDefinition.styles).toBeTruthy();
-      expect(docDefinition.defaultStyle.font).toBe("Roboto");
-      expect(docDefinition.pageSize).toBe("LETTER");
-      expect(collectNestedValues(docDefinition.content)).not.toContain(null);
-      expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
+    expect(docDefinition.content.length).toBeGreaterThan(0);
+    expect(docDefinition.styles).toBeTruthy();
+    expect(docDefinition.defaultStyle.font).toBe("Roboto");
+    expect(docDefinition.pageSize).toBe("LETTER");
+    expect(collectNestedValues(docDefinition.content)).not.toContain(null);
+    expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
 
-      if (template === "modern" || template === "minimal") {
-        expect(docDefinition.styles.sectionTitle?.color).toBe("#7c3aed");
-      }
+    if (template === "modern" || template === "minimal") {
+      expect(docDefinition.styles.sectionTitle?.color).toBe("#7c3aed");
     }
-  );
+  });
 });

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
 import { createTemplateFixture } from "@/lib/templates/template-fixtures";
-import { loadPdfTemplateRenderer, TEMPLATE_OPTIONS, TEMPLATE_REGISTRY } from "./registry";
 import { isTemplateId, TEMPLATE_IDS } from "@/types/template";
+import { loadPdfTemplateRenderer, TEMPLATE_OPTIONS, TEMPLATE_REGISTRY } from "./registry";
 
 describe("template registry", () => {
   it("keeps template option order aligned with supported ids", () => {

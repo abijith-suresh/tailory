@@ -97,9 +97,9 @@ const EditorShell: Component = () => {
           <div class="ml-3 flex shrink-0 items-center gap-1 md:hidden">
             <button
               type="button"
-              onClick={() => prevSection() && setActiveSection(prevSection()!.id)}
+              onClick={() => prevSection() && setActiveSection(prevSection()?.id)}
               disabled={!prevSection()}
-              aria-label={prevSection() ? `Go to ${prevSection()!.label}` : "First section"}
+              aria-label={prevSection() ? `Go to ${prevSection()?.label}` : "First section"}
               class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
               style={{ color: "#1d6648" }}
             >
@@ -122,9 +122,9 @@ const EditorShell: Component = () => {
             </span>
             <button
               type="button"
-              onClick={() => nextSection() && setActiveSection(nextSection()!.id)}
+              onClick={() => nextSection() && setActiveSection(nextSection()?.id)}
               disabled={!nextSection()}
-              aria-label={nextSection() ? `Go to ${nextSection()!.label}` : "Last section"}
+              aria-label={nextSection() ? `Go to ${nextSection()?.label}` : "Last section"}
               class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
               style={{ color: "#1d6648" }}
             >

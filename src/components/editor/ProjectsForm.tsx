@@ -102,8 +102,8 @@ const ProjectsForm: Component = () => {
             />
           </FormField>
 
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Highlights</label>
+          <fieldset class="space-y-1">
+            <legend class="block text-sm font-medium text-gray-700">Highlights</legend>
             <div class="space-y-2">
               <For each={item.highlights}>
                 {(h, idx) => (
@@ -133,7 +133,7 @@ const ProjectsForm: Component = () => {
                 + Add highlight
               </button>
             </div>
-          </div>
+          </fieldset>
         </div>
       )}
     />

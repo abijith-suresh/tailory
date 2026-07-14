@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-
-import { createTemplateFixture } from "./template-fixtures";
 import { buildModernRenderModel, modernTemplate } from "./modern";
+import { createTemplateFixture } from "./template-fixtures";
 
 describe("modernTemplate", () => {
   it("uses dynamic divider widths and avoids raw bullet glyph text", () => {

@@ -13,14 +13,14 @@ function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T
   const moveUp = (index: number) => {
     if (index === 0) return;
     const next = [...props.items];
-    [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+    [next[index - 1], next[index]] = [next[index] as T, next[index - 1] as T];
     props.onReorder(next);
   };
 
   const moveDown = (index: number) => {
     if (index === props.items.length - 1) return;
     const next = [...props.items];
-    [next[index + 1], next[index]] = [next[index]!, next[index + 1]!];
+    [next[index + 1], next[index]] = [next[index] as T, next[index + 1] as T];
     props.onReorder(next);
   };
 

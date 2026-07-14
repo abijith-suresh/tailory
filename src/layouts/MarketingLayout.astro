@@ -61,13 +61,11 @@ const navLinks = [
         </div>
 
         <!-- Mobile hamburger button (hidden on md+) -->
-        <button
-          id="nav-open-btn"
+        <button type="button" id="nav-open-btn"
           class="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-md md:hidden"
           aria-label="Open navigation menu"
           aria-expanded="false"
-          aria-controls="nav-drawer"
-        >
+          aria-controls="nav-drawer">
           <span
             class="line-top block h-[2px] w-5 origin-center rounded-full bg-[#1d6648] transition-transform duration-300"
           ></span>
@@ -103,11 +101,9 @@ const navLinks = [
         <span class="text-lg font-bold text-[#1d6648]" style="font-family: 'Lora', Georgia, serif">
           Tailory
         </span>
-        <button
-          id="nav-close-btn"
+        <button type="button" id="nav-close-btn"
           class="flex h-8 w-8 items-center justify-center rounded-md text-[#3d6650] transition-colors hover:bg-[#ccddd4]/50 hover:text-[#1d6648]"
-          aria-label="Close navigation menu"
-        >
+          aria-label="Close navigation menu">
           <svg
             width="16"
             height="16"
@@ -183,7 +179,7 @@ const navLinks = [
         closeBtn?.addEventListener("click", close);
         backdrop?.addEventListener("click", close);
 
-        drawerLinks.forEach((link) => link.addEventListener("click", close));
+        for (const link of drawerLinks) link.addEventListener("click", close);
 
         const onKeydown = (e: KeyboardEvent) => {
           if (e.key === "Escape") close();
@@ -211,7 +207,7 @@ const navLinks = [
       );
 
       const setupReveal = () => {
-        document.querySelectorAll("[data-reveal]").forEach((el) => observer.observe(el));
+        for (const el of document.querySelectorAll("[data-reveal]")) observer.observe(el);
       };
 
       setupReveal();

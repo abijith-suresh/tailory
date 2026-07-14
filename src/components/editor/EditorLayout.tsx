@@ -1,8 +1,8 @@
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import EditorShell from "@/components/editor/EditorShell";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import {
   exportError,
   importError,
@@ -167,7 +167,7 @@ function ImportSuccessToast() {
   return (
     <Show when={importFeedback()}>
       {(_) => {
-        const fb = importFeedback()!;
+        const fb = _ as ImportFeedback;
         const parts: string[] = [];
         if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
         if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);
@@ -294,7 +294,7 @@ export default function EditorLayout() {
         }}
       >
         {/* Editor panel */}
-        <div
+        <section
           style={{
             display: "flex",
             width: isMobile() ? "100%" : "50%",
@@ -308,17 +308,16 @@ export default function EditorLayout() {
             position: isMobile() ? "absolute" : "relative",
             inset: isMobile() ? "0" : "auto",
           }}
-          role="region"
           aria-label="Resume editor"
           aria-hidden={!showEditor()}
         >
           <ErrorBoundary>
             <EditorShell />
           </ErrorBoundary>
-        </div>
+        </section>
 
         {/* Preview panel */}
-        <div
+        <section
           style={{
             display: "flex",
             width: isMobile() ? "100%" : "50%",
@@ -331,14 +330,13 @@ export default function EditorLayout() {
             position: isMobile() ? "absolute" : "relative",
             inset: isMobile() ? "0" : "auto",
           }}
-          role="region"
           aria-label="Resume preview"
           aria-hidden={!showPreview()}
         >
           <ErrorBoundary>
             <ResumePreview />
           </ErrorBoundary>
-        </div>
+        </section>
       </div>
 
       {/* Mobile tab bar — part of normal flow (not fixed), sits below panels */}
@@ -349,6 +347,7 @@ export default function EditorLayout() {
         >
           <div class="flex" role="tablist" aria-label="Switch between editor and preview">
             <button
+              type="button"
               role="tab"
               aria-selected={activePane() === "editor"}
               class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"
@@ -376,6 +375,7 @@ export default function EditorLayout() {
             </button>
 
             <button
+              type="button"
               role="tab"
               aria-selected={activePane() === "preview"}
               class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"

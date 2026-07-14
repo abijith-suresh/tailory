@@ -54,34 +54,34 @@ describe("parseResume", () => {
   it("extracts work experience entries", async () => {
     const result = await parseResume(SAMPLE_RESUME);
     expect(result.data.work).toBeDefined();
-    expect(result.data.work!.length).toBeGreaterThan(0);
+    expect(result.data.work?.length).toBeGreaterThan(0);
   });
 
   it("extracts education", async () => {
     const result = await parseResume(SAMPLE_RESUME);
     expect(result.data.education).toBeDefined();
-    expect(result.data.education!.length).toBeGreaterThan(0);
-    expect(result.data.education![0].institution).toContain("University");
+    expect(result.data.education?.length).toBeGreaterThan(0);
+    expect(result.data.education?.[0].institution).toContain("University");
   });
 
   it("extracts skills", async () => {
     const result = await parseResume(SAMPLE_RESUME);
     expect(result.data.skills).toBeDefined();
-    expect(result.data.skills!.length).toBeGreaterThan(3);
-    const skillNames = result.data.skills!.map((s) => s.name);
+    expect(result.data.skills?.length).toBeGreaterThan(3);
+    const skillNames = result.data.skills?.map((s) => s.name);
     expect(skillNames).toContain("TypeScript");
   });
 
   it("extracts projects", async () => {
     const result = await parseResume(SAMPLE_RESUME);
     expect(result.data.projects).toBeDefined();
-    expect(result.data.projects!.length).toBeGreaterThan(0);
+    expect(result.data.projects?.length).toBeGreaterThan(0);
   });
 
   it("extracts certificates", async () => {
     const result = await parseResume(SAMPLE_RESUME);
     expect(result.data.certificates).toBeDefined();
-    expect(result.data.certificates!.length).toBeGreaterThan(0);
+    expect(result.data.certificates?.length).toBeGreaterThan(0);
   });
 
   it("returns a confidence score between 0 and 100", async () => {
