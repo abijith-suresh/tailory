@@ -22,35 +22,35 @@
   },
   "dependencies": {
     "astro": "^6.2.1",
-    "geist": "^1.7.0",
+    "geist": "^1.7.2",
     "idb": "^8.0.3",
     "mammoth": "^1.12.0",
     "pdfjs-dist": "^5.7.284",
-    "pdfmake": "^0.3.7",
-    "solid-js": "^1.9.12",
+    "pdfmake": "^0.3.11",
+    "solid-js": "^1.9.14",
     "solid-transition-group": "^0.3.0",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@astrojs/solid-js": "^6.0.1",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/vite": "^4.2.4",
+    "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
-    "@types/pdfmake": "^0.3.2",
-    "@vitest/ui": "^4.1.5",
-    "eslint": "^10.2.1",
+    "@types/pdfmake": "^0.3.3",
+    "@vitest/ui": "^4.1.10",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3",
+    "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1",
-    "vitest": "^4.1.5"
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10"
   }
 }

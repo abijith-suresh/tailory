@@ -143,13 +143,7 @@ export interface ResumeSchema {
 }
 
 export type SectionId =
-  | "basics"
-  | "summary"
-  | "work"
-  | "education"
-  | "skills"
-  | "projects"
-  | "certs";
+  "basics" | "summary" | "work" | "education" | "skills" | "projects" | "certs";
 
 export const EMPTY_RESUME: ResumeSchema = {
   basics: {

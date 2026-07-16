@@ -667,7 +667,7 @@ function stringToPDFString(e, t = !1) {
   for (let r = 0, i = e.length; r < i; r++) {
     const n = e.charCodeAt(r);
     if (!t && 27 === n) {
-      for (; ++r < i && 27 !== e.charCodeAt(r); );
+      for (; ++r < i && 27 !== e.charCodeAt(r););
       continue;
     }
     const s = aa[n];
@@ -1082,7 +1082,7 @@ async function fetchBinaryData(e) {
 function getInheritableProperty({ dict: e, key: t, getArray: a = !1, stopWhenFound: r = !0 }) {
   let i;
   const n = new RefSet();
-  for (; e instanceof Dict && (!e.objId || !n.has(e.objId)); ) {
+  for (; e instanceof Dict && (!e.objId || !n.has(e.objId));) {
     e.objId && n.put(e.objId);
     const s = a ? e.getArray(t) : e.get(t);
     if (void 0 !== s) {
@@ -2849,7 +2849,7 @@ class ImageResizer {
     }
   }
   static _guessMax(e, t, a, r) {
-    for (; e + a + 1 < t; ) {
+    for (; e + a + 1 < t;) {
       const a = Math.floor((e + t) / 2),
         i = r || a;
       this._areGoodDims(a, i) ? (e = a) : (t = a);
@@ -3131,7 +3131,7 @@ const Ca = async function JBig2(e = {}) {
   var u,
     d,
     callRuntimeCallbacks = (e) => {
-      for (; e.length > 0; ) e.shift()(t);
+      for (; e.length > 0;) e.shift()(t);
     },
     f = [],
     addOnPostRun = (e) => f.push(e),
@@ -3190,7 +3190,7 @@ const Ca = async function JBig2(e = {}) {
   t.thisProgram && t.thisProgram;
   if (t.preInit) {
     "function" == typeof t.preInit && (t.preInit = [t.preInit]);
-    for (; t.preInit.length > 0; ) t.preInit.shift()();
+    for (; t.preInit.length > 0;) t.preInit.shift()();
   }
   t.writeArrayToMemory = (e, t) => {
     s.set(e, t);
@@ -3273,7 +3273,7 @@ const Ca = async function JBig2(e = {}) {
     !(function preRun() {
       if (t.preRun) {
         "function" == typeof t.preRun && (t.preRun = [t.preRun]);
-        for (; t.preRun.length; ) addOnPreRun(t.preRun.shift());
+        for (; t.preRun.length;) addOnPreRun(t.preRun.shift());
       }
       callRuntimeCallbacks(g);
     })();
@@ -3289,7 +3289,7 @@ const Ca = async function JBig2(e = {}) {
         !(function postRun() {
           if (t.postRun) {
             "function" == typeof t.postRun && (t.postRun = [t.postRun]);
-            for (; t.postRun.length; ) addOnPostRun(t.postRun.shift());
+            for (; t.postRun.length;) addOnPostRun(t.postRun.shift());
           }
           callRuntimeCallbacks(f);
         })();
@@ -3389,24 +3389,24 @@ class DecodeStream extends BaseStream {
     this.eof = !1;
     this.buffer = va;
     this.minBufferLength = 512;
-    if (e) for (; this.minBufferLength < e; ) this.minBufferLength *= 2;
+    if (e) for (; this.minBufferLength < e;) this.minBufferLength *= 2;
   }
   get isEmpty() {
-    for (; !this.eof && 0 === this.bufferLength; ) this.readBlock();
+    for (; !this.eof && 0 === this.bufferLength;) this.readBlock();
     return 0 === this.bufferLength;
   }
   ensureBuffer(e) {
     const t = this.buffer;
     if (e <= t.byteLength) return t;
     let a = this.minBufferLength;
-    for (; a < e; ) a *= 2;
+    for (; a < e;) a *= 2;
     const r = new Uint8Array(a);
     r.set(t);
     return (this.buffer = r);
   }
   getByte() {
     const e = this.pos;
-    for (; this.bufferLength <= e; ) {
+    for (; this.bufferLength <= e;) {
       if (this.eof) return -1;
       this.readBlock();
     }
@@ -3418,11 +3418,11 @@ class DecodeStream extends BaseStream {
     if (e) {
       this.ensureBuffer(a + e);
       r = a + e;
-      for (; !this.eof && this.bufferLength < r; ) this.readBlock(t);
+      for (; !this.eof && this.bufferLength < r;) this.readBlock(t);
       const i = this.bufferLength;
       r > i && (r = i);
     } else {
-      for (; !this.eof; ) this.readBlock(t);
+      for (; !this.eof;) this.readBlock(t);
       r = this.bufferLength;
     }
     this.pos = r;
@@ -3438,10 +3438,10 @@ class DecodeStream extends BaseStream {
     this.pos = 0;
   }
   makeSubStream(e, t, a = null) {
-    if (void 0 === t) for (; !this.eof; ) this.readBlock();
+    if (void 0 === t) for (; !this.eof;) this.readBlock();
     else {
       const a = e + t;
-      for (; this.bufferLength <= a && !this.eof; ) this.readBlock();
+      for (; this.bufferLength <= a && !this.eof;) this.readBlock();
     }
     return new Stream(this.buffer, e, t, a);
   }
@@ -3449,7 +3449,7 @@ class DecodeStream extends BaseStream {
     return this.stream ? this.stream.getBaseStreams() : null;
   }
   clone() {
-    for (; !this.eof; ) this.readBlock();
+    for (; !this.eof;) this.readBlock();
     return new Stream(this.buffer, this.start, this.end - this.start, this.dict.clone());
   }
 }
@@ -3716,7 +3716,7 @@ function buildHuffmanTable(e, t) {
     r,
     i = 0,
     n = 16;
-  for (; n > 0 && !e[n - 1]; ) n--;
+  for (; n > 0 && !e[n - 1];) n--;
   const s = [{ children: [], index: 0 }];
   let o,
     c = s[0];
@@ -3724,10 +3724,10 @@ function buildHuffmanTable(e, t) {
     for (r = 0; r < e[a]; r++) {
       c = s.pop();
       c.children[c.index] = t[i];
-      for (; c.index > 0; ) c = s.pop();
+      for (; c.index > 0;) c = s.pop();
       c.index++;
       s.push(c);
-      for (; s.length <= a; ) {
+      for (; s.length <= a;) {
         s.push((o = { children: [], index: 0 }));
         c.children[c.index] = o.children;
         c = o;
@@ -3797,7 +3797,7 @@ function decodeScan(e, t, a, r, i, n, s, o, c, l = !1) {
   }
   function receive(e) {
     let t = 0;
-    for (; e > 0; ) {
+    for (; e > 0;) {
       t = (t << 1) | readBit();
       e--;
     }
@@ -3844,7 +3844,7 @@ function decodeScan(e, t, a, r, i, n, s, o, c, l = !1) {
             }
             let a = n;
             const r = s;
-            for (; a <= r; ) {
+            for (; a <= r;) {
               const r = decodeHuffman(e.huffmanTableAC),
                 i = 15 & r,
                 n = r >> 4;
@@ -3868,7 +3868,7 @@ function decodeScan(e, t, a, r, i, n, s, o, c, l = !1) {
             let i,
               o,
               l = 0;
-            for (; a <= r; ) {
+            for (; a <= r;) {
               const r = t + Fa[a],
                 n = e.blockData[r] < 0 ? -1 : 1;
               switch (b) {
@@ -3920,7 +3920,7 @@ function decodeScan(e, t, a, r, i, n, s, o, c, l = !1) {
           r = 0 === a ? 0 : receiveAndExtend(a);
         e.blockData[t] = e.pred += r;
         let i = 1;
-        for (; i < 64; ) {
+        for (; i < 64;) {
           const a = decodeHuffman(e.huffmanTableAC),
             r = 15 & a,
             n = a >> 4;
@@ -3939,7 +3939,7 @@ function decodeScan(e, t, a, r, i, n, s, o, c, l = !1) {
     O = 0;
   const D = 1 === w ? r[0].blocksPerLine * r[0].blocksPerColumn : h * a.mcusPerColumn;
   let M, R;
-  for (; O <= D; ) {
+  for (; O <= D;) {
     const a = i ? Math.min(D - O, i) : D;
     if (a > 0) {
       for (x = 0; x < w; x++) r[x].pred = 0;
@@ -4137,7 +4137,7 @@ function findNextFileMarker(e, t, a = t) {
   const n = readUint16(e, t);
   if (n >= 65472 && n <= 65534) return { invalid: null, marker: n, offset: t };
   let s = readUint16(e, i);
-  for (; !(s >= 65472 && s <= 65534); ) {
+  for (; !(s >= 65472 && s <= 65534);) {
     if (++i >= r) return null;
     s = readUint16(e, i);
   }
@@ -4189,7 +4189,7 @@ class JpegImage {
     if (65496 !== n) throw new JpegError("SOI not found");
     n = readUint16(e, r);
     r += 2;
-    e: for (; 65497 !== n; ) {
+    e: for (; 65497 !== n;) {
       switch (n) {
         case 65505:
           const { appData: t, oldOffset: s, newOffset: o } = readDataBlock(e, r);
@@ -4237,7 +4237,7 @@ class JpegImage {
     if (65496 !== u) throw new JpegError("SOI not found");
     u = readUint16(e, i);
     i += 2;
-    e: for (; 65497 !== u; ) {
+    e: for (; 65497 !== u;) {
       let d, f, g;
       switch (u) {
         case 65504:
@@ -4292,7 +4292,7 @@ class JpegImage {
           i += 2;
           const y = b + i - 2;
           let w;
-          for (; i < y; ) {
+          for (; i < y;) {
             const t = e[i++],
               a = new Uint16Array(64);
             if (t >> 4) {
@@ -4347,7 +4347,7 @@ class JpegImage {
         case 65476:
           const v = readUint16(e, i);
           i += 2;
-          for (d = 2; d < v; ) {
+          for (d = 2; d < v;) {
             const t = e[i++],
               a = new Uint8Array(16);
             let r = 0;
@@ -4486,7 +4486,7 @@ class JpegImage {
     let C = this._decodeTransform;
     a || 4 !== b || C || (C = new Int32Array([-256, 255, -256, 255, -256, 255, -256, 255]));
     if (C)
-      for (u = 0; u < y; )
+      for (u = 0; u < y;)
         for (d = 0, f = 0; d < b; d++, u++, f += 2) w[u] = ((w[u] * C[f]) >> 8) + C[f + 1];
     return w;
   }
@@ -4746,7 +4746,7 @@ const Pa = async function OpenJPEG(e = {}) {
   }
   var m,
     callRuntimeCallbacks = (e) => {
-      for (; e.length > 0; ) e.shift()(t);
+      for (; e.length > 0;) e.shift()(t);
     },
     b = [],
     addOnPostRun = (e) => b.push(e),
@@ -4865,11 +4865,11 @@ const Pa = async function OpenJPEG(e = {}) {
       var i = ((e, t, a, r) => {
         var i = t + a;
         if (r) return i;
-        for (; e[t] && !(t >= i); ) ++t;
+        for (; e[t] && !(t >= i);) ++t;
         return t;
       })(e, t, a, r);
       if (i - t > 16 && e.buffer && v) return v.decode(e.subarray(t, i));
-      for (var n = ""; t < i; ) {
+      for (var n = ""; t < i;) {
         var s = e[t++];
         if (128 & s) {
           var o = 63 & e[t++];
@@ -4907,7 +4907,7 @@ const Pa = async function OpenJPEG(e = {}) {
   t.thisProgram && (a = t.thisProgram);
   if (t.preInit) {
     "function" == typeof t.preInit && (t.preInit = [t.preInit]);
-    for (; t.preInit.length > 0; ) t.preInit.shift()();
+    for (; t.preInit.length > 0;) t.preInit.shift()();
   }
   t.writeArrayToMemory = (e, t) => {
     c.set(e, t);
@@ -5096,7 +5096,7 @@ const Pa = async function OpenJPEG(e = {}) {
     !(function preRun() {
       if (t.preRun) {
         "function" == typeof t.preRun && (t.preRun = [t.preRun]);
-        for (; t.preRun.length; ) addOnPreRun(t.preRun.shift());
+        for (; t.preRun.length;) addOnPreRun(t.preRun.shift());
       }
       callRuntimeCallbacks(y);
     })();
@@ -5112,7 +5112,7 @@ const Pa = async function OpenJPEG(e = {}) {
         !(function postRun() {
           if (t.postRun) {
             "function" == typeof t.postRun && (t.postRun = [t.postRun]);
-            for (; t.postRun.length; ) addOnPostRun(t.postRun.shift());
+            for (; t.postRun.length;) addOnPostRun(t.postRun.shift());
           }
           callRuntimeCallbacks(b);
         })();
@@ -5228,7 +5228,7 @@ class JpxImage {
   }
   static parseImageProperties(e) {
     let t = e.getByte();
-    for (; t >= 0; ) {
+    for (; t >= 0;) {
       const a = t;
       t = e.getByte();
       if (65361 === ((a << 8) | t)) {
@@ -5315,7 +5315,7 @@ addState(
         n += b;
       }
       m.set(t.subarray(i - a, i), n);
-      for (; n >= 0; ) {
+      for (; n >= 0;) {
         t[n - 4] = t[n];
         t[n - 3] = t[n + 1];
         t[n - 2] = t[n + 2];
@@ -5558,7 +5558,7 @@ addState(
       [, [l], h] = o;
     if (h) {
       Util.scaleMinMax(c, h);
-      for (let e = 0, t = l.length; e < t; )
+      for (let e = 0, t = l.length; e < t;)
         switch (l[e++]) {
           case $t:
           case zt:
@@ -5612,7 +5612,7 @@ class QueueOptimizer extends NullOptimizer {
       return;
     }
     const n = this.context;
-    for (; t < a; ) {
+    for (; t < a;) {
       if (i) {
         if ((0, i.iterateFn)(n, t)) {
           t++;
@@ -5639,7 +5639,7 @@ class QueueOptimizer extends NullOptimizer {
     this.lastProcessed = t;
   }
   flush() {
-    for (; this.match; ) {
+    for (; this.match;) {
       const e = this.queue.fnArray.length;
       this.lastProcessed = (0, this.match.processFn)(this.context, e);
       this.match = null;
@@ -5835,8 +5835,8 @@ class BinaryCMapStream {
     let n = t,
       s = 0,
       o = 0;
-    for (; n >= 0; ) {
-      for (; o < 8 && r.length > 0; ) {
+    for (; n >= 0;) {
+      for (; o < 8 && r.length > 0;) {
         s |= r[--i] << o;
         o += 7;
       }
@@ -5874,7 +5874,7 @@ class BinaryCMapReader {
       l = new Uint8Array(La),
       h = new Uint8Array(La);
     let u, d;
-    for (; (d = r.readByte()) >= 0; ) {
+    for (; (d = r.readByte()) >= 0;) {
       const e = d >> 5;
       if (7 === e) {
         switch (31 & d) {
@@ -6006,7 +6006,7 @@ class Ascii85Stream extends DecodeStream {
   readBlock() {
     const e = this.stream;
     let t = e.getByte();
-    for (; isWhiteSpace(t); ) t = e.getByte();
+    for (; isWhiteSpace(t);) t = e.getByte();
     if (-1 === t || 126 === t) {
       this.eof = !0;
       return;
@@ -6022,7 +6022,7 @@ class Ascii85Stream extends DecodeStream {
       n[0] = t;
       for (i = 1; i < 5; ++i) {
         t = e.getByte();
-        for (; isWhiteSpace(t); ) t = e.getByte();
+        for (; isWhiteSpace(t);) t = e.getByte();
         n[i] = t;
         if (-1 === t || 126 === t) break;
       }
@@ -7179,7 +7179,7 @@ class CCITTFaxDecoder {
     this.outputBits = 0;
     this.rowsDone = !1;
     let a;
-    for (; 0 === (a = this._lookBits(12)); ) this._eatBits(1);
+    for (; 0 === (a = this._lookBits(12));) this._eatBits(1);
     1 === a && this._eatBits(12);
     if (this.encoding > 0) {
       this.nextLine2D = !this._lookBits(1);
@@ -7205,7 +7205,7 @@ class CCITTFaxDecoder {
         this.codingPos = 0;
         r = 0;
         i = 0;
-        for (; t[this.codingPos] < a; ) {
+        for (; t[this.codingPos] < a;) {
           n = this._getTwoDimCode();
           switch (n) {
             case 0:
@@ -7231,14 +7231,14 @@ class CCITTFaxDecoder {
               }
               this._addPixels(t[this.codingPos] + n, i);
               t[this.codingPos] < a && this._addPixels(t[this.codingPos] + o, 1 ^ i);
-              for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+              for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               break;
             case 7:
               this._addPixels(e[r] + 3, i);
               i ^= 1;
               if (t[this.codingPos] < a) {
                 ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 5:
@@ -7246,7 +7246,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 3:
@@ -7254,7 +7254,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 2:
@@ -7262,7 +7262,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 8:
@@ -7270,7 +7270,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 r > 0 ? --r : ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 6:
@@ -7278,7 +7278,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 r > 0 ? --r : ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case 4:
@@ -7286,7 +7286,7 @@ class CCITTFaxDecoder {
               i ^= 1;
               if (t[this.codingPos] < a) {
                 r > 0 ? --r : ++r;
-                for (; e[r] <= t[this.codingPos] && e[r] < a; ) r += 2;
+                for (; e[r] <= t[this.codingPos] && e[r] < a;) r += 2;
               }
               break;
             case _a:
@@ -7303,7 +7303,7 @@ class CCITTFaxDecoder {
         t[0] = 0;
         this.codingPos = 0;
         i = 0;
-        for (; t[this.codingPos] < a; ) {
+        for (; t[this.codingPos] < a;) {
           n = 0;
           if (i)
             do {
@@ -7322,12 +7322,12 @@ class CCITTFaxDecoder {
       if (this.eoblock || this.row !== this.rows - 1) {
         n = this._lookBits(12);
         if (this.eoline)
-          for (; n !== _a && 1 !== n; ) {
+          for (; n !== _a && 1 !== n;) {
             this._eatBits(1);
             n = this._lookBits(12);
           }
         else
-          for (; 0 === n; ) {
+          for (; 0 === n;) {
             this._eatBits(1);
             n = this._lookBits(12);
           }
@@ -7446,7 +7446,7 @@ class CCITTFaxDecoder {
         this.err = !0;
         e = 0;
       }
-      for (; r > 0 && e < a[r - 1]; ) --r;
+      for (; r > 0 && e < a[r - 1];) --r;
       a[r] = e;
     }
     this.codingPos = r;
@@ -7529,7 +7529,7 @@ class CCITTFaxDecoder {
   }
   _lookBits(e) {
     let t;
-    for (; this.inputBits < e; ) {
+    for (; this.inputBits < e;) {
       if (-1 === (t = this.source.next()))
         return 0 === this.inputBits
           ? _a
@@ -7561,7 +7561,7 @@ class CCITTFaxStream extends DecodeStream {
     });
   }
   readBlock() {
-    for (; !this.eof; ) {
+    for (; !this.eof;) {
       const e = this.ccittFaxDecoder.readNextChar();
       if (-1 === e) {
         this.eof = !0;
@@ -7707,7 +7707,7 @@ class FlateStream extends DecodeStream {
     let a,
       r = this.codeSize,
       i = this.codeBuf;
-    for (; r < e; ) {
+    for (; r < e;) {
       if (-1 === (a = t.getByte())) throw new FormatError("Bad encoding in flate stream");
       i |= a << r;
       r += 8;
@@ -7724,7 +7724,7 @@ class FlateStream extends DecodeStream {
     let i,
       n = this.codeSize,
       s = this.codeBuf;
-    for (; n < r && -1 !== (i = t.getByte()); ) {
+    for (; n < r && -1 !== (i = t.getByte());) {
       s |= i << n;
       n += 8;
     }
@@ -7829,7 +7829,7 @@ class FlateStream extends DecodeStream {
         const l = e + t,
           h = new Uint8Array(l);
         let u, d, f;
-        for (; o < l; ) {
+        for (; o < l;) {
           const e = this.getCode(c);
           if (16 === e) {
             u = 2;
@@ -7849,7 +7849,7 @@ class FlateStream extends DecodeStream {
             f = a = 0;
           }
           let t = this.getBits(u) + d;
-          for (; t-- > 0; ) h[o++] = f;
+          for (; t-- > 0;) h[o++] = f;
         }
         i = this.generateHuffmanTable(h.subarray(0, e));
         n = this.generateHuffmanTable(h.subarray(e, l));
@@ -8442,7 +8442,7 @@ function decodeTextRegion(e, t, a, r, i, n, s, o, c, l, h, u, d, f, g, p, m, b, 
   let v = e ? -f.tableDeltaT.decode(y) : -decodeInteger(C, "IADT", k),
     F = 0;
   S = 0;
-  for (; S < n; ) {
+  for (; S < n;) {
     v += e ? f.tableDeltaT.decode(y) : decodeInteger(C, "IADT", k);
     F += e ? f.tableFirstS.decode(y) : decodeInteger(C, "IAFS", k);
     let r = F;
@@ -8538,7 +8538,7 @@ function readSegmentHeader(e, t) {
     l += 3;
     let t = (o + 8) >> 3;
     c[0] = e[l++];
-    for (; --t > 0; ) c.push(e[l++]);
+    for (; --t > 0;) c.push(e[l++]);
   } else if (5 === o || 6 === o) throw new Jbig2Error("invalid referred-to flags");
   a.retainBits = c;
   let h = 4;
@@ -8575,7 +8575,7 @@ function readSegmentHeader(e, t) {
       n[5] = 255 & t.height;
       for (d = l, f = e.length; d < f; d++) {
         let t = 0;
-        for (; t < i && n[t] === e[d + t]; ) t++;
+        for (; t < i && n[t] === e[d + t];) t++;
         if (t === i) {
           a.length = d + i;
           break;
@@ -8590,7 +8590,7 @@ function readSegmentHeader(e, t) {
 function readSegments(e, t, a, r) {
   const i = [];
   let n = a;
-  for (; n < r; ) {
+  for (; n < r;) {
     const a = readSegmentHeader(t, n);
     n = a.headerEnd;
     const r = { header: a, data: t };
@@ -8932,7 +8932,7 @@ class SimpleSegmentVisitor {
         y = [];
         g = Math.max(g, 1);
       }
-      for (; d.length < r; ) {
+      for (; d.length < r;) {
         f += e ? n.tableDeltaHeight.decode(u) : decodeInteger(m, "IADH", p);
         let r = 0,
           i = 0;
@@ -9019,9 +9019,9 @@ class SimpleSegmentVisitor {
         k,
         C = !1;
       const v = a.length + r;
-      for (; S.length < v; ) {
+      for (; S.length < v;) {
         let t = e ? b.decode(u) : decodeInteger(m, "IAEX", p);
-        for (; t--; ) S.push(C);
+        for (; t--;) S.push(C);
         C = !C;
       }
       for (x = 0, k = a.length; x < k; x++) S[x] && w.push(a[x]);
@@ -9062,7 +9062,7 @@ class SimpleSegmentVisitor {
         }
         const s = new HuffmanTable(n, !1);
         n.length = 0;
-        for (let e = 0; e < r; ) {
+        for (let e = 0; e < r;) {
           const t = s.decode(i);
           if (t >= 32) {
             let a, r, s;
@@ -9381,11 +9381,11 @@ class HuffmanTable {
       o = 1,
       c = 0;
     r[0] = 0;
-    for (; o <= a; ) {
+    for (; o <= a;) {
       c = (c + r[o - 1]) << 1;
       i = c;
       n = 0;
-      for (; n < t; ) {
+      for (; n < t;) {
         s = e[n];
         if (s.prefixLength === o) {
           s.prefixCode = i;
@@ -9880,7 +9880,7 @@ class LZWStream extends DecodeStream {
   readBits(e) {
     let t = this.bitsCached,
       a = this.cachedData;
-    for (; t < e; ) {
+    for (; t < e;) {
       const e = this.stream.getByte();
       if (-1 === e) {
         this.eof = !0;
@@ -10180,7 +10180,7 @@ class Parser {
           return this.makeInlineImage(e);
         case "[":
           const a = [];
-          for (; !isCmd(this.buf1, "]") && this.buf1 !== sa; ) a.push(this.getObj(e));
+          for (; !isCmd(this.buf1, "]") && this.buf1 !== sa;) a.push(this.getObj(e));
           if (this.buf1 === sa) {
             if (this.recoveryMode) return a;
             throw new ParserEOFException("End of file inside array.");
@@ -10189,7 +10189,7 @@ class Parser {
           return a;
         case "<<":
           const r = new Dict(this.xref);
-          for (; !isCmd(this.buf1, ">>") && this.buf1 !== sa; ) {
+          for (; !isCmd(this.buf1, ">>") && this.buf1 !== sa;) {
             if (!(this.buf1 instanceof Name)) {
               info("Malformed dictionary: key must be a name object");
               this.shift();
@@ -10227,7 +10227,7 @@ class Parser {
     let r,
       i,
       n = 0;
-    for (; -1 !== (r = e.getByte()); )
+    for (; -1 !== (r = e.getByte());)
       if (0 === n) n = 69 === r ? 1 : 0;
       else if (1 === n) n = 73 === r ? 2 : 0;
       else if (32 === r || 10 === r || 13 === r) {
@@ -10291,7 +10291,7 @@ class Parser {
     let a,
       r,
       i = !1;
-    for (; -1 !== (a = e.getByte()); )
+    for (; -1 !== (a = e.getByte());)
       if (255 === a) {
         switch (e.getByte()) {
           case 0:
@@ -10357,11 +10357,11 @@ class Parser {
   findASCII85DecodeInlineStreamEnd(e) {
     const t = e.pos;
     let a;
-    for (; -1 !== (a = e.getByte()); )
+    for (; -1 !== (a = e.getByte());)
       if (126 === a) {
         const t = e.pos;
         a = e.peekByte();
-        for (; isWhiteSpace(a); ) {
+        for (; isWhiteSpace(a);) {
           e.skip();
           a = e.peekByte();
         }
@@ -10386,7 +10386,7 @@ class Parser {
   findASCIIHexDecodeInlineStreamEnd(e) {
     const t = e.pos;
     let a;
-    for (; -1 !== (a = e.getByte()) && 62 !== a; );
+    for (; -1 !== (a = e.getByte()) && 62 !== a;);
     const r = e.pos - t;
     if (-1 === a) {
       warn("Inline ASCIIHexDecode image stream: EOD marker not found, searching for /EI/ instead.");
@@ -10399,7 +10399,7 @@ class Parser {
   inlineStreamSkipEI(e) {
     let t,
       a = 0;
-    for (; -1 !== (t = e.getByte()); )
+    for (; -1 !== (t = e.getByte());)
       if (0 === a) a = 69 === t ? 1 : 0;
       else if (1 === a) a = 73 === t ? 2 : 0;
       else if (2 === a) break;
@@ -10409,7 +10409,7 @@ class Parser {
       a = t.stream,
       r = Object.create(null);
     let i;
-    for (; !isCmd(this.buf1, "ID") && this.buf1 !== sa; ) {
+    for (; !isCmd(this.buf1, "ID") && this.buf1 !== sa;) {
       if (!(this.buf1 instanceof Name))
         throw new FormatError("Dictionary key must be a name object");
       const t = this.buf1.name;
@@ -10450,7 +10450,7 @@ class Parser {
         const t = [],
           a = e.length;
         let r = 0;
-        for (; r < a - 1; ) t.push((e[r++] << 8) | e[r++]);
+        for (; r < a - 1;) t.push((e[r++] << 8) | e[r++]);
         r < a && t.push(e[r]);
         return a + "_" + String.fromCharCode.apply(null, t);
       })(a.getBytes(i + c));
@@ -10488,20 +10488,20 @@ class Parser {
         new Uint8Array([115, 116, 114, 101, 97]),
       ],
       n = 9 - r;
-    for (; t.pos < t.end; ) {
+    for (; t.pos < t.end;) {
       const s = t.peekBytes(2048),
         o = s.length - 9;
       if (o <= 0) break;
       let c = 0;
-      for (; c < o; ) {
+      for (; c < o;) {
         let o = 0;
-        for (; o < r && s[c + o] === a[o]; ) o++;
+        for (; o < r && s[c + o] === a[o];) o++;
         if (o >= r) {
           let r = !1;
           for (const e of i) {
             const t = e.length;
             let i = 0;
-            for (; i < t && s[c + o + i] === e[i]; ) i++;
+            for (; i < t && s[c + o + i] === e[i];) i++;
             if (i >= n) {
               r = !0;
               break;
@@ -10685,7 +10685,7 @@ class Lexer {
     let i = e - 48,
       n = 0,
       s = 1;
-    for (; (e = this.nextChar()) >= 0; )
+    for (; (e = this.nextChar()) >= 0;)
       if (e >= 48 && e <= 57) {
         const r = e - 48;
         if (t) n = 10 * n + r;
@@ -10802,7 +10802,7 @@ class Lexer {
     let e, t;
     const a = this.strBuf;
     a.length = 0;
-    for (; (e = this.nextChar()) >= 0 && !ir[e]; )
+    for (; (e = this.nextChar()) >= 0 && !ir[e];)
       if (35 === e) {
         e = this.nextChar();
         if (ir[e]) {
@@ -10932,7 +10932,7 @@ class Lexer {
     }
     const r = this.knownCommands;
     let i = void 0 !== r?.[a];
-    for (; (t = this.nextChar()) >= 0 && !ir[t]; ) {
+    for (; (t = this.nextChar()) >= 0 && !ir[t];) {
       const e = a + String.fromCharCode(t);
       if (i && void 0 === r[e]) break;
       if (128 === a.length) throw new FormatError(`Command token too long: ${a.length}`);
@@ -10947,7 +10947,7 @@ class Lexer {
   }
   skipToNextLine() {
     let e = this.currentChar;
-    for (; e >= 0; ) {
+    for (; e >= 0;) {
       if (13 === e) {
         e = this.nextChar();
         10 === e && this.nextChar();
@@ -10974,16 +10974,14 @@ class Linearization {
       i = t.getObj(),
       n = t.getObj();
     let s, o;
-    if (
-      !(
-        Number.isInteger(a) &&
-        Number.isInteger(r) &&
-        isCmd(i, "obj") &&
-        n instanceof Dict &&
-        "number" == typeof (s = n.get("Linearized")) &&
-        s > 0
-      )
-    )
+    if (!(
+      Number.isInteger(a) &&
+      Number.isInteger(r) &&
+      isCmd(i, "obj") &&
+      n instanceof Dict &&
+      "number" == typeof (s = n.get("Linearized")) &&
+      s > 0
+    ))
       return null;
     if ((o = getInt(n, "L")) !== e.length)
       throw new Error(
@@ -11199,12 +11197,12 @@ class CMap {
   }
   mapCidRange(e, t, a) {
     if (t - e > sr) throw new Error("mapCidRange - ignoring data above MAX_MAP_RANGE.");
-    for (; e <= t; ) this._map[e++] = a++;
+    for (; e <= t;) this._map[e++] = a++;
   }
   mapBfRange(e, t, a) {
     if (t - e > sr) throw new Error("mapBfRange - ignoring data above MAX_MAP_RANGE.");
     const r = a.length - 1;
-    for (; e <= t; ) {
+    for (; e <= t;) {
       this._map[e++] = a;
       const t = a.charCodeAt(r) + 1;
       t > 255
@@ -11216,7 +11214,7 @@ class CMap {
     if (t - e > sr) throw new Error("mapBfRangeToArray - ignoring data above MAX_MAP_RANGE.");
     const r = a.length;
     let i = 0;
-    for (; e <= t && i < r; ) {
+    for (; e <= t && i < r;) {
       this._map[e] = a[i++];
       ++e;
     }
@@ -11251,7 +11249,7 @@ class CMap {
     for (let n = 0, s = i.length; n < s; n++) {
       r = ((r << 8) | e.charCodeAt(t + n)) >>> 0;
       const s = i[n];
-      for (let e = 0, t = s.length; e < t; ) {
+      for (let e = 0, t = s.length; e < t;) {
         const t = s[e++],
           i = s[e++];
         if (r >= t && r <= i) {
@@ -11268,7 +11266,7 @@ class CMap {
     const t = this.codespaceRanges;
     for (let a = 0, r = t.length; a < r; a++) {
       const r = t[a];
-      for (let t = 0, i = r.length; t < i; ) {
+      for (let t = 0, i = r.length; t < i;) {
         const i = r[t++],
           n = r[t++];
         if (e >= i && e <= n) return a + 1;
@@ -11371,7 +11369,7 @@ function parseBfRange(e, t) {
       {
         a = t.getObj();
         const n = [];
-        for (; !isCmd(a, "]") && a !== sa; ) {
+        for (; !isCmd(a, "]") && a !== sa;) {
           n.push(a);
           a = t.getObj();
         }
@@ -19465,7 +19463,7 @@ class CFFParser {
     let e = this.bytes;
     const t = e.length;
     let a = 0;
-    for (; a < t && 1 !== e[a]; ) ++a;
+    for (; a < t && 1 !== e[a];) ++a;
     if (a >= t) throw new FormatError("Invalid CFF header");
     if (0 !== a) {
       info("cff data is shifted");
@@ -19488,7 +19486,7 @@ class CFFParser {
           const r = 15,
             i = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "E", "E-", null, "-"],
             n = e.length;
-          for (; t < n; ) {
+          for (; t < n;) {
             const n = e[t++],
               s = n >> 4,
               o = 15 & n;
@@ -19521,7 +19519,7 @@ class CFFParser {
     const r = [];
     t = 0;
     const i = e.length;
-    for (; t < i; ) {
+    for (; t < i;) {
       let i = e[t];
       if (i <= 21) {
         12 === i && (i = (i << 8) | e[++t]);
@@ -19586,7 +19584,7 @@ class CFFParser {
     let i = e.stackSize;
     const n = e.stack;
     let s = t.length;
-    for (let o = 0; o < s; ) {
+    for (let o = 0; o < s;) {
       const c = t[o++];
       let l = null;
       if (12 === c) {
@@ -19815,14 +19813,14 @@ class CFFParser {
         }
         break;
       case 1:
-        for (; o.length <= t; ) {
+        for (; o.length <= t;) {
           c = (i[e++] << 8) | i[e++];
           l = i[e++];
           for (h = 0; h <= l; h++) o.push(r ? c++ : a.get(c++));
         }
         break;
       case 2:
-        for (; o.length <= t; ) {
+        for (; o.length <= t;) {
           c = (i[e++] << 8) | i[e++];
           l = (i[e++] << 8) | i[e++];
           for (h = 0; h <= l; h++) o.push(r ? c++ : a.get(c++));
@@ -21622,7 +21620,7 @@ function lookupCmap(e, t) {
   let r = 0,
     i = 0,
     n = e.length - 1;
-  for (; i < n; ) {
+  for (; i < n;) {
     const t = (i + n + 1) >> 1;
     a < e[t].start ? (n = t - 1) : (i = t);
   }
@@ -21715,11 +21713,11 @@ function compileGlyf(e, t, a) {
     r += 2 + readUint16(e, r);
     const l = t.at(-1) + 1,
       h = [];
-    for (; h.length < l; ) {
+    for (; h.length < l;) {
       n = e[r++];
       let t = 1;
       8 & n && (t += e[r++]);
-      for (; t-- > 0; ) h.push({ flags: n });
+      for (; t-- > 0;) h.push({ flags: n });
     }
     for (a = 0; a < l; a++) {
       switch (18 & h[a].flags) {
@@ -21791,7 +21789,7 @@ function compileCharString(e, t, a, r) {
     c = null;
   !(function parse(e) {
     let c = 0;
-    for (; c < e.length; ) {
+    for (; c < e.length;) {
       let l,
         h,
         u,
@@ -21817,14 +21815,14 @@ function compileCharString(e, t, a, r) {
           y = !0;
           break;
         case 5:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             n += i.shift();
             s += i.shift();
             lineTo(n, s);
           }
           break;
         case 6:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             n += i.shift();
             lineTo(n, s);
             if (0 === i.length) break;
@@ -21833,7 +21831,7 @@ function compileCharString(e, t, a, r) {
           }
           break;
         case 7:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             s += i.shift();
             lineTo(n, s);
             if (0 === i.length) break;
@@ -21842,7 +21840,7 @@ function compileCharString(e, t, a, r) {
           }
           break;
         case 8:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             l = n + i.shift();
             u = s + i.shift();
             h = l + i.shift();
@@ -21971,7 +21969,7 @@ function compileCharString(e, t, a, r) {
           y = !0;
           break;
         case 24:
-          for (; i.length > 2; ) {
+          for (; i.length > 2;) {
             l = n + i.shift();
             u = s + i.shift();
             h = l + i.shift();
@@ -21985,7 +21983,7 @@ function compileCharString(e, t, a, r) {
           lineTo(n, s);
           break;
         case 25:
-          for (; i.length > 6; ) {
+          for (; i.length > 6;) {
             n += i.shift();
             s += i.shift();
             lineTo(n, s);
@@ -22000,7 +21998,7 @@ function compileCharString(e, t, a, r) {
           break;
         case 26:
           i.length % 2 && (n += i.shift());
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             l = n;
             u = s + i.shift();
             h = l + i.shift();
@@ -22012,7 +22010,7 @@ function compileCharString(e, t, a, r) {
           break;
         case 27:
           i.length % 2 && (s += i.shift());
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             l = n + i.shift();
             u = s;
             h = l + i.shift();
@@ -22032,7 +22030,7 @@ function compileCharString(e, t, a, r) {
           b && parse(b);
           break;
         case 30:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             l = n;
             u = s + i.shift();
             h = l + i.shift();
@@ -22051,7 +22049,7 @@ function compileCharString(e, t, a, r) {
           }
           break;
         case 31:
-          for (; i.length > 0; ) {
+          for (; i.length > 0;) {
             l = n + i.shift();
             u = s;
             h = l + i.shift();
@@ -25651,7 +25649,7 @@ class OpenTypeFileBuilder {
   static getSearchParams(e, t) {
     let a = 1,
       r = 0;
-    for (; (a ^ e) > a; ) {
+    for (; (a ^ e) > a;) {
       a <<= 1;
       r++;
     }
@@ -25971,7 +25969,7 @@ class Type1Parser {
                 if (!isHexDigit(t)) continue;
                 s++;
                 let a;
-                for (; s < i && !isHexDigit((a = e[s])); ) s++;
+                for (; s < i && !isHexDigit((a = e[s]));) s++;
                 if (s < i) {
                   const e = parseInt(String.fromCharCode(t, a), 16);
                   n[o++] = e ^ (r >> 8);
@@ -26046,7 +26044,7 @@ class Type1Parser {
     i.lenIV = 4;
     const n = { subrs: [], charstrings: [], properties: { privateData: i } };
     let s, o, c, l;
-    for (; null !== (s = this.getToken()); )
+    for (; null !== (s = this.getToken());)
       if ("/" === s) {
         s = this.getToken();
         switch (s) {
@@ -26074,7 +26072,7 @@ class Type1Parser {
           case "Subrs":
             this.readInt();
             this.getToken();
-            for (; "dup" === this.getToken(); ) {
+            for (; "dup" === this.getToken();) {
               const e = this.readInt();
               o = this.readInt();
               this.getToken();
@@ -26136,7 +26134,7 @@ class Type1Parser {
   }
   extractFontHeader(e) {
     let t;
-    for (; null !== (t = this.getToken()); )
+    for (; null !== (t = this.getToken());)
       if ("/" === t) {
         t = this.getToken();
         switch (t) {
@@ -26153,7 +26151,7 @@ class Type1Parser {
               this.getToken();
               for (let a = 0; a < e; a++) {
                 t = this.getToken();
-                for (; "dup" !== t && "def" !== t; ) {
+                for (; "dup" !== t && "def" !== t;) {
                   t = this.getToken();
                   if (null === t) return;
                 }
@@ -26182,12 +26180,12 @@ function findBlock(e, t, a) {
     n = r - i;
   let s = a,
     o = !1;
-  for (; s < n; ) {
+  for (; s < n;) {
     let a = 0;
-    for (; a < i && e[s + a] === t[a]; ) a++;
+    for (; a < i && e[s + a] === t[a];) a++;
     if (a >= i) {
       s += a;
-      for (; s < r && isWhiteSpace(e[s]); ) s++;
+      for (; s < r && isWhiteSpace(e[s]);) s++;
       o = !0;
       break;
     }
@@ -26633,12 +26631,12 @@ function createCmapTable(e, t, a) {
       r.sort((e, t) => e.fontCharCode - t.fontCharCode);
       const i = [],
         n = r.length;
-      for (let e = 0; e < n; ) {
+      for (let e = 0; e < n;) {
         const t = r[e].fontCharCode,
           a = [r[e].glyphId];
         ++e;
         let s = t;
-        for (; e < n && s + 1 === r[e].fontCharCode; ) {
+        for (; e < n && s + 1 === r[e].fontCharCode;) {
           a.push(r[e].glyphId);
           ++s;
           ++e;
@@ -27260,7 +27258,7 @@ class Font {
         m = !1,
         b = 0,
         y = 0;
-      for (let e = c.length; l < e; ) {
+      for (let e = c.length; l < e;) {
         const e = c[l++];
         if (64 === e) {
           r = c[l++];
@@ -27364,11 +27362,11 @@ class Font {
             r = d.pop();
             isNaN(r) || (t = 2 * -r);
           }
-          for (; t < 0 && d.length > 0; ) {
+          for (; t < 0 && d.length > 0;) {
             d.pop();
             t++;
           }
-          for (; t > 0; ) {
+          for (; t > 0;) {
             d.push(NaN);
             t--;
           }
@@ -27824,7 +27822,7 @@ class Font {
             if (!l) break;
             const h = [],
               u = [];
-            for (; t.pos < n; ) {
+            for (; t.pos < n;) {
               const e = t.getByte();
               u.length = e;
               for (c = 0; c < e; ++c) u[c] = String.fromCharCode(t.getByte());
@@ -28337,7 +28335,7 @@ class Font {
       const a = Object.create(null),
         r = e.length;
       let i = 0;
-      for (; i < r; ) {
+      for (; i < r;) {
         this.cMap.readCharCode(e, i, a);
         const { charcode: r, length: n } = a;
         i += n;
@@ -28357,7 +28355,7 @@ class Font {
     if (this.cMap) {
       const a = Object.create(null);
       let r = 0;
-      for (; r < e.length; ) {
+      for (; r < e.length;) {
         this.cMap.readCharCode(e, r, a);
         const i = a.length;
         t.push([r, r + i]);
@@ -29259,7 +29257,7 @@ class MeshStreamReader {
       return ((a << (8 - r)) | ((255 & e) >> r)) >>> 0;
     }
     if (8 === e && 0 === r) return t.getByte();
-    for (; r < e; ) {
+    for (; r < e;) {
       a = (a << 8) | t.getByte();
       r += 8;
     }
@@ -29375,7 +29373,7 @@ class MeshShading extends BaseShading {
       r = [],
       i = [];
     let n = 0;
-    for (; e.hasData; ) {
+    for (; e.hasData;) {
       const s = e.readFlag(),
         o = e.readCoordinate(),
         c = e.readComponents();
@@ -29407,7 +29405,7 @@ class MeshShading extends BaseShading {
     const a = this.coords,
       r = this.colors,
       i = [];
-    for (; e.hasData; ) {
+    for (; e.hasData;) {
       const t = e.readCoordinate(),
         n = e.readComponents();
       i.push(a.length);
@@ -29426,7 +29424,7 @@ class MeshShading extends BaseShading {
       a = this.colors,
       r = new Int32Array(16),
       i = new Int32Array(4);
-    for (; e.hasData; ) {
+    for (; e.hasData;) {
       const n = e.readFlag();
       if (!(0 <= n && n <= 3)) throw new FormatError("Unknown type6 flag");
       const s = t.length;
@@ -29584,7 +29582,7 @@ class MeshShading extends BaseShading {
       a = this.colors,
       r = new Int32Array(16),
       i = new Int32Array(4);
-    for (; e.hasData; ) {
+    for (; e.hasData;) {
       const n = e.readFlag();
       if (!(0 <= n && n <= 3)) throw new FormatError("Unknown type7 flag");
       const s = t.length;
@@ -31379,7 +31377,7 @@ class PostScriptLexer {
     const a = this.strBuf;
     a.length = 0;
     a[0] = String.fromCharCode(t);
-    for (; (t = this.nextChar()) >= 0 && ((t >= 65 && t <= 90) || (t >= 97 && t <= 122)); )
+    for (; (t = this.nextChar()) >= 0 && ((t >= 65 && t <= 90) || (t >= 97 && t <= 122));)
       a.push(String.fromCharCode(t));
     const r = a.join("");
     switch (r.toLowerCase()) {
@@ -31396,7 +31394,7 @@ class PostScriptLexer {
     const t = this.strBuf;
     t.length = 0;
     t[0] = String.fromCharCode(e);
-    for (; (e = this.nextChar()) >= 0 && ((e >= 48 && e <= 57) || 45 === e || 46 === e); )
+    for (; (e = this.nextChar()) >= 0 && ((e >= 48 && e <= 57) || 45 === e || 46 === e);)
       t.push(String.fromCharCode(e));
     const a = parseFloat(t.join(""));
     if (isNaN(a)) throw new FormatError(`Invalid floating point number: ${a}`);
@@ -31605,7 +31603,7 @@ class PDFFunction {
       u = r.getBytes((s * a + 7) / 8);
     let d = 0;
     for (i = 0; i < s; i++) {
-      for (; c < a; ) {
+      for (; c < a;) {
         l <<= 8;
         l |= u[d++];
         c += 8;
@@ -31864,7 +31862,7 @@ class PostScriptEvaluator {
     const r = this.operators,
       i = r.length;
     let n, s, o;
-    for (; a < i; ) {
+    for (; a < i;) {
       n = r[a++];
       if ("number" != typeof n)
         switch (n) {
@@ -33707,7 +33705,7 @@ class PDFImage {
       for (let n = 0; n < r; n++) {
         a = d + (-8 & c);
         i = d + c;
-        for (; d < a; ) {
+        for (; d < a;) {
           u = e[o++];
           s[d] = (u >> 7) & 1;
           s[d + 1] = (u >> 6) & 1;
@@ -33722,7 +33720,7 @@ class PDFImage {
         if (d < i) {
           u = e[o++];
           t = 128;
-          for (; d < i; ) {
+          for (; d < i;) {
             s[d++] = +!!(u & t);
             t >>= 1;
           }
@@ -33736,7 +33734,7 @@ class PDFImage {
           u = 0;
           a = 0;
         }
-        for (; a < t; ) {
+        for (; a < t;) {
           u = (u << 8) | e[o++];
           a += 8;
         }
@@ -34137,7 +34135,7 @@ class PartialEvaluator {
     e.objId && a.put(e.objId);
     const r = [e],
       i = this.xref;
-    for (; r.length; ) {
+    for (; r.length;) {
       const e = r.shift(),
         t = e.get("ExtGState");
       if (t instanceof Dict)
@@ -34319,7 +34317,7 @@ class PartialEvaluator {
           let u = 0;
           for (const t of e) {
             let e = 128;
-            for (; e > 0; ) {
+            for (; e > 0;) {
               h[u++] = t & e ? 0 : 255;
               e >>= 1;
             }
@@ -34394,7 +34392,7 @@ class PartialEvaluator {
           for (s = 0; d && s <= a; s++) {
             let e = s * i;
             const a = e + t;
-            for (; e < a && !n[e]; ) e++;
+            for (; e < a && !n[e];) e++;
             if (e === a) continue;
             let r = e % i,
               o = s;
@@ -35064,7 +35062,7 @@ class PartialEvaluator {
       S.reset();
       const s = {};
       let o, x, k, C, v, F;
-      for (; !(o = S.check()); ) {
+      for (; !(o = S.check());) {
         s.args = null;
         if (!w.read(s)) break;
         let e = s.args,
@@ -35905,7 +35903,7 @@ class PartialEvaluator {
         p,
         y,
         w = [];
-      for (; !(g = M.check()); ) {
+      for (; !(g = M.check());) {
         w.length = 0;
         f.args = w;
         if (!O.read(f)) break;
@@ -36966,7 +36964,7 @@ class TranslatedFont {
     }
     let s = 0,
       o = e.length;
-    for (; s < o; ) {
+    for (; s < o;) {
       switch (e.fnArray[s]) {
         case rt:
           break;
@@ -36992,7 +36990,7 @@ class TranslatedFont {
           const [t] = e.argsArray[s];
           let a = 0,
             r = t.length;
-          for (; a < r; ) {
+          for (; a < r;) {
             const [e] = t[a];
             switch (e) {
               case "TR":
@@ -37015,7 +37013,7 @@ class TranslatedFont {
   #pe(e) {
     let t = 1;
     const a = e.length;
-    for (; t < a; ) {
+    for (; t < a;) {
       if (e.fnArray[t] === qt) {
         const a = e.argsArray[t][2];
         this._bbox ??= [1 / 0, 1 / 0, -1 / 0, -1 / 0];
@@ -37256,11 +37254,11 @@ class EvaluatorPreprocessor {
         else {
           if (o !== s) {
             const e = this.nonProcessedArgs;
-            for (; o > s; ) {
+            for (; o > s;) {
               e.push(t.shift());
               o--;
             }
-            for (; o < s && 0 !== e.length; ) {
+            for (; o < s && 0 !== e.length;) {
               null === t && (t = []);
               t.unshift(e.pop());
               o++;
@@ -37654,7 +37652,7 @@ class NameOrNumberTree {
       r = new RefSet();
     r.put(this.root);
     const i = [this.root];
-    for (; i.length > 0; ) {
+    for (; i.length > 0;) {
       const n = a.fetchIfRef(i.shift());
       if (!(n instanceof Dict)) continue;
       if (n.has("Kids")) {
@@ -37679,7 +37677,7 @@ class NameOrNumberTree {
     const t = this.xref;
     let a = t.fetchIfRef(this.root),
       r = 0;
-    for (; a.has("Kids"); ) {
+    for (; a.has("Kids");) {
       if (++r > 10) {
         warn(`Search depth limit reached for "${this._type}" tree.`);
         return null;
@@ -37688,7 +37686,7 @@ class NameOrNumberTree {
       if (!Array.isArray(i)) return null;
       let n = 0,
         s = i.length - 1;
-      for (; n <= s; ) {
+      for (; n <= s;) {
         const r = (n + s) >> 1,
           o = t.fetchIfRef(i[r]),
           c = o.get("Limits");
@@ -37707,7 +37705,7 @@ class NameOrNumberTree {
     if (Array.isArray(i)) {
       let a = 0,
         r = i.length - 2;
-      for (; a <= r; ) {
+      for (; a <= r;) {
         const n = (a + r) >> 1,
           s = n + (1 & n),
           o = t.fetchIfRef(i[s]);
@@ -37832,16 +37830,16 @@ class XMLParserBase {
     const a = [];
     let r = t;
     function skipWs() {
-      for (; r < e.length && isWhitespace(e, r); ) ++r;
+      for (; r < e.length && isWhitespace(e, r);) ++r;
     }
-    for (; r < e.length && !isWhitespace(e, r) && ">" !== e[r] && "/" !== e[r]; ) ++r;
+    for (; r < e.length && !isWhitespace(e, r) && ">" !== e[r] && "/" !== e[r];) ++r;
     const i = e.substring(t, r);
     skipWs();
-    for (; r < e.length && ">" !== e[r] && "/" !== e[r] && "?" !== e[r]; ) {
+    for (; r < e.length && ">" !== e[r] && "/" !== e[r] && "?" !== e[r];) {
       skipWs();
       let t = "",
         i = "";
-      for (; r < e.length && !isWhitespace(e, r) && "=" !== e[r]; ) {
+      for (; r < e.length && !isWhitespace(e, r) && "=" !== e[r];) {
         t += e[r];
         ++r;
       }
@@ -37862,19 +37860,19 @@ class XMLParserBase {
   }
   _parseProcessingInstruction(e, t) {
     let a = t;
-    for (; a < e.length && !isWhitespace(e, a) && ">" !== e[a] && "?" !== e[a] && "/" !== e[a]; )
+    for (; a < e.length && !isWhitespace(e, a) && ">" !== e[a] && "?" !== e[a] && "/" !== e[a];)
       ++a;
     const r = e.substring(t, a);
     !(function skipWs() {
-      for (; a < e.length && isWhitespace(e, a); ) ++a;
+      for (; a < e.length && isWhitespace(e, a);) ++a;
     })();
     const i = a;
-    for (; a < e.length && ("?" !== e[a] || ">" !== e[a + 1]); ) ++a;
+    for (; a < e.length && ("?" !== e[a] || ">" !== e[a + 1]);) ++a;
     return { name: r, value: e.substring(i, a), parsed: a - t };
   }
   parseXml(e) {
     let t = 0;
-    for (; t < e.length; ) {
+    for (; t < e.length;) {
       let a = t;
       if ("<" === e[t]) {
         ++a;
@@ -37960,7 +37958,7 @@ class XMLParserBase {
             a += i.parsed + (n ? 2 : 1);
         }
       } else {
-        for (; a < e.length && "<" !== e[a]; ) a++;
+        for (; a < e.length && "<" !== e[a];) a++;
         const r = e.substring(t, a);
         this.onText(this._resolveEntities(r));
       }
@@ -38036,7 +38034,7 @@ class SimpleDOMNode {
         i = i.childNodes[0];
       } else {
         if (0 === r.length) return null;
-        for (; 0 !== r.length; ) {
+        for (; 0 !== r.length;) {
           const [e, t] = r.pop(),
             a = t + 1;
           if (a < e.childNodes.length) {
@@ -38178,7 +38176,7 @@ class MetadataParser {
     let t = e.documentElement;
     if ("rdf:rdf" !== t.nodeName) {
       t = t.firstChild;
-      for (; t && "rdf:rdf" !== t.nodeName; ) t = t.nextSibling;
+      for (; t && "rdf:rdf" !== t.nodeName;) t = t.nextSibling;
     }
     if (t && "rdf:rdf" === t.nodeName && t.hasChildNodes())
       for (const e of t.childNodes)
@@ -38986,7 +38984,7 @@ class Catalog {
     r.put(e);
     const i = this.xref,
       n = new Uint8ClampedArray(3);
-    for (; a.length > 0; ) {
+    for (; a.length > 0;) {
       const t = a.shift(),
         s = i.fetchIfRef(t.obj);
       if (null === s) continue;
@@ -39523,7 +39521,7 @@ class Catalog {
       s = this.pageIndexCache,
       o = this.pageDictCache;
     let c = 0;
-    for (; t.length; ) {
+    for (; t.length;) {
       const r = t.pop();
       if (r instanceof Ref) {
         const l = n.get(r);
@@ -39602,7 +39600,7 @@ class Catalog {
       }
       n.set(c++, [a, null]);
     }
-    for (; a.length > 0; ) {
+    for (; a.length > 0;) {
       const e = a.at(-1),
         { currentNode: t, posInKids: i } = e;
       let n = t.getRaw("Kids");
@@ -39877,7 +39875,7 @@ class ObjectLoader {
   async #Be(e) {
     const t = [],
       a = [];
-    for (; e.length; ) {
+    for (; e.length;) {
       let r = e.pop();
       if (r instanceof Ref) {
         if (this.refSet.has(r)) continue;
@@ -40387,7 +40385,7 @@ function parseExpression(e, t, a = !0) {
   let [i] = r;
   const n = [{ name: i, cacheName: "." + i, index: 0, js: null, formCalc: null, operator: so }];
   let s = i.length;
-  for (; s < e.length; ) {
+  for (; s < e.length;) {
     const o = s;
     if ("[" === e.charAt(s++)) {
       r = e.slice(s).match(no);
@@ -40693,7 +40691,7 @@ class XFAObject {
   }
   [ks](e) {
     let t = this;
-    for (; t; ) {
+    for (; t;) {
       if (t === e) return !0;
       t = t[fs]();
     }
@@ -41305,7 +41303,7 @@ function layoutNode(e, t) {
     if (!l) {
       const t = e[gs]();
       let a = e[fs]();
-      for (; a && a !== t; ) {
+      for (; a && a !== t;) {
         if (a.font) {
           l = a.font;
           break;
@@ -41789,7 +41787,7 @@ function isRequired(e) {
   return "error" === e.validate?.nullTest;
 }
 function setTabIndex(e) {
-  for (; e; ) {
+  for (; e;) {
     if (!e.traversal) {
       e[zs] = e[fs]()[zs];
       return;
@@ -45310,7 +45308,7 @@ class SubformSet extends XFAObject {
   }
   [ds]() {
     let e = this[fs]();
-    for (; !(e instanceof Subform); ) e = e[fs]();
+    for (; !(e instanceof Subform);) e = e[fs]();
     return e;
   }
   [xs]() {
@@ -46531,7 +46529,7 @@ class Binder {
         }
         if (this._isConsumeData()) {
           const a = [];
-          for (; a.length < c; ) {
+          for (; a.length < c;) {
             const i = this._findDataByNameToConsume(r.name, r[ms](), t, e);
             if (!i) break;
             i[zn] = !0;
@@ -46568,7 +46566,7 @@ class DataHandler {
   }
   serialize(e) {
     const t = [[-1, this.data[ls]()]];
-    for (; t.length > 0; ) {
+    for (; t.length > 0;) {
       const a = t.at(-1),
         [r, i] = a;
       if (r + 1 === i.length) {
@@ -49852,7 +49850,7 @@ class Annotation {
     let a = e;
     const r = new RefSet();
     e.objId && r.put(e.objId);
-    for (; a.has("Parent"); ) {
+    for (; a.has("Parent");) {
       a = a.get("Parent");
       if (!(a instanceof Dict) || (a.objId && r.has(a.objId))) break;
       a.objId && r.put(a.objId);
@@ -50199,7 +50197,7 @@ class WidgetAnnotation extends Annotation {
       const r = new RefSet(),
         i = e,
         n = { dict: null, ref: null };
-      for (; e instanceof Dict && !r.has(t); ) {
+      for (; e instanceof Dict && !r.has(t);) {
         r.put(t);
         if (e.has("T")) break;
         if (!((t = e.getRaw("Parent")) instanceof Ref)) return n;
@@ -52066,7 +52064,7 @@ function calculateMD5(e, t, a) {
   l += 3;
   const d = new Int32Array(16),
     { k: f, r: g } = rc;
-  for (l = 0; l < o; ) {
+  for (l = 0; l < o;) {
     for (h = 0; h < 16; ++h, l += 4)
       d[h] = c[l] | (c[l + 1] << 8) | (c[l + 2] << 16) | (c[l + 3] << 24);
     let e,
@@ -52548,7 +52546,7 @@ function calculateSHA512(e, t, a, r = !1) {
     M = new Word64(0, 0),
     R = new Word64(0, 0);
   let N, E;
-  for (g = 0; g < d; ) {
+  for (g = 0; g < d;) {
     for (p = 0; p < 16; ++p) {
       b[p].high = (f[g] << 24) | (f[g + 1] << 16) | (f[g + 2] << 8) | f[g + 3];
       b[p].low = (f[g + 4] << 24) | (f[g + 5] << 16) | (f[g + 6] << 8) | f[g + 7];
@@ -52691,7 +52689,7 @@ function calculateSHA256(e, t, a) {
   d[f++] = (a << 3) & 255;
   const m = new Uint32Array(64),
     { k: b } = sc;
-  for (f = 0; f < u; ) {
+  for (f = 0; f < u;) {
     for (g = 0; g < 16; ++g) {
       m[g] = (d[f] << 24) | (d[f + 1] << 16) | (d[f + 2] << 8) | d[f + 3];
       f += 4;
@@ -53273,7 +53271,7 @@ class PDF20 extends PDFBase {
     let r = calculateSHA256(t, 0, t.length).subarray(0, 32),
       i = [0],
       n = 0;
-    for (; n < 64 || i.at(-1) > n - 32; ) {
+    for (; n < 64 || i.at(-1) > n - 32;) {
       const t = e.length + r.length + a.length,
         s = new Uint8Array(t);
       let o = 0;
@@ -53366,7 +53364,7 @@ class CipherTransformFactory {
       for (; d < u; ++d) l[d] = t[d];
     }
     h = 0;
-    for (; d < 32; ) l[d++] = CipherTransformFactory._defaultPasswordBytes[h++];
+    for (; d < 32;) l[d++] = CipherTransformFactory._defaultPasswordBytes[h++];
     l.set(a, d);
     d += a.length;
     l[d++] = 255 & i;
@@ -53411,7 +53409,7 @@ class CipherTransformFactory {
     const s = Math.min(32, e.length);
     for (; n < s; ++n) i[n] = e[n];
     let o = 0;
-    for (; n < 32; ) i[n++] = CipherTransformFactory._defaultPasswordBytes[o++];
+    for (; n < 32;) i[n++] = CipherTransformFactory._defaultPasswordBytes[o++];
     let c = calculateMD5(i, 0, n);
     const l = r >> 3;
     if (a >= 3) for (o = 0; o < 50; ++o) c = calculateMD5(c, 0, c.length);
@@ -53719,7 +53717,7 @@ class XRef {
     e.pos = t.streamPos;
     const [a, r, i] = t.byteWidths,
       n = t.entryRanges;
-    for (; n.length > 0; ) {
+    for (; n.length > 0;) {
       const [s, o] = n;
       if (!Number.isInteger(s) || !Number.isInteger(o))
         throw new FormatError(`Invalid XRef range fields: ${s}, ${o}`);
@@ -53773,7 +53771,7 @@ class XRef {
     function readToken(e, t) {
       let a = "",
         r = e[t];
-      for (; 10 !== r && 13 !== r && 60 !== r && !(++t >= e.length); ) {
+      for (; 10 !== r && 13 !== r && 60 !== r && !(++t >= e.length);) {
         a += String.fromCharCode(r);
         r = e[t];
       }
@@ -53783,9 +53781,9 @@ class XRef {
       const r = a.length,
         i = e.length;
       let n = 0;
-      for (; t < i; ) {
+      for (; t < i;) {
         let i = 0;
-        for (; i < r && e[t + i] === a[i]; ) ++i;
+        for (; i < r && e[t + i] === a[i];) ++i;
         if (i >= r) break;
         t++;
         n++;
@@ -53808,7 +53806,7 @@ class XRef {
     let h = s.start;
     const u = [],
       d = [];
-    for (; h < l; ) {
+    for (; h < l;) {
       let f = o[h];
       if (9 === f || 10 === f || 13 === f || 32 === f) {
         ++h;
@@ -53942,7 +53940,7 @@ class XRef {
   readXRef(e = !1) {
     const t = this.stream,
       a = new Set();
-    for (; this.startXRefQueue.length; ) {
+    for (; this.startXRefQueue.length;) {
       try {
         const e = this.startXRefQueue[0];
         if (a.has(e)) {
@@ -53965,13 +53963,11 @@ class XRef {
           }
         } else {
           if (!Number.isInteger(n)) throw new FormatError("Invalid XRef stream header");
-          if (
-            !(
-              Number.isInteger(r.getObj()) &&
-              isCmd(r.getObj(), "obj") &&
-              (n = r.getObj()) instanceof BaseStream
-            )
-          )
+          if (!(
+            Number.isInteger(r.getObj()) &&
+            isCmd(r.getObj(), "obj") &&
+            (n = r.getObj()) instanceof BaseStream
+          ))
             throw new FormatError("Invalid XRef stream");
           i = this.processXRefStream(n);
           this.topDict || (this.topDict = i);
@@ -54607,9 +54603,9 @@ function find(e, t, a = 1024, r = !1) {
   if (r) {
     const a = i - 1;
     let r = n.length - 1;
-    for (; r >= a; ) {
+    for (; r >= a;) {
       let s = 0;
-      for (; s < i && n[r - s] === t[a - s]; ) s++;
+      for (; s < i && n[r - s] === t[a - s];) s++;
       if (s >= i) {
         e.pos += r - a;
         return !0;
@@ -54618,9 +54614,9 @@ function find(e, t, a = 1024, r = !1) {
     }
   } else {
     let a = 0;
-    for (; a <= s; ) {
+    for (; a <= s;) {
       let r = 0;
-      for (; r < i && n[a + r] === t[r]; ) r++;
+      for (; r < i && n[a + r] === t[r];) r++;
       if (r >= i) {
         e.pos += a;
         return !0;
@@ -54677,7 +54673,7 @@ class PDFDocument {
       if (find(e, hc)) {
         e.skip(6);
         let a = e.peekByte();
-        for (; isWhiteSpace(a); ) {
+        for (; isWhiteSpace(a);) {
           e.pos++;
           a = e.peekByte();
         }
@@ -54688,7 +54684,7 @@ class PDFDocument {
         r = lc.length;
       let i = !1,
         n = e.end;
-      for (; !i && n > 0; ) {
+      for (; !i && n > 0;) {
         n -= a - r;
         n < 0 && (n = 0);
         e.pos = n;
@@ -54701,7 +54697,7 @@ class PDFDocument {
           a = e.getByte();
         } while (isWhiteSpace(a));
         let r = "";
-        for (; a >= 32 && a <= 57; ) {
+        for (; a >= 32 && a <= 57;) {
           r += String.fromCharCode(a);
           a = e.getByte();
         }
@@ -54719,7 +54715,7 @@ class PDFDocument {
     e.skip(cc.length);
     let t,
       a = "";
-    for (; (t = e.getByte()) > 32 && a.length < 7; ) a += String.fromCharCode(t);
+    for (; (t = e.getByte()) > 32 && a.length < 7;) a += String.fromCharCode(t);
     ua.test(a) ? (this.#ut = a) : warn(`Invalid PDF header version: ${a}`);
   }
   parseStartXRef() {
@@ -56750,7 +56746,7 @@ class PDFEditor {
     r.setIfName("Type", "Pages");
     r.set("Count", e.length);
     const i = [{ dict: r, kids: e, parentRef: a }];
-    for (; i.length > 0; ) {
+    for (; i.length > 0;) {
       const { dict: e, kids: t, parentRef: a } = i.pop();
       if (t.length <= 16) {
         e.set("Kids", t);
@@ -56777,7 +56773,7 @@ class PDFEditor {
       [r, i] = this.newDict,
       n = [{ dict: i, entries: a }],
       s = t ? "Names" : "Nums";
-    for (; n.length > 0; ) {
+    for (; n.length > 0;) {
       const { dict: e, entries: t } = n.pop();
       if (t.length <= 64) {
         e.set("Limits", [t[0][0], t.at(-1)[0]]);
