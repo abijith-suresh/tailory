@@ -175,10 +175,10 @@ function normalizeDate(value: unknown): string | undefined {
 function hasLocationContent(location: ResumeLocation): boolean {
   return Boolean(
     location.address ||
-    location.postalCode ||
-    location.city ||
-    location.countryCode ||
-    location.region
+      location.postalCode ||
+      location.city ||
+      location.countryCode ||
+      location.region
   );
 }
 

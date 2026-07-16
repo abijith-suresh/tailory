@@ -1,8 +1,7 @@
-import type { ResumeSchema } from "@/types/resume";
-
 import { parseJsonResumeString } from "@/lib/resume/json";
-import { processUploadedFile } from "@/lib/upload/process-file";
 import type { SupportedUploadExtension } from "@/lib/upload/guardrails";
+import { processUploadedFile } from "@/lib/upload/process-file";
+import type { ResumeSchema } from "@/types/resume";
 
 export interface ImportResumeSuccess {
   success: true;

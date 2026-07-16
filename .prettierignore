@@ -1,6 +1,0 @@
-dist/
-.astro/
-node_modules/
-bun.lock
-bun.lockb
-CHANGELOG.md

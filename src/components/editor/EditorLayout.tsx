@@ -1,8 +1,8 @@
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import EditorShell from "@/components/editor/EditorShell";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ResumePreview from "@/components/preview/ResumePreview";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import {
   exportError,
   importError,
