@@ -1,5 +1,3 @@
-import { SECTION_KEYWORDS } from "./section-keywords";
-import type { SectionType } from "./section-keywords";
 import type {
   ResumeAward,
   ResumeBasics,
@@ -14,6 +12,8 @@ import type {
   ResumeWork,
 } from "@/types/resume";
 import { EMPTY_RESUME } from "@/types/resume";
+import type { SectionType } from "./section-keywords";
+import { SECTION_KEYWORDS } from "./section-keywords";
 
 export interface ParseResult {
   data: ResumeSchema;
@@ -98,7 +98,7 @@ function splitIntoSections(text: string): Record<string, string> {
     if (content) {
       // Merge into existing section if it already exists
       if (sections[currentSection]) {
-        sections[currentSection] += "\n" + content;
+        sections[currentSection] += `\n${content}`;
       } else {
         sections[currentSection] = content;
       }
@@ -242,8 +242,7 @@ function parseLocationFragment(fragment: string): ResumeLocation | null {
   const cleaned = cleanLocationFragment(fragment);
 
   if (
-    !cleaned ||
-    !cleaned.includes(",") ||
+    !cleaned?.includes(",") ||
     EMAIL_RE.test(cleaned) ||
     PHONE_RE.test(cleaned) ||
     URL_RE.test(cleaned) ||

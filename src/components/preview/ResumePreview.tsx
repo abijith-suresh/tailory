@@ -1,10 +1,8 @@
 import { type Component, For, Show } from "solid-js";
-
-import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import ResumeDocument from "@/components/resume/ResumeDocument";
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { resume, selectedTemplate, setSelectedTemplate } from "@/store/resume";
-import { selectedAccentColor } from "@/store/resume";
+import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
+import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 
 const TOTAL_SECTIONS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * 14;

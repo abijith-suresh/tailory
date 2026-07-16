@@ -1,9 +1,9 @@
 import type { Component } from "solid-js";
-import { resume, setResume } from "@/store/resume";
-import type { ResumeEducation } from "@/types/resume";
-import { ReorderableList } from "@/components/ui/ReorderableList";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
+import { ReorderableList } from "@/components/ui/ReorderableList";
+import { resume, setResume } from "@/store/resume";
+import type { ResumeEducation } from "@/types/resume";
 
 function newEducation(): ResumeEducation {
   return {

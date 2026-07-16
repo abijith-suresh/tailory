@@ -21,9 +21,8 @@ interface TailoryDB {
 
 let _db: IDBPDatabase<TailoryDB> | null = null;
 
-function handleStorageError(message: string, error: unknown) {
+function handleStorageError(_message: string, _error: unknown) {
   _db = null;
-  console.warn(message, error);
 }
 
 async function getDB(): Promise<IDBPDatabase<TailoryDB>> {

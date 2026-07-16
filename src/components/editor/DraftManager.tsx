@@ -7,7 +7,7 @@ import {
   onMount,
   Show,
 } from "solid-js";
-
+import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import {
   AUTOSAVE_DRAFT_ID,
   deleteDraft,
@@ -15,7 +15,6 @@ import {
   type ResumeDraft,
   saveDraft,
 } from "@/lib/storage/db";
-import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
 import { loadResume, resume } from "@/store/resume";
 

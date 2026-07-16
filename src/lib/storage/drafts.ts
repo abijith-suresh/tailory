@@ -1,3 +1,4 @@
+import { normalizeResume, serializeNormalizedResume } from "@/lib/resume/normalize";
 import {
   AUTOSAVE_DRAFT_ID,
   getDraft,
@@ -5,7 +6,6 @@ import {
   type ResumeDraft,
   saveDraft,
 } from "@/lib/storage/db";
-import { normalizeResume, serializeNormalizedResume } from "@/lib/resume/normalize";
 import type { ResumeSchema } from "@/types/resume";
 
 export function cloneResumeData(data: ResumeSchema): ResumeSchema {
