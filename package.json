@@ -41,7 +41,7 @@
     "@types/pdfmake": "^0.3.3",
     "@vitest/ui": "^4.1.10",
     "husky": "^9.1.7",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.1",
     "lint-staged": "^16.4.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
