@@ -3,12 +3,15 @@ import { Transition } from "solid-transition-group";
 
 import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
+import AwardsForm from "./AwardsForm";
 import BasicsForm from "./BasicsForm";
 import CertificatesForm from "./CertificatesForm";
 import EducationForm from "./EducationForm";
 import ProjectsForm from "./ProjectsForm";
+import PublicationsForm from "./PublicationsForm";
 import SkillsForm from "./SkillsForm";
 import SummaryForm from "./SummaryForm";
+import VolunteerForm from "./VolunteerForm";
 import WorkForm from "./WorkForm";
 
 interface SectionMeta {
@@ -38,10 +41,28 @@ const SECTIONS: SectionMeta[] = [
     component: () => <WorkForm />,
   },
   {
+    id: "volunteer",
+    label: "Volunteer",
+    subtitle: "Community work, service, and contributions",
+    component: () => <VolunteerForm />,
+  },
+  {
     id: "education",
     label: "Education",
     subtitle: "Degrees, institutions, and dates",
     component: () => <EducationForm />,
+  },
+  {
+    id: "awards",
+    label: "Awards",
+    subtitle: "Honors, recognition, and distinctions",
+    component: () => <AwardsForm />,
+  },
+  {
+    id: "publications",
+    label: "Publications",
+    subtitle: "Articles, papers, talks, and published work",
+    component: () => <PublicationsForm />,
   },
   {
     id: "skills",

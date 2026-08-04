@@ -146,7 +146,10 @@ export type SectionId =
   | "basics"
   | "summary"
   | "work"
+  | "volunteer"
   | "education"
+  | "awards"
+  | "publications"
   | "skills"
   | "projects"
   | "certs";
