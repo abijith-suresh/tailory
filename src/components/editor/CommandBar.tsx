@@ -30,6 +30,13 @@ const SECTIONS: Section[] = [
   { id: "work", label: "Work", isDone: () => (resume.work?.length ?? 0) > 0 },
   { id: "education", label: "Education", isDone: () => (resume.education?.length ?? 0) > 0 },
   { id: "skills", label: "Skills", isDone: () => (resume.skills?.length ?? 0) > 0 },
+  { id: "languages", label: "Languages", isDone: () => (resume.languages?.length ?? 0) > 0 },
+  { id: "interests", label: "Interests", isDone: () => (resume.interests?.length ?? 0) > 0 },
+  {
+    id: "references",
+    label: "References",
+    isDone: () => (resume.references?.length ?? 0) > 0,
+  },
   { id: "projects", label: "Projects", isDone: () => (resume.projects?.length ?? 0) > 0 },
   { id: "certs", label: "Certs", isDone: () => (resume.certificates?.length ?? 0) > 0 },
 ];

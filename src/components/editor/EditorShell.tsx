@@ -6,7 +6,10 @@ import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
 import CertificatesForm from "./CertificatesForm";
 import EducationForm from "./EducationForm";
+import InterestsForm from "./InterestsForm";
+import LanguagesForm from "./LanguagesForm";
 import ProjectsForm from "./ProjectsForm";
+import ReferencesForm from "./ReferencesForm";
 import SkillsForm from "./SkillsForm";
 import SummaryForm from "./SummaryForm";
 import WorkForm from "./WorkForm";
@@ -48,6 +51,24 @@ const SECTIONS: SectionMeta[] = [
     label: "Skills",
     subtitle: "Technical and professional skills",
     component: () => <SkillsForm />,
+  },
+  {
+    id: "languages",
+    label: "Languages",
+    subtitle: "Languages and fluency levels",
+    component: () => <LanguagesForm />,
+  },
+  {
+    id: "interests",
+    label: "Interests",
+    subtitle: "Communities, hobbies, and focus areas",
+    component: () => <InterestsForm />,
+  },
+  {
+    id: "references",
+    label: "References",
+    subtitle: "People who can vouch for your work",
+    component: () => <ReferencesForm />,
   },
   {
     id: "projects",
