@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2](https://github.com/abijith-suresh/tailory/compare/v0.6.1...v0.6.2) (2026-08-08)
+
+
+### Features
+
+* add languages interests and references forms ([29cce7b](https://github.com/abijith-suresh/tailory/commit/29cce7b109cc6c98c7fd8a7531d5a515fbca194d))
+* tighten JSON Resume compatibility rules ([#60](https://github.com/abijith-suresh/tailory/issues/60)) ([997488c](https://github.com/abijith-suresh/tailory/commit/997488cbadb09314138d7f7506c29beb637c737c))
+
+
+### Bug Fixes
+
+* replace invalid dependabot auto-merge config with actions workflow ([#81](https://github.com/abijith-suresh/tailory/issues/81)) ([1d7cefc](https://github.com/abijith-suresh/tailory/commit/1d7cefcd894c95ae26834a1f44049a358475421e))
+
 ## [Unreleased]
 
 ## [0.6.1] - 2026-04-29
