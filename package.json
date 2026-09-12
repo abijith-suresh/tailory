@@ -21,7 +21,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "astro": "^7.3.1",
+    "astro": "^7.3.2",
     "geist": "^1.7.2",
     "idb": "^8.0.3",
     "mammoth": "^1.12.2",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@astrojs/solid-js": "^7.0.2",
-    "@biomejs/biome": "^2.5.12",
+    "@biomejs/biome": "^2.5.13",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@tailwindcss/vite": "^4.3.3",
@@ -42,7 +42,7 @@
     "@vitest/ui": "^5.0.0",
     "husky": "^9.1.7",
     "jsdom": "^30.0.1",
-    "lint-staged": "^17.4.1",
+    "lint-staged": "^17.5.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }
