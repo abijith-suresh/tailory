@@ -20,14 +20,28 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 
 ## JSON Resume support
 
-Tailory can import and export JSON Resume-style documents for the fields it currently supports. In practice:
+Tailory supports JSON Resume-style import and export for the fields it models in its own resume schema.
 
-- supported fields are normalized on import and exported back as clean JSON
-- internal entry IDs are removed during export
-- unsupported or non-standard shapes may be rejected or normalized away
-- some fields Tailory can preserve or render are still not exposed in the editor UI
+Supported top-level sections are:
 
-Compatibility details live in [docs/json-resume.md](./docs/json-resume.md).
+- `basics`
+- `work`
+- `volunteer`
+- `education`
+- `awards`
+- `certificates`
+- `publications`
+- `skills`
+- `languages`
+- `interests`
+- `references`
+- `projects`
+
+Tailory ignores `$schema` and `meta` during import. It normalizes supported content into its internal schema, removes internal entry IDs during export, rejects unknown top-level fields, and reports malformed section shapes instead of silently dropping them.
+
+Tailory does not claim full validation against the upstream official JSON Resume schema package. Some supported sections can import, survive normalization, and render in preview and PDF export without having first-class editor controls yet.
+
+Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, required identity fields are missing, or unsupported top-level fields would be silently discarded.
 
 ## Privacy and storage
 
@@ -67,7 +81,7 @@ bun run test
 bun run build
 ```
 
-Release workflow notes live in [docs/releases.md](./docs/releases.md).
+Release and contribution workflow notes live in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 

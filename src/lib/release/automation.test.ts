@@ -43,7 +43,7 @@ describe("release automation source of truth", () => {
   });
 
   it("documents the maintainer release flow in-repo", () => {
-    const docPath = path.join(process.cwd(), "docs", "releases.md");
+    const docPath = path.join(process.cwd(), "CONTRIBUTING.md");
 
     expect(existsSync(docPath)).toBe(true);
 

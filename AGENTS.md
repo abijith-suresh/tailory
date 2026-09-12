@@ -74,9 +74,8 @@ The product does not include, and must not gain without updating this section fi
 
 ## Documentation
 
-- `README.md` describes current user-visible behavior.
-- `docs/json-resume.md` describes the supported JSON Resume-style contract.
-- `docs/releases.md` describes Release Please and the baseline recovery process.
+- `README.md` describes current user-visible behavior and the supported JSON Resume-style contract.
+- `CONTRIBUTING.md` describes development, contribution, release, and baseline recovery workflows.
 - Keep public copy and documentation aligned with the product truth. Do not advertise unimplemented features.
 
 ## Git and CI
