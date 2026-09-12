@@ -7,5 +7,8 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "include-component-in-tag": false,
-  "bootstrap-sha": "a0838d947bac100ab4e13f8e354d2680b46920a2"
+  "bootstrap-sha": "ee2884926931efef42aabca4c4d2684c2d2739db",
+  "initial-version": "0.0.1",
+  "include-v-in-tag": false,
+  "include-v-in-release-name": false
 }

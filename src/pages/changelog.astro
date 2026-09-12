@@ -1,5 +1,7 @@
 ---
-import changelogSource from "../../CHANGELOG.md?raw";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
 type ReleaseSection = { title: string; items: string[] };
@@ -44,6 +46,8 @@ function parseChangelog(source: string): Release[] {
   return releases;
 }
 
+const changelogPath = fileURLToPath(new URL("../../CHANGELOG.md", import.meta.url));
+const changelogSource = existsSync(changelogPath) ? readFileSync(changelogPath, "utf8") : "";
 const releases = parseChangelog(changelogSource);
 
 function formatDate(date: string) {
@@ -74,50 +78,56 @@ function formatDate(date: string) {
   <section class="mx-auto max-w-4xl px-8 pb-24">
     <div class="space-y-12">
       {
-        releases.map((release, i) => (
-          <article
-            class="border-t border-[#ccddd4] py-12"
-            data-reveal
-            data-reveal-delay={String(Math.min(i * 100, 300))}
-          >
-            <div class="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
-              <div>
-                <p class="text-xs font-medium uppercase tracking-[0.18em] text-[#a0b8ab]">
-                  {formatDate(release.date)}
-                </p>
-                <h2
-                  class="mt-2 text-2xl font-bold text-[#1d6648]"
-                  style="font-family: 'Lora', Georgia, serif"
-                >
-                  {release.version}
-                </h2>
+        releases.length > 0 ? (
+          releases.map((release, i) => (
+            <article
+              class="border-t border-[#ccddd4] py-12"
+              data-reveal
+              data-reveal-delay={String(Math.min(i * 100, 300))}
+            >
+              <div class="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
+                <div>
+                  <p class="text-xs font-medium uppercase tracking-[0.18em] text-[#a0b8ab]">
+                    {formatDate(release.date)}
+                  </p>
+                  <h2
+                    class="mt-2 text-2xl font-bold text-[#1d6648]"
+                    style="font-family: 'Lora', Georgia, serif"
+                  >
+                    {release.version}
+                  </h2>
+                </div>
+                {i === 0 && (
+                  <span class="inline-block rounded-full bg-[#1d6648]/10 px-2.5 py-0.5 text-xs font-medium text-[#1d6648]">
+                    Latest
+                  </span>
+                )}
               </div>
-              {i === 0 && (
-                <span class="inline-block rounded-full bg-[#1d6648]/10 px-2.5 py-0.5 text-xs font-medium text-[#1d6648]">
-                  Latest
-                </span>
-              )}
-            </div>
 
-            <div class="mt-6 space-y-6">
-              {release.sections.map((section) => (
-                <section>
-                  <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#6d8f7e]">
-                    {section.title}
-                  </h3>
-                  <ul class="mt-3 space-y-3">
-                    {section.items.map((item) => (
-                      <li class="flex gap-3 text-base leading-relaxed text-[#3d6650]">
-                        <span class="mt-1 shrink-0 text-xs text-[#1d6648]">→</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </article>
-        ))
+              <div class="mt-6 space-y-6">
+                {release.sections.map((section) => (
+                  <section>
+                    <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-[#6d8f7e]">
+                      {section.title}
+                    </h3>
+                    <ul class="mt-3 space-y-3">
+                      {section.items.map((item) => (
+                        <li class="flex gap-3 text-base leading-relaxed text-[#3d6650]">
+                          <span class="mt-1 shrink-0 text-xs text-[#1d6648]">→</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </article>
+          ))
+        ) : (
+          <p class="border-t border-[#ccddd4] py-12 text-base leading-relaxed text-[#3d6650]">
+            The first published release will appear here after the new release baseline is cut.
+          </p>
+        )
       }
     </div>
   </section>
