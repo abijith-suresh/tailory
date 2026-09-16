@@ -118,12 +118,22 @@ const WorkForm: Component = () => {
           </FormField>
 
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Highlights / Bullets</label>
+            <p
+              id={`work-highlights-label-${item.id}`}
+              class="block text-sm font-medium text-gray-700"
+            >
+              Highlights / Bullets
+            </p>
             <div class="space-y-2">
               <For each={item.highlights}>
                 {(h, idx) => (
                   <div class="flex gap-2">
+                    <label for={`work-highlight-${item.id}-${idx()}`} class="sr-only">
+                      Highlight {idx() + 1}
+                    </label>
                     <Textarea
+                      id={`work-highlight-${item.id}-${idx()}`}
+                      aria-describedby={`work-highlights-label-${item.id}`}
                       value={h}
                       onInput={(v) => updateHighlight(item.id, idx(), v)}
                       placeholder="Led development of…"

@@ -271,6 +271,21 @@ export default function EditorLayout() {
   const showEditor = () => !isMobile() || activePane() === "editor";
   const showPreview = () => !isMobile() || activePane() === "preview";
 
+  const focusPaneTab = (pane: Pane) => {
+    setActivePane(pane);
+    document.getElementById(`${pane}-pane-tab`)?.focus();
+  };
+
+  const handlePaneTabKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "End") {
+      e.preventDefault();
+      focusPaneTab("preview");
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "Home") {
+      e.preventDefault();
+      focusPaneTab("editor");
+    }
+  };
+
   return (
     <div
       style={{
@@ -295,6 +310,7 @@ export default function EditorLayout() {
       >
         {/* Editor panel */}
         <div
+          id="editor-pane"
           style={{
             display: "flex",
             width: isMobile() ? "100%" : "50%",
@@ -311,6 +327,7 @@ export default function EditorLayout() {
           role="region"
           aria-label="Resume editor"
           aria-hidden={!showEditor()}
+          inert={!showEditor()}
         >
           <ErrorBoundary>
             <EditorShell />
@@ -319,6 +336,7 @@ export default function EditorLayout() {
 
         {/* Preview panel */}
         <div
+          id="preview-pane"
           style={{
             display: "flex",
             width: isMobile() ? "100%" : "50%",
@@ -334,6 +352,7 @@ export default function EditorLayout() {
           role="region"
           aria-label="Resume preview"
           aria-hidden={!showPreview()}
+          inert={!showPreview()}
         >
           <ErrorBoundary>
             <ResumePreview />
@@ -349,14 +368,18 @@ export default function EditorLayout() {
         >
           <div class="flex" role="tablist" aria-label="Switch between editor and preview">
             <button
+              id="editor-pane-tab"
               role="tab"
               aria-selected={activePane() === "editor"}
+              aria-controls="editor-pane"
+              tabIndex={activePane() === "editor" ? 0 : -1}
               class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"
               style={{
                 color: activePane() === "editor" ? "#1d6648" : "#5a7a68",
                 "background-color": activePane() === "editor" ? "#edf4f0" : "transparent",
               }}
               onClick={() => setActivePane("editor")}
+              onKeyDown={handlePaneTabKeyDown}
             >
               <svg
                 width="18"
@@ -376,14 +399,18 @@ export default function EditorLayout() {
             </button>
 
             <button
+              id="preview-pane-tab"
               role="tab"
               aria-selected={activePane() === "preview"}
+              aria-controls="preview-pane"
+              tabIndex={activePane() === "preview" ? 0 : -1}
               class="flex flex-1 flex-col items-center gap-1 rounded-md py-3 text-xs font-medium transition-colors active:scale-[0.97] hover:bg-[#dceae2]"
               style={{
                 color: activePane() === "preview" ? "#1d6648" : "#5a7a68",
                 "background-color": activePane() === "preview" ? "#edf4f0" : "transparent",
               }}
               onClick={() => setActivePane("preview")}
+              onKeyDown={handlePaneTabKeyDown}
             >
               <svg
                 width="18"

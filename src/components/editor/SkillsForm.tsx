@@ -37,7 +37,11 @@ const SkillsForm: Component = () => {
   return (
     <div class="space-y-4">
       <div class="flex gap-2">
+        <label for="skills-input" class="sr-only">
+          Add a skill
+        </label>
         <input
+          id="skills-input"
           type="text"
           value={inputValue()}
           onInput={(e) => setInputValue(e.currentTarget.value)}
