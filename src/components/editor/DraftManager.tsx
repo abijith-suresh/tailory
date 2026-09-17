@@ -8,6 +8,7 @@ import {
   Show,
 } from "solid-js";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
+import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
 import {
   AUTOSAVE_DRAFT_ID,
   deleteDraft,
@@ -24,8 +25,6 @@ interface DraftManagerProps {
   dark?: boolean;
 }
 
-let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
-
 const DraftManager: Component<DraftManagerProps> = (props) => {
   const [status, setStatus] = createSignal<Status>("idle");
   const [drafts, setDrafts] = createSignal<ResumeDraft[]>([]);
@@ -35,7 +34,9 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
   const [popupTop, setPopupTop] = createSignal(0);
   const [popupRight, setPopupRight] = createSignal(0);
+  let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
   let saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
+  let isDisposed = false;
 
   const computePopupPosition = () => {
     if (!containerRef) return;
@@ -48,6 +49,33 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
     saveStatusTimer = setTimeout(() => setStatus("idle"), 2000);
   };
+
+  const performSave = async (snapshot: string) => {
+    if (!storageAvailable()) return;
+    if (!isDisposed) setStatus("saving");
+
+    let saved = false;
+    try {
+      saved = await saveAutosaveDraft(snapshot);
+    } catch {
+      saved = false;
+    }
+
+    if (!saved) {
+      if (!isDisposed) {
+        setStorageAvailable(false);
+        setStatus("error");
+      }
+      return;
+    }
+
+    if (isDisposed) return;
+    setLastAutosaveSnapshot(snapshot);
+    setStatus("saved");
+    queueStatusReset();
+  };
+
+  const autosaveQueue = createSerializedTaskQueue(performSave);
 
   onMount(async () => {
     const restored = await restoreAutosaveDraft();
@@ -75,26 +103,16 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     if (snapshot === lastAutosaveSnapshot()) return;
 
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(async () => {
-      await performSave(snapshot);
+    autoSaveTimer = setTimeout(() => {
+      autoSaveTimer = null;
+      void autosaveQueue.enqueue(snapshot).catch(() => {
+        if (!isDisposed) {
+          setStorageAvailable(false);
+          setStatus("error");
+        }
+      });
     }, 2000);
   });
-
-  const performSave = async (snapshotJson?: string) => {
-    setStatus("saving");
-    const snapshot = snapshotJson ?? serializeNormalizedResume(resume);
-    const saved = await saveAutosaveDraft(snapshot);
-
-    if (!saved) {
-      setStorageAvailable(false);
-      setStatus("error");
-      return;
-    }
-
-    setLastAutosaveSnapshot(snapshot);
-    setStatus("saved");
-    queueStatusReset();
-  };
 
   const saveNamedDraft = async () => {
     if (!storageAvailable()) {
@@ -161,6 +179,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   });
 
   onCleanup(() => {
+    isDisposed = true;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
   });
