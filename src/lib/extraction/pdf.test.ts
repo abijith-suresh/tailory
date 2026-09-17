@@ -97,4 +97,46 @@ describe("extractTextFromPDF", () => {
       "No selectable text was found in this PDF. It may be a scanned PDF, so try a text-based PDF or DOCX file."
     );
   });
+
+  it("cleans up the loading task and document after extraction", async () => {
+    const cleanup = vi.fn();
+    const loadingTaskDestroy = vi.fn().mockResolvedValue(undefined);
+    const pageCleanup = vi.fn();
+
+    getDocument.mockReturnValue({
+      destroy: loadingTaskDestroy,
+      promise: Promise.resolve({
+        cleanup,
+        numPages: 1,
+        getPage: vi.fn().mockResolvedValue({
+          cleanup: pageCleanup,
+          getTextContent: vi.fn().mockResolvedValue({
+            items: [{ str: "Jane Doe", transform: [1, 0, 0, 1, 40, 720] }],
+          }),
+        }),
+      }),
+    });
+
+    const { extractTextFromPDF } = await import("./pdf");
+    const file = new File(["%PDF-1.7"], "resume.pdf", { type: "application/pdf" });
+
+    await expect(extractTextFromPDF(file)).resolves.toBe("Jane Doe");
+    expect(pageCleanup).toHaveBeenCalledOnce();
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(loadingTaskDestroy).toHaveBeenCalledOnce();
+  });
+
+  it("rejects PDFs that exceed the page limit", async () => {
+    const loadingTaskDestroy = vi.fn().mockResolvedValue(undefined);
+    getDocument.mockReturnValue({
+      destroy: loadingTaskDestroy,
+      promise: Promise.resolve({ numPages: 21 }),
+    });
+
+    const { extractTextFromPDF, MAX_PDF_PAGES } = await import("./pdf");
+    const file = new File(["%PDF-1.7"], "long.pdf", { type: "application/pdf" });
+
+    await expect(extractTextFromPDF(file)).rejects.toThrow(`${MAX_PDF_PAGES} pages or fewer`);
+    expect(loadingTaskDestroy).toHaveBeenCalledOnce();
+  });
 });

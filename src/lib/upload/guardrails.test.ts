@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_UPLOAD_SIZE_BYTES, validateUploadFile } from "./guardrails";
+import { MAX_UPLOAD_SIZE_BYTES, validateUploadFile, validateUploadFileContent } from "./guardrails";
 
 describe("validateUploadFile", () => {
   it("accepts supported files within the size limit", () => {
@@ -74,5 +74,46 @@ describe("validateUploadFile", () => {
       ok: false,
       error: "Unsupported file type. Please upload a PDF, DOCX, or JSON file.",
     });
+  });
+});
+
+describe("validateUploadFileContent", () => {
+  it("accepts a PDF signature", async () => {
+    await expect(
+      validateUploadFileContent(
+        { arrayBuffer: async () => new TextEncoder().encode("%PDF-1.7").buffer },
+        "pdf"
+      )
+    ).resolves.toEqual({ ok: true, extension: "pdf" });
+  });
+
+  it("rejects a PDF with a mismatched signature", async () => {
+    await expect(
+      validateUploadFileContent(
+        { arrayBuffer: async () => new TextEncoder().encode("not a pdf").buffer },
+        "pdf"
+      )
+    ).resolves.toEqual({
+      ok: false,
+      error: "This file does not look like a valid PDF. Please choose another PDF file.",
+    });
+  });
+
+  it("accepts ZIP signatures used by DOCX files", async () => {
+    await expect(
+      validateUploadFileContent(
+        { arrayBuffer: async () => new Uint8Array([0x50, 0x4b, 0x03, 0x04]).buffer },
+        "docx"
+      )
+    ).resolves.toEqual({ ok: true, extension: "docx" });
+  });
+
+  it("does not pre-parse JSON content", async () => {
+    await expect(
+      validateUploadFileContent(
+        { arrayBuffer: async () => new TextEncoder().encode("{}").buffer },
+        "json"
+      )
+    ).resolves.toEqual({ ok: true, extension: "json" });
   });
 });

@@ -5,6 +5,13 @@ const SUPPORTED_UPLOAD_EXTENSIONS = new Set(["pdf", "docx", "json"]);
 
 export type SupportedUploadExtension = "pdf" | "docx" | "json";
 
+const PDF_SIGNATURE = "%PDF-";
+const ZIP_SIGNATURES = [
+  [0x50, 0x4b, 0x03, 0x04],
+  [0x50, 0x4b, 0x05, 0x06],
+  [0x50, 0x4b, 0x07, 0x08],
+] as const;
+
 interface UploadValidationSuccess {
   ok: true;
   extension: SupportedUploadExtension;
@@ -52,5 +59,54 @@ export function validateUploadFile(
   return {
     ok: true,
     extension: extension as SupportedUploadExtension,
+  };
+}
+
+function startsWithBytes(bytes: Uint8Array, signature: readonly number[]): boolean {
+  return signature.every((value, index) => bytes[index] === value);
+}
+
+/**
+ * Checks the leading bytes of binary uploads so an extension alone cannot
+ * route arbitrary content into a document parser.
+ */
+export async function validateUploadFileContent(
+  file: Pick<File, "arrayBuffer">,
+  extension: SupportedUploadExtension
+): Promise<UploadValidationResult> {
+  if (extension === "json") {
+    return { ok: true, extension };
+  }
+
+  let bytes: Uint8Array;
+
+  try {
+    bytes = new Uint8Array(await file.arrayBuffer());
+  } catch {
+    return {
+      ok: false,
+      error: "Unable to read this file. Please choose another PDF or DOCX file.",
+    };
+  }
+
+  if (extension === "pdf") {
+    const header = new TextDecoder().decode(bytes.subarray(0, PDF_SIGNATURE.length));
+    if (header === PDF_SIGNATURE) {
+      return { ok: true, extension };
+    }
+
+    return {
+      ok: false,
+      error: "This file does not look like a valid PDF. Please choose another PDF file.",
+    };
+  }
+
+  if (ZIP_SIGNATURES.some((signature) => startsWithBytes(bytes, signature))) {
+    return { ok: true, extension };
+  }
+
+  return {
+    ok: false,
+    error: "This file does not look like a valid DOCX file. Please choose another DOCX file.",
   };
 }
