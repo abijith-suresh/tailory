@@ -390,4 +390,52 @@ https://example.com/resume-imports
       url: "https://example.com/resume-imports",
     });
   });
+
+  it("parses dedicated language, interest, and reference sections", async () => {
+    const result = await parseResume(`
+JANE DOE
+jane.doe@email.com | +91 98765 43210 | linkedin.com/in/janedoe | github.com/janedoe
+
+LANGUAGES
+English - Native
+Spanish: Professional working proficiency
+
+INTERESTS
+Open source, Hiking, Photography
+
+REFERENCES
+Jane Smith - Engineering Manager
+Available on request.
+`);
+
+    expect(result.data.basics.phone).toBe("+91 98765 43210");
+    expect(result.data.basics.profiles).toEqual([
+      {
+        network: "LinkedIn",
+        username: "janedoe",
+        url: "https://linkedin.com/in/janedoe",
+      },
+      {
+        network: "GitHub",
+        username: "janedoe",
+        url: "https://github.com/janedoe",
+      },
+    ]);
+    expect(result.data.languages).toEqual([
+      expect.objectContaining({ language: "English", fluency: "Native" }),
+      expect.objectContaining({
+        language: "Spanish",
+        fluency: "Professional working proficiency",
+      }),
+    ]);
+    expect(result.data.interests?.map((interest) => interest.name)).toEqual([
+      "Open source",
+      "Hiking",
+      "Photography",
+    ]);
+    expect(result.data.references?.[0]).toMatchObject({
+      name: "Jane Smith",
+      reference: "Engineering Manager Available on request.",
+    });
+  });
 });
