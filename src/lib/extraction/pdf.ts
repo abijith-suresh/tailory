@@ -3,6 +3,10 @@ import * as pdfjs from "pdfjs-dist";
 // Set the worker source to the file we copied to public/
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
+export const MAX_PDF_PAGES = 20;
+export const MAX_PDF_TEXT_ITEMS = 10_000;
+export const MAX_EXTRACTED_TEXT_LENGTH = 250_000;
+
 interface PositionedTextItem {
   height: number;
   str: string;
@@ -160,26 +164,67 @@ function normalizeExtractedText(text: string): string {
 export async function extractTextFromPDF(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
   const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
-  const pdf = await loadingTask.promise;
+  let pdf: Awaited<typeof loadingTask.promise> | undefined;
 
-  const pageTexts: string[] = [];
+  try {
+    pdf = await loadingTask.promise;
 
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const content = await page.getTextContent();
-    const pageText = reconstructPageText(content.items);
+    if (pdf.numPages > MAX_PDF_PAGES) {
+      throw new Error(
+        `This PDF has too many pages to process safely. Please upload a file with ${MAX_PDF_PAGES} pages or fewer.`
+      );
+    }
 
-    if (!pageText) continue;
-    pageTexts.push(pageText);
+    const pageTexts: string[] = [];
+    let extractedLength = 0;
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+
+      try {
+        const content = await page.getTextContent();
+        if (content.items.length > MAX_PDF_TEXT_ITEMS) {
+          throw new Error(
+            "This PDF page contains too much text to process safely. Please upload a simpler PDF."
+          );
+        }
+
+        const pageText = reconstructPageText(content.items);
+        if (!pageText) continue;
+
+        extractedLength += pageText.length;
+        if (extractedLength > MAX_EXTRACTED_TEXT_LENGTH) {
+          throw new Error(
+            "This PDF contains too much text to process safely. Please upload a shorter resume."
+          );
+        }
+
+        pageTexts.push(pageText);
+      } finally {
+        page.cleanup?.();
+      }
+    }
+
+    const extractedText = pageTexts.join("\n\n").trim();
+
+    if (!extractedText) {
+      throw new Error(
+        "No selectable text was found in this PDF. It may be a scanned PDF, so try a text-based PDF or DOCX file."
+      );
+    }
+
+    return extractedText;
+  } finally {
+    try {
+      pdf?.cleanup?.();
+    } catch {
+      // Cleanup should not replace the useful extraction error.
+    }
+
+    try {
+      await loadingTask.destroy?.();
+    } catch {
+      // Cleanup should not replace the useful extraction error.
+    }
   }
-
-  const extractedText = pageTexts.join("\n\n").trim();
-
-  if (!extractedText) {
-    throw new Error(
-      "No selectable text was found in this PDF. It may be a scanned PDF, so try a text-based PDF or DOCX file."
-    );
-  }
-
-  return extractedText;
 }

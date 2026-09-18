@@ -63,7 +63,7 @@ describe("importResumeFile", () => {
     });
 
     const { importResumeFile } = await import("./import-resume");
-    const file = new File(["pdf"], "resume.pdf", { type: "application/pdf" });
+    const file = new File(["%PDF-1.7"], "resume.pdf", { type: "application/pdf" });
 
     await expect(importResumeFile(file, "pdf")).resolves.toEqual({
       success: true,

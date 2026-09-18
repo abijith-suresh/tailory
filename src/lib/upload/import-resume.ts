@@ -1,5 +1,9 @@
 import { parseJsonResumeString } from "@/lib/resume/json";
-import type { SupportedUploadExtension } from "@/lib/upload/guardrails";
+import {
+  validateUploadFile,
+  validateUploadFileContent,
+  type SupportedUploadExtension,
+} from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
 import type { ResumeSchema } from "@/types/resume";
 
@@ -27,6 +31,23 @@ export async function importResumeFile(
   file: File,
   extension: SupportedUploadExtension
 ): Promise<ImportResumeOutcome> {
+  const validation = validateUploadFile(file);
+  if (!validation.ok) {
+    return { success: false, error: validation.error };
+  }
+
+  if (validation.extension !== extension) {
+    return {
+      success: false,
+      error: "The selected file type does not match its file name. Please choose it again.",
+    };
+  }
+
+  const contentValidation = await validateUploadFileContent(file, extension);
+  if (!contentValidation.ok) {
+    return { success: false, error: contentValidation.error };
+  }
+
   if (extension === "json") {
     try {
       const text = await file.text();
