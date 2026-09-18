@@ -103,12 +103,22 @@ const ProjectsForm: Component = () => {
           </FormField>
 
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Highlights</label>
+            <p
+              id={`project-highlights-label-${item.id}`}
+              class="block text-sm font-medium text-gray-700"
+            >
+              Highlights
+            </p>
             <div class="space-y-2">
               <For each={item.highlights}>
                 {(h, idx) => (
                   <div class="flex gap-2">
+                    <label for={`project-highlight-${item.id}-${idx()}`} class="sr-only">
+                      Highlight {idx() + 1}
+                    </label>
                     <Textarea
+                      id={`project-highlight-${item.id}-${idx()}`}
+                      aria-describedby={`project-highlights-label-${item.id}`}
                       value={h}
                       onInput={(v) => updateHighlight(item.id, idx(), v)}
                       placeholder="Built with TypeScript…"
