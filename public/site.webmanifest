@@ -1,8 +1,17 @@
 {
-  "name": "Astro Template",
-  "short_name": "Astro",
-  "icons": [],
-  "theme_color": "#030712",
-  "background_color": "#030712",
-  "display": "standalone"
+  "name": "Tailory",
+  "short_name": "Tailory",
+  "description": "A free, browser-based resume editor.",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#1d6648",
+  "background_color": "#f4f8f5",
+  "display": "browser"
 }
