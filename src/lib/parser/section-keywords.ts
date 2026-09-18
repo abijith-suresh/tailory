@@ -31,9 +31,10 @@ export const SECTION_KEYWORDS = {
     "technologies",
     "technical expertise",
     "tools",
-    "languages",
-    "programming languages",
   ],
+  languages: ["languages", "spoken languages", "language skills"],
+  interests: ["interests", "hobbies", "personal interests"],
+  references: ["references", "professional references"],
   projects: [
     "projects",
     "personal projects",

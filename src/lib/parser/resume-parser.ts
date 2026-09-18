@@ -4,6 +4,10 @@ import type {
   ResumeCertificate,
   ResumeEducation,
   ResumeLocation,
+  ResumeInterest,
+  ResumeLanguage,
+  ResumeProfile,
+  ResumeReference,
   ResumeProject,
   ResumePublication,
   ResumeSchema,
@@ -110,7 +114,11 @@ function splitIntoSections(text: string): Record<string, string> {
     const trimmed = line.trim();
     const detected = detectSectionStart(trimmed);
 
-    if (detected) {
+    // "Languages: ..." is commonly used as a category label inside a
+    // broader skills section. Keep that content with the skills block.
+    const isSkillsCategory = currentSection === "skills" && detected?.section === "languages";
+
+    if (detected && !isSkillsCategory) {
       flush();
       currentSection = detected.section;
 
@@ -129,7 +137,8 @@ function splitIntoSections(text: string): Record<string, string> {
 // ─── Field extractors ──────────────────────────────────────────────────────
 
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i;
-const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}|\+\d{1,3}[\s.-]\d{4,14}/;
+const PHONE_RE =
+  /(?:\+\d{1,3}[\s.-]?(?:\(\d{1,4}\)[\s.-]?)?(?:\d[\s().-]?){6,13}\d)|(?:\(?\d{2,4}\)?[\s.-]\d{2,4}[\s.-]\d{2,4})/;
 const URL_RE = /https?:\/\/[^\s,)]+|(?:www|linkedin|github)\.[^\s,)]+/i;
 const MONTH_PATTERN =
   "(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)";
@@ -170,6 +179,63 @@ function extractPhone(text: string): string {
 
 function extractUrl(text: string): string {
   return URL_RE.exec(text)?.[0] ?? "";
+}
+
+function extractUrls(text: string): string[] {
+  const matches = text.match(new RegExp(URL_RE.source, "gi")) ?? [];
+  const seen = new Set<string>();
+
+  return matches.filter((url) => {
+    const key = url.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function normalizeProfileUrl(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+function parseProfile(url: string): ResumeProfile | null {
+  const normalizedUrl = normalizeProfileUrl(url);
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(normalizedUrl);
+  } catch {
+    return null;
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
+  const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+  const profileNetworks: Array<{ host: string; network: string; pathIndex?: number }> = [
+    { host: "linkedin.com", network: "LinkedIn", pathIndex: 1 },
+    { host: "github.com", network: "GitHub" },
+    { host: "gitlab.com", network: "GitLab" },
+    { host: "x.com", network: "X" },
+    { host: "twitter.com", network: "Twitter" },
+  ];
+
+  const match = profileNetworks.find(
+    (profile) => hostname === profile.host || hostname.endsWith(`.${profile.host}`)
+  );
+  if (!match) return null;
+
+  const username = pathParts[match.pathIndex ?? 0] ?? "";
+  if (!username) return null;
+
+  return {
+    network: match.network,
+    username,
+    url: normalizedUrl,
+  };
+}
+
+function extractProfiles(text: string): ResumeProfile[] {
+  return extractUrls(text)
+    .map(parseProfile)
+    .filter((profile): profile is ResumeProfile => Boolean(profile));
 }
 
 function extractDates(text: string): { startDate: string; endDate: string } {
@@ -615,7 +681,7 @@ function parseHeader(text: string): ResumeBasics {
     phone: extractPhone(remaining),
     url: extractUrl(remaining),
     location,
-    profiles: [],
+    profiles: extractProfiles(remaining),
   };
 }
 
@@ -771,6 +837,59 @@ function parseSkills(text: string): ResumeSkill[] {
   }));
 }
 
+function parseLanguages(text: string): ResumeLanguage[] {
+  const entries: ResumeLanguage[] = [];
+
+  for (const value of text
+    .split("\n")
+    .flatMap((line) => line.split(/[|,;•]+/))
+    .map((line) => cleanListValue(line))
+    .filter(Boolean)) {
+    const match = value.match(/^(.+?)\s*(?:[-–—:]\s*(.+)|\(([^)]+)\))$/);
+    const language = (match?.[1] ?? value).trim();
+    const fluency = (match?.[2] ?? match?.[3] ?? "").trim();
+
+    if (!language || language.length > 80) continue;
+    entries.push({
+      id: crypto.randomUUID(),
+      language,
+      fluency: fluency || undefined,
+    });
+  }
+
+  return entries;
+}
+
+function parseInterests(text: string): ResumeInterest[] {
+  return tokenizeSkills(text).map((name) => ({
+    id: crypto.randomUUID(),
+    name,
+    keywords: [],
+  }));
+}
+
+function parseReferences(text: string): ResumeReference[] {
+  return splitEntryBlocks(text).flatMap((block) => {
+    const lines = block
+      .split("\n")
+      .map((line) => cleanListValue(line))
+      .filter(Boolean);
+    const firstLine = lines[0] ?? "";
+    if (!firstLine) return [];
+
+    const { primary, secondary } = splitPrimaryAndSecondary(firstLine);
+    const reference = [secondary, ...lines.slice(1)].filter(Boolean).join(" ").trim();
+
+    return [
+      {
+        id: crypto.randomUUID(),
+        name: primary,
+        reference: reference || undefined,
+      },
+    ];
+  });
+}
+
 function parsePublications(text: string): ResumePublication[] {
   const entries: ResumePublication[] = [];
   const blocks = splitEntryBlocks(text);
@@ -858,13 +977,21 @@ function parseCertificates(text: string): ResumeCertificate[] {
 
 function calcConfidence(resume: ResumeSchema): number {
   let score = 0;
-  if (resume.basics.name) score += 20;
-  if (resume.basics.email) score += 15;
-  if (resume.basics.phone) score += 10;
-  if ((resume.work?.length ?? 0) > 0) score += 20;
-  if ((resume.education?.length ?? 0) > 0) score += 15;
+  if (resume.basics.name) score += 15;
+  if (resume.basics.email) score += 12;
+  if (resume.basics.phone) score += 8;
+  if ((resume.work?.length ?? 0) > 0) score += 15;
+  if ((resume.education?.length ?? 0) > 0) score += 10;
   if ((resume.skills?.length ?? 0) > 0) score += 10;
   if (resume.basics.summary) score += 10;
+  if ((resume.projects?.length ?? 0) > 0) score += 5;
+  if ((resume.certificates?.length ?? 0) > 0) score += 4;
+  if ((resume.languages?.length ?? 0) > 0) score += 3;
+  if ((resume.interests?.length ?? 0) > 0) score += 2;
+  if ((resume.references?.length ?? 0) > 0) score += 2;
+  if ((resume.volunteer?.length ?? 0) > 0) score += 2;
+  if ((resume.awards?.length ?? 0) > 0) score += 1;
+  if ((resume.publications?.length ?? 0) > 0) score += 1;
   return Math.min(score, 100);
 }
 
@@ -914,6 +1041,21 @@ export async function parseResume(rawText: string): Promise<ParseResult> {
   // Skills
   if (rawSections.skills) {
     data.skills = parseSkills(rawSections.skills);
+  }
+
+  // Languages
+  if (rawSections.languages) {
+    data.languages = parseLanguages(rawSections.languages);
+  }
+
+  // Interests
+  if (rawSections.interests) {
+    data.interests = parseInterests(rawSections.interests);
+  }
+
+  // References
+  if (rawSections.references) {
+    data.references = parseReferences(rawSections.references);
   }
 
   // Projects
