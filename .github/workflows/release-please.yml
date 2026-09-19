@@ -2,20 +2,21 @@ name: Release Please
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 jobs:
   release-please:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: googleapis/release-please-action@v5
-        id: release
-        with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+    uses: abijith-suresh/workflows/.github/workflows/release-please.yml@e59572c426373f5864ef1a6dad2524b47280a30c # v0.4.1
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    secrets:
+      RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}

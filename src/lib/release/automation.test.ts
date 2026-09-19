@@ -8,6 +8,7 @@ describe("release automation source of truth", () => {
     const root = process.cwd();
     const packageJson = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")) as {
       version: string;
+      packageManager?: string;
     };
     const manifest = JSON.parse(
       readFileSync(path.join(root, ".release-please-manifest.json"), "utf8")
@@ -26,20 +27,28 @@ describe("release automation source of truth", () => {
       path.join(root, ".github", "workflows", "release-please.yml"),
       "utf8"
     );
+
     expect(config["include-component-in-tag"]).toBe(false);
-    expect(config["bootstrap-sha"]).toMatch(/^[0-9a-f]{40}$/u);
-    expect(config["initial-version"]).toBe("0.0.1");
     expect(config["include-v-in-tag"]).toBe(false);
     expect(config["include-v-in-release-name"]).toBe(false);
-    expect(workflow).toContain("config-file: release-please-config.json");
-    expect(workflow).toContain("manifest-file: .release-please-manifest.json");
+    expect(config["bootstrap-sha"]).toBeUndefined();
+    expect(config["initial-version"]).toBeUndefined();
+    expect(workflow).toContain("abijith-suresh/workflows/.github/workflows/release-please.yml");
+    expect(workflow).toContain("RELEASE_PLEASE_TOKEN:");
+    expect(workflow).toContain("secrets.RELEASE_PLEASE_TOKEN");
 
-    if (existsSync(path.join(root, "CHANGELOG.md"))) {
-      expect(manifest["."]).toBe(packageJson.version);
-    } else {
-      expect(packageJson.version).toBe("0.0.1");
-      expect(manifest["."]).toBe("0.0.0");
-    }
+    expect(manifest["."]).toBe(packageJson.version);
+    expect(packageJson.version).toBe("0.0.1");
+
+    // Unified CI runtime contract
+    expect(existsSync(path.join(root, "mise.toml"))).toBe(true);
+    expect(existsSync(path.join(root, ".bun-version"))).toBe(false);
+    expect(existsSync(path.join(root, ".node-version"))).toBe(false);
+    expect(packageJson.packageManager).toBe("bun@1.4.1");
+
+    const mise = readFileSync(path.join(root, "mise.toml"), "utf8");
+    expect(mise).toContain('bun = "1.4.1"');
+    expect(mise).toContain('node = "24.20.0"');
   });
 
   it("documents the maintainer release flow in-repo", () => {

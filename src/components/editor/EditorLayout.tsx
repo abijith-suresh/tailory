@@ -18,21 +18,28 @@ const MOBILE_BREAKPOINT = 768;
 
 // ── Confidence helpers ────────────────────────────────────────────────────────
 
+function normalizeScore(score: number): number {
+  return score > 1 ? score : score * 100;
+}
+
 function confidenceLabel(score: number): string {
-  if (score >= 0.8) return "High confidence";
-  if (score >= 0.5) return "Medium confidence";
+  const norm = normalizeScore(score);
+  if (norm >= 80) return "High confidence";
+  if (norm >= 50) return "Medium confidence";
   return "Low confidence — review carefully";
 }
 
 function confidenceAccent(score: number): string {
-  if (score >= 0.8) return "#1d6648";
-  if (score >= 0.5) return "#b45309";
+  const norm = normalizeScore(score);
+  if (norm >= 80) return "#1d6648";
+  if (norm >= 50) return "#b45309";
   return "#b91c1c";
 }
 
 function confidenceBorder(score: number): string {
-  if (score >= 0.8) return "#ccddd4";
-  if (score >= 0.5) return "#fcd34d";
+  const norm = normalizeScore(score);
+  if (norm >= 80) return "#ccddd4";
+  if (norm >= 50) return "#fcd34d";
   return "#fca5a5";
 }
 
