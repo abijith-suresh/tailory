@@ -19,7 +19,7 @@ const MOBILE_BREAKPOINT = 768;
 // ── Confidence helpers ────────────────────────────────────────────────────────
 
 function normalizeScore(score: number): number {
-  return score > 1 ? score : score * 100;
+  return score > 0 && score <= 1 && !Number.isInteger(score) ? score * 100 : score;
 }
 
 function confidenceLabel(score: number): string {
