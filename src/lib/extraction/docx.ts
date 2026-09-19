@@ -1,5 +1,3 @@
-import mammoth from "mammoth";
-
 function isLegacyDocFile(file: File): boolean {
   const extension = file.name.split(".").pop()?.trim().toLowerCase();
   return extension === "doc" || file.type === "application/msword";
@@ -15,6 +13,21 @@ function normalizeExtractedText(text: string): string {
     .trim();
 }
 
+interface MammothModule {
+  extractRawText: (input: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+}
+
+let mammothPromise: Promise<MammothModule> | null = null;
+
+async function getMammoth(): Promise<MammothModule> {
+  if (!mammothPromise) {
+    mammothPromise = import("mammoth").then((mod) => {
+      return ((mod as unknown as { default?: MammothModule }).default ?? mod) as MammothModule;
+    });
+  }
+  return mammothPromise;
+}
+
 /**
  * Extract plain text from a DOCX file using mammoth.
  */
@@ -25,6 +38,7 @@ export async function extractTextFromDOCX(file: File): Promise<string> {
     );
   }
 
+  const mammoth = await getMammoth();
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
   const extractedText = normalizeExtractedText(result.value);
