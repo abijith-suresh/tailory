@@ -1,7 +1,17 @@
-import * as pdfjs from "pdfjs-dist";
+type PdfJsModule = typeof import("pdfjs-dist");
 
-// Set the worker source to the file we copied to public/
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+let pdfjsPromise: Promise<PdfJsModule> | null = null;
+
+async function getPdfJs(): Promise<PdfJsModule> {
+  if (!pdfjsPromise) {
+    pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
+      // Set the worker source to the file we copied to public/
+      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+      return pdfjs;
+    });
+  }
+  return pdfjsPromise;
+}
 
 export const MAX_PDF_PAGES = 20;
 export const MAX_PDF_TEXT_ITEMS = 10_000;
@@ -162,6 +172,7 @@ function normalizeExtractedText(text: string): string {
  * Returns a single string with pages separated by newlines.
  */
 export async function extractTextFromPDF(file: File): Promise<string> {
+  const pdfjs = await getPdfJs();
   const arrayBuffer = await file.arrayBuffer();
   const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
   let pdf: Awaited<typeof loadingTask.promise> | undefined;
