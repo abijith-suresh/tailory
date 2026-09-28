@@ -18,7 +18,9 @@ pnpm-debug.log*
 # Environment files
 .env
 .env.*
-!.env.example
+
+# Test coverage
+coverage/
 
 # OS generated files
 .DS_Store

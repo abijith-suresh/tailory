@@ -24,6 +24,7 @@ bun run type-check
 bun run lint
 bun run format:check
 bun run test
+bun run test:coverage
 bun run build
 ```
 
