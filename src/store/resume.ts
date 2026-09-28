@@ -15,9 +15,7 @@ export const [resume, setResume] = createStore<ResumeSchema>(defaultResume);
 export const [selectedTemplate, setSelectedTemplate] =
   createSignal<TemplateId>(DEFAULT_TEMPLATE_ID);
 
-export const [selectedAccentColor, setSelectedAccentColor] = createSignal(
-  DEFAULT_RESUME_ACCENT_COLOR
-);
+export const [selectedAccentColor] = createSignal(DEFAULT_RESUME_ACCENT_COLOR);
 
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
 
@@ -38,8 +36,4 @@ export const [importFeedback, setImportFeedback] = createSignal<ImportFeedback |
 
 export function loadResume(data: ResumeSchema) {
   setResume(normalizeResume(data));
-}
-
-export function resetResume() {
-  setResume(normalizeResume(EMPTY_RESUME));
 }

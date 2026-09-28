@@ -1,10 +1,10 @@
-import { type Component, For, type JSX } from "solid-js";
+import { For, type JSX } from "solid-js";
 
 interface ReorderableListProps<T extends { id: string }> {
   items: T[];
   onReorder: (items: T[]) => void;
   onRemove: (id: string) => void;
-  renderItem: (item: T, index: number) => JSX.Element;
+  renderItem: (item: T) => JSX.Element;
   addLabel?: string;
   onAdd?: () => void;
 }
@@ -58,7 +58,7 @@ function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T
                 ✕
               </button>
             </div>
-            {props.renderItem(item, index())}
+            {props.renderItem(item)}
           </div>
         )}
       </For>
@@ -76,5 +76,4 @@ function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T
   );
 }
 
-export default ReorderableList as Component<ReorderableListProps<{ id: string }>>;
 export { ReorderableList };

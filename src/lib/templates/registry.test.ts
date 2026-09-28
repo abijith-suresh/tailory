@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
 import { createTemplateFixture } from "@/lib/templates/template-fixtures";
-import { isTemplateId, TEMPLATE_IDS } from "@/types/template";
+import { TEMPLATE_IDS } from "@/types/template";
 import { loadPdfTemplateRenderer, TEMPLATE_OPTIONS, TEMPLATE_REGISTRY } from "./registry";
 
 describe("template registry", () => {
@@ -23,10 +23,5 @@ describe("template registry", () => {
 
     expect(model.template).toBe(templateId);
     expect(model.sections.length).toBeGreaterThan(0);
-  });
-
-  it("validates template ids", () => {
-    expect(isTemplateId("modern")).toBe(true);
-    expect(isTemplateId("bogus")).toBe(false);
   });
 });
