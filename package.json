@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "astro": "^7.3.5",
-    "geist": "^1.7.2",
     "idb": "^8.0.3",
     "mammoth": "^1.12.3",
     "pdfjs-dist": "^6.3.289",
