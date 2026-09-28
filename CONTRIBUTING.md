@@ -27,6 +27,16 @@ bun run test
 bun run build
 ```
 
+## Maintenance
+
+When you upgrade `pdfjs-dist`, re-sync the worker that the browser loads:
+
+```sh
+bun run assets:pdf-worker
+```
+
+`public/pdf.worker.min.mjs` must match the installed `pdfjs-dist` build. If it drifts, PDF import fails with an API/worker version mismatch. The guard in `src/lib/extraction/pdf-worker-assets.test.ts` fails `bun run test` when the worker is out of date, so run the command above and commit the updated file as part of the upgrade.
+
 ## Contribution workflow
 
 - Branch from the latest `main`.
@@ -67,6 +77,6 @@ If release history needs repair:
 1. Decide the correct release baseline and tag.
 2. Update `package.json`.
 3. Update `.release-please-manifest.json`.
-4. Update the Release Please initial version and bootstrap SHA.
+4. Keep the Release Please `initial-version` and `bootstrap-sha` options unset; the release automation test asserts they stay undefined.
 5. Repair `CHANGELOG.md` compare links if a changelog already exists.
 6. Confirm that the latest real tag matches the version source of truth before re-enabling automation.
