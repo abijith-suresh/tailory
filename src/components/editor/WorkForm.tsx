@@ -1,10 +1,10 @@
-import { type Component, For } from "solid-js";
+import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 
 import FormField from "@/components/ui/FormField";
+import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
-import Textarea from "@/components/ui/Textarea";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeWork } from "@/types/resume";
 
@@ -117,48 +117,16 @@ const WorkForm: Component = () => {
             />
           </FormField>
 
-          <div class="space-y-1">
-            <p
-              id={`work-highlights-label-${item.id}`}
-              class="block text-sm font-medium text-gray-700"
-            >
-              Highlights / Bullets
-            </p>
-            <div class="space-y-2">
-              <For each={item.highlights}>
-                {(h, idx) => (
-                  <div class="flex gap-2">
-                    <label for={`work-highlight-${item.id}-${idx()}`} class="sr-only">
-                      Highlight {idx() + 1}
-                    </label>
-                    <Textarea
-                      id={`work-highlight-${item.id}-${idx()}`}
-                      aria-describedby={`work-highlights-label-${item.id}`}
-                      value={h}
-                      onInput={(v) => updateHighlight(item.id, idx(), v)}
-                      placeholder="Led development of…"
-                      rows={2}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeHighlight(item.id, idx())}
-                      aria-label="Remove highlight"
-                      class="mt-1 flex-shrink-0 text-red-400 transition-colors active:opacity-70 hover:text-red-600"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-              </For>
-              <button
-                type="button"
-                onClick={() => addHighlight(item.id)}
-                class="text-xs text-[#1d6648] transition-colors hover:underline"
-              >
-                + Add bullet
-              </button>
-            </div>
-          </div>
+          <HighlightList
+            highlights={item.highlights ?? []}
+            idPrefix={`work-highlight-${item.id}`}
+            label="Highlights / Bullets"
+            addLabel="Add bullet"
+            placeholder="Led development of…"
+            onInput={(index, value) => updateHighlight(item.id, index, value)}
+            onRemove={(index) => removeHighlight(item.id, index)}
+            onAdd={() => addHighlight(item.id)}
+          />
         </div>
       )}
     />

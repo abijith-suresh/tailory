@@ -45,75 +45,42 @@ function confidenceBorder(score: number): string {
 
 // ── Toast components ──────────────────────────────────────────────────────────
 
-function ExportErrorToast() {
+const TOAST_DISMISS_DELAY = 5000;
+
+function useAutoDismiss(isActive: () => boolean, dismiss: () => void) {
   createEffect(() => {
-    const err = exportError();
-    if (!err) return;
-    const timer = setTimeout(() => setExportError(""), 5000);
+    if (!isActive()) return;
+    const timer = setTimeout(dismiss, TOAST_DISMISS_DELAY);
     onCleanup(() => clearTimeout(timer));
   });
+}
 
+function DismissButton(props: { onDismiss: () => void; class: string }) {
   return (
-    <Show when={exportError()}>
-      <div
-        role="alert"
-        aria-live="assertive"
-        class="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-white px-4 py-3 shadow-xl shadow-black/10"
-        style={{ "pointer-events": "auto" }}
+    <button type="button" onClick={props.onDismiss} class={props.class} aria-label="Dismiss">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#b91c1c"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mt-0.5 shrink-0"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <p class="flex-1 text-sm leading-snug text-red-700">{exportError()}</p>
-        <button
-          type="button"
-          onClick={() => setExportError("")}
-          class="shrink-0 text-red-400 transition-colors hover:text-red-600"
-          aria-label="Dismiss"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-    </Show>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
   );
 }
 
-function ImportErrorToast() {
-  createEffect(() => {
-    const err = importError();
-    if (!err) return;
-    const timer = setTimeout(() => setImportError(""), 5000);
-    onCleanup(() => clearTimeout(timer));
-  });
+function ErrorToast(props: { message: () => string; onDismiss: () => void }) {
+  useAutoDismiss(() => props.message().length > 0, props.onDismiss);
 
   return (
-    <Show when={importError()}>
+    <Show when={props.message()}>
       <div
         role="alert"
         aria-live="assertive"
@@ -136,45 +103,26 @@ function ImportErrorToast() {
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
-        <p class="flex-1 text-sm leading-snug text-red-700">{importError()}</p>
-        <button
-          type="button"
-          onClick={() => setImportError("")}
+        <p class="flex-1 text-sm leading-snug text-red-700">{props.message()}</p>
+        <DismissButton
+          onDismiss={props.onDismiss}
           class="shrink-0 text-red-400 transition-colors hover:text-red-600"
-          aria-label="Dismiss"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+        />
       </div>
     </Show>
   );
 }
 
 function ImportSuccessToast() {
-  createEffect(() => {
-    const fb = importFeedback();
-    if (!fb) return;
-    const timer = setTimeout(() => setImportFeedback(null), 5000);
-    onCleanup(() => clearTimeout(timer));
-  });
+  useAutoDismiss(
+    () => importFeedback() !== null,
+    () => setImportFeedback(null)
+  );
 
   return (
     <Show when={importFeedback()}>
-      {(_) => {
-        const fb = importFeedback()!;
+      {(feedback) => {
+        const fb = feedback();
         const parts: string[] = [];
         if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
         if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);
@@ -254,8 +202,8 @@ function ToastContainer() {
         "pointer-events": "none",
       }}
     >
-      <ExportErrorToast />
-      <ImportErrorToast />
+      <ErrorToast message={exportError} onDismiss={() => setExportError("")} />
+      <ErrorToast message={importError} onDismiss={() => setImportError("")} />
       <ImportSuccessToast />
     </div>
   );

@@ -1,7 +1,8 @@
-import { type Component, For } from "solid-js";
+import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 
 import FormField from "@/components/ui/FormField";
+import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
@@ -102,48 +103,16 @@ const ProjectsForm: Component = () => {
             />
           </FormField>
 
-          <div class="space-y-1">
-            <p
-              id={`project-highlights-label-${item.id}`}
-              class="block text-sm font-medium text-gray-700"
-            >
-              Highlights
-            </p>
-            <div class="space-y-2">
-              <For each={item.highlights}>
-                {(h, idx) => (
-                  <div class="flex gap-2">
-                    <label for={`project-highlight-${item.id}-${idx()}`} class="sr-only">
-                      Highlight {idx() + 1}
-                    </label>
-                    <Textarea
-                      id={`project-highlight-${item.id}-${idx()}`}
-                      aria-describedby={`project-highlights-label-${item.id}`}
-                      value={h}
-                      onInput={(v) => updateHighlight(item.id, idx(), v)}
-                      placeholder="Built with TypeScript…"
-                      rows={2}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeHighlight(item.id, idx())}
-                      aria-label="Remove highlight"
-                      class="mt-1 flex-shrink-0 text-red-400 transition-colors active:opacity-70 hover:text-red-600"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-              </For>
-              <button
-                type="button"
-                onClick={() => addHighlight(item.id)}
-                class="text-xs text-[#1d6648] transition-colors hover:underline"
-              >
-                + Add highlight
-              </button>
-            </div>
-          </div>
+          <HighlightList
+            highlights={item.highlights ?? []}
+            idPrefix={`project-highlight-${item.id}`}
+            label="Highlights"
+            addLabel="Add highlight"
+            placeholder="Built with TypeScript…"
+            onInput={(index, value) => updateHighlight(item.id, index, value)}
+            onRemove={(index) => removeHighlight(item.id, index)}
+            onAdd={() => addHighlight(item.id)}
+          />
         </div>
       )}
     />
