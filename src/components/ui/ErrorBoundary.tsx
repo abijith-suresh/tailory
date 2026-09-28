@@ -2,7 +2,6 @@ import { type Component, type JSX, ErrorBoundary as SolidErrorBoundary } from "s
 
 interface ErrorBoundaryProps {
   children: JSX.Element;
-  fallback?: (err: Error, reset: () => void) => JSX.Element;
 }
 
 const ErrorBoundary: Component<ErrorBoundaryProps> = (props) => {
@@ -20,11 +19,7 @@ const ErrorBoundary: Component<ErrorBoundaryProps> = (props) => {
     </div>
   );
 
-  return (
-    <SolidErrorBoundary fallback={props.fallback ?? defaultFallback}>
-      {props.children}
-    </SolidErrorBoundary>
-  );
+  return <SolidErrorBoundary fallback={defaultFallback}>{props.children}</SolidErrorBoundary>;
 };
 
 export default ErrorBoundary;

@@ -21,7 +21,6 @@ import {
   setImportError,
   setImportFeedback,
 } from "@/store/resume";
-import type { SectionId } from "@/types/resume";
 import DraftManager from "./DraftManager";
 
 const CIRCUMFERENCE = 2 * Math.PI * 14;

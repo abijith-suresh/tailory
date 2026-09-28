@@ -7,5 +7,3 @@ export interface PdfTemplateOptions {
   pageMargins?: PdfMargin;
   typography?: ResumeTypographyInput;
 }
-
-export type { PdfMargin };

@@ -21,7 +21,7 @@ interface TailoryDB {
 
 let _db: IDBPDatabase<TailoryDB> | null = null;
 
-function handleStorageError(_message: string, _error: unknown) {
+function resetDbConnection() {
   _db = null;
 }
 
@@ -35,7 +35,7 @@ async function getDB(): Promise<IDBPDatabase<TailoryDB>> {
     });
     return _db;
   } catch (error) {
-    handleStorageError("Draft storage unavailable.", error);
+    resetDbConnection();
     throw error;
   }
 }
@@ -65,8 +65,8 @@ export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
     });
 
     return true;
-  } catch (error) {
-    handleStorageError(`Failed to save draft '${draft.id}'.`, error);
+  } catch {
+    resetDbConnection();
     return false;
   }
 }
@@ -82,8 +82,8 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
           resumeData: normalizeResume(draft.resumeData),
         }
       : undefined;
-  } catch (error) {
-    handleStorageError(`Failed to load draft '${id}'.`, error);
+  } catch {
+    resetDbConnection();
     return undefined;
   }
 }
@@ -99,8 +99,8 @@ export async function listDrafts(): Promise<ResumeDraft[]> {
         resumeData: normalizeResume(draft.resumeData),
       }))
       .sort((a, b) => b.updatedAt - a.updatedAt);
-  } catch (error) {
-    handleStorageError("Failed to list drafts.", error);
+  } catch {
+    resetDbConnection();
     return [];
   }
 }
@@ -110,8 +110,8 @@ export async function deleteDraft(id: string): Promise<boolean> {
     const db = await getDB();
     await db.delete("drafts", id);
     return true;
-  } catch (error) {
-    handleStorageError(`Failed to delete draft '${id}'.`, error);
+  } catch {
+    resetDbConnection();
     return false;
   }
 }

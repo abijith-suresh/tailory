@@ -4,7 +4,6 @@ type TextareaProps = {
   "aria-describedby"?: string;
   error?: boolean;
   id?: string;
-  onBlur?: () => void;
   onInput: (value: string) => void;
   placeholder?: string;
   rows?: number;
@@ -23,7 +22,6 @@ const Textarea: Component<TextareaProps> = (props) => (
     id={props.id}
     value={props.value}
     onInput={(e) => props.onInput(e.currentTarget.value)}
-    onBlur={props.onBlur}
     placeholder={props.placeholder}
     rows={props.rows ?? 4}
     aria-invalid={props.error ? "true" : undefined}

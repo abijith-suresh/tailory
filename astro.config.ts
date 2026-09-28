@@ -6,8 +6,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [solidJs()],
   vite: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins: [tailwindcss() as any],
+    plugins: [tailwindcss()],
     resolve: {
       alias: {
         "@": "/src",
