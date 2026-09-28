@@ -1,6 +1,7 @@
-import { type Component, type JSX, Show } from "solid-js";
+import { type Component, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
+import { SECTION_DEFINITIONS, TOTAL_SECTIONS, getSectionDefinition } from "@/lib/sections/registry";
 import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
@@ -14,84 +15,27 @@ import SkillsForm from "./SkillsForm";
 import SummaryForm from "./SummaryForm";
 import WorkForm from "./WorkForm";
 
-interface SectionMeta {
-  component: () => JSX.Element;
-  id: SectionId;
-  label: string;
-  subtitle: string;
-}
+const SECTION_COMPONENTS: Record<SectionId, Component> = {
+  basics: BasicsForm,
+  summary: SummaryForm,
+  work: WorkForm,
+  education: EducationForm,
+  skills: SkillsForm,
+  languages: LanguagesForm,
+  interests: InterestsForm,
+  references: ReferencesForm,
+  projects: ProjectsForm,
+  certs: CertificatesForm,
+};
 
-const SECTIONS: SectionMeta[] = [
-  {
-    id: "basics",
-    label: "Basic Info",
-    subtitle: "Name, contact details, and headline",
-    component: () => <BasicsForm />,
-  },
-  {
-    id: "summary",
-    label: "Summary",
-    subtitle: "A brief professional overview",
-    component: () => <SummaryForm />,
-  },
-  {
-    id: "work",
-    label: "Work Experience",
-    subtitle: "Jobs, roles, and accomplishments",
-    component: () => <WorkForm />,
-  },
-  {
-    id: "education",
-    label: "Education",
-    subtitle: "Degrees, institutions, and dates",
-    component: () => <EducationForm />,
-  },
-  {
-    id: "skills",
-    label: "Skills",
-    subtitle: "Technical and professional skills",
-    component: () => <SkillsForm />,
-  },
-  {
-    id: "languages",
-    label: "Languages",
-    subtitle: "Languages and fluency levels",
-    component: () => <LanguagesForm />,
-  },
-  {
-    id: "interests",
-    label: "Interests",
-    subtitle: "Communities, hobbies, and focus areas",
-    component: () => <InterestsForm />,
-  },
-  {
-    id: "references",
-    label: "References",
-    subtitle: "People who can vouch for your work",
-    component: () => <ReferencesForm />,
-  },
-  {
-    id: "projects",
-    label: "Projects",
-    subtitle: "Personal and professional projects",
-    component: () => <ProjectsForm />,
-  },
-  {
-    id: "certs",
-    label: "Certifications",
-    subtitle: "Licenses, certificates, and credentials",
-    component: () => <CertificatesForm />,
-  },
-];
-
-// ── EditorShell ──────────────────────────────────────────────────────────────
+// ── EditorShell ───────────────────────────────────────────────────────────────
 
 const EditorShell: Component = () => {
-  const currentSection = () => SECTIONS.find((s) => s.id === activeSection());
-  const currentIndex = () => SECTIONS.findIndex((s) => s.id === activeSection());
-  const prevSection = () => (currentIndex() > 0 ? SECTIONS[currentIndex() - 1] : null);
+  const currentSection = () => getSectionDefinition(activeSection());
+  const currentIndex = () => SECTION_DEFINITIONS.findIndex((s) => s.id === activeSection());
+  const prevSection = () => (currentIndex() > 0 ? SECTION_DEFINITIONS[currentIndex() - 1] : null);
   const nextSection = () =>
-    currentIndex() < SECTIONS.length - 1 ? SECTIONS[currentIndex() + 1] : null;
+    currentIndex() < TOTAL_SECTIONS - 1 ? SECTION_DEFINITIONS[currentIndex() + 1] : null;
 
   return (
     <div class="flex h-full flex-col" style={{ background: "#f4f8f5" }}>
@@ -114,8 +58,8 @@ const EditorShell: Component = () => {
             </p>
           </div>
 
-          {/* Mobile prev/next navigation — hidden on md+ (desktop has chips in CommandBar) */}
-          <div class="ml-3 flex shrink-0 items-center gap-1 md:hidden">
+          {/* Section nav */}
+          <div class="flex items-center gap-1.5" role="toolbar" aria-label="Section navigation">
             <button
               type="button"
               onClick={() => prevSection() && setActiveSection(prevSection()!.id)}
@@ -139,7 +83,7 @@ const EditorShell: Component = () => {
               </svg>
             </button>
             <span class="min-w-[3rem] text-center text-xs font-medium" style={{ color: "#5a7a68" }}>
-              {currentIndex() + 1}/{SECTIONS.length}
+              {currentIndex() + 1}/{TOTAL_SECTIONS}
             </span>
             <button
               type="button"
@@ -176,7 +120,14 @@ const EditorShell: Component = () => {
       >
         <Transition name="section" mode="outin">
           <Show when={currentSection()} keyed>
-            {(section) => <div class="p-6">{section.component()}</div>}
+            {(section) => {
+              const FormComponent = SECTION_COMPONENTS[section.id];
+              return (
+                <div class="p-6">
+                  <FormComponent />
+                </div>
+              );
+            }}
           </Show>
         </Transition>
       </div>

@@ -1,23 +1,13 @@
 import { type Component, For, Show } from "solid-js";
 import ResumeDocument from "@/components/resume/ResumeDocument";
 import { resolveResumeDesignSettings } from "@/lib/resume/design";
+import { TOTAL_SECTIONS, getCompletedSectionsCount, isResumeEmpty } from "@/lib/sections/registry";
 import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 
-const TOTAL_SECTIONS = 10;
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
-const isEmpty = () =>
-  !resume.basics.name &&
-  !resume.basics.summary &&
-  (resume.work?.length ?? 0) === 0 &&
-  (resume.education?.length ?? 0) === 0 &&
-  (resume.skills?.length ?? 0) === 0 &&
-  (resume.languages?.length ?? 0) === 0 &&
-  (resume.interests?.length ?? 0) === 0 &&
-  (resume.references?.length ?? 0) === 0 &&
-  (resume.projects?.length ?? 0) === 0 &&
-  (resume.certificates?.length ?? 0) === 0;
+const isEmpty = () => isResumeEmpty(resume);
 
 const ResumePreview: Component = () => {
   const design = () =>
@@ -26,20 +16,7 @@ const ResumePreview: Component = () => {
       accentColor: selectedAccentColor(),
     });
 
-  const completedCount = () => {
-    let count = 0;
-    if (resume.basics.name) count++;
-    if (resume.basics.summary) count++;
-    if ((resume.work?.length ?? 0) > 0) count++;
-    if ((resume.education?.length ?? 0) > 0) count++;
-    if ((resume.skills?.length ?? 0) > 0) count++;
-    if ((resume.languages?.length ?? 0) > 0) count++;
-    if ((resume.interests?.length ?? 0) > 0) count++;
-    if ((resume.references?.length ?? 0) > 0) count++;
-    if ((resume.projects?.length ?? 0) > 0) count++;
-    if ((resume.certificates?.length ?? 0) > 0) count++;
-    return count;
-  };
+  const completedCount = () => getCompletedSectionsCount(resume);
 
   const ringDash = () => {
     const filled = (completedCount() / TOTAL_SECTIONS) * CIRCUMFERENCE;
