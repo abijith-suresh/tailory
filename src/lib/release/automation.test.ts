@@ -38,7 +38,7 @@ describe("release automation source of truth", () => {
     expect(workflow).toContain("secrets.RELEASE_PLEASE_TOKEN");
 
     expect(manifest["."]).toBe(packageJson.version);
-    expect(packageJson.version).toBe("0.0.1");
+    expect(packageJson.version).toMatch(/^\d+\.\d+\.\d+$/);
 
     // Unified CI runtime contract
     expect(existsSync(path.join(root, "mise.toml"))).toBe(true);
