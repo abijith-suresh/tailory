@@ -59,7 +59,8 @@ function joinLineFragments(items: PositionedTextItem[]): string {
     const value = item.str.replace(/\u00a0/g, " ");
     if (!value.trim()) continue;
 
-    if (line && shouldInsertSpace(sorted[index - 1]!, item)) {
+    const previous = sorted[index - 1];
+    if (line && previous && shouldInsertSpace(previous, item)) {
       line += " ";
     }
 
