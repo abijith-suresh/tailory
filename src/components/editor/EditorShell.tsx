@@ -37,6 +37,16 @@ const EditorShell: Component = () => {
   const nextSection = () =>
     currentIndex() < TOTAL_SECTIONS - 1 ? SECTION_DEFINITIONS[currentIndex() + 1] : null;
 
+  const goToPrevSection = () => {
+    const section = prevSection();
+    if (section) setActiveSection(section.id);
+  };
+
+  const goToNextSection = () => {
+    const section = nextSection();
+    if (section) setActiveSection(section.id);
+  };
+
   return (
     <div class="flex h-full flex-col" style={{ background: "#f4f8f5" }}>
       {/* Section header */}
@@ -62,9 +72,9 @@ const EditorShell: Component = () => {
           <div class="flex items-center gap-1.5" role="toolbar" aria-label="Section navigation">
             <button
               type="button"
-              onClick={() => prevSection() && setActiveSection(prevSection()!.id)}
+              onClick={goToPrevSection}
               disabled={!prevSection()}
-              aria-label={prevSection() ? `Go to ${prevSection()!.label}` : "First section"}
+              aria-label={prevSection() ? `Go to ${prevSection()?.label}` : "First section"}
               class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
               style={{ color: "#1d6648" }}
             >
@@ -87,9 +97,9 @@ const EditorShell: Component = () => {
             </span>
             <button
               type="button"
-              onClick={() => nextSection() && setActiveSection(nextSection()!.id)}
+              onClick={goToNextSection}
               disabled={!nextSection()}
-              aria-label={nextSection() ? `Go to ${nextSection()!.label}` : "Last section"}
+              aria-label={nextSection() ? `Go to ${nextSection()?.label}` : "Last section"}
               class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
               style={{ color: "#1d6648" }}
             >

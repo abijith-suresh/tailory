@@ -5,7 +5,9 @@
       "@/*": ["./src/*"]
     },
     "jsx": "preserve",
-    "jsxImportSource": "solid-js"
+    "jsxImportSource": "solid-js",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
