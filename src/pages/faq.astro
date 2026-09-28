@@ -8,11 +8,11 @@ const faqs = [
   },
   {
     q: "Does my resume get uploaded to a server?",
-    a: "No. Tailory has no backend server at all. Your file is opened locally in the browser using the File API. Text extraction, parsing, editing, preview rendering, and PDF generation all happen inside your browser tab. Nothing is transmitted over the network.",
+    a: "No. Tailory has no backend server at all. Your file is opened locally in the browser using the File API. Text extraction, parsing, editing, preview rendering, and PDF generation all happen inside your browser tab. No resume content is transmitted over the network. The page does request normal web assets such as fonts, and like any website the host sees standard request metadata, but your resume data never leaves your device.",
   },
   {
     q: "What file formats can I upload?",
-    a: "Tailory accepts PDF (.pdf), Word (.docx), and JSON (.json) files. PDF text is extracted with PDF.js, DOCX text is extracted with Mammoth, and JSON imports are normalized as supported JSON Resume-style data. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read.",
+    a: "Tailory accepts PDF (.pdf), Word (.docx), and JSON (.json) files. PDF text is extracted with PDF.js, DOCX text is extracted with Mammoth, and JSON imports are normalized as supported JSON Resume-style data. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read. Uploads are capped at 10 MB; PDF extraction is capped at 20 pages and 250,000 characters.",
   },
   {
     q: "Can I import or export JSON Resume files?",
@@ -24,7 +24,7 @@ const faqs = [
   },
   {
     q: "Will the exported PDF pass ATS screening?",
-    a: "Tailory's PDF output is generated with pdfmake and consists entirely of machine-readable text — no images, no vector graphics, no tables that confuse parsers. All three templates are designed to output plain, ATS-compatible text layouts.",
+    a: "Tailory cannot guarantee how any specific employer's system will read your resume. What it can do is keep the exported PDF text-based: every field is selectable, searchable text rather than a screenshot, and all three templates use single-column layouts with standard section headings. Always review the exported file yourself before submitting it.",
   },
   {
     q: "What's the difference between the three templates?",
@@ -51,7 +51,7 @@ const faqs = [
 
 <MarketingLayout
   title="FAQ — Tailory"
-  description="Frequently asked questions about Tailory — privacy, file formats, JSON Resume support, ATS compatibility, and offline limitations."
+  description="Frequently asked questions about Tailory — privacy, file formats, JSON Resume support, PDF export, and offline limitations."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>

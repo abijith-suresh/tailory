@@ -32,9 +32,9 @@ const features = [
   },
   {
     n: "05",
-    title: "ATS-Safe PDF Export",
+    title: "Text-Based PDF Export",
     detail:
-      "PDF output is generated with pdfmake entirely in your browser. The resulting file is machine-readable text — no images, no embedded fonts that obscure content, no tables that confuse parsers. Every field is laid out as selectable, searchable text.",
+      "PDF output is generated with pdfmake entirely in your browser. Every field is laid out as selectable, searchable text rather than an image of your resume, and all templates stay single-column with standard section headings. Tailory does not score or guarantee ATS outcomes.",
     mockup: "export",
   },
   {
@@ -49,7 +49,7 @@ const features = [
 
 <MarketingLayout
   title="Features — Tailory"
-  description="Everything Tailory does today — PDF, DOCX, and JSON import, live preview, three templates, ATS-safe PDF export, and local browser draft storage."
+  description="Everything Tailory does today — PDF, DOCX, and JSON import, live preview, three templates, text-based PDF export, and local browser draft storage."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
@@ -151,7 +151,7 @@ const features = [
             {f.mockup === "templates" && (
               <div class="flex w-full max-w-xs flex-col gap-3">
                 {[
-                  { name: "Modern", desc: "Two-column, accented" },
+                  { name: "Modern", desc: "Two-tone header, accented" },
                   { name: "Minimal", desc: "Clean single-column" },
                   { name: "Compact ATS", desc: "ATS-optimised" },
                 ].map((t, ti) => (
@@ -180,7 +180,7 @@ const features = [
                   <span class="text-xs font-bold text-[#3d6650]">PDF</span>
                 </div>
                 <p class="text-sm font-medium text-[#0e2418]">resume.pdf</p>
-                <p class="mt-1 text-xs text-[#a0b8ab]">Machine-readable · ATS-safe</p>
+                <p class="mt-1 text-xs text-[#a0b8ab]">Machine-readable text</p>
                 <div class="mt-4 inline-block rounded bg-[#1d6648] px-4 py-2 text-xs font-medium text-white">
                   Download
                 </div>

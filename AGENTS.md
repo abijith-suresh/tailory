@@ -54,19 +54,21 @@ The product does not include, and must not gain without updating this section fi
 
 ## Project map
 
-- `src/components/upload/`: upload flow code that must remain aligned with the active editor entry point
-- `src/components/editor/`: editor forms, navigation, and draft management
+- `src/components/editor/`: editor forms, navigation, import/export command bar, and draft management
 - `src/components/preview/`: live resume preview
 - `src/lib/extraction/`: PDF and DOCX text extraction
 - `src/lib/parser/`: resume parsing heuristics
-- `src/lib/export/pdf-export.ts`: PDF export
+- `src/lib/upload/`: upload validation and import routing
+- `src/lib/export/`: PDF export and templates
+- `src/lib/storage/`: IndexedDB drafts and autosave
 - `src/store/resume.ts`: shared resume state
+- `scripts/`: maintenance scripts such as the PDF worker sync
 
 ## Hard rules
 
 - Use SolidJS for interactive UI. Do not introduce React or Vue.
 - Keep `pdfmake` dynamically imported inside browser runtime code. Do not import it at module scope.
-- Keep `public/pdf.worker.min.mjs` at the same path and keep `GlobalWorkerOptions.workerSrc` pointed to `/pdf.worker.min.mjs`.
+- Keep `public/pdf.worker.min.mjs` at the same path, keep `GlobalWorkerOptions.workerSrc` pointed to `/pdf.worker.min.mjs`, and re-run `bun run assets:pdf-worker` whenever `pdfjs-dist` changes.
 - Use the `@/` path alias for `src` imports.
 - Preserve the current browser-only workflow unless the user explicitly asks for server features.
 - Keep parser, editor, preview, export, and draft behavior aligned with the product truth.
