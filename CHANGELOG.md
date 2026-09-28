@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.2](https://github.com/abijith-suresh/tailory/compare/0.0.1...0.0.2) (2026-09-28)
+
+
+### Bug Fixes
+
+* **extraction:** sync PDF worker with pdfjs-dist and guard against drift ([#136](https://github.com/abijith-suresh/tailory/issues/136)) ([6d851fb](https://github.com/abijith-suresh/tailory/commit/6d851fb85e215f2c064e1c132449341270906da9))
+* **release:** stop pinning the package version to the baseline ([#145](https://github.com/abijith-suresh/tailory/issues/145)) ([5f65703](https://github.com/abijith-suresh/tailory/commit/5f657036126968bfec4daf21333b9f8091c20dcf))
+
 ## 0.0.1 (2026-09-18)
 
 
