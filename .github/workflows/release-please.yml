@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   release-please:
-    uses: abijith-suresh/workflows/.github/workflows/release-please.yml@91910de008d024aba8ef1b0035fbf5406ff085b2 # v0.5.0-rc
+    uses: abijith-suresh/workflows/.github/workflows/release-please.yml@0424bd486ad1c3e0bbb4d206886dec114872eb68 # v0.5.0-rc
     permissions:
       contents: write
       issues: write
