@@ -9,18 +9,26 @@ interface ReorderableListProps<T extends { id: string }> {
   onAdd?: () => void;
 }
 
+function swap<T>(items: T[], first: number, second: number) {
+  const a = items[first];
+  const b = items[second];
+  if (a === undefined || b === undefined) return;
+  items[first] = b;
+  items[second] = a;
+}
+
 function ReorderableList<T extends { id: string }>(props: ReorderableListProps<T>): JSX.Element {
   const moveUp = (index: number) => {
     if (index === 0) return;
     const next = [...props.items];
-    [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+    swap(next, index - 1, index);
     props.onReorder(next);
   };
 
   const moveDown = (index: number) => {
     if (index === props.items.length - 1) return;
     const next = [...props.items];
-    [next[index + 1], next[index]] = [next[index]!, next[index + 1]!];
+    swap(next, index, index + 1);
     props.onReorder(next);
   };
 

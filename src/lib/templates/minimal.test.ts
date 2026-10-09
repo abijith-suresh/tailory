@@ -17,7 +17,8 @@ describe("minimalTemplate", () => {
 
   it("does not emit dangling auto date columns for missing dates", () => {
     const resume = createTemplateFixture();
-    resume.work = [{ ...resume.work?.[1]! }];
+    const secondJob = resume.work?.[1];
+    resume.work = secondJob ? [{ ...secondJob }] : [];
     const doc = minimalTemplate(resume, { fontFamily: "Roboto" });
     const serialized = JSON.stringify(doc);
 
