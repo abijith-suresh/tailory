@@ -12,28 +12,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  bun-quality:
-    name: bun-quality
-    uses: abijith-suresh/workflows/.github/workflows/bun-quality.yml@163055ac24b4169ae93ae05c5d7491b1cd5d96c7 # v0.6.0
+  ci:
+    name: CI
+    uses: abijith-suresh/workflows/.github/workflows/ci.yml@6838f8e2495013c024606bbf8d63d3d5c66344fa # 0.8.0
     permissions:
       contents: read
 
   dependency-review:
     name: dependency-review
-    uses: abijith-suresh/workflows/.github/workflows/dependency-review.yml@163055ac24b4169ae93ae05c5d7491b1cd5d96c7 # v0.6.0
+    uses: abijith-suresh/workflows/.github/workflows/dependency-review.yml@6838f8e2495013c024606bbf8d63d3d5c66344fa # 0.8.0
     permissions:
       contents: read
 
-  quality:
-    name: quality
-    if: always()
-    needs: [bun-quality, dependency-review]
-    runs-on: ubuntu-latest
-
+  gate:
+    name: gate
+    if: ${{ !cancelled() }}
+    needs: [ci, dependency-review]
+    runs-on: ubuntu-24.04
+    permissions: {}
     steps:
-      - name: Check required quality jobs
+      - name: Require CI success
+        shell: bash
+        env:
+          CI_RESULT: ${{ needs.ci.result }}
+          DEPENDENCY_REVIEW_RESULT: ${{ needs.dependency-review.result }}
         run: |
-          if [[ "${{ needs.bun-quality.result }}" != "success" || "${{ needs.dependency-review.result }}" != "success" ]]; then
-            echo "bun-quality and dependency-review must both pass" >&2
+          set -euo pipefail
+          if [[ "$CI_RESULT" != success || "$DEPENDENCY_REVIEW_RESULT" != success ]]; then
+            echo "ci result: $CI_RESULT" >&2
+            echo "dependency-review result: $DEPENDENCY_REVIEW_RESULT" >&2
             exit 1
           fi
