@@ -45,7 +45,7 @@ bun run assets:pdf-worker
 - Use SolidJS for interactive UI. Do not introduce React or Vue.
 - Keep parser, editor, preview, export, and draft behavior aligned.
 - Add regression coverage when changing import, autosave, parsing, or export behavior.
-- Use Conventional Commit titles: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`, `ci`, or `build`.
+- Use Conventional Commit titles; allowed types and header rules live in `commitlint.config.ts`.
 - Open one focused pull request at a time and wait for review or merge feedback.
 - Squash merge is the expected merge strategy.
 
