@@ -8,24 +8,14 @@ Non-goals: accounts, signup, sync, or collaboration; server-side resume processi
 
 Status: live.
 
-## How I Work Here
-- Run `bun run verify` before handoff. Add focused regression tests for the behavior you touched; CI owns the full suite.
-- Use Conventional Commits, with types from `commitlint.config.ts`. Squash merge, never commit to `main`, and keep one focused PR open until review.
-- Keep interactive UI in SolidJS; do not introduce React or Vue.
-- Keep `pdfmake` dynamically imported in browser runtime code; a module-scope import breaks the client-only build.
-- Keep parser, editor, preview, export, and draft behavior aligned. Update README when user-visible behavior, limits, or supported JSON fields change; never advertise unimplemented features.
-
 ## Sources of Truth
+
 | Fact | Where |
 |---|---|
 | Product intent | § The Project (this file) |
 | Runtime behavior | code + tests |
-| Commands & deps | package.json |
-| Commit rules | commitlint.config.ts |
-| User-visible behavior & JSON Resume contract | README.md |
+| Commands & deps | `package.json` |
+| How to work here | `CONTRIBUTING.md` |
+| User-visible behavior & JSON Resume contract | `README.md` |
 
 Code and tests are the authority; this file never overrides executable truth.
-
-## Getting Around
-- `src/lib/extraction/` — PDF.js worker is version-coupled; re-sync `public/pdf.worker.min.mjs` after `pdfjs-dist` upgrades or PDF import fails.
-- `src/lib/templates/` — preview and PDF export share render models; template edits affect both paths.

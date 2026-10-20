@@ -11,22 +11,8 @@ bun install
 bun run dev
 ```
 
-Run the full quality gate before pushing:
-
-```sh
-bun run verify
-```
-
-Individual checks are available when you need to narrow down a failure:
-
-```sh
-bun run type-check
-bun run lint
-bun run format:check
-bun run test
-bun run test:coverage
-bun run build
-```
+Run `bun run verify` before handoff; add focused tests for what you touched and leave the full
+suite to CI. When you need to narrow down a failure, run the relevant script from `package.json`.
 
 ## Maintenance
 
@@ -43,7 +29,12 @@ bun run assets:pdf-worker
 - Branch from the latest `main`.
 - Never commit directly to `main`.
 - Use SolidJS for interactive UI. Do not introduce React or Vue.
-- Keep parser, editor, preview, export, and draft behavior aligned.
+- Keep `pdfmake` dynamically imported in browser runtime code; a module-scope import breaks the
+  client-only build.
+- Preview and PDF export share render models under `src/lib/templates/`; template edits affect both
+  paths.
+- Keep parser, editor, preview, export, and draft behavior aligned. Keep README and public copy
+  accurate; never advertise unimplemented features.
 - Add regression coverage when changing import, autosave, parsing, or export behavior.
 - Use Conventional Commit titles; allowed types and header rules live in `commitlint.config.ts`.
 - Open one focused pull request at a time and wait for review or merge feedback.
