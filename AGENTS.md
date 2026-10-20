@@ -1,92 +1,21 @@
-# Agent instructions for Tailory
+# tailory — agent brief
+Tailory is a browser-based resume editor: people import a PDF, DOCX, or JSON Resume-style file, edit structured data, preview it live, and export a text PDF or JSON. It is for people who want a private, no-account resume tool rather than another cloud profile.
 
-## Overview
+## The Project
+Core promise: resume content stays in the browser. Import, editing, preview, export, autosave, and named drafts all happen locally, and content is never uploaded to an application server. Drafts live in IndexedDB and disappear with site data; public copy must say so.
 
-- Tailory is a client-side resume editor built with Astro and SolidJS.
-- Users import PDF, DOCX, or JSON Resume-style files, edit structured data, preview it live, and export a PDF or JSON document.
+Non-goals: accounts, signup, sync, or collaboration; server-side resume processing; an offline-first PWA or service worker; public sharing, design or page-format controls, or extra templates before that work is tracked and tested; ATS scoring or hiring guarantees; claims of full validation against the official JSON Resume schema; speculative code for possible future expansion.
 
-## Product truth
+Status: live.
 
-This section is the product source of truth. Update it before changing product scope, promises, or non-goals. Code and public copy follow this section.
+## Sources of Truth
 
-### Core promise
+| Fact | Where |
+|---|---|
+| Product intent | § The Project (this file) |
+| Runtime behavior | code + tests |
+| Commands & deps | `package.json` |
+| How to work here | `CONTRIBUTING.md` |
+| User-visible behavior & JSON Resume contract | `README.md` |
 
-- Keep resume import, editing, preview, and export in the browser.
-- Do not upload resume content to an application server.
-- Do not require accounts, signups, login, or collaboration features.
-- Keep drafts local and explain that IndexedDB storage is cleared with site data.
-- Keep public copy honest about parser limits and the fields users can edit.
-
-### Current product surface
-
-- Import PDF, DOCX, and JSON Resume-style documents.
-- Edit basics, summary, work, education, skills, projects, certifications, languages, interests, and references.
-- Preview resumes with Modern, Minimal, and Compact ATS templates.
-- Export PDF and JSON documents.
-- Store autosaves and named drafts locally in IndexedDB.
-- Render and preserve volunteer work, awards, and publications, although those sections do not yet have editor forms.
-
-### Non-goals
-
-The product does not include, and must not gain without updating this section first:
-
-- server-side resume processing, accounts, sync, or collaboration
-- an offline-first PWA or service worker
-- a claim of full validation against the official JSON Resume schema package
-- ATS scoring or guarantees about hiring outcomes
-- public sharing, design controls, page-format controls, or additional templates before their tracked work is implemented and tested
-- speculative code kept only for possible future expansion
-
-## Stack
-
-- Astro 7
-- SolidJS islands
-- Tailwind CSS v4
-- TypeScript strict mode
-- Bun
-
-## Commands
-
-- Install dependencies: `bun install`
-- Dev server: `bun run dev`
-- Quality gate: `bun run verify`
-- Individual checks: `bun run type-check`, `bun run lint`, `bun run format:check`, `bun run test`, `bun run build`
-
-## Project map
-
-- `src/components/editor/`: editor forms, navigation, import/export command bar, and draft management
-- `src/components/preview/`: live resume preview
-- `src/lib/extraction/`: PDF and DOCX text extraction
-- `src/lib/parser/`: resume parsing heuristics
-- `src/lib/upload/`: upload validation and import routing
-- `src/lib/export/`: PDF export and templates
-- `src/lib/storage/`: IndexedDB drafts and autosave
-- `src/store/resume.ts`: shared resume state
-- `scripts/`: maintenance scripts such as the PDF worker sync
-
-## Hard rules
-
-- Use SolidJS for interactive UI. Do not introduce React or Vue.
-- Keep `pdfmake` dynamically imported inside browser runtime code. Do not import it at module scope.
-- Keep `public/pdf.worker.min.mjs` at the same path, keep `GlobalWorkerOptions.workerSrc` pointed to `/pdf.worker.min.mjs`, and re-run `bun run assets:pdf-worker` whenever `pdfjs-dist` changes.
-- Use the `@/` path alias for `src` imports.
-- Preserve the current browser-only workflow unless the user explicitly asks for server features.
-- Keep parser, editor, preview, export, and draft behavior aligned with the product truth.
-- Add regression coverage for import, autosave, parsing, and export behavior when changing those paths.
-
-## Documentation
-
-- `README.md` describes current user-visible behavior and the supported JSON Resume-style contract.
-- `CONTRIBUTING.md` describes development, contribution, release, and baseline recovery workflows.
-- Keep public copy and documentation aligned with the product truth. Do not advertise unimplemented features.
-
-## Git and CI
-
-- Branch from the latest `main` before starting changes.
-- Never commit directly to `main`.
-- Commit and PR titles must use Conventional Commits: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`, `ci`, or `build`.
-- Before push, run `bun run verify`.
-- `pre-commit` runs `lint-staged`, `commit-msg` runs `commitlint`, and `pre-push` runs `bun run verify`.
-- CI enforces quality and PR-title checks on pull requests.
-- Squash merge is the expected merge strategy.
-- Open one focused PR at a time, then wait for review or merge feedback before continuing.
+Code and tests are the authority; this file never overrides executable truth.
