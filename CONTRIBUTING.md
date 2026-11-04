@@ -49,7 +49,7 @@ These files and conventions stay aligned:
 - `package.json` contains the current package version.
 - `.release-please-manifest.json` contains Release Please's tracked version.
 - `CHANGELOG.md` contains generated release history after the first baseline release.
-- Git tags use the `X.Y.Z` format with no `v` prefix or component prefix.
+- Git tags use the `vX.Y.Z` format with no component prefix. The `0.0.1` and `0.0.2` tags predate this and stay unprefixed.
 - GitHub Releases use the matching tag.
 
 The normal release flow is:
