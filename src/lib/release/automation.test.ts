@@ -29,8 +29,8 @@ describe("release automation source of truth", () => {
     );
 
     expect(config["include-component-in-tag"]).toBe(false);
-    expect(config["include-v-in-tag"]).toBe(false);
-    expect(config["include-v-in-release-name"]).toBe(false);
+    expect(config["include-v-in-tag"]).toBeUndefined();
+    expect(config["include-v-in-release-name"]).toBeUndefined();
     expect(config["bootstrap-sha"]).toBeUndefined();
     expect(config["initial-version"]).toBeUndefined();
     expect(workflow).toContain("abijith-suresh/workflows/.github/workflows/release-please.yml");
