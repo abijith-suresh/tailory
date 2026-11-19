@@ -1,3 +1,5 @@
+import { MAX_EXTRACTED_TEXT_LENGTH } from "./limits";
+
 function isLegacyDocFile(file: File): boolean {
   const extension = file.name.split(".").pop()?.trim().toLowerCase();
   return extension === "doc" || file.type === "application/msword";
@@ -46,6 +48,12 @@ export async function extractTextFromDOCX(file: File): Promise<string> {
   if (!extractedText) {
     throw new Error(
       "No text could be extracted from this DOCX file. Please try another DOCX or paste your resume into the editor."
+    );
+  }
+
+  if (extractedText.length > MAX_EXTRACTED_TEXT_LENGTH) {
+    throw new Error(
+      "This DOCX contains too much text to process safely. Please upload a shorter resume."
     );
   }
 

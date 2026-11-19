@@ -40,6 +40,33 @@ describe("extractTextFromDOCX", () => {
     expect(extractRawText).not.toHaveBeenCalled();
   });
 
+  it("rejects text over the extraction limit", async () => {
+    const { MAX_EXTRACTED_TEXT_LENGTH } = await import("./limits");
+    extractRawText.mockResolvedValue({ value: "a".repeat(MAX_EXTRACTED_TEXT_LENGTH + 1) });
+
+    const { extractTextFromDOCX } = await import("./docx");
+    const file = new File(["docx"], "resume.docx", {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
+    await expect(extractTextFromDOCX(file)).rejects.toThrow(
+      "This DOCX contains too much text to process safely. Please upload a shorter resume."
+    );
+  });
+
+  it("accepts text at the extraction limit", async () => {
+    const { MAX_EXTRACTED_TEXT_LENGTH } = await import("./limits");
+    const text = "a".repeat(MAX_EXTRACTED_TEXT_LENGTH);
+    extractRawText.mockResolvedValue({ value: text });
+
+    const { extractTextFromDOCX } = await import("./docx");
+    const file = new File(["docx"], "resume.docx", {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
+    await expect(extractTextFromDOCX(file)).resolves.toBe(text);
+  });
+
   it("fails when mammoth returns blank text", async () => {
     extractRawText.mockResolvedValue({
       value: "\n\n  \u00a0\n",
