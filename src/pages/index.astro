@@ -8,7 +8,7 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 const drafts = [
   { name: "Design roles", saved: "11/18/2026, 9:42 AM" },
   { name: "Short version", saved: "11/12/2026, 6:05 PM" },
-  { name: "Agency applications", saved: "10/30/2026, 8:17 AM" },
+  { name: "Agency roles", saved: "10/30/2026, 8:17 AM" },
 ];
 ---
 
@@ -147,7 +147,7 @@ const drafts = [
             drafts.map((draft) => (
               <li class="flex items-baseline justify-between gap-4 border-b border-line px-5 py-3 last:border-b-0">
                 <span class="text-meta font-medium">{draft.name}</span>
-                <span class="text-label text-ink-subtle tabular-nums">{draft.saved}</span>
+                <span class="text-label whitespace-nowrap text-ink-subtle tabular-nums">{draft.saved}</span>
               </li>
             ))
           }
