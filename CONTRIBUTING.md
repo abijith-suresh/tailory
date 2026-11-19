@@ -1,74 +1,58 @@
-# Contributing to Tailory
+# Contributing
 
-Tailory is a browser-only resume editor. Keep resume data in the browser, keep the product scope small, and keep the public copy aligned with what the app actually does.
+These rules apply to people and coding agents alike. Read [AGENTS.md](AGENTS.md) first for what the product is and what is out of scope.
 
-## Development
+## Setup
 
-Install dependencies and run the local app with Bun:
+`mise.toml` pins the Bun and Node versions, and the `packageManager` field in `package.json` must match its Bun version.
 
-```sh
-bun install
+```bash
+mise install
+bun install --frozen-lockfile
 bun run dev
 ```
 
-Run `bun run verify` before handoff; add focused tests for what you touched and leave the full
-suite to CI. When you need to narrow down a failure, run the relevant script from `package.json`.
+Run the commands below with `mise exec --` if mise is not activated in your shell.
 
-## Maintenance
+## Checks
 
-When you upgrade `pdfjs-dist`, re-sync the worker that the browser loads:
+| Command                  | What it does                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `bun run verify`         | Type check, lint, format check, unit tests with coverage, and build. Run before push. |
+| `bun run test:e2e:build` | Build, then run the Playwright browser tests.                                         |
+| `bun run format`         | Fix formatting (Biome).                                                               |
 
-```sh
-bun run assets:pdf-worker
-```
+Git hooks run on your machine. `pre-commit` runs Biome on staged files, `commit-msg` runs commitlint, and `pre-push` runs `bun run verify`. Install the browsers once with `bunx playwright install chromium firefox webkit`.
 
-`public/pdf.worker.min.mjs` must match the installed `pdfjs-dist` build. If it drifts, PDF import fails with an API/worker version mismatch. The guard in `src/lib/extraction/pdf-worker-assets.test.ts` fails `bun run test` when the worker is out of date, so run the command above and commit the updated file as part of the upgrade.
+Add a focused test for the behavior you change, beside the module it covers. Add a regression test when you change import, autosave, parsing or export. Do not lower the coverage thresholds to remove a test.
 
-## Contribution workflow
+## Making a change
 
-- Branch from the latest `main`.
-- Never commit directly to `main`.
-- Use SolidJS for interactive UI. Do not introduce React or Vue.
-- Keep `pdfmake` dynamically imported in browser runtime code; a module-scope import breaks the
-  client-only build.
-- Preview and PDF export share render models under `src/lib/templates/`; template edits affect both
-  paths.
-- Keep parser, editor, preview, export, and draft behavior aligned. Keep README and public copy
-  accurate; never advertise unimplemented features.
-- Add regression coverage when changing import, autosave, parsing, or export behavior.
-- Use Conventional Commit titles; allowed types and header rules live in `commitlint.config.ts`.
-- Open one focused pull request at a time and wait for review or merge feedback.
-- Squash merge is the expected merge strategy.
+1. Branch from the latest `main` with a kebab-case name and a type prefix, such as `fix/docx-heading-import`. Do not commit to `main`.
+2. Keep the change small and focused.
+3. Use Conventional Commits for commits and for the PR title, for example `fix: keep dates when importing a docx`. The allowed types are in `commitlint.config.ts`, and the header is at most 72 characters. Pull requests are squash merged, so the title becomes the commit.
+4. Run `bun run verify` and open one pull request.
 
-## Releases
+Releases are automated from the commit messages.
 
-Tailory uses Release Please for version bumps, changelog entries, Git tags, and GitHub Releases.
+## Rules that break the product
 
-These files and conventions stay aligned:
+- Resume data never leaves the browser. No uploads, beacons, or error reports that contain resume content.
+- Use SolidJS for interactive UI. Do not add React or Vue.
+- Import `pdfmake` dynamically in browser code. A module-scope import breaks the client-only build.
+- Preview and PDF export share the render models in `src/lib/templates/`. A template change affects both.
+- Keep `public/pdf.worker.min.mjs` in sync with `pdfjs-dist`. After you upgrade it, run `bun run assets:pdf-worker` and commit the result. A test in `src/lib/extraction/pdf-worker-assets.test.ts` fails when they drift.
+- Do not describe or add features that are not implemented.
 
-- `package.json` contains the current package version.
-- `.release-please-manifest.json` contains Release Please's tracked version.
-- `CHANGELOG.md` contains generated release history after the first baseline release.
-- Git tags use the `vX.Y.Z` format with no component prefix. The `0.0.1` and `0.0.2` tags predate this and stay unprefixed.
-- GitHub Releases use the matching tag.
+## Code style
 
-The normal release flow is:
+- Follow the existing Astro, SolidJS, TypeScript and Tailwind patterns, and prefer small explicit modules over generic abstractions.
+- Biome handles formatting and lint rules. `.editorconfig` sets the rest.
+- Add comments only where the behavior is not obvious.
 
-1. Merge conventional-commit pull requests into `main`.
-2. The Release Please workflow runs on every push to `main`.
-3. Release Please opens or updates a release pull request when it finds user-facing commits since the last release.
-4. Review and merge the generated release pull request.
-5. Release Please creates the matching tag and GitHub Release on the next workflow run.
+## Writing copy
 
-Do not hand-edit package versions for normal releases or curate generated changelog entries. Keep the workflow pointed at `release-please-config.json` and `.release-please-manifest.json`. The workflow uses the `RELEASE_PLEASE_TOKEN` secret.
-
-The initial reset uses `0.0.1` as the package version and `0.0.0` as the temporary manifest version. Release Please creates the first `0.0.1` release pull request. After that release, the package, manifest, changelog, tag, and GitHub Release should agree.
-
-If release history needs repair:
-
-1. Decide the correct release baseline and tag.
-2. Update `package.json`.
-3. Update `.release-please-manifest.json`.
-4. Keep the Release Please `initial-version` and `bootstrap-sha` options unset; the release automation test asserts they stay undefined.
-5. Repair `CHANGELOG.md` compare links if a changelog already exists.
-6. Confirm that the latest real tag matches the version source of truth before re-enabling automation.
+- Use sentence case, short sentences and "you".
+- Describe only what the product does today.
+- Never call opening a file "upload". Use "open" or "choose".
+- Use one term per feature.

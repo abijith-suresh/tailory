@@ -50,20 +50,4 @@ describe("release automation source of truth", () => {
     expect(mise).toContain('bun = "1.4.1"');
     expect(mise).toContain('node = "24.20.0"');
   });
-
-  it("documents the maintainer release flow in-repo", () => {
-    const docPath = path.join(process.cwd(), "CONTRIBUTING.md");
-
-    expect(existsSync(docPath)).toBe(true);
-
-    const docs = readFileSync(docPath, "utf8");
-
-    expect(docs).toContain("Release Please");
-    expect(docs).toContain("package.json");
-    expect(docs).toContain(".release-please-manifest.json");
-    expect(docs).toContain("CHANGELOG.md");
-    expect(docs).toContain("X.Y.Z");
-    expect(docs).toContain("0.0.1");
-    expect(docs).toContain("RELEASE_PLEASE_TOKEN");
-  });
 });
