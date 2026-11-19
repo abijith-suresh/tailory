@@ -1,6 +1,10 @@
 import { type Component, For, Show } from "solid-js";
 import ResumeDocument from "@/components/resume/ResumeDocument";
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
+import {
+  RESUME_PREVIEW_FONT_FAMILY,
+  RESUME_PREVIEW_PAGE_MIN_HEIGHT,
+  resolveResumeDesignSettings,
+} from "@/lib/resume/design";
 import { TOTAL_SECTIONS, getCompletedSectionsCount, isResumeEmpty } from "@/lib/sections/registry";
 import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
@@ -144,8 +148,8 @@ const ResumePreview: Component = () => {
           <div
             class="resume-document__page mx-auto max-w-[680px] rounded-sm bg-white p-10 text-xs leading-relaxed shadow-lg"
             style={{
-              "font-family": design().previewFontFamily,
-              "min-height": `${design().previewPageMinHeight}px`,
+              "font-family": RESUME_PREVIEW_FONT_FAMILY,
+              "min-height": `${RESUME_PREVIEW_PAGE_MIN_HEIGHT}px`,
             }}
           >
             <ResumeDocument design={design()} resume={resume} />

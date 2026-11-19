@@ -10,8 +10,8 @@ describe("template registry", () => {
     expect(TEMPLATE_OPTIONS.map((template) => template.id)).toEqual(TEMPLATE_IDS);
   });
 
-  it.each(TEMPLATE_IDS)("loads a pdf renderer for %s", async (templateId) => {
-    await expect(loadPdfTemplateRenderer(templateId)).resolves.toEqual(expect.any(Function));
+  it.each(TEMPLATE_IDS)("loads a pdf renderer for %s", (templateId) => {
+    expect(loadPdfTemplateRenderer(templateId)).toEqual(expect.any(Function));
     expect(TEMPLATE_REGISTRY[templateId].label.length).toBeGreaterThan(0);
   });
 
