@@ -28,18 +28,6 @@ describe("extractTextFromDOCX", () => {
     );
   });
 
-  it("rejects legacy .doc files", async () => {
-    const { extractTextFromDOCX } = await import("./docx");
-    const file = new File(["doc"], "resume.doc", {
-      type: "application/msword",
-    });
-
-    await expect(extractTextFromDOCX(file)).rejects.toThrow(
-      "Legacy .doc files are not supported. Please save the document as .docx or PDF and try again."
-    );
-    expect(extractRawText).not.toHaveBeenCalled();
-  });
-
   it("rejects text over the extraction limit", async () => {
     const { MAX_EXTRACTED_TEXT_LENGTH } = await import("./limits");
     extractRawText.mockResolvedValue({ value: "a".repeat(MAX_EXTRACTED_TEXT_LENGTH + 1) });

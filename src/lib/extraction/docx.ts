@@ -1,10 +1,5 @@
 import { MAX_EXTRACTED_TEXT_LENGTH } from "./limits";
 
-function isLegacyDocFile(file: File): boolean {
-  const extension = file.name.split(".").pop()?.trim().toLowerCase();
-  return extension === "doc" || file.type === "application/msword";
-}
-
 function normalizeExtractedText(text: string): string {
   return text
     .replace(/\r\n/g, "\n")
@@ -32,14 +27,9 @@ async function getMammoth(): Promise<MammothModule> {
 
 /**
  * Extract plain text from a DOCX file using mammoth.
+ * Assumes the file has already been validated by validateUploadFile(), which rejects legacy .doc.
  */
 export async function extractTextFromDOCX(file: File): Promise<string> {
-  if (isLegacyDocFile(file)) {
-    throw new Error(
-      "Legacy .doc files are not supported. Please save the document as .docx or PDF and try again."
-    );
-  }
-
   const mammoth = await getMammoth();
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
