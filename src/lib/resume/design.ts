@@ -33,7 +33,7 @@ export interface ResumeDesignSettings {
 
 export const DEFAULT_RESUME_ACCENT_COLOR = "#1d6648";
 export const DEFAULT_PAGE_FORMAT: PageFormat = "A4";
-export const DEFAULT_RESUME_PREVIEW_FONT_FAMILY = '"Roboto", "Geist", Arial, sans-serif';
+export const DEFAULT_RESUME_PREVIEW_FONT_FAMILY = '"Roboto", Arial, sans-serif';
 export const DEFAULT_RESUME_PDF_FONT_FAMILY = "Roboto";
 
 const PAGE_FORMAT_DIMENSIONS: Record<

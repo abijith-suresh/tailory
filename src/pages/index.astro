@@ -1,234 +1,266 @@
 ---
+import ExternalIcon from "@/components/site/ExternalIcon.astro";
+import FileGlyph from "@/components/site/FileGlyph.astro";
+import HeroVisual from "@/components/site/HeroVisual.astro";
+import ResumeSheet from "@/components/site/ResumeSheet.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
-const features = [
-  {
-    n: "01",
-    term: "PDF, DOCX & JSON Import",
-    def: "Bring in an existing resume as a PDF, DOCX, or JSON document without sending it to an application server.",
-  },
-  {
-    n: "02",
-    term: "Auto-Parsing",
-    def: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
-  },
-  {
-    n: "03",
-    term: "Live Preview",
-    def: "See your resume rendered in real time as you make edits — no save required.",
-  },
-  {
-    n: "04",
-    term: "Three Templates",
-    def: "Modern, Minimal, and Compact ATS — each optimised for a different context.",
-  },
-  {
-    n: "05",
-    term: "PDF & JSON Export",
-    def: "Download a machine-readable PDF for applications or export structured JSON for portability.",
-  },
-  {
-    n: "06",
-    term: "Draft Storage",
-    def: "Your work saves automatically to your browser's IndexedDB — never to a server.",
-  },
-];
-
-const steps = [
-  {
-    title: "Upload",
-    desc: "Import an existing PDF, DOCX, or JSON resume, or begin from a blank form.",
-  },
-  { title: "Edit", desc: "Refine every field in a calm structured editor. No formatting fights." },
-  { title: "Export", desc: "Download a polished, text-based PDF in one click." },
-];
-
-const tabs = ["Basics", "Summary", "Work", "Education"];
-const formFields = [
-  { label: "Full name", val: "Alex Johnson" },
-  { label: "Email", val: "alex@example.com" },
-  { label: "Location", val: "San Francisco, CA" },
+const drafts = [
+  { name: "Design roles", saved: "11/18/2026, 9:42 AM" },
+  { name: "Short version", saved: "11/12/2026, 6:05 PM" },
+  { name: "Agency applications", saved: "10/30/2026, 8:17 AM" },
 ];
 ---
 
 <MarketingLayout
-  title="Tailory — Resume editor that belongs to you"
-  description="A fully client-side resume editor. Import PDF, DOCX, or JSON Resume data, edit it locally, preview live, and export PDF or JSON in your browser."
+  title="Tailory · Your resume, edited in your browser"
+  description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a text PDF or JSON. Your resume stays in your browser."
 >
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-20 pt-24" data-reveal>
-    <p class="mb-8 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">
-      Client-side resume editor
-    </p>
-    <h1
-      class="mb-8 max-w-3xl leading-[1.05] text-[#0e2418]"
-      style="font-family: 'Lora', Georgia, serif; font-size: clamp(52px, 6.5vw, 80px); font-weight: 700"
+  <section class="hero relative overflow-hidden">
+    <div class="graph-paper hero__grid absolute inset-0" aria-hidden="true"></div>
+    <div
+      class="relative mx-auto grid max-w-page items-center gap-12 px-gutter pt-12 pb-10 md:px-gutter-wide lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] lg:gap-12 lg:pt-16 lg:pb-16"
     >
-      The resume editor that <em style="color: #1d6648; font-style: italic">belongs to you.</em>
-    </h1>
-    <div class="mb-10 h-px w-20 bg-[#ccddd4]"></div>
-    <p class="mb-10 max-w-xl text-lg leading-relaxed text-[#3d6650]">
-      Import a PDF, DOCX, or JSON resume, edit every field in a calm structured interface, and
-      export a text-based PDF or structured JSON — without sending resume data to an application
-      server.
-    </p>
-    <div class="flex flex-wrap items-center gap-4">
-      <a
-        href="/editor"
-        class="inline-block rounded-md bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
-      >
-        Open the editor →
-      </a>
-      <div class="flex flex-wrap gap-3">
-        {
-          ["No account", "Local only", "Open source"].map((chip) => (
-            <span
-              aria-hidden="true"
-              class="rounded-full border border-[#ccddd4] bg-white px-4 py-1.5 text-xs font-medium text-[#3d6650]"
-            >
-              {chip}
-            </span>
-          ))
-        }
+      <div class="max-w-xl">
+        <h1 class="text-display font-bold text-balance">Your resume, edited in your browser.</h1>
+        <p class="mt-6 max-w-md text-lead text-ink-muted">
+          Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a text PDF.
+        </p>
+        <div class="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a
+            href="/editor"
+            class="inline-flex h-12 items-center rounded-control bg-ink px-6 text-body font-semibold text-on-ink transition-colors hover:bg-accent-strong"
+          >
+            Open editor
+          </a>
+          <a
+            href="https://github.com/abijith-suresh/tailory"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-body font-medium text-ink underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-ink"
+          >
+            View the source <ExternalIcon class="size-3.5" />
+          </a>
+        </div>
       </div>
+
+      <HeroVisual />
     </div>
   </section>
 
-  <!-- App Preview Mockup -->
-  <section class="mx-auto max-w-6xl px-8 pb-24" data-reveal data-reveal-delay="100">
-    <p class="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-[#a0b8ab]">Editor preview</p>
-    <div class="overflow-hidden rounded-xl border border-[#ccddd4] shadow-lg shadow-[#1d6648]/5">
-      <!-- Top bar -->
-      <div class="flex items-center border-b border-[#ccddd4] bg-white px-4 py-2.5">
-        <span
-          class="mr-6 text-sm font-bold text-[#1d6648]"
-          style="font-family: 'Lora', Georgia, serif"
-        >
-          Tailory
-        </span>
-        <div class="flex">
-          {
-            tabs.map((tab, i) => (
-              <div
-                class:list={[
-                  "border-b-2 px-4 py-2 text-xs font-medium transition-colors",
-                  i === 0 ? "border-[#1d6648] text-[#1d6648]" : "border-transparent text-[#a0b8ab]",
-                ]}
-              >
-                {tab}
-              </div>
-            ))
-          }
-        </div>
-        <div class="ml-auto">
-          <span class="rounded bg-[#1d6648] px-3 py-1 text-xs font-medium text-white"
-            >Export PDF</span
-          >
-        </div>
-      </div>
-      <!-- Split pane -->
-      <div class="flex" style="height: 260px">
-        <!-- Left: Editor panel -->
-        <div class="w-1/2 overflow-hidden border-r border-[#ccddd4] bg-[#f4f8f5] p-5">
-          <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#a0b8ab]">
-            Basics
-          </p>
-          {
-            formFields.map((field) => (
-              <div class="mb-3">
-                <p class="mb-1 text-[11px] font-medium text-[#3d6650]">{field.label}</p>
-                <div class="rounded border border-[#ccddd4] bg-white px-3 py-2 text-xs text-[#0e2418]">
-                  {field.val}
-                </div>
-              </div>
-            ))
-          }
-        </div>
-        <!-- Right: Preview panel -->
-        <div class="w-1/2 bg-[#f4f8f5] p-5">
-          <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#a0b8ab]">
-            Preview
-          </p>
-          <div class="rounded border border-[#ccddd4] bg-white p-4">
-            <div class="mb-2 h-3 w-28 rounded bg-[#1d6648]/20"></div>
-            <div class="mb-4 h-2 w-20 rounded bg-[#ccddd4]"></div>
-            <div class="mb-1.5 h-2 w-full rounded bg-[#ccddd4]"></div>
-            <div class="mb-1.5 h-2 w-5/6 rounded bg-[#ccddd4]"></div>
-            <div class="mb-4 h-2 w-4/5 rounded bg-[#ccddd4]"></div>
-            <div class="mb-1 h-2 w-16 rounded bg-[#1d6648]/40"></div>
-            <div class="mb-1.5 h-2 w-full rounded bg-[#ccddd4]"></div>
-            <div class="h-2 w-3/4 rounded bg-[#ccddd4]"></div>
+  <!-- Features -->
+  <section
+    class="mx-auto max-w-page px-gutter pt-8 pb-section md:px-gutter-wide lg:pt-10"
+    aria-labelledby="features-title"
+  >
+    <h2 id="features-title" class="text-headline font-bold">Import, edit, export.</h2>
+
+    <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <li class="feature-card">
+        <div class="feature-card__visual graph-paper" aria-hidden="true">
+          <div class="flex items-end gap-3">
+            <FileGlyph label="PDF" />
+            <FileGlyph label="DOCX" />
+            <FileGlyph label="JSON" />
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+        <h3 class="feature-card__title">Import</h3>
+        <p class="feature-card__text">Open a PDF, DOCX, or JSON file, or start blank.</p>
+      </li>
 
-  <!-- Divider -->
-  <div class="mx-auto max-w-6xl border-t border-[#ccddd4] px-8"></div>
-
-  <!-- Features — numbered list -->
-  <section class="mx-auto max-w-6xl px-8 py-24">
-    <p class="mb-16 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">What it does</p>
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-      {
-        features.map((f, i) => (
-          <div
-            class="flex gap-6 border-t border-[#ccddd4] pt-6 transition-all duration-200 hover:border-[#ccddd4] hover:-translate-y-0.5"
-            data-reveal
-            data-reveal-delay={String(Math.min(i * 100, 400))}
-          >
-            <span class="shrink-0 text-sm font-medium text-[#a0b8ab]">{f.n}</span>
-            <div>
-              <h3 class="mb-1.5 text-base font-semibold text-[#0e2418]">{f.term}</h3>
-              <p class="text-sm leading-relaxed text-[#3d6650]">{f.def}</p>
+      <li class="feature-card">
+        <div class="feature-card__visual graph-paper" aria-hidden="true">
+          <div class="w-44">
+            <div
+              class="rounded-control border border-accent bg-sheet px-2.5 py-1.5 text-label text-ink shadow-[0_0_0_3px_var(--color-accent-soft)]"
+            >
+              Product designer<span class="ml-px inline-block h-3.5 w-[1.5px] translate-y-0.5 bg-accent"></span>
+            </div>
+            <div class="mx-auto h-4 w-px border-l-2 border-dashed border-accent"></div>
+            <div class="rounded-sheet bg-sheet px-3 py-2.5 shadow-card">
+              <p class="font-resume text-[0.8125rem] leading-tight font-bold text-gray-900">Rosa Delgado</p>
+              <p class="font-resume text-[0.625rem] text-gray-500">Product designer</p>
             </div>
           </div>
-        ))
-      }
-    </div>
-  </section>
+        </div>
+        <h3 class="feature-card__title">Live preview</h3>
+        <p class="feature-card__text">The page updates as you type.</p>
+      </li>
 
-  <!-- Divider -->
-  <div class="mx-auto max-w-6xl border-t border-[#ccddd4] px-8"></div>
-
-  <!-- How it works -->
-  <section class="mx-auto max-w-6xl px-8 py-24">
-    <p class="mb-16 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">How it works</p>
-    <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-      {
-        steps.map((s, i) => (
-          <div data-reveal data-reveal-delay={String(i * 100)}>
-            <div class="mb-5 flex h-9 w-9 items-center justify-center rounded-full border border-[#1d6648] text-sm font-semibold text-[#1d6648]">
-              {i + 1}
-            </div>
-            <h3
-              class="mb-3 text-xl font-bold text-[#0e2418]"
-              style="font-family: 'Lora', Georgia, serif"
-            >
-              {s.title}
-            </h3>
-            <p class="text-sm leading-relaxed text-[#3d6650]">{s.desc}</p>
+      <li class="feature-card">
+        <div class="feature-card__visual graph-paper" aria-hidden="true">
+          <div class="template-fan">
+            <ResumeSheet template="minimal" class="template-fan__sheet" />
+            <ResumeSheet template="compact-ats" class="template-fan__sheet" />
+            <ResumeSheet template="modern" class="template-fan__sheet" />
           </div>
-        ))
-      }
-    </div>
+        </div>
+        <h3 class="feature-card__title">Three templates</h3>
+        <p class="feature-card__text">Modern, Minimal, and Compact. Switch any time.</p>
+      </li>
+
+      <li class="feature-card">
+        <div class="feature-card__visual graph-paper" aria-hidden="true">
+          <div class="flex items-end gap-3">
+            <FileGlyph label="PDF" accent />
+            <FileGlyph label="JSON" accent />
+          </div>
+        </div>
+        <h3 class="feature-card__title">Export</h3>
+        <p class="feature-card__text">A text PDF to send, or JSON to import later.</p>
+      </li>
+    </ul>
   </section>
 
-  <!-- Privacy callout -->
-  <div class="bg-[#0e2418]">
-    <div class="mx-auto max-w-6xl px-8 py-20" data-reveal>
-      <p class="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-[#3d6650]">Privacy</p>
-      <h2
-        class="mb-5 max-w-3xl leading-tight text-white"
-        style="font-family: 'Lora', Georgia, serif; font-size: clamp(28px, 3.5vw, 46px); font-weight: 700"
-      >
-        Your resume is your business. We have no way of seeing it.
-      </h2>
-      <p class="max-w-lg text-base leading-relaxed text-[#3d6650]">
-        No telemetry. No cloud sync. No accounts required. Tailory runs entirely in your browser —
-        your data stays exactly where it belongs.
-      </p>
-    </div>
+  <div class="mx-auto max-w-page px-gutter md:px-gutter-wide" aria-hidden="true">
+    <div class="stitch text-line-strong"></div>
   </div>
+
+  <!-- Privacy -->
+  <section
+    class="mx-auto grid max-w-page items-center gap-12 px-gutter py-section md:grid-cols-2 md:px-gutter-wide lg:gap-20"
+    aria-labelledby="privacy-title"
+  >
+    <div class="max-w-md">
+      <h2 id="privacy-title" class="text-headline font-bold text-balance">
+        Your resume stays in this browser.
+      </h2>
+      <p class="mt-5 text-body text-ink-muted">
+        Tailory saves as you type and keeps named drafts on this device. Clearing site data deletes
+        them, so export JSON when you want a copy.
+      </p>
+      <a
+        href="/privacy"
+        class="mt-6 inline-block text-body font-medium text-ink underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-ink"
+      >
+        Privacy policy
+      </a>
+    </div>
+
+    <div class="drafts" aria-hidden="true">
+      <p class="drafts__tag">This browser</p>
+      <div class="rounded-card border border-line bg-surface shadow-card">
+        <p class="border-b border-line px-5 py-3 text-meta font-semibold">Saved drafts</p>
+        <ul>
+          {
+            drafts.map((draft) => (
+              <li class="flex items-baseline justify-between gap-4 border-b border-line px-5 py-3 last:border-b-0">
+                <span class="text-meta font-medium">{draft.name}</span>
+                <span class="text-label text-ink-subtle tabular-nums">{draft.saved}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to action -->
+  <section class="graph-paper border-t border-line">
+    <div class="mx-auto max-w-page px-gutter py-section md:px-gutter-wide">
+      <div
+        class="mx-auto flex max-w-3xl flex-col items-start gap-6 rounded-sheet bg-sheet px-7 py-9 shadow-sheet sm:flex-row sm:items-center sm:justify-between sm:px-10"
+      >
+        <h2 class="text-[1.625rem] leading-tight font-bold tracking-[-0.02em] text-balance">
+          Start with the resume you have.
+        </h2>
+        <a
+          href="/editor"
+          class="inline-flex h-12 shrink-0 items-center rounded-control bg-ink px-6 text-body font-semibold text-on-ink transition-colors hover:bg-accent-strong"
+        >
+          Open editor
+        </a>
+      </div>
+    </div>
+  </section>
 </MarketingLayout>
+
+<style>
+  .hero__grid {
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  }
+
+  .feature-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .feature-card__visual {
+    display: flex;
+    height: 8.5rem;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--color-line);
+    background-color: var(--color-paper);
+  }
+
+  .feature-card__title {
+    padding: 1.25rem 1.25rem 0;
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    letter-spacing: var(--text-title--letter-spacing);
+    font-weight: 650;
+  }
+
+  .feature-card__text {
+    padding: 0.375rem 1.25rem 1.375rem;
+    font-size: var(--text-meta);
+    line-height: var(--text-meta--line-height);
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 40rem) {
+    .feature-card__visual {
+      height: 10rem;
+    }
+  }
+
+  .template-fan {
+    position: relative;
+    width: 9.5rem;
+    height: 7.5rem;
+  }
+
+  .template-fan :global(.template-fan__sheet) {
+    --sheet-scale: 0.135;
+    position: absolute;
+    top: 0;
+  }
+
+  .template-fan :global(.template-fan__sheet:nth-child(1)) {
+    left: 0;
+    top: 0.75rem;
+  }
+
+  .template-fan :global(.template-fan__sheet:nth-child(2)) {
+    left: 2.25rem;
+    top: 0.375rem;
+  }
+
+  .template-fan :global(.template-fan__sheet:nth-child(3)) {
+    left: 4.5rem;
+  }
+
+  .drafts {
+    position: relative;
+    padding: 2.25rem 1.25rem 1.25rem;
+    border: 2px dashed var(--color-accent);
+    border-radius: calc(var(--radius-card) + 0.5rem);
+  }
+
+  .drafts__tag {
+    position: absolute;
+    top: -0.7rem;
+    left: 1.25rem;
+    padding: 0 0.5rem;
+    background: var(--color-paper);
+    font-size: var(--text-label);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+</style>

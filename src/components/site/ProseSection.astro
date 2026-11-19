@@ -1,0 +1,30 @@
+---
+// One titled block of a text page. Sits in the same 44rem column as PageIntro.
+interface Props {
+  title: string;
+  id?: string;
+}
+
+const { title, id } = Astro.props;
+---
+
+<section class="border-t border-line py-7" id={id}>
+  <h2 class="text-title font-semibold">{title}</h2>
+  <div class="prose-section mt-2 space-y-3 text-body text-ink-muted">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .prose-section :global(a) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 150ms;
+  }
+
+  .prose-section :global(a:hover) {
+    text-decoration-color: var(--color-ink);
+  }
+</style>

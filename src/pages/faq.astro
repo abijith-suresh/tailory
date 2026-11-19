@@ -1,107 +1,72 @@
 ---
+import PageIntro from "@/components/site/PageIntro.astro";
+import ProseSection from "@/components/site/ProseSection.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
+
+const repoUrl = "https://github.com/abijith-suresh/tailory";
 
 const faqs = [
   {
-    q: "Is Tailory really free?",
-    a: "Yes, entirely. Tailory is open source under the MIT licence. There is no paid tier, no usage limits, no premium features behind a paywall. The source code is on GitHub and you are free to self-host it.",
+    q: "Is Tailory free?",
+    a: "Yes. The source is on GitHub under the MIT license.",
   },
   {
-    q: "Does my resume get uploaded to a server?",
-    a: "No. Tailory has no backend server at all. Your file is opened locally in the browser using the File API. Text extraction, parsing, editing, preview rendering, and PDF generation all happen inside your browser tab. No resume content is transmitted over the network. The page does request normal web assets such as fonts, and like any website the host sees standard request metadata, but your resume data never leaves your device.",
+    q: "Does my resume leave my browser?",
+    a: "No. Import, editing, preview, and export all run in the tab. Tailory has no server that receives resume content.",
   },
   {
-    q: "What file formats can I upload?",
-    a: "Tailory accepts PDF (.pdf), Word (.docx), and JSON (.json) files. PDF text is extracted with PDF.js, DOCX text is extracted with Mammoth, and JSON imports are normalized as supported JSON Resume-style data. Scanned PDFs (image-only) cannot be parsed because there is no text layer to read. Uploads are capped at 10 MB; PDF extraction is capped at 20 pages and 250,000 characters.",
+    q: "Which files can I import?",
+    a: "PDF, DOCX, and JSON, up to 10 MB. Scanned PDFs hold pictures of text, so Tailory can't read them.",
   },
   {
-    q: "Can I import or export JSON Resume files?",
-    a: "Yes. Tailory can import and export JSON for the fields it currently supports. Supported data is normalized on import and exported without internal IDs, but Tailory does not yet claim full official-schema validation and some schema sections still render better than they edit in the form UI.",
+    q: "Can I start without a file?",
+    a: "Yes. Open the editor and fill in the sections.",
   },
   {
-    q: "Which browsers are supported?",
-    a: "Any modern browser with IndexedDB support: Chrome, Firefox, Safari, and Edge. Internet Explorer is not supported. Mobile browsers work but the editor layout is optimised for wider screens.",
+    q: "Does it work with JSON Resume?",
+    a: "Tailory imports and exports JSON Resume-style data for the sections it supports. It doesn't check files against the official schema.",
   },
   {
-    q: "Will the exported PDF pass ATS screening?",
-    a: "Tailory cannot guarantee how any specific employer's system will read your resume. What it can do is keep the exported PDF text-based: every field is selectable, searchable text rather than a screenshot, and all three templates use single-column layouts with standard section headings. Always review the exported file yourself before submitting it.",
+    q: "Where are my drafts saved?",
+    a: "In this browser's storage for the site. Clearing site data deletes them, so export JSON to keep a copy.",
   },
   {
-    q: "What's the difference between the three templates?",
-    a: "Modern uses a strong two-tone header with clear section dividers. Minimal keeps decoration low and spacing generous. Compact ATS is the densest option and is tuned for plain, keyword-forward output.",
+    q: "How do the templates differ?",
+    a: "Modern has a ruled header and lines between sections. Minimal leaves out the decoration. Compact fits more on a page.",
   },
   {
-    q: "Where is my data stored between sessions?",
-    a: "Tailory autosaves your resume to the browser's IndexedDB after each change. IndexedDB is a local browser storage mechanism — data lives only on your device and in your browser's storage for the site. It persists across sessions until you clear your browser data or manually delete drafts.",
+    q: "Will hiring software read my PDF?",
+    a: "Tailory can't promise how an employer's software reads a resume. The exported PDF holds selectable text, not an image of it.",
   },
   {
-    q: "Can I use Tailory offline?",
-    a: "Tailory has no server dependency for editing, parsing, previewing, or exporting once the app is loaded, but it is not packaged as an offline-first app and does not ship a service worker. Treat offline use as best-effort browser behavior rather than a guaranteed product feature.",
+    q: "Does Tailory work offline?",
+    a: "Not reliably. The editor doesn't need a server once it has loaded, but Tailory isn't built as an offline app.",
   },
   {
-    q: "Can I start from scratch without uploading a file?",
-    a: "Yes. The editor opens with an empty form. You can type directly into any field without uploading anything. File upload is a convenience, not a requirement.",
-  },
-  {
-    q: "Is the source code available?",
-    a: "Yes. Tailory is fully open source on GitHub under the MIT licence. You can inspect, fork, self-host, or contribute to the project. Bug reports and pull requests are welcome.",
+    q: "Which browsers work?",
+    a: "Current Chrome, Edge, Firefox, and Safari. Phones work too, but editing is easier on a wider screen.",
   },
 ];
 ---
 
 <MarketingLayout
-  title="FAQ — Tailory"
-  description="Frequently asked questions about Tailory — privacy, file formats, JSON Resume support, PDF export, and offline limitations."
+  title="FAQ"
+  description="Answers about Tailory: where your resume is stored, which files it imports, JSON Resume support, templates, and browsers."
 >
-  <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-16 pt-24" data-reveal>
-    <p class="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">FAQ</p>
-    <h1
-      class="max-w-2xl leading-[1.1] text-[#0e2418]"
-      style="font-family: 'Lora', Georgia, serif; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700"
-    >
-      Frequently asked questions.
-    </h1>
-    <div class="mt-8 h-px w-20 bg-[#ccddd4]"></div>
-  </section>
-
-  <!-- FAQ accordion -->
-  <section class="mx-auto max-w-3xl px-8 pb-24">
+  <PageIntro title="Questions and answers" />
+  <div class="mx-auto max-w-[44rem] px-gutter pb-section">
     {
-      faqs.map((item, i) => (
-        <details
-          class="group border-t border-[#ccddd4]"
-          data-reveal
-          data-reveal-delay={String(Math.min(i * 60, 300))}
-        >
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-medium text-[#0e2418] transition-colors duration-150 hover:text-[#1d6648]">
-            {item.q}
-            <span class="shrink-0 text-[#a0b8ab] transition-transform group-open:rotate-180">
-              ↓
-            </span>
-          </summary>
-          <p class="pb-6 text-base leading-relaxed text-[#3d6650]">{item.a}</p>
-        </details>
+      faqs.map((item) => (
+        <ProseSection title={item.q}>
+          <p>{item.a}</p>
+        </ProseSection>
       ))
     }
-    <div class="border-t border-[#ccddd4]"></div>
-  </section>
-
-  <!-- Still have questions? -->
-  <div class="border-t border-[#ccddd4] bg-white">
-    <div class="mx-auto max-w-6xl px-8 py-16 text-center">
-      <p class="mb-4 text-2xl font-bold text-[#0e2418]" style="font-family: 'Lora', Georgia, serif">
-        Still have questions?
+    <ProseSection title="Something else?">
+      <p>
+        <a href={`${repoUrl}/issues`} target="_blank" rel="noopener noreferrer">Open an issue on
+        GitHub</a>.
       </p>
-      <p class="mb-6 text-base text-[#3d6650]">Open an issue on GitHub — we read every one.</p>
-      <a
-        href="https://github.com/abijith-suresh/tailory/issues"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-block rounded-md border border-[#1d6648] px-6 py-2.5 text-sm font-medium text-[#1d6648] transition-[background-color,transform] hover:bg-[#1d6648] hover:text-white hover:-translate-y-px active:scale-95 active:translate-y-0"
-      >
-        Open an issue ↗
-      </a>
-    </div>
+    </ProseSection>
   </div>
 </MarketingLayout>
