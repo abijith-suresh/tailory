@@ -1,0 +1,77 @@
+---
+// A small file with a folded corner and its format written on it.
+interface Props {
+  label: string;
+  accent?: boolean;
+}
+
+const { label, accent = false } = Astro.props;
+---
+
+<span class:list={["file-glyph", accent && "file-glyph--accent"]}>
+  <span class="file-glyph__lines" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </span>
+  <span class="file-glyph__label">{label}</span>
+</span>
+
+<style>
+  .file-glyph {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 3.75rem;
+    height: 4.75rem;
+    padding: 0.75rem 0.5rem 0.5rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 3px;
+    background: var(--color-sheet);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  }
+
+  .file-glyph::after {
+    content: "";
+    position: absolute;
+    top: -1.5px;
+    right: -1.5px;
+    width: 15.5px;
+    height: 15.5px;
+    background: linear-gradient(
+      to bottom left,
+      transparent calc(50% - 0.75px),
+      var(--color-ink) calc(50% - 0.75px) calc(50% + 0.75px),
+      var(--color-line) calc(50% + 0.75px)
+    );
+  }
+
+  .file-glyph__lines {
+    display: grid;
+    gap: 4px;
+  }
+
+  .file-glyph__lines span {
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .file-glyph__lines span:nth-child(1) {
+    width: 70%;
+  }
+
+  .file-glyph__lines span:nth-child(3) {
+    width: 55%;
+  }
+
+  .file-glyph__label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-ink);
+  }
+
+  .file-glyph--accent .file-glyph__label {
+    color: var(--color-accent);
+  }
+</style>

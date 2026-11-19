@@ -47,8 +47,8 @@ export const TEMPLATE_REGISTRY = {
   },
   "compact-ats": {
     id: "compact-ats",
-    label: "Compact ATS",
-    description: "Dense, keyword-optimized",
+    label: "Compact",
+    description: "Dense, single column",
     buildRenderModel: buildCompactAtsRenderModel,
     renderPdf: compactAtsTemplate,
   },

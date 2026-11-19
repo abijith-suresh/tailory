@@ -1,0 +1,52 @@
+---
+// Renders a resume with the editor's own template code (static HTML, no client JS).
+// The sheet keeps the preview's 680px page width and is scaled down with --sheet-scale.
+import ResumeDocument from "@/components/resume/ResumeDocument";
+import { resolveResumeDesignSettings } from "@/lib/resume/design";
+import { TEMPLATE_REGISTRY } from "@/lib/templates/registry";
+import { createSampleResume } from "@/lib/templates/sample-resume";
+import type { TemplateId } from "@/types/template";
+
+interface Props {
+  template?: TemplateId;
+  class?: string;
+}
+
+const { template = "modern", class: className } = Astro.props;
+const design = resolveResumeDesignSettings({ template });
+const resume = createSampleResume();
+const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[template].label} template`;
+---
+
+<div class:list={["resume-sheet", className]} role="img" aria-label={label}>
+  <div
+    aria-hidden="true"
+    class="resume-sheet__page resume-document__page bg-sheet p-10 text-xs leading-relaxed text-ink"
+    style={{
+      "font-family": design.previewFontFamily,
+      width: `${design.previewPageWidth}px`,
+      height: `${design.previewPageMinHeight}px`,
+    }}
+  >
+    <ResumeDocument design={design} resume={resume} />
+  </div>
+</div>
+
+<style>
+  .resume-sheet {
+    --sheet-scale: 0.5;
+    position: relative;
+    width: calc(680px * var(--sheet-scale));
+    height: calc(842px * var(--sheet-scale));
+    overflow: hidden;
+    border-radius: var(--radius-sheet);
+    background: var(--color-sheet);
+    box-shadow: var(--shadow-sheet);
+  }
+
+  .resume-sheet__page {
+    transform: scale(var(--sheet-scale));
+    transform-origin: top left;
+    overflow: hidden;
+  }
+</style>

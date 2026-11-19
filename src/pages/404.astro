@@ -1,0 +1,56 @@
+---
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+---
+
+<MarketingLayout title="Page not found" description="This page doesn't exist." noindex>
+  <section class="relative overflow-hidden">
+    <div class="graph-paper not-found__grid absolute inset-0" aria-hidden="true"></div>
+    <div
+      class="relative mx-auto flex max-w-page flex-col items-center px-gutter py-section text-center md:px-gutter-wide"
+    >
+      <div class="not-found__sheet" aria-hidden="true">
+        <span>404</span>
+      </div>
+      <h1 class="mt-10 text-headline font-bold">This page isn't here.</h1>
+      <p class="mt-4 max-w-sm text-body text-ink-muted">
+        The link may be out of date. Your drafts are still in this browser.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <a
+          href="/"
+          class="inline-flex h-12 items-center rounded-control bg-ink px-6 text-body font-semibold text-on-ink transition-colors hover:bg-accent-strong"
+        >
+          Go to the home page
+        </a>
+        <a
+          href="/editor"
+          class="text-body font-medium text-ink underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-ink"
+        >
+          Open editor
+        </a>
+      </div>
+    </div>
+  </section>
+</MarketingLayout>
+
+<style>
+  .not-found__grid {
+    mask-image: linear-gradient(to bottom, black 70%, transparent);
+  }
+
+  /* An empty pattern piece: the outline of a page with nothing cut from it. */
+  .not-found__sheet {
+    display: flex;
+    width: 8.5rem;
+    height: 10.5rem;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border: 2px dashed var(--color-accent);
+    border-radius: var(--radius-sheet);
+    background: rgb(255 255 255 / 0.6);
+    font-size: var(--text-label);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+</style>

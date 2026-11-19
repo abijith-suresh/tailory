@@ -129,7 +129,7 @@ const CommandBar: Component = () => {
       <a
         href="/"
         class="mr-2 shrink-0 text-lg font-bold tracking-tight text-white"
-        style={{ "font-family": "'Lora', serif" }}
+        style={{ "font-family": "var(--font-sans)" }}
         aria-label="Tailory home"
       >
         Tailory
@@ -168,7 +168,6 @@ const CommandBar: Component = () => {
             dominant-baseline="central"
             fill="white"
             font-size="9"
-            font-family="'DM Sans', sans-serif"
             font-weight="600"
           >
             {completedCount()}/{TOTAL_SECTIONS}

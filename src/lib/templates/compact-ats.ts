@@ -28,8 +28,8 @@ import {
 } from "@/lib/templates/section-builders";
 import type { ResumeSchema } from "@/types/resume";
 
-// Compact ATS template: single column, dense layout, maximum keyword density.
-// Optimized for Applicant Tracking Systems: no tables, no images, standard fonts.
+// Compact template (id "compact-ats", kept for saved drafts): single column, dense layout.
+// No tables, no images, standard fonts.
 
 const PAGE_MARGINS = [36, 36, 36, 36] as const;
 

@@ -1,0 +1,108 @@
+---
+// Static hero composition: a real resume render with a fragment of the editor beside it.
+// A later change animates this; it can replace the whole component without touching the page.
+import ResumeSheet from "@/components/site/ResumeSheet.astro";
+---
+
+<div class="hero-visual" data-hero-visual>
+  <ResumeSheet class="hero-visual__sheet" template="modern" />
+
+  <div class="hero-visual__editor" aria-hidden="true">
+    <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
+      <span class="text-label font-semibold text-ink">Work</span>
+      <span class="text-label text-ink-subtle">1 of 2</span>
+    </div>
+    <div class="space-y-3 px-4 pt-3 pb-4">
+      <div>
+        <span class="text-label font-medium text-ink-muted">Company</span>
+        <div class="hero-visual__field">Fieldnote</div>
+      </div>
+      <div>
+        <span class="text-label font-medium text-ink-muted">Position</span>
+        <div class="hero-visual__field hero-visual__field--active">
+          Senior product designer<span class="hero-visual__caret"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 2.25rem;
+  }
+
+  .hero-visual :global(.hero-visual__sheet) {
+    --sheet-scale: 0.46;
+    flex-shrink: 0;
+  }
+
+  /* Mark the entry the editor fragment is changing, like chalk on cloth. */
+  .hero-visual
+    :global(.resume-document__section:nth-of-type(2) .resume-document__entry:first-of-type) {
+    outline: 2px dashed var(--color-accent);
+    outline-offset: 6px;
+    border-radius: 2px;
+  }
+
+  .hero-visual__editor {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 13.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .hero-visual__field {
+    margin-top: 0.25rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-control);
+    background: var(--color-sheet);
+    padding: 0.4rem 0.625rem;
+    font-size: var(--text-label);
+    line-height: 1.4;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+
+  .hero-visual__field--active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+
+  .hero-visual__caret {
+    display: inline-block;
+    width: 1.5px;
+    height: 1.05em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+    background: var(--color-accent);
+  }
+
+  @media (min-width: 40rem) {
+    .hero-visual {
+      padding-bottom: 2.5rem;
+    }
+    .hero-visual :global(.hero-visual__sheet) {
+      --sheet-scale: 0.66;
+    }
+    .hero-visual__editor {
+      width: 16rem;
+    }
+    .hero-visual__field {
+      font-size: var(--text-meta);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero-visual :global(.hero-visual__sheet) {
+      --sheet-scale: 0.72;
+    }
+  }
+</style>

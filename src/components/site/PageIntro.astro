@@ -1,0 +1,26 @@
+---
+// Title block for text pages. The heading and the body below share one column so their
+// left edges line up at every width.
+interface Props {
+  title: string;
+  lead?: string;
+  meta?: string;
+}
+
+const { title, lead, meta } = Astro.props;
+---
+
+<header class="relative overflow-hidden">
+  <div class="graph-paper page-intro__grid absolute inset-0" aria-hidden="true"></div>
+  <div class="relative mx-auto max-w-[44rem] px-gutter pt-14 pb-10 md:pt-20 md:pb-12">
+    <h1 class="text-headline font-bold text-balance">{title}</h1>
+    {lead && <p class="mt-4 text-lead text-ink-muted">{lead}</p>}
+    {meta && <p class="mt-4 text-meta text-ink-subtle">{meta}</p>}
+  </div>
+</header>
+
+<style>
+  .page-intro__grid {
+    mask-image: linear-gradient(to bottom, black 30%, transparent);
+  }
+</style>
