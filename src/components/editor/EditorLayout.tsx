@@ -4,9 +4,11 @@ import EditorShell from "@/components/editor/EditorShell";
 import ResumePreview from "@/components/preview/ResumePreview";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import {
+  draftStorageError,
   exportError,
   importError,
   importFeedback,
+  setDraftStorageError,
   setExportError,
   setImportError,
   setImportFeedback,
@@ -76,8 +78,8 @@ function DismissButton(props: { onDismiss: () => void; class: string }) {
   );
 }
 
-function ErrorToast(props: { message: () => string; onDismiss: () => void }) {
-  useAutoDismiss(() => props.message().length > 0, props.onDismiss);
+function ErrorToast(props: { message: () => string; onDismiss: () => void; persistent?: boolean }) {
+  useAutoDismiss(() => !props.persistent && props.message().length > 0, props.onDismiss);
 
   return (
     <Show when={props.message()}>
@@ -204,6 +206,11 @@ function ToastContainer() {
     >
       <ErrorToast message={exportError} onDismiss={() => setExportError("")} />
       <ErrorToast message={importError} onDismiss={() => setImportError("")} />
+      <ErrorToast
+        message={draftStorageError}
+        onDismiss={() => setDraftStorageError("")}
+        persistent
+      />
       <ImportSuccessToast />
     </div>
   );

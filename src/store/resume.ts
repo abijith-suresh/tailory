@@ -34,6 +34,8 @@ export const [importError, setImportError] = createSignal("");
 
 export const [importFeedback, setImportFeedback] = createSignal<ImportFeedback | null>(null);
 
+export const [draftStorageError, setDraftStorageError] = createSignal("");
+
 export function loadResume(data: ResumeSchema) {
   setResume(normalizeResume(data));
 }

@@ -88,7 +88,8 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
   }
 }
 
-export async function listDrafts(): Promise<ResumeDraft[]> {
+/** Returns null when drafts can't be read, so callers can tell a failure from an empty list. */
+export async function listDrafts(): Promise<ResumeDraft[] | null> {
   try {
     const db = await getDB();
     const all = await db.getAll("drafts");
@@ -101,7 +102,7 @@ export async function listDrafts(): Promise<ResumeDraft[]> {
       .sort((a, b) => b.updatedAt - a.updatedAt);
   } catch {
     resetDbConnection();
-    return [];
+    return null;
   }
 }
 
