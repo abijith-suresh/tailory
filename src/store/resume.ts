@@ -39,3 +39,8 @@ export const [draftStorageError, setDraftStorageError] = createSignal("");
 export function loadResume(data: ResumeSchema) {
   setResume(normalizeResume(data));
 }
+
+/** Set while another tab is autosaving; holds the action that makes this tab save again. */
+export const [otherTabActive, setOtherTabActive] = createSignal<{ takeOver: () => void } | null>(
+  null
+);
