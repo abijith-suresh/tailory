@@ -60,9 +60,7 @@ export const TEMPLATE_OPTIONS: TemplateMetadata[] = TEMPLATE_IDS.map((id) => ({
   description: TEMPLATE_REGISTRY[id].description,
 }));
 
-export async function loadPdfTemplateRenderer(
-  templateId: TemplateId
-): Promise<PdfTemplateRenderer> {
+export function loadPdfTemplateRenderer(templateId: TemplateId): PdfTemplateRenderer {
   return TEMPLATE_REGISTRY[templateId].renderPdf;
 }
 

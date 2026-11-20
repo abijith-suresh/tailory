@@ -6,7 +6,7 @@ import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-
 
 describe("minimalTemplate", () => {
   it("keeps exported contact url and avoids raw bullet glyph text", () => {
-    const doc = minimalTemplate(createTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = minimalTemplate(createTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).toContain(
@@ -19,7 +19,7 @@ describe("minimalTemplate", () => {
     const resume = createTemplateFixture();
     const secondJob = resume.work?.[1];
     resume.work = secondJob ? [{ ...secondJob }] : [];
-    const doc = minimalTemplate(resume, { fontFamily: "Roboto" });
+    const doc = minimalTemplate(resume);
     const serialized = JSON.stringify(doc);
 
     expect(serialized).not.toContain('"width":"auto"');
@@ -73,7 +73,7 @@ describe("minimalTemplate", () => {
   });
 
   it("keeps unicode and problematic glyph content extractable in the document definition", () => {
-    const doc = minimalTemplate(createUnicodeTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = minimalTemplate(createUnicodeTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).toContain("Jose Alvarez");

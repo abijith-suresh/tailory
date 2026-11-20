@@ -10,11 +10,7 @@ import {
   formatSkillsText,
 } from "@/lib/export/template-helpers";
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
-import {
-  type ResumeDesignSettings,
-  resolvePageMargins,
-  resolveResumeDesignSettings,
-} from "@/lib/resume/design";
+import { type ResumeDesignSettings, resolveResumeDesignSettings } from "@/lib/resume/design";
 import type { ResumeRenderModel, ResumeSectionModel } from "@/lib/templates/render-model";
 import {
   buildAwardsSection,
@@ -110,7 +106,7 @@ export function buildModernRenderModel(
   return {
     template: "modern",
     design,
-    pageMargins: resolvePageMargins(design, [...PAGE_MARGINS]),
+    pageMargins: [...PAGE_MARGINS],
     header: {
       name: resume.basics.name,
       label: resume.basics.label,
@@ -127,20 +123,12 @@ export function buildModernRenderModel(
 
 export function modernTemplate(
   resume: ResumeSchema,
-  options: PdfTemplateOptions
+  options: PdfTemplateOptions = {}
 ): TDocumentDefinitions {
   const design = resolveResumeDesignSettings({
     template: "modern",
     accentColor: options.accentColor,
-    pageFormat: options.pageFormat,
-    pageMargins: options.pageMargins,
-    typography: {
-      ...options.typography,
-      pdfFontFamily: options.fontFamily,
-    },
   });
 
-  return renderPdfResumeModel(buildModernRenderModel(resume, design), {
-    fontFamily: options.fontFamily,
-  });
+  return renderPdfResumeModel(buildModernRenderModel(resume, design));
 }

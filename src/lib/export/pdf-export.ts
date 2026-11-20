@@ -1,18 +1,14 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-import type { PageFormat } from "@/lib/resume/design";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
-import { DEFAULT_PDF_FONT, getPdfFont, type PdfFontId, type PdfMakeFontRuntime } from "./fonts";
-import type { PdfTemplateOptions } from "./template-types";
+import { type PdfMakeFontRuntime, registerPdfFonts } from "./fonts";
 
 let fontRegistrationPromise: Promise<void> | null = null;
 
 async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promise<void> {
   if (!fontRegistrationPromise) {
-    fontRegistrationPromise = (async () => {
-      await getPdfFont(DEFAULT_PDF_FONT).register(pdfMake);
-    })();
+    fontRegistrationPromise = registerPdfFonts(pdfMake);
   }
 
   return fontRegistrationPromise;
@@ -23,23 +19,12 @@ function getFilename(resume: ResumeSchema): string {
   return `${name}_resume.pdf`;
 }
 
-async function getDocDef(
-  resume: ResumeSchema,
-  template: TemplateId,
-  options: PdfTemplateOptions
-): Promise<TDocumentDefinitions> {
-  const renderTemplate = await loadPdfTemplateRenderer(template);
-  return renderTemplate(resume, options);
-}
-
 interface BrowserPdfDocument {
   getBlob: () => Promise<Blob>;
 }
 
 interface PdfExportOptions {
   accentColor?: string;
-  font?: PdfFontId;
-  pageFormat?: PageFormat;
 }
 
 async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
@@ -101,14 +86,11 @@ export async function exportPDF(
   const pdfMake = pdfMakeModule.default as PdfMakeFontRuntime & {
     createPdf: (docDefinition: TDocumentDefinitions) => BrowserPdfDocument;
   };
-  const selectedFont = getPdfFont(options.font ?? DEFAULT_PDF_FONT);
 
   await ensurePdfMakeFontsRegistered(pdfMake);
 
-  const docDef = await getDocDef(validation.normalizedResume, template, {
+  const docDef = loadPdfTemplateRenderer(template)(validation.normalizedResume, {
     accentColor: options.accentColor,
-    fontFamily: selectedFont.family,
-    pageFormat: options.pageFormat,
   });
   const filename = getFilename(validation.normalizedResume);
   const blob = await pdfMake.createPdf(docDef).getBlob();
