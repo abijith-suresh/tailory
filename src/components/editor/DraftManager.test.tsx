@@ -6,6 +6,7 @@ import type { ResumeDraft } from "@/lib/storage/db";
 import {
   draftStorageError,
   loadResume,
+  otherTabActive,
   resume,
   setDraftStorageError,
   setResume,
@@ -186,6 +187,70 @@ describe("DraftManager startup", () => {
     await flush();
 
     expect(autosaveCalls()).toHaveLength(0);
+  });
+});
+
+describe("DraftManager with the editor open in two tabs", () => {
+  let otherTab: BroadcastChannel;
+  let otherTabMessages: unknown[];
+
+  beforeEach(() => {
+    otherTabMessages = [];
+    otherTab = new BroadcastChannel("tailory-editor");
+    otherTab.onmessage = (event) => otherTabMessages.push(event.data);
+  });
+
+  afterEach(() => {
+    otherTab.close();
+  });
+
+  async function openInOtherTab() {
+    otherTab.postMessage("active");
+    await vi.waitFor(() => expect(otherTabActive()).not.toBeNull());
+  }
+
+  it("tells tabs that are already open to stop saving", async () => {
+    await renderManager();
+
+    await vi.waitFor(() => expect(otherTabMessages).toEqual(["active"]));
+  });
+
+  it("saves pending edits and stops autosaving when the editor opens in another tab", async () => {
+    await renderManager();
+    setResume("basics", "name", "Jane");
+    await flush();
+
+    await openInOtherTab();
+    await flush();
+    expect(autosaveCalls()).toHaveLength(1);
+    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane");
+
+    setResume("basics", "name", "Jane Doe");
+    await vi.advanceTimersByTimeAsync(2000);
+    window.dispatchEvent(new Event("pagehide"));
+    await flush();
+
+    expect(autosaveCalls()).toHaveLength(1);
+  });
+
+  it("reloads the saved resume and saves again after taking over", async () => {
+    await renderManager();
+    await openInOtherTab();
+    seedDraft("autosave", "Alex");
+    otherTabMessages.length = 0;
+
+    otherTabActive()?.takeOver();
+    await flush();
+
+    expect(otherTabActive()).toBeNull();
+    expect(resume.basics.name).toBe("Alex");
+    await vi.waitFor(() => expect(otherTabMessages).toEqual(["active"]));
+
+    setResume("basics", "label", "Engineer");
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(autosaveCalls()).toHaveLength(1);
+    expect(db.drafts.get("autosave")?.resumeData.basics.label).toBe("Engineer");
   });
 });
 

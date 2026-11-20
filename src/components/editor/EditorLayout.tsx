@@ -8,6 +8,7 @@ import {
   exportError,
   importError,
   importFeedback,
+  otherTabActive,
   setDraftStorageError,
   setExportError,
   setImportError,
@@ -17,6 +18,7 @@ import {
 type Pane = "editor" | "preview";
 
 const MOBILE_BREAKPOINT = 768;
+const OTHER_TAB_MESSAGE = "Tailory is open in another tab. Changes here aren't saved.";
 
 // ── Confidence helpers ────────────────────────────────────────────────────────
 
@@ -71,8 +73,16 @@ function DismissButton(props: { onDismiss: () => void; class: string }) {
   );
 }
 
-function ErrorToast(props: { message: () => string; onDismiss: () => void; persistent?: boolean }) {
-  useAutoDismiss(() => !props.persistent && props.message().length > 0, props.onDismiss);
+function ErrorToast(props: {
+  message: () => string;
+  onDismiss?: () => void;
+  persistent?: boolean;
+  action?: { label: string; onClick: () => void };
+}) {
+  useAutoDismiss(
+    () => !props.persistent && props.message().length > 0,
+    () => props.onDismiss?.()
+  );
 
   return (
     <Show when={props.message()}>
@@ -99,10 +109,25 @@ function ErrorToast(props: { message: () => string; onDismiss: () => void; persi
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <p class="flex-1 text-sm leading-snug text-red-700">{props.message()}</p>
-        <DismissButton
-          onDismiss={props.onDismiss}
-          class="shrink-0 text-red-400 transition-colors hover:text-red-600"
-        />
+        <Show when={props.action}>
+          {(action) => (
+            <button
+              type="button"
+              onClick={() => action().onClick()}
+              class="shrink-0 text-sm font-medium text-red-700 underline underline-offset-2 transition-colors hover:text-red-900"
+            >
+              {action().label}
+            </button>
+          )}
+        </Show>
+        <Show when={props.onDismiss}>
+          {(onDismiss) => (
+            <DismissButton
+              onDismiss={onDismiss()}
+              class="shrink-0 text-red-400 transition-colors hover:text-red-600"
+            />
+          )}
+        </Show>
       </div>
     </Show>
   );
@@ -237,6 +262,11 @@ function ToastContainer() {
       <ErrorToast
         message={draftStorageError}
         onDismiss={() => setDraftStorageError("")}
+        persistent
+      />
+      <ErrorToast
+        message={() => (otherTabActive() ? OTHER_TAB_MESSAGE : "")}
+        action={{ label: "Use this tab", onClick: () => otherTabActive()?.takeOver() }}
         persistent
       />
       <ImportSuccessToast />
