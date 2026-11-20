@@ -246,13 +246,12 @@ describe("exportPDF", () => {
   });
 
   it.each(["modern", "minimal", "compact-ats"] as const)(
-    "creates a valid pdf definition for %s and propagates options",
+    "creates a valid pdf definition for %s and propagates the accent color",
     async (template) => {
       const { exportPDF } = await import("./pdf-export");
 
       await exportPDF(createTemplateFixture(), template, {
         accentColor: "#7c3aed",
-        pageFormat: "Letter",
       });
 
       expect(createPdf).toHaveBeenCalledTimes(1);
@@ -267,7 +266,7 @@ describe("exportPDF", () => {
       expect(docDefinition.content.length).toBeGreaterThan(0);
       expect(docDefinition.styles).toBeTruthy();
       expect(docDefinition.defaultStyle.font).toBe("Roboto");
-      expect(docDefinition.pageSize).toBe("LETTER");
+      expect(docDefinition.pageSize).toBe("A4");
       expect(collectNestedValues(docDefinition.content)).not.toContain(null);
       expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
 

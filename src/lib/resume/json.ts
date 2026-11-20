@@ -292,40 +292,130 @@ function exportBasics(basics: ResumeSchema["basics"]): Record<string, unknown> {
   });
 }
 
+const MONTH_NAMES = [
+  ["jan", "january"],
+  ["feb", "february"],
+  ["mar", "march"],
+  ["apr", "april"],
+  ["may", "may"],
+  ["jun", "june"],
+  ["jul", "july"],
+  ["aug", "august"],
+  ["sep", "september"],
+  ["oct", "october"],
+  ["nov", "november"],
+  ["dec", "december"],
+] as const;
+
+const MONTH_NUMBERS = new Map<string, string>(
+  MONTH_NAMES.flatMap(([short, long], index) => {
+    const month = String(index + 1).padStart(2, "0");
+    return [
+      [short, month],
+      [long, month],
+    ] as const;
+  })
+);
+MONTH_NUMBERS.set("sept", "09");
+
+const PRESENT_DATE_RE = /^(present|current|now)$/i;
+const ISO_PARTIAL_DATE_RE = /^\d{4}(?:-\d{2}(?:-\d{2})?)?$/;
+const ISO_YEAR_MONTH_RE = /^(\d{4})-(\d{2})$/;
+const SLASH_MONTH_YEAR_RE = /^(\d{1,2})\/(\d{4})$/;
+const MONTH_NAME_YEAR_RE = /^([a-z]+)\.?\s*,?\s*(\d{4})$/i;
+const DATE_FIELDS = new Set(["startDate", "endDate", "date", "releaseDate"]);
+
+function formatMonth(month: number): string | undefined {
+  return month >= 1 && month <= 12 ? String(month).padStart(2, "0") : undefined;
+}
+
+/**
+ * Converts a stored free-text date to a JSON Resume ISO 8601 partial date
+ * (YYYY, YYYY-MM, YYYY-MM-DD). Anything that cannot be read unambiguously is
+ * returned unchanged instead of being guessed.
+ */
+function toJsonResumeDate(value: string): string {
+  const trimmed = value.trim();
+
+  if (ISO_PARTIAL_DATE_RE.test(trimmed)) {
+    const yearMonth = trimmed.match(ISO_YEAR_MONTH_RE);
+    return yearMonth && !formatMonth(Number(yearMonth[2])) ? value : trimmed;
+  }
+
+  const slash = trimmed.match(SLASH_MONTH_YEAR_RE);
+  if (slash) {
+    const month = formatMonth(Number(slash[1]));
+    return month ? `${slash[2]}-${month}` : value;
+  }
+
+  const named = trimmed.match(MONTH_NAME_YEAR_RE);
+  if (named) {
+    const month = MONTH_NUMBERS.get(named[1]?.toLowerCase() ?? "");
+    return month ? `${named[2]}-${month}` : value;
+  }
+
+  return value;
+}
+
+function exportEntry<T extends { id: string }>(entry: T): Record<string, unknown> {
+  const { id: _id, ...rest } = entry;
+  const exported: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(rest)) {
+    if (typeof value === "string" && DATE_FIELDS.has(key)) {
+      if (key === "endDate" && PRESENT_DATE_RE.test(value.trim())) {
+        continue;
+      }
+
+      exported[key] = toJsonResumeDate(value);
+      continue;
+    }
+
+    exported[key] = value;
+  }
+
+  return exported;
+}
+
 function stripIds<T extends { id: string }>(
   entries: T[] | undefined
-): Array<Omit<T, "id">> | undefined {
+): Array<Record<string, unknown>> | undefined {
   if (!entries || entries.length === 0) {
     return undefined;
   }
 
-  return entries.map(({ id: _id, ...entry }) => entry);
+  return entries.map(exportEntry);
 }
 
-function pruneEmptySections(document: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(
-    Object.entries(document).filter(([, value]) => {
-      if (value === undefined) {
-        return false;
-      }
-
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
-
-      if (isRecord(value)) {
-        return Object.keys(value).length > 0;
-      }
-
-      return value !== "";
-    })
+function isEmptyValue(value: unknown): boolean {
+  return (
+    value === undefined ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0) ||
+    (isRecord(value) && Object.keys(value).length === 0)
   );
+}
+
+function pruneEmpty(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(pruneEmpty).filter((entry) => !isEmptyValue(entry));
+  }
+
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .map(([key, entry]) => [key, pruneEmpty(entry)] as const)
+        .filter(([, entry]) => !isEmptyValue(entry))
+    );
+  }
+
+  return value;
 }
 
 export function exportJsonResumeDocument(resume: ResumeSchema): Record<string, unknown> {
   const normalized = normalizeResume(resume);
 
-  return pruneEmptySections({
+  return pruneEmpty({
     basics: exportBasics(normalized.basics),
     work: stripIds<ResumeWork>(normalized.work),
     volunteer: stripIds<ResumeVolunteer>(normalized.volunteer),
@@ -338,7 +428,7 @@ export function exportJsonResumeDocument(resume: ResumeSchema): Record<string, u
     interests: stripIds<ResumeInterest>(normalized.interests),
     references: stripIds<ResumeReference>(normalized.references),
     projects: stripIds<ResumeProject>(normalized.projects),
-  });
+  }) as Record<string, unknown>;
 }
 
 export function exportJsonResumeString(resume: ResumeSchema): string {

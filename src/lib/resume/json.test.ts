@@ -208,4 +208,211 @@ describe("JSON Resume export", () => {
       reference: "Available on request",
     });
   });
+
+  it.each([
+    ["Jan 2020", "2020-01"],
+    ["January 2020", "2020-01"],
+    ["Sept. 2020", "2020-09"],
+    ["Dec, 2019", "2019-12"],
+    ["03/2021", "2021-03"],
+    ["3/2021", "2021-03"],
+    ["2021-03", "2021-03"],
+    ["2021-03-15", "2021-03-15"],
+    ["2021", "2021"],
+  ])("exports the date %j as %j", (stored, expected) => {
+    const exported = exportJsonResumeDocument(
+      createResume({
+        basics: { name: "Jane Doe" },
+        work: [{ id: "w1", name: "Acme", position: "Engineer", startDate: stored }],
+        awards: [{ id: "a1", title: "Prize", date: stored }],
+        publications: [{ id: "p1", name: "Paper", releaseDate: stored }],
+      })
+    );
+
+    expect(exported.work).toMatchObject([{ startDate: expected }]);
+    expect(exported.awards).toMatchObject([{ date: expected }]);
+    expect(exported.publications).toMatchObject([{ releaseDate: expected }]);
+  });
+
+  it.each([
+    "Spring 2020",
+    "13/2020",
+    "00/2020",
+    "2020-13",
+    "01/02/2020",
+    "Summer",
+    "Q3 2020",
+    "Mayhem 2020",
+  ])("leaves the unparseable date %j unchanged", (stored) => {
+    const exported = exportJsonResumeDocument(
+      createResume({
+        basics: { name: "Jane Doe" },
+        education: [{ id: "e1", institution: "State U", startDate: stored, endDate: stored }],
+      })
+    );
+
+    expect(exported.education).toMatchObject([{ startDate: stored, endDate: stored }]);
+  });
+
+  it.each(["Present", "present", "Current", "Now"])(
+    "omits endDate for the current-role marker %j",
+    (marker) => {
+      const exported = exportJsonResumeDocument(
+        createResume({
+          basics: { name: "Jane Doe" },
+          work: [
+            {
+              id: "w1",
+              name: "Acme",
+              position: "Engineer",
+              startDate: "Jan 2020",
+              endDate: marker,
+            },
+          ],
+          projects: [{ id: "p1", name: "Site", startDate: "2022", endDate: marker }],
+        })
+      );
+
+      expect(exported.work).toEqual([{ name: "Acme", position: "Engineer", startDate: "2020-01" }]);
+      expect(exported.projects).toEqual([{ name: "Site", startDate: "2022" }]);
+    }
+  );
+
+  it("converts dates only on export and leaves stored values untouched", () => {
+    const resume = createResume({
+      basics: { name: "Jane Doe" },
+      work: [
+        { id: "w1", name: "Acme", position: "Engineer", startDate: "Jan 2020", endDate: "Present" },
+      ],
+    });
+
+    exportJsonResumeDocument(resume);
+
+    expect(resume.work?.[0]).toMatchObject({ startDate: "Jan 2020", endDate: "Present" });
+  });
+
+  it("prunes empty strings, arrays and objects without dropping identity fields", () => {
+    const exported = exportJsonResumeDocument(
+      createResume({
+        basics: {
+          name: "Jane Doe",
+          label: "Engineer",
+          email: "jane@example.com",
+          summary: "",
+          location: { city: "" },
+          profiles: [{ network: "", username: "", url: "" }],
+        },
+        work: [
+          {
+            id: "w1",
+            name: "Acme",
+            position: "Engineer",
+            summary: "",
+            highlights: [],
+            startDate: "",
+          },
+        ],
+        skills: [{ id: "s1", name: "TypeScript", level: "", keywords: [] }],
+        interests: [],
+      })
+    );
+
+    expect(exported).toEqual({
+      basics: { name: "Jane Doe", label: "Engineer", email: "jane@example.com" },
+      work: [{ name: "Acme", position: "Engineer" }],
+      skills: [{ name: "TypeScript" }],
+    });
+    expect(JSON.stringify(exported)).not.toMatch(/""|\[\]|\{\}/);
+  });
+
+  it("round-trips an already conformant JSON Resume document unchanged", () => {
+    const document = {
+      basics: {
+        name: "Jane Doe",
+        label: "Senior Engineer",
+        image: "https://janedoe.dev/me.png",
+        email: "jane@example.com",
+        phone: "555-0100",
+        url: "https://janedoe.dev",
+        summary: "Builds things.",
+        location: {
+          address: "1 Main St",
+          postalCode: "10001",
+          city: "New York",
+          countryCode: "US",
+          region: "NY",
+        },
+        profiles: [{ network: "GitHub", username: "janedoe", url: "https://github.com/janedoe" }],
+      },
+      work: [
+        {
+          name: "Acme Corp",
+          position: "Senior Engineer",
+          url: "https://acme.example",
+          startDate: "2020-01",
+          endDate: "2023-06-30",
+          summary: "Led the platform team.",
+          highlights: ["Led launch", "Cut costs"],
+        },
+        { name: "Globex", position: "Engineer", startDate: "2023-07" },
+      ],
+      volunteer: [
+        {
+          organization: "Food Bank",
+          position: "Volunteer",
+          startDate: "2019",
+          endDate: "2020",
+          summary: "Sorted donations.",
+          highlights: ["Ran weekend shifts"],
+        },
+      ],
+      education: [
+        {
+          institution: "State University",
+          url: "https://state.example",
+          area: "Computer Science",
+          studyType: "BSc",
+          startDate: "2012-09",
+          endDate: "2016-05",
+          score: "3.8",
+          courses: ["Algorithms"],
+        },
+      ],
+      awards: [{ title: "Hackathon Winner", date: "2021-04", awarder: "Devs", summary: "First." }],
+      certificates: [
+        { name: "Cloud Pro", date: "2022-11-02", issuer: "Cloud Co", url: "https://cloud.example" },
+      ],
+      publications: [
+        {
+          name: "On Resumes",
+          publisher: "Journal",
+          releaseDate: "2018-03",
+          url: "https://journal.example/resumes",
+          summary: "A study.",
+        },
+      ],
+      skills: [{ name: "Web", level: "Master", keywords: ["TypeScript", "SolidJS"] }],
+      languages: [{ language: "English", fluency: "Native speaker" }],
+      interests: [{ name: "Hiking", keywords: ["Trails"] }],
+      references: [{ name: "Alex Smith", reference: "Great to work with." }],
+      projects: [
+        {
+          name: "Tailory",
+          description: "Resume editor.",
+          highlights: ["Private by design"],
+          keywords: ["resume"],
+          startDate: "2024",
+          url: "https://tailory.example",
+          roles: ["Author"],
+          entity: "Personal",
+          type: "application",
+        },
+      ],
+    };
+
+    expect(exportJsonResumeDocument(parseJsonResumeDocument(document))).toEqual(document);
+    expect(
+      JSON.parse(exportJsonResumeString(parseJsonResumeString(JSON.stringify(document))))
+    ).toEqual(document);
+  });
 });
