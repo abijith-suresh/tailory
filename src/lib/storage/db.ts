@@ -80,7 +80,8 @@ export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
   }
 }
 
-export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
+/** Returns undefined when there is no such draft and null when it can't be read. */
+export async function getDraft(id: string): Promise<ResumeDraft | undefined | null> {
   try {
     const db = await getDB();
     const draft = await db.get("drafts", id);
@@ -94,7 +95,7 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
       : undefined;
   } catch {
     resetDbConnection();
-    return undefined;
+    return null;
   }
 }
 

@@ -14,6 +14,7 @@ import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 const db = vi.hoisted(() => ({
   available: true,
+  readFails: false,
   drafts: new Map<string, ResumeDraft>(),
   saveDraft: vi.fn(),
   listDrafts: vi.fn(),
@@ -23,7 +24,7 @@ const db = vi.hoisted(() => ({
 vi.mock("@/lib/storage/db", () => ({
   AUTOSAVE_DRAFT_ID: "autosave",
   isDraftStorageAvailable: async () => db.available,
-  getDraft: async (id: string) => db.drafts.get(id),
+  getDraft: async (id: string) => (db.readFails ? null : db.drafts.get(id)),
   saveDraft: db.saveDraft,
   listDrafts: db.listDrafts,
   deleteDraft: db.deleteDraft,
@@ -54,6 +55,7 @@ async function renderManager() {
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   db.available = true;
+  db.readFails = false;
   db.drafts.clear();
   db.saveDraft.mockImplementation(async (draft: ResumeDraft) => {
     db.drafts.set(draft.id, draft);
@@ -155,6 +157,35 @@ describe("DraftManager autosave", () => {
       "Drafts aren't available in this browser, so changes won't be saved. Export JSON to keep a copy."
     );
     expect(getByLabelText("Open saved drafts")).toBeDisabled();
+  });
+});
+
+describe("DraftManager startup", () => {
+  it("does not overwrite the saved resume when it can't be read", async () => {
+    seedDraft("autosave", "Jane");
+    db.readFails = true;
+    await renderManager();
+    await vi.advanceTimersByTimeAsync(2000);
+
+    setResume("basics", "name", "Alex");
+    await vi.advanceTimersByTimeAsync(2000);
+    window.dispatchEvent(new Event("pagehide"));
+    await flush();
+
+    expect(autosaveCalls()).toHaveLength(0);
+    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane");
+    expect(draftStorageError()).toBe(
+      "Couldn't load your saved resume, so changes here won't be saved. Reload the page to try again."
+    );
+  });
+
+  it("does not save the empty resume before anything is edited", async () => {
+    await renderManager();
+    await vi.advanceTimersByTimeAsync(2000);
+    window.dispatchEvent(new Event("pagehide"));
+    await flush();
+
+    expect(autosaveCalls()).toHaveLength(0);
   });
 });
 

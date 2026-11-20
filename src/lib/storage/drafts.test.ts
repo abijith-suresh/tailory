@@ -56,6 +56,15 @@ describe("autosave draft helpers", () => {
     expect(getDraft).not.toHaveBeenCalled();
   });
 
+  it("reports a failed read instead of treating it as no saved resume", async () => {
+    isDraftStorageAvailable.mockResolvedValue(true);
+    getDraft.mockResolvedValue(null);
+
+    const { restoreAutosaveDraft } = await import("./drafts");
+
+    await expect(restoreAutosaveDraft()).resolves.toEqual({ available: true, readFailed: true });
+  });
+
   it("restores a normalized autosave draft and snapshot", async () => {
     const rawResume = createResume({
       basics: {
