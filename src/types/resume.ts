@@ -152,7 +152,10 @@ export type SectionId =
   | "interests"
   | "references"
   | "projects"
-  | "certs";
+  | "certs"
+  | "volunteer"
+  | "awards"
+  | "publications";
 
 export const EMPTY_RESUME: ResumeSchema = {
   basics: {
