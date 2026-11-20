@@ -43,8 +43,6 @@ Supported top-level sections are:
 
 Tailory ignores `$schema` and `meta` during import. It normalizes supported content into its internal schema, removes internal entry IDs during export, rejects unknown top-level fields, and reports malformed section shapes instead of silently dropping them.
 
-On JSON export, dates that can be read unambiguously (month name and year, `MM/YYYY`, `YYYY-MM`, `YYYY`) are written as ISO 8601 partial dates, and a current role (`Present`, `Current`, `Now`) omits `endDate`. Dates Tailory cannot read unambiguously are exported unchanged. Empty strings, arrays, and objects are left out. The preview and PDF keep showing dates as you entered them.
-
 Tailory does not claim full validation against the upstream official JSON Resume schema package. Some supported sections can import, survive normalization, and render in preview and PDF export without having first-class editor controls yet.
 
 Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, required identity fields are missing, or unsupported top-level fields would be silently discarded.
