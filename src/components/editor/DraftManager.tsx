@@ -9,17 +9,18 @@ import {
 } from "solid-js";
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
-import {
-  AUTOSAVE_DRAFT_ID,
-  deleteDraft,
-  listDrafts,
-  type ResumeDraft,
-  saveDraft,
-} from "@/lib/storage/db";
-import { cloneResumeData, restoreAutosaveDraft, saveAutosaveDraft } from "@/lib/storage/drafts";
-import { loadResume, resume } from "@/store/resume";
+import { AUTOSAVE_DRAFT_ID, deleteDraft, listDrafts, type ResumeDraft } from "@/lib/storage/db";
+import { restoreAutosaveDraft, saveAutosaveDraft, saveNamedDraft } from "@/lib/storage/drafts";
+import { loadResume, resume, setDraftStorageError } from "@/store/resume";
+import { replaceResume } from "./replace-resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
+
+const AUTOSAVE_DELAY = 2000;
+const SAVE_FAILED_MESSAGE =
+  "Couldn't save your changes in this browser. Export JSON to keep a copy.";
+const STORAGE_UNAVAILABLE_MESSAGE =
+  "Drafts aren't available in this browser, so changes won't be saved. Export JSON to keep a copy.";
 
 interface DraftManagerProps {
   dark?: boolean;
@@ -28,6 +29,7 @@ interface DraftManagerProps {
 const DraftManager: Component<DraftManagerProps> = (props) => {
   const [status, setStatus] = createSignal<Status>("idle");
   const [drafts, setDrafts] = createSignal<ResumeDraft[]>([]);
+  const [listError, setListError] = createSignal("");
   const [showList, setShowList] = createSignal(false);
   const [storageAvailable, setStorageAvailable] = createSignal(true);
   const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
@@ -35,7 +37,9 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [popupTop, setPopupTop] = createSignal(0);
   const [popupRight, setPopupRight] = createSignal(0);
   let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  let pendingSnapshot: string | null = null;
   let saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
+  let listTrigger: HTMLElement | null = null;
   let isDisposed = false;
 
   const computePopupPosition = () => {
@@ -50,8 +54,22 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     saveStatusTimer = setTimeout(() => setStatus("idle"), 2000);
   };
 
+  // A failed write keeps autosave on: the next change retries, and the message stays until a save
+  // succeeds.
+  const reportSaveFailure = () => {
+    if (isDisposed) return;
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    setStatus("error");
+    setDraftStorageError(SAVE_FAILED_MESSAGE);
+  };
+
+  const reportSaveSuccess = () => {
+    setStatus("saved");
+    setDraftStorageError("");
+    queueStatusReset();
+  };
+
   const performSave = async (snapshot: string) => {
-    if (!storageAvailable()) return;
     if (!isDisposed) setStatus("saving");
 
     let saved = false;
@@ -62,27 +80,41 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     }
 
     if (!saved) {
-      if (!isDisposed) {
-        setStorageAvailable(false);
-        setStatus("error");
-      }
+      reportSaveFailure();
       return;
     }
 
     if (isDisposed) return;
     setLastAutosaveSnapshot(snapshot);
-    setStatus("saved");
-    queueStatusReset();
+    reportSaveSuccess();
   };
 
   const autosaveQueue = createSerializedTaskQueue(performSave);
 
+  const flushAutosave = () => {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+    const snapshot = pendingSnapshot;
+    pendingSnapshot = null;
+    if (snapshot === null) return;
+    void autosaveQueue.enqueue(snapshot).catch(reportSaveFailure);
+  };
+
+  // Save pending edits right away when the tab is hidden or closed instead of dropping them.
+  const flushWhenHidden = () => {
+    if (document.visibilityState === "hidden") flushAutosave();
+  };
+  window.addEventListener("pagehide", flushAutosave);
+  document.addEventListener("visibilitychange", flushWhenHidden);
+
   onMount(async () => {
     const restored = await restoreAutosaveDraft();
+    if (isDisposed) return;
     setStorageAvailable(restored.available);
 
     if (!restored.available) {
       setStatus("error");
+      setDraftStorageError(STORAGE_UNAVAILABLE_MESSAGE);
       return;
     }
 
@@ -94,94 +126,106 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setHasHydratedAutosave(true);
   });
 
-  // Auto-save on store changes (debounced 2s)
+  // Auto-save on store changes (debounced)
   createEffect(() => {
     if (!hasHydratedAutosave() || !storageAvailable()) return;
 
     // Reactive read of the resume store fields that trigger saves
     const snapshot = serializeNormalizedResume(resume);
-    if (snapshot === lastAutosaveSnapshot()) return;
 
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => {
-      autoSaveTimer = null;
-      void autosaveQueue.enqueue(snapshot).catch(() => {
-        if (!isDisposed) {
-          setStorageAvailable(false);
-          setStatus("error");
-        }
-      });
-    }, 2000);
+    autoSaveTimer = null;
+    pendingSnapshot = null;
+    if (snapshot === lastAutosaveSnapshot()) return;
+
+    pendingSnapshot = snapshot;
+    autoSaveTimer = setTimeout(flushAutosave, AUTOSAVE_DELAY);
   });
 
-  const saveNamedDraft = async () => {
-    if (!storageAvailable()) {
-      setStatus("error");
-      return;
-    }
-
+  const handleSaveDraft = async () => {
     setStatus("saving");
-    const draftName = resume.basics.name || "Untitled";
-    const saved = await saveDraft({
-      id: `draft-${Date.now()}`,
-      name: draftName,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      resumeData: cloneResumeData(resume),
-    });
+    const saved = await saveNamedDraft(resume);
+    if (isDisposed) return;
 
     if (!saved) {
-      setStorageAvailable(false);
-      setStatus("error");
+      reportSaveFailure();
       return;
     }
 
-    setStatus("saved");
-    queueStatusReset();
+    reportSaveSuccess();
   };
 
-  const loadDraftsList = async () => {
-    computePopupPosition();
+  const refreshDrafts = async () => {
     const all = await listDrafts();
+    if (all === null) {
+      setDrafts([]);
+      setListError("Couldn't load your drafts. Try again.");
+      return;
+    }
+
+    setListError("");
     setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
+  };
+
+  const openList = async (trigger: HTMLElement) => {
+    listTrigger = trigger;
+    computePopupPosition();
+    await refreshDrafts();
     setShowList(true);
   };
 
-  const loadDraft = (draft: ResumeDraft) => {
-    loadResume(draft.resumeData);
+  const closeList = (restoreFocus = true) => {
     setShowList(false);
+    if (restoreFocus) listTrigger?.focus();
   };
 
-  const removeDraft = async (e: MouseEvent, id: string) => {
+  const toggleList = (e: MouseEvent & { currentTarget: HTMLElement }) => {
+    if (showList()) closeList();
+    else void openList(e.currentTarget);
+  };
+
+  const loadDraft = async (draft: ResumeDraft) => {
+    if (await replaceResume(draft.resumeData, "draft")) closeList();
+  };
+
+  const removeDraft = async (e: MouseEvent, draft: ResumeDraft) => {
     e.stopPropagation();
-    const deleted = await deleteDraft(id);
-    if (!deleted) {
-      setStorageAvailable(false);
-      setStatus("error");
+    if (!window.confirm(`Delete "${draft.name}"? This can't be undone.`)) return;
+
+    if (!(await deleteDraft(draft.id))) {
+      setListError("Couldn't delete the draft. Try again.");
       return;
     }
 
-    const all = await listDrafts();
-    setDrafts(all.filter((d) => d.id !== AUTOSAVE_DRAFT_ID));
+    await refreshDrafts();
   };
 
-  // Click-outside: close the drafts popup when user clicks elsewhere
+  // Close the drafts popup on Escape or when the user clicks elsewhere
   let containerRef: HTMLDivElement | undefined;
   createEffect(() => {
     if (!showList()) return;
-    const handler = (e: MouseEvent) => {
+    const handleMouseDown = (e: MouseEvent) => {
       if (containerRef && !containerRef.contains(e.target as Node)) {
-        setShowList(false);
+        closeList(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    onCleanup(() => document.removeEventListener("mousedown", handler));
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeList();
+    };
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("keydown", handleKeyDown);
+    onCleanup(() => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    });
   });
 
   onCleanup(() => {
     isDisposed = true;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    window.removeEventListener("pagehide", flushAutosave);
+    document.removeEventListener("visibilitychange", flushWhenHidden);
   });
 
   const btnClass = () =>
@@ -191,18 +235,14 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   return (
     <div class="relative" ref={(el) => (containerRef = el)}>
+      <span class="sr-only" role="status">
+        {status() === "saved" ? "Changes saved" : status() === "error" ? "Changes not saved" : ""}
+      </span>
       {/* Mobile compact button — only in dark (CommandBar) mode */}
       <Show when={props.dark}>
         <button
           type="button"
-          onClick={
-            showList()
-              ? () => setShowList(false)
-              : () => {
-                  computePopupPosition();
-                  loadDraftsList();
-                }
-          }
+          onClick={toggleList}
           disabled={!storageAvailable()}
           title="Drafts"
           aria-label="Open saved drafts"
@@ -228,7 +268,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
       <div class="hidden gap-2 sm:flex">
         <button
           type="button"
-          onClick={saveNamedDraft}
+          onClick={handleSaveDraft}
           disabled={status() === "saving" || !storageAvailable()}
           class={`flex items-center gap-1.5 ${btnClass()}`}
         >
@@ -252,12 +292,14 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             : status() === "saved"
               ? "Saved"
               : status() === "error"
-                ? "Drafts unavailable"
+                ? storageAvailable()
+                  ? "Not saved"
+                  : "Drafts unavailable"
                 : "Save draft"}
         </button>
         <button
           type="button"
-          onClick={() => (showList() ? setShowList(false) : loadDraftsList())}
+          onClick={toggleList}
           disabled={!storageAvailable()}
           class={`flex items-center gap-1.5 ${btnClass()}`}
         >
@@ -291,7 +333,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             <span class="text-xs font-semibold text-gray-700">Saved Drafts</span>
             <button
               type="button"
-              onClick={() => setShowList(false)}
+              onClick={() => closeList()}
               class="rounded-md text-gray-400 transition-colors hover:text-gray-600"
               aria-label="Close"
             >
@@ -299,9 +341,18 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
             </button>
           </div>
           <div class="max-h-64 overflow-y-auto">
+            <Show when={listError()}>
+              <p role="alert" class="px-4 py-3 text-xs text-red-600">
+                {listError()}
+              </p>
+            </Show>
             <Show
               when={drafts().length > 0}
-              fallback={<p class="px-4 py-6 text-center text-xs text-gray-400">No saved drafts</p>}
+              fallback={
+                <Show when={!listError()}>
+                  <p class="px-4 py-6 text-center text-xs text-gray-400">No saved drafts</p>
+                </Show>
+              }
             >
               <For each={drafts()}>
                 {(draft) => (
@@ -314,7 +365,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
                     </button>
                     <button
                       type="button"
-                      onClick={(e) => removeDraft(e, draft.id)}
+                      onClick={(e) => removeDraft(e, draft)}
                       aria-label="Delete draft"
                       class="ml-2 rounded-md text-red-400 transition-colors hover:text-red-600"
                     >

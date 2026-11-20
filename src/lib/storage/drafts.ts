@@ -3,10 +3,18 @@ import {
   AUTOSAVE_DRAFT_ID,
   getDraft,
   isDraftStorageAvailable,
+  listDrafts,
   type ResumeDraft,
   saveDraft,
 } from "@/lib/storage/db";
-import type { ResumeSchema } from "@/types/resume";
+import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
+
+export type ReplaceReason = "import" | "draft";
+
+const COPY_NAME_SUFFIX: Record<ReplaceReason, string> = {
+  import: "before import",
+  draft: "before loading draft",
+};
 
 export function cloneResumeData(data: ResumeSchema): ResumeSchema {
   return normalizeResume(data);
@@ -58,4 +66,61 @@ export async function saveAutosaveDraft(snapshotJson: string): Promise<boolean> 
     updatedAt: now,
     resumeData: normalizedData,
   });
+}
+
+/** Saves a named draft, updating the existing draft with the same name instead of adding another. */
+export async function saveNamedDraft(data: ResumeSchema): Promise<boolean> {
+  const name = data.basics.name.trim() || "Untitled";
+  const drafts = await listDrafts();
+  if (drafts === null) return false;
+
+  const existing = drafts.find((draft) => draft.id !== AUTOSAVE_DRAFT_ID && draft.name === name);
+  const now = Date.now();
+
+  return saveDraft({
+    id: existing?.id ?? `draft-${now}`,
+    name,
+    createdAt: now,
+    updatedAt: now,
+    resumeData: cloneResumeData(data),
+  });
+}
+
+/**
+ * Before the current resume is replaced, saves it as a draft unless it is empty, unchanged by the
+ * replacement, or already saved as a named draft.
+ */
+export async function keepCopyBeforeReplacing(
+  current: ResumeSchema,
+  incoming: ResumeSchema,
+  reason: ReplaceReason
+): Promise<"not-needed" | "saved" | "failed"> {
+  const snapshot = serializeNormalizedResume(current);
+  if (
+    snapshot === serializeNormalizedResume(EMPTY_RESUME) ||
+    snapshot === serializeNormalizedResume(incoming)
+  ) {
+    return "not-needed";
+  }
+
+  const drafts = await listDrafts();
+  if (drafts === null) return "failed";
+
+  const alreadySaved = drafts.some(
+    (draft) =>
+      draft.id !== AUTOSAVE_DRAFT_ID && serializeNormalizedResume(draft.resumeData) === snapshot
+  );
+  if (alreadySaved) return "not-needed";
+
+  const data = cloneResumeData(current);
+  const now = Date.now();
+  const saved = await saveDraft({
+    id: `copy-${now}`,
+    name: `${data.basics.name || "Untitled"} (${COPY_NAME_SUFFIX[reason]})`,
+    createdAt: now,
+    updatedAt: now,
+    resumeData: data,
+  });
+
+  return saved ? "saved" : "failed";
 }

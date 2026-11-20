@@ -12,7 +12,6 @@ import {
 } from "@/lib/sections/registry";
 import {
   activeSection,
-  loadResume,
   resume,
   selectedAccentColor,
   selectedTemplate,
@@ -22,6 +21,7 @@ import {
   setImportFeedback,
 } from "@/store/resume";
 import DraftManager from "./DraftManager";
+import { replaceResume } from "./replace-resume";
 
 const CIRCUMFERENCE = 2 * Math.PI * 14;
 
@@ -76,18 +76,22 @@ const CommandBar: Component = () => {
     setIsImporting(true);
     setImportError("");
 
-    const outcome = await importResumeFile(file, validation.extension);
-    setIsImporting(false);
+    try {
+      const outcome = await importResumeFile(file, validation.extension);
+      if (!outcome.success) {
+        setImportError(outcome.error);
+        return;
+      }
 
-    if (!outcome.success) {
-      setImportError(outcome.error);
-      return;
+      if (!(await replaceResume(outcome.resume, "import"))) return;
+      if (outcome.feedback) {
+        setImportFeedback(outcome.feedback);
+      }
+    } catch {
+      setImportError("Couldn't import this file. Try again or choose a different file.");
+    } finally {
+      setIsImporting(false);
     }
-
-    if (outcome.feedback) {
-      setImportFeedback(outcome.feedback);
-    }
-    loadResume(outcome.resume);
   };
 
   const handleExportJson = async () => {

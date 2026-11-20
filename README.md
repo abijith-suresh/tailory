@@ -9,7 +9,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - **Live preview**: See the current resume render update as you edit.
 - **Three templates**: Modern, Minimal, and Compact ATS.
 - **Export**: Download a PDF or export the current resume as JSON.
-- **Local drafts**: Autosave and named drafts are stored in IndexedDB on your device.
+- **Local drafts**: Autosave and named drafts are stored in IndexedDB on your device. Saving a draft under an existing name updates it. Importing a file or loading a draft first saves the resume you were editing as a draft.
 
 ## Current limits
 
