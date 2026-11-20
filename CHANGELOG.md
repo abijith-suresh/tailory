@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.3](https://github.com/abijith-suresh/tailory/compare/0.0.2...v0.0.3) (2026-11-20)
+
+
+### Bug Fixes
+
+* **export:** download on desktop and delay object URL revoke ([#168](https://github.com/abijith-suresh/tailory/issues/168)) ([f4ce932](https://github.com/abijith-suresh/tailory/commit/f4ce93234275dc5e6808fdb12fa5d339514ac2eb))
+* **export:** write ISO dates and prune empty values in JSON export ([#163](https://github.com/abijith-suresh/tailory/issues/163)) ([8b22460](https://github.com/abijith-suresh/tailory/commit/8b22460a911d1092e699af716570b278d5360b1a))
+* **parser:** harden resume import parsing ([#160](https://github.com/abijith-suresh/tailory/issues/160)) ([a64fd1a](https://github.com/abijith-suresh/tailory/commit/a64fd1a904de6dfdb526783ee640749db8bf2c9d))
+
 ## [0.0.2](https://github.com/abijith-suresh/tailory/compare/0.0.1...0.0.2) (2026-09-28)
 
 
