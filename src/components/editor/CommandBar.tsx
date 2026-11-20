@@ -177,8 +177,11 @@ const CommandBar: Component = () => {
       </div>
 
       {/* Section chips */}
-      <nav class="hidden md:flex md:flex-1 md:items-center md:gap-1.5" aria-label="Resume sections">
-        <div class="flex items-center gap-1.5">
+      <nav
+        class="hidden md:flex md:max-w-full md:flex-1 md:items-center md:gap-1.5"
+        aria-label="Resume sections"
+      >
+        <div class="flex items-center gap-1.5 overflow-x-auto">
           <For each={SECTION_DEFINITIONS}>
             {(section) => (
               <button
