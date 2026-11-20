@@ -4,15 +4,18 @@ import { Transition } from "solid-transition-group";
 import { SECTION_DEFINITIONS, TOTAL_SECTIONS, getSectionDefinition } from "@/lib/sections/registry";
 import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
+import AwardsForm from "./AwardsForm";
 import BasicsForm from "./BasicsForm";
 import CertificatesForm from "./CertificatesForm";
 import EducationForm from "./EducationForm";
 import InterestsForm from "./InterestsForm";
 import LanguagesForm from "./LanguagesForm";
 import ProjectsForm from "./ProjectsForm";
+import PublicationsForm from "./PublicationsForm";
 import ReferencesForm from "./ReferencesForm";
 import SkillsForm from "./SkillsForm";
 import SummaryForm from "./SummaryForm";
+import VolunteerForm from "./VolunteerForm";
 import WorkForm from "./WorkForm";
 
 const SECTION_COMPONENTS: Record<SectionId, Component> = {
@@ -26,6 +29,9 @@ const SECTION_COMPONENTS: Record<SectionId, Component> = {
   references: ReferencesForm,
   projects: ProjectsForm,
   certs: CertificatesForm,
+  volunteer: VolunteerForm,
+  awards: AwardsForm,
+  publications: PublicationsForm,
 };
 
 // ── EditorShell ───────────────────────────────────────────────────────────────

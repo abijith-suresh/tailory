@@ -11,9 +11,9 @@ import {
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 describe("section registry", () => {
-  it("defines all 10 canonical resume sections with labels and descriptions", () => {
-    expect(TOTAL_SECTIONS).toBe(10);
-    expect(SECTION_DEFINITIONS.length).toBe(10);
+  it("defines all 13 canonical resume sections with labels and descriptions", () => {
+    expect(TOTAL_SECTIONS).toBe(13);
+    expect(SECTION_DEFINITIONS.length).toBe(13);
 
     const expectedIds = [
       "basics",
@@ -26,6 +26,9 @@ describe("section registry", () => {
       "references",
       "projects",
       "certs",
+      "volunteer",
+      "awards",
+      "publications",
     ];
 
     expect(SECTION_DEFINITIONS.map((s) => s.id)).toEqual(expectedIds);
@@ -87,5 +90,24 @@ describe("section registry", () => {
 
     expect(getCompletedSectionsCount(populated)).toBe(4);
     expect(isResumeEmpty(populated)).toBe(false);
+  });
+
+  it("marks volunteer, awards, and publications complete once they have an entry", () => {
+    const empty = structuredClone(EMPTY_RESUME);
+    expect(isSectionComplete("volunteer", empty)).toBe(false);
+    expect(isSectionComplete("awards", empty)).toBe(false);
+    expect(isSectionComplete("publications", empty)).toBe(false);
+
+    const populated: ResumeSchema = {
+      ...empty,
+      volunteer: [{ id: "v1", organization: "Code Club", position: "Mentor" }],
+      awards: [{ id: "a1", title: "Engineering Excellence Award" }],
+      publications: [{ id: "p1", name: "Scaling Search at Acme" }],
+    };
+
+    expect(isSectionComplete("volunteer", populated)).toBe(true);
+    expect(isSectionComplete("awards", populated)).toBe(true);
+    expect(isSectionComplete("publications", populated)).toBe(true);
+    expect(getCompletedSectionsCount(populated)).toBe(3);
   });
 });
