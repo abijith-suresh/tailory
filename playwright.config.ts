@@ -1,7 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Astro's default dev/preview port; the repo does not override it.
-const port = 4321;
+// Astro's default dev/preview port. Set PLAYWRIGHT_PORT to run on a private port,
+// for example when several checkouts run browser tests at once.
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 4321);
 const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
@@ -17,7 +18,7 @@ export default defineConfig({
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
-    command: "bun run preview --host 127.0.0.1",
+    command: `bun run preview --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     // Astro 7 auto-backgrounds `astro preview` in agentic shells, which makes
     // Playwright treat the server process as exited; keep it in the foreground.
