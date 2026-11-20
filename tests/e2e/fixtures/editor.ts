@@ -23,7 +23,34 @@ export async function editLabel(page: Page) {
   await page.getByRole("textbox", { name: "Title / Label" }).fill(EDITED_LABEL);
 }
 
-// Autosave is debounced; the draft button reads "Saved" once IndexedDB has the edit.
+// Autosave waits two seconds, then writes to IndexedDB. A busy machine can stretch that past the
+// default expect timeout, so poll the saved draft with a longer one. The draft is more reliable
+// than the "Saved" label, which shows for only two seconds and can be missed.
 export async function waitForAutosave(page: Page) {
-  await expect(page.getByRole("button", { name: "Saved", exact: true })).toBeVisible();
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            new Promise<string | undefined>((resolve, reject) => {
+              const open = indexedDB.open("tailory");
+              open.onerror = () => reject(open.error);
+              open.onsuccess = () => {
+                const db = open.result;
+                if (!db.objectStoreNames.contains("drafts")) {
+                  db.close();
+                  return resolve(undefined);
+                }
+                const get = db.transaction("drafts").objectStore("drafts").get("autosave");
+                get.onerror = () => reject(get.error);
+                get.onsuccess = () => {
+                  db.close();
+                  resolve(get.result?.resumeData?.basics?.label);
+                };
+              };
+            })
+        ),
+      { timeout: 20_000 }
+    )
+    .toBe(EDITED_LABEL);
 }
