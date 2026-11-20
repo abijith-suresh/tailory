@@ -1,3 +1,5 @@
+import { MAX_EXTRACTED_TEXT_LENGTH } from "./limits";
+
 type PdfJsModule = typeof import("pdfjs-dist");
 
 let pdfjsPromise: Promise<PdfJsModule> | null = null;
@@ -15,7 +17,6 @@ async function getPdfJs(): Promise<PdfJsModule> {
 
 export const MAX_PDF_PAGES = 20;
 export const MAX_PDF_TEXT_ITEMS = 10_000;
-export const MAX_EXTRACTED_TEXT_LENGTH = 250_000;
 
 interface PositionedTextItem {
   height: number;
