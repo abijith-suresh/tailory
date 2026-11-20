@@ -16,7 +16,8 @@ import {
   saveAutosaveDraft,
   saveNamedDraft,
 } from "@/lib/storage/drafts";
-import { loadResume, resume, setDraftStorageError } from "@/store/resume";
+import { joinEditorTabs } from "@/lib/storage/editor-tabs";
+import { loadResume, resume, setDraftStorageError, setOtherTabActive } from "@/store/resume";
 import { EMPTY_RESUME } from "@/types/resume";
 import { replaceResume } from "./replace-resume";
 
@@ -41,6 +42,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [listError, setListError] = createSignal("");
   const [showList, setShowList] = createSignal(false);
   const [storageAvailable, setStorageAvailable] = createSignal(true);
+  const [isActiveTab, setIsActiveTab] = createSignal(true);
   const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
   const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
   const [popupTop, setPopupTop] = createSignal(0);
@@ -139,13 +141,30 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setHasHydratedAutosave(true);
   };
 
+  // Only the most recently opened editor tab autosaves. Older tabs stop saving until the user
+  // takes over, which reloads the resume from storage.
+  const takeOver = async () => {
+    editorTabs.claim();
+    setOtherTabActive(null);
+    await restoreFromStorage();
+    if (!isDisposed) setIsActiveTab(true);
+  };
+
+  const editorTabs = joinEditorTabs(() => {
+    if (isDisposed) return;
+    flushAutosave();
+    setIsActiveTab(false);
+    setOtherTabActive({ takeOver: () => void takeOver() });
+  });
+
   onMount(async () => {
+    editorTabs.claim();
     await restoreFromStorage();
   });
 
   // Auto-save on store changes (debounced)
   createEffect(() => {
-    if (!hasHydratedAutosave() || !storageAvailable()) return;
+    if (!hasHydratedAutosave() || !storageAvailable() || !isActiveTab()) return;
 
     // Reactive read of the resume store fields that trigger saves
     const snapshot = serializeNormalizedResume(resume);
@@ -243,6 +262,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
     window.removeEventListener("pagehide", flushAutosave);
     document.removeEventListener("visibilitychange", flushWhenHidden);
+    editorTabs.close();
+    setOtherTabActive(null);
   });
 
   const btnClass = () =>

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import EditorLayout from "@/components/editor/EditorLayout";
 import {
   setDraftStorageError,
+  setOtherTabActive,
   setExportError,
   setImportError,
   setImportFeedback,
@@ -14,6 +15,7 @@ afterEach(() => {
   setImportError("");
   setImportFeedback(null);
   setDraftStorageError("");
+  setOtherTabActive(null);
   vi.useRealTimers();
 });
 
@@ -56,5 +58,23 @@ describe("EditorLayout toasts", () => {
     fireEvent.click(getByLabelText("Dismiss"));
 
     expect(queryByRole("alert")).toBeNull();
+  });
+
+  it("offers to use this tab when the editor is open in another tab", async () => {
+    vi.useFakeTimers();
+    const takeOver = vi.fn();
+    const { getByRole, queryByLabelText } = render(() => <EditorLayout />);
+
+    setOtherTabActive({ takeOver });
+    vi.advanceTimersByTime(60_000);
+    await Promise.resolve();
+
+    expect(getByRole("alert").textContent).toContain(
+      "Tailory is open in another tab. Changes here aren't saved."
+    );
+    expect(queryByLabelText("Dismiss")).toBeNull();
+
+    fireEvent.click(getByRole("button", { name: "Use this tab" }));
+    expect(takeOver).toHaveBeenCalledTimes(1);
   });
 });
