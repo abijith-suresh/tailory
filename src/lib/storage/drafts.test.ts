@@ -65,6 +65,28 @@ describe("autosave draft helpers", () => {
     await expect(restoreAutosaveDraft()).resolves.toEqual({ available: true, readFailed: true });
   });
 
+  it("asks for persistent storage only once", async () => {
+    const persist = vi.fn().mockResolvedValue(true);
+    vi.stubGlobal("navigator", { storage: { persist } });
+    vi.resetModules();
+    const { requestPersistentStorage } = await import("./drafts");
+
+    requestPersistentStorage();
+    requestPersistentStorage();
+
+    expect(persist).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("ignores persistent storage when the browser doesn't support it", async () => {
+    vi.stubGlobal("navigator", {});
+    vi.resetModules();
+    const { requestPersistentStorage } = await import("./drafts");
+
+    expect(() => requestPersistentStorage()).not.toThrow();
+    vi.unstubAllGlobals();
+  });
+
   it("restores a normalized autosave draft and snapshot", async () => {
     const rawResume = createResume({
       basics: {

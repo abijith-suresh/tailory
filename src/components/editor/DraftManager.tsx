@@ -10,7 +10,12 @@ import {
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
 import { AUTOSAVE_DRAFT_ID, deleteDraft, listDrafts, type ResumeDraft } from "@/lib/storage/db";
-import { restoreAutosaveDraft, saveAutosaveDraft, saveNamedDraft } from "@/lib/storage/drafts";
+import {
+  requestPersistentStorage,
+  restoreAutosaveDraft,
+  saveAutosaveDraft,
+  saveNamedDraft,
+} from "@/lib/storage/drafts";
 import { loadResume, resume, setDraftStorageError } from "@/store/resume";
 import { EMPTY_RESUME } from "@/types/resume";
 import { replaceResume } from "./replace-resume";
@@ -71,6 +76,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setStatus("saved");
     setDraftStorageError("");
     queueStatusReset();
+    requestPersistentStorage();
   };
 
   const performSave = async (snapshot: string) => {
