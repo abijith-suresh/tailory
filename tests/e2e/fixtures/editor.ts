@@ -6,14 +6,6 @@ export const RESUME_FIXTURE = fileURLToPath(new URL("./resume.json", import.meta
 export const FIXTURE_NAME = "Ada Fixture";
 export const EDITED_LABEL = "Principal Engineer";
 
-// Some browsers expose navigator.share for files, and exportPDF() prefers it over a download.
-// Remove it so every browser takes the download path. Runs again on each reload.
-export async function removeNavigatorShare(page: Page) {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "share", { value: undefined, configurable: true });
-  });
-}
-
 export async function importFixtureResume(page: Page) {
   await page.getByLabel("Import resume file", { exact: true }).setInputFiles(RESUME_FIXTURE);
   await expect(page.getByRole("textbox", { name: "Full Name" })).toHaveValue(FIXTURE_NAME);

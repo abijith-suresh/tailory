@@ -1,11 +1,5 @@
 import { type BrowserContext, expect, type Request, test } from "@playwright/test";
-import {
-  EDITED_LABEL,
-  editLabel,
-  importFixtureResume,
-  removeNavigatorShare,
-  waitForAutosave,
-} from "./fixtures/editor";
+import { EDITED_LABEL, editLabel, importFixtureResume, waitForAutosave } from "./fixtures/editor";
 
 // Resume content that must never appear in any request: the fixture's values and the edit.
 const RESUME_CONTENT = [
@@ -83,7 +77,6 @@ test("import, edit and export send nothing off the app origin", async ({
 }) => {
   if (!baseURL) throw new Error("Missing preview baseURL");
   const guard = await observeNetwork(context, new URL(baseURL).origin);
-  await removeNavigatorShare(page);
 
   await page.goto("/editor");
   await importFixtureResume(page);

@@ -5,12 +5,10 @@ import {
   editLabel,
   FIXTURE_NAME,
   importFixtureResume,
-  removeNavigatorShare,
   waitForAutosave,
 } from "./fixtures/editor";
 
 test("import, edit, restore from autosave, then export PDF and JSON", async ({ page }) => {
-  await removeNavigatorShare(page);
   await page.goto("/editor");
 
   await importFixtureResume(page);
