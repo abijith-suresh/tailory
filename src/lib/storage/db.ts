@@ -21,6 +21,10 @@ interface TailoryDB {
 
 let _db: IDBPDatabase<TailoryDB> | null = null;
 
+// createdAt of drafts this tab has already read or written (null: not stored yet). Knowing it lets
+// saveDraft write without reading first, so a save started as the page closes reaches IndexedDB.
+const knownCreatedAt = new Map<string, number | null>();
+
 function resetDbConnection() {
   _db = null;
 }
@@ -52,17 +56,22 @@ export async function isDraftStorageAvailable(): Promise<boolean> {
 export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
   try {
     const db = await getDB();
-    const existingDraft = await db.get("drafts", draft.id);
-    const normalizedDraft = {
+    const createdAt = knownCreatedAt.has(draft.id)
+      ? knownCreatedAt.get(draft.id)
+      : (await db.get("drafts", draft.id))?.createdAt;
+    const savedDraft = {
       ...draft,
       name: draft.name.trim() || "Untitled",
       resumeData: normalizeResume(draft.resumeData),
+      createdAt: createdAt ?? draft.createdAt,
     };
 
-    await db.put("drafts", {
-      ...normalizedDraft,
-      createdAt: existingDraft?.createdAt ?? normalizedDraft.createdAt,
-    });
+    const tx = db.transaction("drafts", "readwrite");
+    const put = tx.store.put(savedDraft);
+    // Commit now instead of after the next task, which never comes once the page is closing.
+    tx.commit();
+    await Promise.all([put, tx.done]);
+    knownCreatedAt.set(draft.id, savedDraft.createdAt);
 
     return true;
   } catch {
@@ -75,6 +84,7 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
   try {
     const db = await getDB();
     const draft = await db.get("drafts", id);
+    knownCreatedAt.set(id, draft?.createdAt ?? null);
     return draft
       ? {
           ...draft,
@@ -110,6 +120,7 @@ export async function deleteDraft(id: string): Promise<boolean> {
   try {
     const db = await getDB();
     await db.delete("drafts", id);
+    knownCreatedAt.delete(id);
     return true;
   } catch {
     resetDbConnection();
