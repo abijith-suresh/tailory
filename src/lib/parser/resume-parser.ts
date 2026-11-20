@@ -74,7 +74,7 @@ function detectSectionStart(line: string): { remainder: string; section: Section
   for (const [sectionType, keywords] of Object.entries(SECTION_KEYWORDS)) {
     for (const keyword of keywords) {
       const pattern = new RegExp(
-        `^[^A-Za-z0-9]*${escapeRegExp(keyword)}\\s*[:-|–—]+\\s*(.+)$`,
+        `^[^A-Za-z0-9]*${escapeRegExp(keyword)}\\s*[:|\\-–—]+\\s*(.+)$`,
         "i"
       );
       const match = trimmed.match(pattern);
@@ -142,7 +142,9 @@ const PHONE_RE =
 const URL_RE = /https?:\/\/[^\s,)]+|(?:www|linkedin|github)\.[^\s,)]+/i;
 const MONTH_PATTERN =
   "(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)";
-const DATE_TOKEN_PATTERN = `${MONTH_PATTERN}[\\s,]+\\d{4}|\\d{4}|Present|Current|Now|present|current|now`;
+// Plausible years only, so counts like "10000 users" or "2500 dollars" are not dates.
+const YEAR_PATTERN = "\\b(?:19|20)\\d{2}\\b";
+const DATE_TOKEN_PATTERN = `${MONTH_PATTERN}[\\s,]+${YEAR_PATTERN}|${YEAR_PATTERN}|Present|Current|Now|present|current|now`;
 const DATE_RE = new RegExp(DATE_TOKEN_PATTERN, "gi");
 const DATE_RANGE_RE = new RegExp(
   `(${DATE_TOKEN_PATTERN})\\s*[-–—]\\s*(${DATE_TOKEN_PATTERN})`,
