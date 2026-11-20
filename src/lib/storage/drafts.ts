@@ -22,6 +22,7 @@ export function cloneResumeData(data: ResumeSchema): ResumeSchema {
 
 export async function restoreAutosaveDraft(): Promise<{
   available: boolean;
+  readFailed?: boolean;
   draft?: ResumeDraft;
   snapshotJson?: string;
 }> {
@@ -32,6 +33,10 @@ export async function restoreAutosaveDraft(): Promise<{
   }
 
   const draft = await getDraft(AUTOSAVE_DRAFT_ID);
+
+  if (draft === null) {
+    return { available: true, readFailed: true };
+  }
 
   if (!draft) {
     return { available: true };

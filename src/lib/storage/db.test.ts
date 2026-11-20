@@ -197,7 +197,7 @@ describe("draft storage", () => {
         resumeData: sampleResume("Jane"),
       })
     ).resolves.toBe(false);
-    await expect(storage.getDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBeUndefined();
+    await expect(storage.getDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBeNull();
     await expect(storage.listDrafts()).resolves.toBeNull();
     await expect(storage.deleteDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBe(false);
   });
@@ -253,6 +253,14 @@ describe("draft storage", () => {
     await storage.saveDraft(draft);
 
     expect(openDB).toHaveBeenCalledTimes(2);
+  });
+
+  it("tells a missing draft apart from one that can't be read", async () => {
+    const missing = await loadStorageModule();
+    await expect(missing.storage.getDraft("nope")).resolves.toBeUndefined();
+
+    const failing = await loadStorageModule({ getError: new Error("read failed") });
+    await expect(failing.storage.getDraft(failing.storage.AUTOSAVE_DRAFT_ID)).resolves.toBeNull();
   });
 
   it("returns null instead of an empty list when drafts can't be read", async () => {
