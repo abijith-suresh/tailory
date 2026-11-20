@@ -73,6 +73,19 @@ export async function saveAutosaveDraft(snapshotJson: string): Promise<boolean> 
   });
 }
 
+let persistRequested = false;
+
+/** Asks the browser once not to clear saved drafts when it runs low on space. */
+export function requestPersistentStorage() {
+  if (persistRequested) return;
+  persistRequested = true;
+  try {
+    void navigator.storage?.persist?.().catch(() => undefined);
+  } catch {
+    // Not supported; drafts still work without it.
+  }
+}
+
 /** Saves a named draft, updating the existing draft with the same name instead of adding another. */
 export async function saveNamedDraft(data: ResumeSchema): Promise<boolean> {
   const name = data.basics.name.trim() || "Untitled";
