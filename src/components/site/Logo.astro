@@ -1,9 +1,11 @@
 ---
 interface Props {
   class?: string;
+  /** Hide the wordmark on very narrow screens, leaving the mark. */
+  compact?: boolean;
 }
 
-const { class: className } = Astro.props;
+const { class: className, compact = false } = Astro.props;
 ---
 
 <span class:list={["inline-flex items-center gap-2 text-ink", className]}>
@@ -15,5 +17,10 @@ const { class: className } = Astro.props;
       class="fill-on-accent"></path>
     <path d="M10 25.5h12V29a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1z" class="fill-ink"></path>
   </svg>
-  <span class="font-serif text-[1.5rem] leading-none font-medium tracking-[-0.01em]">Tailory</span>
+  <span
+    class:list={[
+      "font-serif text-[1.5rem] leading-none font-medium tracking-[-0.01em]",
+      { "max-[22.5rem]:sr-only": compact },
+    ]}>Tailory</span
+  >
 </span>

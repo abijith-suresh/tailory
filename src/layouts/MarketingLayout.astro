@@ -44,10 +44,10 @@ const footerLinks = [
         aria-label="Main"
       >
         <a href="/" class="mr-auto flex rounded-control" aria-label="Tailory home">
-          <Logo />
+          <Logo compact />
         </a>
 
-        <ul class="hidden items-center gap-7 md:flex">
+        <ul class="flex items-center gap-4 md:gap-7">
           {
             navLinks.map((link) => (
               <li>
@@ -61,7 +61,7 @@ const footerLinks = [
               </li>
             ))
           }
-          <li>
+          <li class="hidden md:block">
             <a
               href={repoUrl}
               target="_blank"
@@ -73,60 +73,10 @@ const footerLinks = [
           </li>
         </ul>
 
-        <a href="/editor" class="btn-outline h-9 px-4 text-meta whitespace-nowrap">Open editor</a>
-
-        <button
-          id="menu-button"
-          type="button"
-          class="-mr-2 -ml-1 flex size-10 items-center justify-center rounded-control text-ink md:hidden"
-          aria-label="Menu"
-          aria-expanded="false"
-          aria-controls="menu-panel"
-        >
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="size-5">
-            <path
-              class="menu-icon-open"
-              d="M3 6h14M3 10h14M3 14h14"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"></path>
-            <path
-              class="menu-icon-close"
-              d="M5 5l10 10M15 5 5 15"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"></path>
-          </svg>
-        </button>
+        <a href="/editor" class="btn-outline h-9 px-3.5 text-meta whitespace-nowrap md:px-4">
+          Open editor
+        </a>
       </nav>
-
-      <div id="menu-panel" class="border-t border-rule md:hidden" hidden>
-        <ul class="mx-auto flex max-w-page flex-col px-gutter py-2">
-          {
-            navLinks.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  aria-current={path === link.href ? "page" : undefined}
-                  class="flex h-12 items-center text-body font-medium text-ink-muted aria-[current=page]:text-ink"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))
-          }
-          <li>
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex h-12 items-center gap-1.5 text-body font-medium text-ink-muted"
-            >
-              GitHub <ExternalIcon />
-            </a>
-          </li>
-        </ul>
-      </div>
     </header>
 
     <main id="main" class="flex-1">
@@ -168,40 +118,3 @@ const footerLinks = [
     </footer>
   </div>
 </Layout>
-
-<style>
-  #menu-button[aria-expanded="false"] .menu-icon-close,
-  #menu-button[aria-expanded="true"] .menu-icon-open {
-    display: none;
-  }
-</style>
-
-<script>
-  // ClientRouter swaps the page on navigation, so bind element listeners on every page load.
-  // The document outlives navigations, so the Escape listener is added once.
-  const getMenu = () => ({
-    button: document.getElementById("menu-button"),
-    panel: document.getElementById("menu-panel"),
-  });
-
-  const setMenuOpen = (open: boolean) => {
-    const { button, panel } = getMenu();
-    if (!button || !panel) return;
-    button.setAttribute("aria-expanded", String(open));
-    panel.hidden = !open;
-  };
-
-  document.addEventListener("astro:page-load", () => {
-    const { button } = getMenu();
-    button?.addEventListener("click", () => {
-      setMenuOpen(button.getAttribute("aria-expanded") !== "true");
-    });
-  });
-
-  document.addEventListener("keydown", (event) => {
-    const { button } = getMenu();
-    if (event.key !== "Escape" || button?.getAttribute("aria-expanded") !== "true") return;
-    setMenuOpen(false);
-    button.focus();
-  });
-</script>
