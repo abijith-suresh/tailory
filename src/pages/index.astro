@@ -4,7 +4,10 @@ import ProseSection from "@/components/site/ProseSection.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
 const imports = [
-  { format: "JSON", how: "Most exact. Each section Tailory supports comes in field for field." },
+  {
+    format: "JSON",
+    how: "The most reliable. Tailory reads each supported section field by field.",
+  },
   { format: "DOCX", how: "Tailory reads the text and sorts it into sections. Check them after." },
   {
     format: "PDF",
@@ -17,19 +20,15 @@ const imports = [
   title="Tailory · The resume editor that stays in your browser"
   description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a PDF or JSON. Your resume stays in your browser."
 >
-  <!-- Hero: a title page. The headline, one line, one action, then the document itself. -->
+  <!-- Hero: the headline, one line, one action, then the document itself. -->
   <section class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
-    <div class="text-center">
-      <h1 class="mx-auto max-w-[14em] font-serif text-display font-normal text-balance">
-        The resume editor that stays in <em class="italic">your browser.</em>
-      </h1>
-      <p class="mt-5 text-lead text-balance text-ink-muted md:mt-6">
-        No account, no upload. Free and open source.
-      </p>
-      <a href="/editor" class="btn-primary mt-7 h-12 px-6 text-body">Open editor</a>
-    </div>
+    <h1 class="max-w-[13em] font-serif text-display font-normal text-balance">
+      The resume editor that stays in your browser.
+    </h1>
+    <p class="mt-5 text-lead text-ink-muted md:mt-6">No account, no upload. Free and open source.</p>
+    <a href="/editor" class="btn-primary mt-7 h-12 px-6 text-body">Open editor</a>
 
-    <div class="mt-12 md:mt-16">
+    <div class="mt-16 md:mt-20">
       <HeroVisual />
     </div>
   </section>
@@ -66,11 +65,11 @@ const imports = [
     </ProseSection>
 
     <ProseSection title="What imports well">
-      <dl class="divide-y divide-rule border-y border-rule">
+      <dl class="divide-y divide-rule">
         {
           imports.map((item) => (
-            <div class="grid gap-1 py-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-4">
-              <dt class="font-semibold">{item.format}</dt>
+            <div class="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-4">
+              <dt class="font-medium">{item.format}</dt>
               <dd class="text-ink-muted">{item.how}</dd>
             </div>
           ))

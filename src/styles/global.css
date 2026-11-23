@@ -195,6 +195,19 @@
   }
 }
 
+/* From 64rem the page sits in the text column of the home page's two-column grid. */
+@media (min-width: 64rem) {
+  :root {
+    --page-scale: 0.8;
+  }
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --page-scale: 1;
+  }
+}
+
 /* Focus-visible styles for keyboard accessibility */
 :focus-visible {
   outline: 2px solid var(--color-focus);
@@ -350,8 +363,8 @@ textarea {
   background-repeat: no-repeat;
 }
 
-/* Below 24rem the page fills the column, so there is no room for the marks. */
-@media (max-width: 23.99rem) {
+/* On phones the page nearly fills the column, so there is no room for the marks. */
+@media (max-width: 29.99rem) {
   .crop-marks::before {
     display: none;
   }
