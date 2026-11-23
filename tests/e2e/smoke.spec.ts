@@ -29,3 +29,17 @@ test("unknown routes show the not-found page", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page isn’t here.");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
 });
+
+test("GitHub links sit in the footer, not the header", async ({ page }) => {
+  await page.goto("/");
+
+  const header = page.getByRole("navigation", { name: "Main" });
+  await expect(header.getByRole("link", { name: "FAQ" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Privacy" })).toBeVisible();
+  await expect(header.getByRole("link", { name: /GitHub/ })).toHaveCount(0);
+
+  const footer = page.getByRole("navigation", { name: "Footer" });
+  await expect(footer.getByRole("link", { name: /GitHub/ })).toBeVisible();
+  await expect(footer.getByRole("link", { name: /Report an issue/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Releases/ })).toHaveCount(0);
+});

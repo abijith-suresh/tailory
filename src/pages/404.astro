@@ -4,15 +4,15 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 ---
 
 <MarketingLayout title="Page not found" description="This page doesn’t exist." noindex>
-  <section class="mx-auto max-w-page px-gutter pt-12 pb-20 md:px-gutter-wide md:pt-20 md:pb-28">
-    <Tape class="mb-10 max-w-[19rem] md:mb-12" mark={404} />
-    <h1 class="font-serif text-display font-normal text-balance">This page isn’t here.</h1>
-    <p class="mt-6 max-w-md text-lead text-balance text-ink-muted">
+  <section class="mx-auto max-w-page px-4 pt-12 pb-20 md:px-10 md:pt-16 md:pb-28 lg:pt-20">
+    <Tape class="mb-10 max-w-76 md:mb-12" mark={404} />
+    <h1 class="text-heading-4 text-balance md:text-heading-3">This page isn’t here.</h1>
+    <p class="mt-4 max-w-measure text-body-lg text-pretty text-ink-muted md:mt-6">
       The link may be out of date. Your drafts are still in this browser.
     </p>
-    <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
-      <a href="/editor" class="btn-primary h-12 px-6 text-body">Open editor</a>
-      <a href="/" class="link-underline text-body font-medium">Home page</a>
+    <div class="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+      <a href="/editor" class="btn-primary h-11 px-5 text-ui-sm md:h-9">Open editor</a>
+      <a href="/" class="link-underline inline-flex min-h-11 items-center text-ui-sm">Home page</a>
     </div>
   </section>
 </MarketingLayout>

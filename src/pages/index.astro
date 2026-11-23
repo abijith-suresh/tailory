@@ -3,6 +3,25 @@ import HeroVisual from "@/components/site/HeroVisual.astro";
 import ProseSection from "@/components/site/ProseSection.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
+const steps = [
+  {
+    title: "Start from what you have",
+    text: "Open a PDF, DOCX, or JSON resume up to 10 MB, and Tailory reads it in this tab. Or start from a blank page.",
+  },
+  {
+    title: "Edit with a live preview",
+    text: "Each section has its own form, and the preview updates as you type. Switch templates without retyping.",
+  },
+  {
+    title: "Export a PDF or JSON",
+    text: "The PDF holds selectable text, not a picture of it. JSON keeps your content, so you can open it again.",
+  },
+  {
+    title: "Saved in this browser",
+    text: "Your work autosaves, and you can keep named drafts. Clearing site data deletes them, so export JSON to keep a copy.",
+  },
+];
+
 const imports = [
   {
     format: "JSON",
@@ -20,57 +39,56 @@ const imports = [
   title="Tailory · The resume editor that stays in your browser"
   description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a PDF or JSON. Your resume stays in your browser."
 >
-  <!-- Hero: the headline, one line, one action, then the document itself. -->
-  <section class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
-    <h1 class="max-w-[13em] font-serif text-display font-normal text-balance">
-      The resume editor that stays in your browser.
-    </h1>
-    <p class="mt-5 text-lead text-ink-muted md:mt-6">No account, no upload. Free and open source.</p>
-    <a href="/editor" class="btn-primary mt-7 h-12 px-6 text-body">Open editor</a>
-
-    <div class="mt-16 md:mt-20">
-      <HeroVisual />
+  <!--
+    Hero. From 64rem it uses the two-column grid of the section below: the headline and the four
+    steps fill the left column, beside the page.
+  -->
+  <section
+    class="mx-auto grid max-w-page gap-y-12 px-4 pt-12 md:px-10 md:pt-16 lg:grid-cols-[minmax(0,var(--container-rail))_minmax(0,1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 lg:pt-20"
+  >
+    <div class="lg:col-start-1 lg:row-start-1">
+      <h1 class="max-w-measure text-heading-3 text-balance md:text-heading-1">
+        The resume editor that stays in your browser.
+      </h1>
+      <p class="mt-4 text-body-lg text-pretty text-ink-muted md:mt-6">
+        No account, no upload. Free and open source.
+      </p>
+      <a href="/editor" class="btn-primary mt-8 h-11 px-5 text-ui-sm md:h-9">Open editor</a>
     </div>
+
+    <figure class="lg:col-start-2 lg:row-span-3 lg:row-start-1">
+      <HeroVisual />
+      <figcaption class="mt-4 text-body-sm text-ink-subtle md:mt-10">
+        A sample resume in the editor’s Modern template.
+      </figcaption>
+    </figure>
+
+    <ul
+      class="divide-y divide-rule border-t border-ink lg:col-start-1 lg:row-start-2 lg:self-end"
+    >
+      {
+        steps.map((step) => (
+          <li class="py-4 lg:py-3">
+            <h2 class="text-heading-6 text-balance">{step.title}</h2>
+            <p class="mt-1 max-w-measure text-body-md text-pretty text-ink-muted lg:text-body-sm">
+              {step.text}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
-  <div class="mx-auto max-w-page px-gutter pt-section pb-16 md:px-gutter-wide md:pb-24">
+  <div class="mx-auto max-w-page px-4 pt-16 pb-12 md:px-10 md:pb-16 lg:pt-20">
     <div class="border-t border-ink" aria-hidden="true"></div>
-
-    <ProseSection title="Start from what you have">
-      <p>
-        Open a PDF, DOCX, or JSON resume, up to 10&nbsp;MB. Tailory reads it in this tab and fills in the
-        sections. Or start from a blank page.
-      </p>
-    </ProseSection>
-
-    <ProseSection title="Edit with a live preview">
-      <p>
-        Each section has its own form, and the preview updates as you type. Switch templates at any
-        time without retyping.
-      </p>
-    </ProseSection>
-
-    <ProseSection title="Export a PDF or JSON">
-      <p>
-        The PDF holds selectable text, not a picture of it. JSON keeps your content, so you can open
-        it in Tailory again.
-      </p>
-    </ProseSection>
-
-    <ProseSection title="Saved in this browser">
-      <p>
-        Your work autosaves, and you can keep named drafts. Both live in this browser’s storage, so
-        clearing site data deletes them. Export JSON to keep a copy.
-      </p>
-    </ProseSection>
 
     <ProseSection title="What imports well">
       <dl class="divide-y divide-rule">
         {
           imports.map((item) => (
-            <div class="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-4">
-              <dt class="font-medium">{item.format}</dt>
-              <dd class="text-ink-muted">{item.how}</dd>
+            <div class="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[--spacing(18)_minmax(0,1fr)] sm:gap-4">
+              <dt class="text-ui-md">{item.format}</dt>
+              <dd class="max-w-measure text-pretty text-ink-muted">{item.how}</dd>
             </div>
           ))
         }

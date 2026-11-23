@@ -9,9 +9,9 @@ interface Props {
 const { title, lead, meta } = Astro.props;
 ---
 
-<header class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
-  <h1 class="font-serif text-headline font-normal text-balance">{title}</h1>
-  {lead && <p class="mt-5 max-w-measure text-lead text-ink-muted">{lead}</p>}
-  {meta && <p class="mt-4 text-meta text-ink-subtle">{meta}</p>}
+<header class="mx-auto max-w-page px-4 pt-12 md:px-10 md:pt-16 lg:pt-20">
+  <h1 class="text-heading-4 text-balance">{title}</h1>
+  {lead && <p class="mt-4 max-w-measure text-body-lg text-pretty text-ink-muted md:mt-6">{lead}</p>}
+  {meta && <p class="mt-4 text-body-sm text-ink-subtle">{meta}</p>}
   <div class="mt-10 border-t border-ink md:mt-12" aria-hidden="true"></div>
 </header>

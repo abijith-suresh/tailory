@@ -94,9 +94,9 @@
 
 /*
  * Design tokens, named for the role a value plays rather than the page that uses it.
- * The marketing site uses them now; the editor adopts them next. A dark theme only has to
- * redefine the --color-* values. Names avoid Tailwind's defaults so existing editor classes
- * keep their values.
+ * Sizes follow the Cards kit (github.com/oliur/cards): its type scale, a 4px spacing grid, its
+ * control heights and its radius scale. Fonts, colours and motifs are Tailory's own. The marketing
+ * site uses them now; the editor adopts them next. A dark theme only has to redefine --color-*.
  */
 @theme {
   --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -129,43 +129,110 @@
   --color-focus: #17181b;
   --color-shadow: rgb(23 24 27 / 0.1);
 
-  /* Type scale. Display and headline sizes are set in the serif. */
-  --text-display: clamp(2.625rem, 1.5rem + 4.5vw, 5.5rem);
-  --text-display--line-height: 0.98;
-  --text-display--letter-spacing: -0.022em;
-  --text-headline: clamp(2rem, 1.45rem + 2.2vw, 3.25rem);
-  --text-headline--line-height: 1.05;
-  --text-headline--letter-spacing: -0.015em;
-  --text-title: 1.375rem;
-  --text-title--line-height: 1.25;
-  --text-title--letter-spacing: -0.005em;
-  --text-lead: 1.1875rem;
-  --text-lead--line-height: 1.55;
-  --text-body: 1rem;
-  --text-body--line-height: 1.6;
-  --text-meta: 0.875rem;
-  --text-meta--line-height: 1.5;
+  /*
+   * Type scale. Each token sets size, line-height, tracking and weight; don't add font-size,
+   * leading, tracking or font-weight utilities next to one. Line heights sit on the 4px grid.
+   * Headings are set in the serif (see the rule below the theme).
+   */
+  --text-heading-1: 3.5rem;
+  --text-heading-1--line-height: 4rem;
+  --text-heading-1--letter-spacing: -0.02em;
+  --text-heading-1--font-weight: 400;
+  --text-heading-2: 3rem;
+  --text-heading-2--line-height: 3.5rem;
+  --text-heading-2--letter-spacing: -0.02em;
+  --text-heading-2--font-weight: 400;
+  --text-heading-3: 2.5rem;
+  --text-heading-3--line-height: 3rem;
+  --text-heading-3--letter-spacing: -0.015em;
+  --text-heading-3--font-weight: 400;
+  --text-heading-4: 2rem;
+  --text-heading-4--line-height: 2.5rem;
+  --text-heading-4--letter-spacing: -0.01em;
+  --text-heading-4--font-weight: 400;
+  --text-heading-5: 1.5rem;
+  --text-heading-5--line-height: 2rem;
+  --text-heading-5--letter-spacing: -0.005em;
+  --text-heading-5--font-weight: 500;
+  --text-heading-6: 1.25rem;
+  --text-heading-6--line-height: 1.75rem;
+  --text-heading-6--letter-spacing: 0em;
+  --text-heading-6--font-weight: 600;
 
-  /* Spacing and layout */
-  --spacing-gutter: 1rem;
-  --spacing-gutter-wide: 2.5rem;
-  --spacing-section: clamp(4rem, 2.75rem + 5vw, 8rem);
+  --text-ui-xl: 1.5rem;
+  --text-ui-xl--line-height: 2rem;
+  --text-ui-xl--letter-spacing: -0.015em;
+  --text-ui-xl--font-weight: 500;
+  --text-ui-lg: 1.125rem;
+  --text-ui-lg--line-height: 1.5rem;
+  --text-ui-lg--letter-spacing: -0.015em;
+  --text-ui-lg--font-weight: 500;
+  --text-ui-md: 1rem;
+  --text-ui-md--line-height: 1.5rem;
+  --text-ui-md--letter-spacing: -0.011em;
+  --text-ui-md--font-weight: 500;
+  --text-ui-sm: 0.875rem;
+  --text-ui-sm--line-height: 1.25rem;
+  --text-ui-sm--letter-spacing: -0.006em;
+  --text-ui-sm--font-weight: 500;
+  --text-ui-xs: 0.75rem;
+  --text-ui-xs--line-height: 1rem;
+  --text-ui-xs--letter-spacing: 0em;
+  --text-ui-xs--font-weight: 500;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.5rem;
+  --text-body-lg--letter-spacing: -0.015em;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.5rem;
+  --text-body-md--letter-spacing: -0.011em;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-body-sm--letter-spacing: -0.006em;
+  --text-body-sm--font-weight: 400;
+  --text-body-xs: 0.75rem;
+  --text-body-xs--line-height: 1rem;
+  --text-body-xs--letter-spacing: 0em;
+  --text-body-xs--font-weight: 400;
+
+  /*
+   * Spacing. Tailwind's unit stays at 4px; use whole steps only. Layout widths are whole steps
+   * too: page 304, measure 144, rail 88 (the left column of the two-column grid).
+   */
+  --spacing: 0.25rem;
   --container-page: 76rem;
   --container-measure: 36rem;
+  --container-rail: 22rem;
 
-  /* Radius. Small and square, like cut paper. */
-  --radius-control: 0.1875rem;
-  --radius-card: 0.25rem;
-  --radius-sheet: 0.0625rem;
+  /*
+   * Radius, on Cards' scale. Tailory keeps to its small end: paper is cut square, controls get a
+   * slight round. Buttons use rounded-button (36px and up) or rounded-button-sm (smaller).
+   */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 13px;
+  --radius-3xl: 19px;
+  --radius-button: var(--radius-md);
+  --radius-button-sm: var(--radius-sm);
 
   /* Elevation. Optional on top of an edge line; it doesn't carry depth on its own. */
   --shadow-sheet: 0 1px 1px var(--color-shadow), 0 18px 40px -18px var(--color-shadow);
-  --shadow-card: 0 1px 1px var(--color-shadow), 0 8px 20px -12px var(--color-shadow);
+}
+
+/* Headings are set in the serif, with old-style figures. */
+:where([class*="text-heading-"]) {
+  font-family: var(--font-serif);
+  font-feature-settings: "kern", "liga", "onum";
 }
 
 /*
  * Scale of the home page's resume sheet. It keeps the editor's 680px page width and shows it at
- * full size once the page column is wide enough.
+ * full size wherever the column is wide enough.
  */
 :root {
   --page-scale: 0.4;
@@ -195,14 +262,14 @@
   }
 }
 
-/* From 64rem the page sits in the text column of the home page's two-column grid. */
+/* From 64rem the page sits in the right-hand column of the hero, beside the headline. */
 @media (min-width: 64rem) {
   :root {
     --page-scale: 0.8;
   }
 }
 
-@media (min-width: 80rem) {
+@media (min-width: 76rem) {
   :root {
     --page-scale: 1;
   }
@@ -219,21 +286,16 @@
   color: var(--color-ink);
 }
 
-/* Serif display text uses old-style figures and true ligatures. */
-.font-serif {
-  font-feature-settings: "kern", "liga", "onum";
-}
-
-/* Primary action. Marigold is kept for this and the logo. */
+/* Primary action. Marigold is kept for this and the logo. Size it with h-* and px-* steps. */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border-radius: var(--radius-control);
+  gap: --spacing(2);
+  white-space: nowrap;
+  border-radius: var(--radius-button);
   background: var(--color-accent);
   color: var(--color-on-accent);
-  font-weight: 600;
   transition: background-color 150ms;
 }
 
@@ -339,8 +401,8 @@ textarea {
  * page's trim without a frame around it. The marks reach --crop-reach past the page on each side.
  */
 .crop-marks {
-  --crop-len: 0.375rem;
-  --crop-gap: 0.25rem;
+  --crop-len: --spacing(2);
+  --crop-gap: --spacing(1);
   --crop-reach: calc(var(--crop-len) + var(--crop-gap));
   --crop-line: linear-gradient(var(--color-rule-strong), var(--color-rule-strong));
   position: relative;
@@ -372,7 +434,7 @@ textarea {
 
 @media (min-width: 48rem) {
   .crop-marks {
-    --crop-len: 1.25rem;
-    --crop-gap: 0.75rem;
+    --crop-len: --spacing(5);
+    --crop-gap: --spacing(3);
   }
 }

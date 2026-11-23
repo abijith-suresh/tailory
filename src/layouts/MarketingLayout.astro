@@ -20,12 +20,8 @@ const navLinks = [
 ];
 
 const footerLinks = [
-  { label: "Editor", href: "/editor" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "GitHub", href: repoUrl, external: true },
-  { label: "Releases", href: `${repoUrl}/releases`, external: true },
-  { label: "Report an issue", href: `${repoUrl}/issues`, external: true },
+  { label: "GitHub", href: repoUrl },
+  { label: "Report an issue", href: `${repoUrl}/issues` },
 ];
 ---
 
@@ -33,49 +29,37 @@ const footerLinks = [
   <div class="flex min-h-screen flex-col bg-surface text-ink">
     <a
       href="#main"
-      class="sr-only z-50 rounded-control bg-ink px-4 py-2 text-meta text-surface focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      class="sr-only z-50 rounded-button-sm bg-ink px-4 py-2 text-ui-sm text-surface focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
     >
       Skip to content
     </a>
 
     <header class="sticky top-0 z-40 border-b border-rule bg-surface/95 backdrop-blur-sm">
       <nav
-        class="mx-auto flex h-16 max-w-page items-center gap-4 px-gutter md:gap-7 md:px-gutter-wide"
+        class="mx-auto flex h-15 max-w-page items-center gap-4 px-4 md:gap-8 md:px-10"
         aria-label="Main"
       >
-        <a href="/" class="mr-auto flex rounded-control" aria-label="Tailory home">
+        <a href="/" class="mr-auto flex rounded-xs" aria-label="Tailory home">
           <Logo compact />
         </a>
 
-        <ul class="flex items-center gap-4 md:gap-7">
+        <ul class="flex items-center gap-4 md:gap-8">
           {
             navLinks.map((link) => (
               <li>
                 <a
                   href={link.href}
                   aria-current={path === link.href ? "page" : undefined}
-                  class="inline-flex min-h-11 items-center text-meta font-medium text-ink-muted underline-offset-[0.4em] transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-1"
+                  class="inline-flex min-h-11 items-center text-ui-sm text-ink-muted underline-offset-8 transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-1"
                 >
                   {link.label}
                 </a>
               </li>
             ))
           }
-          <li class="hidden md:block">
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 text-meta font-medium text-ink-muted transition-colors hover:text-ink"
-            >
-              GitHub <ExternalIcon />
-            </a>
-          </li>
         </ul>
 
-        <a href="/editor" class="btn-primary h-9 px-3.5 text-meta whitespace-nowrap md:px-4">
-          Open editor
-        </a>
+        <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm md:h-9">Open editor</a>
       </nav>
     </header>
 
@@ -83,31 +67,30 @@ const footerLinks = [
       <slot />
     </main>
 
-    <footer class="mx-auto w-full max-w-page px-gutter md:px-gutter-wide">
-      <div class="border-t border-rule" aria-hidden="true"></div>
+    <footer class="mx-auto w-full max-w-page px-4 md:px-10">
       <div
-        class="grid gap-x-12 gap-y-8 pt-10 pb-12 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:pb-14"
+        class="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 border-t border-rule pt-10 pb-12 md:pb-16"
       >
-        <div>
-          <a href="/" class="inline-block rounded-control" aria-label="Tailory home">
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <a href="/" class="inline-flex rounded-xs" aria-label="Tailory home">
             <Logo />
           </a>
-          <p class="mt-4 text-meta text-ink-subtle">MIT licensed, provided as is.</p>
+          <p class="text-body-sm text-ink-subtle">MIT licensed, provided as is.</p>
         </div>
 
         <nav aria-label="Footer">
-          <ul class="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3 md:flex md:gap-x-7">
+          <ul class="flex flex-wrap gap-x-8">
             {
               footerLinks.map((link) => (
                 <li>
                   <a
                     href={link.href}
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noopener noreferrer" : undefined}
-                    class="inline-flex items-center gap-1 text-meta text-ink-muted transition-colors hover:text-ink"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex min-h-11 items-center gap-1 text-ui-sm text-ink-muted transition-colors hover:text-ink"
                   >
                     {link.label}
-                    {link.external && <ExternalIcon />}
+                    <ExternalIcon />
                   </a>
                 </li>
               ))

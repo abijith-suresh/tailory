@@ -1,21 +1,18 @@
 ---
-// Static hero: one real render of the sample resume, at the editor's page size where it fits,
-// with crop marks at its corners. From 64rem it shares the two-column grid of the sections below:
-// the caption in the left column, the page in the text column.
-// A later change animates this; it can replace the component.
+// Static hero image: one real render of the sample resume, at the editor's page size where it
+// fits, with crop marks at its corners.
 import ResumeSheet from "@/components/site/ResumeSheet.astro";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<figure class="hero-sheet grid gap-y-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-x-10">
-  <div class="crop-marks w-fit lg:col-start-2 lg:row-start-1">
-    <ResumeSheet template="modern" class="hero-sheet__page" />
-  </div>
-  <figcaption
-    class="max-w-[32ch] text-meta text-ink-subtle lg:col-start-1 lg:row-start-1 lg:border-t lg:border-rule lg:pt-3"
-  >
-    A sample resume in the editor’s Modern template.
-  </figcaption>
-</figure>
+<div class:list={["hero-sheet crop-marks w-fit", className]}>
+  <ResumeSheet template="modern" class="hero-sheet__page" />
+</div>
 
 <style>
   .hero-sheet :global(.hero-sheet__page) {
