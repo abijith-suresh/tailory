@@ -162,6 +162,38 @@
   --shadow-card: 0 1px 1px var(--color-shadow), 0 8px 20px -12px var(--color-shadow);
 }
 
+/*
+ * Scale of the home page's resume sheet, which keeps the editor's 680px page width. The tape uses
+ * it too, so one inch on the tape is one inch of the 8.5-inch page on every page of the site.
+ */
+:root {
+  --page-scale: 0.4;
+}
+
+@media (min-width: 24rem) {
+  :root {
+    --page-scale: 0.49;
+  }
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-scale: 0.6;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --page-scale: 0.82;
+  }
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --page-scale: 1;
+  }
+}
+
 /* Focus-visible styles for keyboard accessibility */
 :focus-visible {
   outline: 2px solid var(--color-focus);

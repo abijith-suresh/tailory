@@ -1,192 +1,65 @@
 ---
-import ExternalIcon from "@/components/site/ExternalIcon.astro";
 import HeroVisual from "@/components/site/HeroVisual.astro";
-import ResumeSheet from "@/components/site/ResumeSheet.astro";
+import Tape from "@/components/site/Tape.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
 const steps = [
-  { verb: "Open", text: "a PDF, DOCX, or JSON resume, or start from a blank page." },
-  { verb: "Edit", text: "each section in a form. The preview updates as you type." },
-  { verb: "Export", text: "a PDF with selectable text, or JSON to open again later." },
+  "Open a PDF, DOCX, or JSON resume, or start from a blank page.",
+  "Edit each section in a form. The preview updates as you type.",
+  "Export a PDF with selectable text, or JSON to open again later.",
 ];
-
-// Saved drafts, back to front. The editor lists each by the resume's name and the time saved.
-const drafts = ["Oct 30", "Nov 12", "Nov 18"];
 ---
 
 <MarketingLayout
   title="Tailory · The resume editor that stays in your browser"
   description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a PDF or JSON. Your resume stays in your browser."
 >
-  <!-- Hero -->
-  <section class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
-    <h1 class="max-w-[14ch] font-serif text-display font-normal text-balance">
+  <!-- Hero: the headline across the full measure, saved drafts rising beneath it. -->
+  <section class="mx-auto max-w-page px-gutter pt-10 md:px-gutter-wide md:pt-16">
+    <h1 class="font-serif text-display font-normal text-balance">
       The resume editor that stays in your browser.
     </h1>
 
-    <div class="mt-6 md:mt-8">
-      <p class="text-lead text-balance text-ink-muted">No account, no upload. Free and open source.</p>
-      <div class="mt-6 flex flex-wrap items-center gap-x-7 gap-y-4">
-        <a href="/editor" class="btn-primary h-12 px-6 text-body">Open editor</a>
-        <a
-          href="https://github.com/abijith-suresh/tailory"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="link-underline inline-flex items-center gap-1.5 text-body font-medium"
-        >
-          View source <ExternalIcon class="size-3.5" />
-        </a>
+    <div class="mt-8 grid gap-x-10 gap-y-12 md:mt-12 md:grid-cols-3">
+      <div class="flex flex-col gap-12">
+        <div>
+          <p class="text-lead text-balance text-ink-muted">
+            No account, no upload. Free and open source.
+          </p>
+          <a href="/editor" class="btn-primary mt-6 h-12 px-6 text-body">Open editor</a>
+        </div>
+
+        <div class="max-w-[34ch]">
+          <h2 class="font-serif text-title font-medium">Open, edit, export</h2>
+          <ol class="mt-3 space-y-2 text-body text-ink-muted">
+            {steps.map((step) => <li>{step}</li>)}
+          </ol>
+        </div>
+
+        <div class="max-w-[34ch]">
+          <h2 class="font-serif text-title font-medium">Autosave and drafts</h2>
+          <p class="mt-3 text-body text-ink-muted">
+            Your work autosaves in this browser, and you can keep named drafts. Clearing site data
+            deletes them, so export JSON to keep a copy.
+          </p>
+        </div>
+      </div>
+
+      <div class="md:col-span-2">
+        <HeroVisual />
       </div>
     </div>
   </section>
 
-  <!-- Product and how it works. The wrapper clips the tape where it runs off the screen. -->
-  <div class="overflow-x-clip">
-    <section
-      class="mx-auto grid max-w-page gap-x-20 gap-y-12 px-gutter pt-12 pb-section md:px-gutter-wide md:pt-16 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center"
-    >
-      <HeroVisual />
-      <div>
-        <h2 class="sr-only">How it works</h2>
-        <ol class="steps">
-          {
-            steps.map((step) => (
-              <li>
-                <span class="steps__verb">{step.verb}</span> {step.text}
-              </li>
-            ))
-          }
-        </ol>
-      </div>
-    </section>
-  </div>
-
-  <!-- Drafts -->
-  <section
-    class="mx-auto grid max-w-page gap-14 px-gutter pb-section md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:px-gutter-wide lg:gap-24"
-    aria-labelledby="drafts-title"
-  >
-    <div class="order-last max-w-md md:order-none md:pt-12">
-      <h2 id="drafts-title" class="font-serif text-headline font-normal text-balance">
-        Saved as you type
-      </h2>
-      <p class="mt-5 text-body text-ink-muted">
-        Changes save automatically in this browser, and you can keep drafts to come back to.
-        Clearing site data deletes them, so export JSON to keep a copy.
-      </p>
-      <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
-        <a href="/editor" class="btn-primary h-12 px-6 text-body">Open editor</a>
-        <a href="/privacy" class="link-underline text-body font-medium">Privacy policy</a>
-      </div>
-    </div>
-
-    <div class="drafts" aria-hidden="true">
-      {
-        drafts.map((saved, index) => (
-          <div
-            class:list={["drafts__sheet", { "drafts__sheet--open": index === drafts.length - 1 }]}
-            style={{ "--i": String(drafts.length - 1 - index) }}
-            data-tab={index === 1 ? "middle" : undefined}
-          >
-            <span class="drafts__tab">{saved}</span>
-            {index === drafts.length - 1 && <ResumeSheet template="modern" class="drafts__page" />}
-          </div>
-        ))
-      }
-    </div>
-  </section>
+  <!-- The tape measures the front sheet: zero on its left edge, 8½ on its right. -->
+  <Tape class="home-tape" start="sheet" zero={0} mark={8.5} />
 </MarketingLayout>
 
 <style>
-  .steps {
-    display: grid;
-    gap: 1.5rem;
-    max-width: 34rem;
-    font-family: var(--font-serif);
-    font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.875rem);
-    line-height: 1.22;
-    letter-spacing: -0.01em;
-    color: var(--color-ink-muted);
-    text-wrap: pretty;
-  }
-
-  .steps__verb {
-    font-weight: 600;
-    color: var(--color-ink);
-  }
-
-  /* Saved drafts as a stack of tabbed sheets, the latest in front. */
-  .drafts {
-    --sheet-scale: 0.36;
-    --step: 1.25rem;
-    position: relative;
-    width: calc(680px * var(--sheet-scale) + var(--step) * 2);
-    height: calc(842px * var(--sheet-scale) + var(--step) * 2 + 1.75rem);
-  }
-
-  .drafts__sheet {
-    position: absolute;
-    top: calc(1.75rem + var(--step) * (2 - var(--i)));
-    left: calc(var(--step) * var(--i));
-    width: calc(680px * var(--sheet-scale));
-    height: calc(842px * var(--sheet-scale));
-    border-radius: var(--radius-sheet);
-    background: var(--color-sheet);
-    outline: 1px solid var(--color-rule);
-    box-shadow: var(--shadow-card);
-  }
-
-  .drafts__sheet :global(.drafts__page) {
-    --sheet-scale: inherit;
-  }
-
-  /* Tabs step across the sheets, like index dividers. */
-  .drafts__tab {
-    position: absolute;
-    bottom: 100%;
-    left: 0.5rem;
-    padding: 0.3125rem 0.625rem 0.25rem;
-    border-radius: var(--radius-control) var(--radius-control) 0 0;
-    background: var(--color-surface-sunken);
-    outline: 1px solid var(--color-rule);
-    font-size: var(--text-meta);
-    line-height: 1.2;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    color: var(--color-ink-muted);
-  }
-
-  .drafts__sheet[data-tab="middle"] .drafts__tab {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .drafts__sheet--open .drafts__tab {
-    left: auto;
-    right: 0.5rem;
-    background: var(--color-accent);
-    outline-color: var(--color-accent);
-    color: var(--color-on-accent);
-    font-weight: 600;
-  }
-
-  @media (min-width: 24rem) {
-    .drafts {
-      --sheet-scale: 0.44;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .drafts {
-      justify-self: center;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .drafts {
-      --sheet-scale: 0.5;
-      --step: 1.5rem;
-    }
+  /* The front sheet tucks its blank foot under the tape. */
+  :global(.home-tape) {
+    z-index: 1;
+    margin-top: -0.75rem;
+    margin-bottom: var(--spacing-section);
   }
 </style>

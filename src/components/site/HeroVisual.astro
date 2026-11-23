@@ -1,72 +1,105 @@
 ---
-// Static hero: a real resume render with a tape measure laid across its foot. The tape is to
-// scale with the 8.5-inch page, starts at its left edge and runs off the screen, so the page
-// must clip it (overflow-x: clip). A later change animates this; it can replace the component.
+// Static hero: saved drafts as a stack of tabbed sheets, each a real render of the sample resume
+// tailored for a different role. The latest is in front and its foot rests on the tape below.
+// The editor names drafts after the resume and lists the time saved, so the tabs show dates.
+// A later change animates this; it can replace the component.
 import ResumeSheet from "@/components/site/ResumeSheet.astro";
-import Tape from "@/components/site/Tape.astro";
+
+const drafts = [
+  { saved: "Oct 30", jobTitle: "Design systems lead" },
+  { saved: "Nov 12", jobTitle: "UX researcher" },
+  { saved: "Nov 18" },
+];
 ---
 
-<div class="hero-visual">
-  <ResumeSheet class="hero-visual__sheet" template="modern" />
-  <Tape class="hero-visual__tape" length={60} />
+<div class="drafts">
+  {
+    drafts.map((draft, index) => {
+      const latest = index === drafts.length - 1;
+      return (
+        <div class="drafts__sheet" style={{ "--i": String(index) }} aria-hidden={!latest}>
+          <span class="drafts__tab" aria-hidden="true">
+            {draft.saved}
+          </span>
+          <ResumeSheet template="modern" class="drafts__page" jobTitle={draft.jobTitle} />
+        </div>
+      );
+    })
+  }
 </div>
 
 <style>
-  .hero-visual {
-    --sheet-scale: 0.42;
-    /* The sheet is 8.5 inches wide. */
-    --tape-inch: calc(680px * var(--sheet-scale) / 8.5);
-    --tape-gap: 2.5rem;
-    position: relative;
-    justify-self: start;
-    padding-bottom: var(--tape-gap);
-  }
-
-  .hero-visual :global(.hero-visual__sheet) {
-    --sheet-scale: inherit;
-  }
-
   /*
-   * The tape's end cap hooks over the page's left edge, so 0 sits on the edge. It crosses the
-   * blank foot of the page, below the resume's last line.
+   * Each newer draft sits a slice lower and a hair to the right, so every sheet behind shows its
+   * name and title line and a paper edge. The stack sits flush right, so the front sheet's left
+   * edge is where the tape's zero falls.
    */
-  .hero-visual :global(.hero-visual__tape) {
+  .drafts {
+    --sheet-scale: var(--page-scale);
+    /* Deep enough to show the name and title line of the template's header. */
+    --slice: calc(5.625rem * var(--sheet-scale));
+    --shift: 0.375rem;
+    --tab: 1.5rem;
+    position: relative;
+    width: calc(680px * var(--sheet-scale) + var(--shift) * 2);
+    height: calc(var(--tab) + var(--slice) * 2 + 842px * var(--sheet-scale));
+    margin-left: auto;
+  }
+
+  .drafts__sheet {
     position: absolute;
-    bottom: calc(var(--tape-gap) - 1rem);
-    left: -0.3125rem;
-    width: 240rem;
-    height: 2.25rem;
-    transform: rotate(-3deg);
-    transform-origin: 0 50%;
+    top: calc(var(--tab) + var(--slice) * var(--i));
+    left: calc(var(--shift) * var(--i));
   }
 
-  @media (min-width: 24rem) {
-    .hero-visual {
-      --sheet-scale: 0.5;
-    }
+  .drafts__sheet :global(.drafts__page) {
+    --sheet-scale: inherit;
+    box-shadow: none;
   }
 
-  @media (min-width: 40rem) {
-    .hero-visual {
-      --sheet-scale: 0.7;
-      --tape-gap: 3.5rem;
+  .drafts__sheet:last-child :global(.drafts__page) {
+    box-shadow: var(--shadow-sheet);
+  }
+
+  /* Tabs step across the right of the sheets, clear of the names, like index dividers. */
+  .drafts__tab {
+    position: absolute;
+    bottom: 100%;
+    right: calc(0.375rem + (2 - var(--i)) * 3.75rem);
+    padding: 0.25rem 0.5rem 0.1875rem;
+    border: 1px solid var(--color-edge);
+    border-bottom: 0;
+    border-radius: var(--radius-control) var(--radius-control) 0 0;
+    background: var(--color-sheet);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--color-ink-muted);
+  }
+
+  .drafts__sheet:last-child .drafts__tab {
+    border-color: var(--color-accent-edge);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 600;
+  }
+
+  @media (min-width: 48rem) {
+    .drafts {
+      --tab: 1.75rem;
     }
-    .hero-visual :global(.hero-visual__tape) {
-      height: 2.75rem;
-      bottom: calc(var(--tape-gap) - 1.25rem);
-      transform: rotate(-2.5deg);
+    .drafts__tab {
+      right: calc(0.75rem + (2 - var(--i)) * 5.5rem);
+      padding: 0.3125rem 0.625rem 0.25rem;
+      font-size: var(--text-meta);
     }
   }
 
   @media (min-width: 64rem) {
-    .hero-visual {
-      --sheet-scale: 0.64;
-    }
-  }
-
-  @media (min-width: 80rem) {
-    .hero-visual {
-      --sheet-scale: 0.74;
+    .drafts__tab {
+      right: calc(1rem + (2 - var(--i)) * 6.5rem);
     }
   }
 </style>

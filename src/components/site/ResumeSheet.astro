@@ -16,11 +16,14 @@ const PAGE_WIDTH = 680;
 interface Props {
   template?: TemplateId;
   class?: string;
+  /** Replace the title line, to show a copy of the sample tailored for another role. */
+  jobTitle?: string;
 }
 
-const { template = "modern", class: className } = Astro.props;
+const { template = "modern", class: className, jobTitle } = Astro.props;
 const design = resolveResumeDesignSettings({ template });
 const resume = createSampleResume();
+if (jobTitle) resume.basics.label = jobTitle;
 const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[template].label} template`;
 ---
 
