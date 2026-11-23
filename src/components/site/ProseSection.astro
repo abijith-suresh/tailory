@@ -1,6 +1,6 @@
 ---
 // One titled block of a text page: the title in the left column, the text on the right. The text
-// column runs to the container edge, so on wide screens it is set larger to keep lines short.
+// is set larger on wide screens and stops at about 65 characters a line.
 interface Props {
   title: string;
   id?: string;
@@ -13,8 +13,8 @@ const { title, id } = Astro.props;
   class="grid gap-2 border-b border-rule py-7 last:border-b-0 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-baseline md:gap-10 md:py-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]"
   id={id}
 >
-  <h2 class="font-serif text-title font-medium text-balance">{title}</h2>
-  <div class="prose-section space-y-3 text-body text-ink lg:text-lead">
+  <h2 class="font-serif text-title font-semibold text-balance">{title}</h2>
+  <div class="prose-section max-w-[40rem] space-y-3 text-body text-ink lg:text-lead">
     <slot />
   </div>
 </section>
