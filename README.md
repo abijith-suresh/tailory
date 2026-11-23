@@ -18,7 +18,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - JSON Resume support is implemented through Tailory's normalization layer; it is **not yet formally validated against the official schema package**
 - Tailory is browser-only and privacy-first, but it is **not an offline-first PWA**. There is no service worker, so the first load still depends on normal browser and network behavior.
 - The preview is designed to stay close to export output, but the exported PDF remains the final source of truth
-- On devices that support the Web Share API, exporting a PDF may open the system share sheet instead of downloading a file.
+- On touch-first devices (phones and tablets with no mouse or trackpad) that support the Web Share API, exporting a PDF may open the system share sheet instead of downloading a file. Desktop browsers always download.
 - Tailory does not score resumes or guarantee ATS or hiring outcomes. PDF export is text-based, but how an employer's system reads it is outside Tailory's control.
 
 ## JSON Resume support

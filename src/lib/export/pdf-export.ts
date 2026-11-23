@@ -2,6 +2,7 @@ import type { TDocumentDefinitions } from "pdfmake/interfaces";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
+import { downloadBlob, isTouchFirstDevice, sanitizeFilenameBase } from "./download";
 import { type PdfMakeFontRuntime, registerPdfFonts } from "./fonts";
 
 let fontRegistrationPromise: Promise<void> | null = null;
@@ -15,8 +16,7 @@ async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promis
 }
 
 function getFilename(resume: ResumeSchema): string {
-  const name = resume.basics.name.trim().replace(/\s+/g, "_") || "resume";
-  return `${name}_resume.pdf`;
+  return `${sanitizeFilenameBase(resume.basics.name)}_resume.pdf`;
 }
 
 interface BrowserPdfDocument {
@@ -33,7 +33,7 @@ async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
     share?: (data?: ShareData) => Promise<void>;
   };
 
-  if (typeof File === "undefined" || typeof nav.share !== "function") {
+  if (!isTouchFirstDevice() || typeof File === "undefined" || typeof nav.share !== "function") {
     return false;
   }
 
@@ -57,17 +57,6 @@ async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
 
     return false;
   }
-}
-
-function downloadPdfBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-  link.click();
-
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function exportPDF(
@@ -99,5 +88,5 @@ export async function exportPDF(
     return;
   }
 
-  downloadPdfBlob(blob, filename);
+  downloadBlob(blob, filename);
 }
