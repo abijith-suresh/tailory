@@ -104,25 +104,29 @@
   --font-resume: "Roboto", Arial, sans-serif;
 
   /*
-   * Colour. Contrast on surface: ink 15.4:1, ink-muted 8.0:1, ink-subtle 5.1:1, accent-ink 5.8:1,
+   * Colour. A neutral grey paper and a near-black ink, with marigold as the one accent.
+   * Contrast on surface: ink 14.1:1, ink-muted 7.7:1, ink-subtle 5.3:1, accent-ink 5.8:1,
    * rule-strong 3.3:1 (enough for control borders). Ink on accent 9.0:1.
+   * Paper edges are drawn with `edge` lines, so depth doesn't depend on a shadow.
    */
-  --color-surface: #f0f2f5;
-  --color-surface-raised: #fafbfc;
-  --color-surface-sunken: #e5e8ee;
+  --color-surface: #e7e8e6;
+  --color-surface-raised: #f4f5f3;
+  --color-surface-sunken: #dbdcd9;
   --color-sheet: #ffffff;
-  --color-ink: #151a2c;
-  --color-ink-muted: #42495e;
-  --color-ink-subtle: #5f667b;
-  --color-rule: #d3d8e1;
-  --color-rule-strong: #7d8497;
+  --color-ink: #1a1a1d;
+  --color-ink-muted: #45464b;
+  --color-ink-subtle: #5d5e63;
+  --color-rule: #c7c8c5;
+  --color-rule-strong: #7e7f7c;
+  --color-edge: #b3b4b1;
   --color-accent: #e9b23c;
   --color-accent-hover: #d99f22;
-  --color-accent-ink: #7f5509;
-  --color-accent-wash: #f7e5b8;
-  --color-on-accent: #151a2c;
-  --color-focus: #151a2c;
-  --color-shadow: rgb(21 26 44 / 0.14);
+  --color-accent-edge: #a87a14;
+  --color-accent-ink: #77500a;
+  --color-accent-wash: #f5e1ad;
+  --color-on-accent: #1a1a1d;
+  --color-focus: #1a1a1d;
+  --color-shadow: rgb(26 26 29 / 0.12);
 
   /* Type scale. Display and headline sizes are set in the serif. */
   --text-display: clamp(2.75rem, 1.4rem + 5.4vw, 6.25rem);
@@ -153,7 +157,7 @@
   --radius-card: 0.25rem;
   --radius-sheet: 0.0625rem;
 
-  /* Elevation */
+  /* Elevation. Optional on top of an edge line; it doesn't carry depth on its own. */
   --shadow-sheet: 0 1px 1px var(--color-shadow), 0 18px 40px -18px var(--color-shadow);
   --shadow-card: 0 1px 1px var(--color-shadow), 0 8px 20px -12px var(--color-shadow);
 }
