@@ -7,7 +7,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - **Client-side import**: Open PDF, DOCX, and `.json` resume files locally in your browser.
 - **Structured editing**: Edit basics, summary, work, education, skills, projects, certifications, languages, interests, and references.
 - **Live preview**: See the current resume render update as you edit.
-- **Three templates**: Modern, Minimal, and Compact.
+- **Templates**: Switch the layout at any time without retyping your content.
 - **Export**: Download a PDF or export the current resume as JSON.
 - **Local drafts**: Autosave and named drafts are stored in IndexedDB on your device.
 
