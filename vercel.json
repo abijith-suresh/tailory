@@ -1,7 +1,7 @@
 {
   "ignoreCommand": "case \"${VERCEL_GIT_COMMIT_REF:-}\" in dependabot/*) echo 'Skipping Dependabot preview deployment'; exit 0 ;; *) exit 1 ;; esac",
   "buildCommand": "bun run build",
-  "installCommand": "bun install",
+  "installCommand": "rm -rf node_modules && bun install --frozen-lockfile",
   "outputDirectory": "dist",
   "redirects": [
     {

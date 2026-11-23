@@ -9,11 +9,7 @@ import {
   formatSkillsText,
 } from "@/lib/export/template-helpers";
 import type { PdfTemplateOptions } from "@/lib/export/template-types";
-import {
-  type ResumeDesignSettings,
-  resolvePageMargins,
-  resolveResumeDesignSettings,
-} from "@/lib/resume/design";
+import { type ResumeDesignSettings, resolveResumeDesignSettings } from "@/lib/resume/design";
 import type { ResumeRenderModel, ResumeSectionModel } from "@/lib/templates/render-model";
 import {
   buildAwardsSection,
@@ -138,7 +134,7 @@ export function buildCompactAtsRenderModel(
   return {
     template: "compact-ats",
     design,
-    pageMargins: resolvePageMargins(design, [...PAGE_MARGINS]),
+    pageMargins: [...PAGE_MARGINS],
     header: {
       name: resume.basics.name,
       dividerAfter: true,
@@ -157,20 +153,12 @@ export function buildCompactAtsRenderModel(
 
 export function compactAtsTemplate(
   resume: ResumeSchema,
-  options: PdfTemplateOptions
+  options: PdfTemplateOptions = {}
 ): TDocumentDefinitions {
   const design = resolveResumeDesignSettings({
     template: "compact-ats",
     accentColor: options.accentColor,
-    pageFormat: options.pageFormat,
-    pageMargins: options.pageMargins,
-    typography: {
-      ...options.typography,
-      pdfFontFamily: options.fontFamily,
-    },
   });
 
-  return renderPdfResumeModel(buildCompactAtsRenderModel(resume, design), {
-    fontFamily: options.fontFamily,
-  });
+  return renderPdfResumeModel(buildCompactAtsRenderModel(resume, design));
 }

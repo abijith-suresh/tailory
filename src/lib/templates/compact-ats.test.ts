@@ -7,7 +7,7 @@ import { createTemplateFixture } from "./template-fixtures";
 
 describe("compactAtsTemplate", () => {
   it("uses dynamic divider widths and ATS-safe bullets", () => {
-    const doc = compactAtsTemplate(createTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = compactAtsTemplate(createTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).not.toContain('"x2":515');
@@ -16,7 +16,7 @@ describe("compactAtsTemplate", () => {
   });
 
   it("keeps long contact information in the document definition", () => {
-    const doc = compactAtsTemplate(createTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = compactAtsTemplate(createTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).toContain("jane.doe.very.long.email@example.dev");

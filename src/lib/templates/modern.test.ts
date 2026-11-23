@@ -6,7 +6,7 @@ import { createTemplateFixture } from "./template-fixtures";
 
 describe("modernTemplate", () => {
   it("uses dynamic divider widths and avoids raw bullet glyph text", () => {
-    const doc = modernTemplate(createTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = modernTemplate(createTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).not.toContain('"x2":515');
@@ -14,7 +14,7 @@ describe("modernTemplate", () => {
   });
 
   it("keeps url and section content in the document definition", () => {
-    const doc = modernTemplate(createTemplateFixture(), { fontFamily: "Roboto" });
+    const doc = modernTemplate(createTemplateFixture());
     const serialized = JSON.stringify(doc);
 
     expect(serialized).toContain(
@@ -25,15 +25,11 @@ describe("modernTemplate", () => {
     expect(serialized).toContain("CERTIFICATIONS");
   });
 
-  it("propagates accent color and page format from the shared design settings", () => {
-    const doc = modernTemplate(createTemplateFixture(), {
-      accentColor: "#2563eb",
-      fontFamily: "Roboto",
-      pageFormat: "Letter",
-    });
+  it("propagates accent color and uses a fixed A4 page", () => {
+    const doc = modernTemplate(createTemplateFixture(), { accentColor: "#2563eb" });
 
     expect(doc.styles?.sectionTitle).toMatchObject({ color: "#2563eb" });
-    expect(doc.pageSize).toBe("LETTER");
+    expect(doc.pageSize).toBe("A4");
   });
 
   it("builds a shared render model for preview and export parity", () => {

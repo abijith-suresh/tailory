@@ -31,7 +31,7 @@ export function joinDefined(
   return values.length > 0 ? values.join(separator) : undefined;
 }
 
-export function formatLocation(location?: ResumeLocation): string | undefined {
+function formatLocation(location?: ResumeLocation): string | undefined {
   return joinDefined([location?.city, location?.region], ", ");
 }
 
@@ -153,24 +153,17 @@ export interface DividerOptions {
   lineWidth?: number;
   margin?: Margins;
   pageMargins: PdfMargin;
-  pageWidth?: number;
 }
 
 export function renderDivider(options: DividerOptions): Content {
-  const {
-    color = "#d1d5db",
-    lineWidth = 0.75,
-    margin = [0, 4, 0, 4],
-    pageMargins,
-    pageWidth = A4_PAGE_WIDTH,
-  } = options;
+  const { color = "#d1d5db", lineWidth = 0.75, margin = [0, 4, 0, 4], pageMargins } = options;
 
   return {
     canvas: [
       {
         type: "line",
         x1: 0,
-        x2: pageWidth - pageMargins[0] - pageMargins[2],
+        x2: getContentWidth(pageMargins),
         y1: 0,
         y2: 0,
         lineColor: color,
@@ -277,8 +270,8 @@ export function buildProjectMetadata(project: ResumeProject): string | undefined
   );
 }
 
-export function getContentWidth(pageMargins: PdfMargin, pageWidth = A4_PAGE_WIDTH): number {
-  return pageWidth - pageMargins[0] - pageMargins[2];
+function getContentWidth(pageMargins: PdfMargin): number {
+  return A4_PAGE_WIDTH - pageMargins[0] - pageMargins[2];
 }
 
 export const spacing = {

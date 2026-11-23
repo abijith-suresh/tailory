@@ -1,0 +1,28 @@
+{
+  "basics": {
+    "name": "Ada Fixture",
+    "label": "Software Engineer",
+    "email": "ada.fixture@example.com",
+    "phone": "+1 555-010-0199",
+    "summary": "Builds small, reliable tools that run in the browser."
+  },
+  "work": [
+    {
+      "name": "Example Labs",
+      "position": "Software Engineer",
+      "startDate": "2021-03",
+      "endDate": "2024-06",
+      "highlights": ["Shipped a private editor with no server component."]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Example University",
+      "area": "Computer Science",
+      "studyType": "BSc",
+      "startDate": "2017-09",
+      "endDate": "2021-06"
+    }
+  ],
+  "skills": [{ "name": "Languages", "keywords": ["TypeScript", "Rust"] }]
+}
