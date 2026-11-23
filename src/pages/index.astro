@@ -1,9 +1,15 @@
 ---
 import ExternalIcon from "@/components/site/ExternalIcon.astro";
-import FileGlyph from "@/components/site/FileGlyph.astro";
 import HeroVisual from "@/components/site/HeroVisual.astro";
 import ResumeSheet from "@/components/site/ResumeSheet.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
+import type { TemplateId } from "@/types/template";
+
+const templates: { id: TemplateId; name: string; text: string }[] = [
+  { id: "modern", name: "Modern", text: "A ruled header and lines between sections." },
+  { id: "minimal", name: "Minimal", text: "Type and space, no decoration." },
+  { id: "compact-ats", name: "Compact", text: "Tighter spacing to fit more on a page." },
+];
 
 const drafts = [
   { name: "Design roles", saved: "11/18/2026, 9:42 AM" },
@@ -13,254 +19,181 @@ const drafts = [
 ---
 
 <MarketingLayout
-  title="Tailory · Your resume, edited in your browser"
+  title="Tailory · The resume editor that stays in your browser"
   description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a text PDF or JSON. Your resume stays in your browser."
 >
   <!-- Hero -->
-  <section class="hero relative overflow-hidden">
-    <div class="graph-paper hero__grid absolute inset-0" aria-hidden="true"></div>
-    <div
-      class="relative mx-auto grid max-w-page items-center gap-12 px-gutter pt-12 pb-10 md:px-gutter-wide lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] lg:gap-12 lg:pt-16 lg:pb-16"
-    >
-      <div class="max-w-xl">
-        <h1 class="text-display font-bold text-balance">Your resume, edited in your browser.</h1>
-        <p class="mt-6 max-w-md text-lead text-ink-muted">
-          Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a text PDF.
-        </p>
-        <div class="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-          <a
-            href="/editor"
-            class="inline-flex h-12 items-center rounded-control bg-ink px-6 text-body font-semibold text-on-ink transition-colors hover:bg-accent-strong"
-          >
-            Open editor
-          </a>
-          <a
-            href="https://github.com/abijith-suresh/tailory"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1.5 text-body font-medium text-ink underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-ink"
-          >
-            View the source <ExternalIcon class="size-3.5" />
-          </a>
-        </div>
-      </div>
+  <section
+    class="mx-auto grid max-w-page gap-x-16 gap-y-8 px-gutter pt-12 md:px-gutter-wide md:pt-20 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-end"
+  >
+    <div>
+      <p class="label text-accent-ink">Resume editor · Free and open source</p>
+      <h1 class="mt-5 max-w-[15ch] font-serif text-display font-normal text-balance">
+        The resume editor that stays in <em class="font-light">your browser.</em>
+      </h1>
+    </div>
 
-      <HeroVisual />
+    <div class="border-t border-rule pt-6 lg:mb-3 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-7">
+      <p class="max-w-[34rem] text-lead text-ink-muted">
+        Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a text PDF. No
+        account, no upload.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+        <a href="/editor" class="btn-primary h-12 px-6 text-body">Open editor</a>
+        <a
+          href="https://github.com/abijith-suresh/tailory"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-underline inline-flex items-center gap-1.5 text-body font-medium"
+        >
+          View the source <ExternalIcon class="size-3.5" />
+        </a>
+      </div>
     </div>
   </section>
 
-  <!-- Features -->
-  <section
-    class="mx-auto max-w-page px-gutter pt-8 pb-section md:px-gutter-wide lg:pt-10"
-    aria-labelledby="features-title"
-  >
-    <h2 id="features-title" class="text-headline font-bold">Import, edit, export.</h2>
-
-    <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <li class="feature-card">
-        <div class="feature-card__visual graph-paper" aria-hidden="true">
-          <div class="flex items-end gap-3">
-            <FileGlyph label="PDF" />
-            <FileGlyph label="DOCX" />
-            <FileGlyph label="JSON" />
-          </div>
-        </div>
-        <h3 class="feature-card__title">Import</h3>
-        <p class="feature-card__text">Open a PDF, DOCX, or JSON file, or start blank.</p>
-      </li>
-
-      <li class="feature-card">
-        <div class="feature-card__visual graph-paper" aria-hidden="true">
-          <div class="w-44">
-            <div
-              class="rounded-control border border-accent bg-sheet px-2.5 py-1.5 text-label text-ink shadow-[0_0_0_3px_var(--color-accent-soft)]"
-            >
-              Product designer<span class="ml-px inline-block h-3.5 w-[1.5px] translate-y-0.5 bg-accent"></span>
-            </div>
-            <div class="mx-auto h-4 w-px border-l-2 border-dashed border-accent"></div>
-            <div class="rounded-sheet bg-sheet px-3 py-2.5 shadow-card">
-              <p class="font-resume text-[0.8125rem] leading-tight font-bold text-gray-900">Rosa Delgado</p>
-              <p class="font-resume text-[0.625rem] text-gray-500">Product designer</p>
-            </div>
-          </div>
-        </div>
-        <h3 class="feature-card__title">Live preview</h3>
-        <p class="feature-card__text">The page updates as you type.</p>
-      </li>
-
-      <li class="feature-card">
-        <div class="feature-card__visual graph-paper" aria-hidden="true">
-          <div class="template-fan">
-            <ResumeSheet template="minimal" class="template-fan__sheet" />
-            <ResumeSheet template="compact-ats" class="template-fan__sheet" />
-            <ResumeSheet template="modern" class="template-fan__sheet" />
-          </div>
-        </div>
-        <h3 class="feature-card__title">Three templates</h3>
-        <p class="feature-card__text">Modern, Minimal, and Compact. Switch any time.</p>
-      </li>
-
-      <li class="feature-card">
-        <div class="feature-card__visual graph-paper" aria-hidden="true">
-          <div class="flex items-end gap-3">
-            <FileGlyph label="PDF" accent />
-            <FileGlyph label="JSON" accent />
-          </div>
-        </div>
-        <h3 class="feature-card__title">Export</h3>
-        <p class="feature-card__text">A text PDF to send, or JSON to import later.</p>
-      </li>
-    </ul>
-  </section>
-
-  <div class="mx-auto max-w-page px-gutter md:px-gutter-wide" aria-hidden="true">
-    <div class="stitch text-line-strong"></div>
+  <div class="mx-auto max-w-page px-gutter pt-14 pb-section md:px-gutter-wide md:pt-16">
+    <HeroVisual />
   </div>
+
+  <!-- Templates -->
+  <section class="border-y border-rule bg-surface-sunken" aria-labelledby="templates-title">
+    <div class="mx-auto max-w-page px-gutter py-section md:px-gutter-wide">
+      <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end md:gap-10">
+        <h2 id="templates-title" class="font-serif text-headline font-normal text-balance">
+          Three templates. <em class="font-light">Switch any time.</em>
+        </h2>
+        <p class="max-w-md text-body text-ink-muted md:justify-self-end">
+          Your content carries over when you switch.
+        </p>
+      </div>
+
+      <ul class="specimens mt-12 grid grid-cols-3 gap-3 sm:gap-6 lg:gap-10">
+        {
+          templates.map((template, index) => (
+            <li class="flex flex-col items-center">
+              <ResumeSheet template={template.id} class="specimens__sheet" />
+              <p class="mt-5 flex items-baseline gap-2 self-stretch border-t border-rule-strong pt-3 sm:mt-6">
+                <span class="label hidden text-ink-subtle sm:inline">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span class="font-serif text-[1.125rem] leading-tight sm:text-title">
+                  {template.name}
+                </span>
+              </p>
+              <p class="mt-1 hidden self-stretch text-meta text-ink-muted sm:block">
+                {template.text}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
 
   <!-- Privacy -->
   <section
-    class="mx-auto grid max-w-page items-center gap-12 px-gutter py-section md:grid-cols-2 md:px-gutter-wide lg:gap-20"
+    class="mx-auto grid max-w-page gap-12 px-gutter py-section md:grid-cols-2 md:px-gutter-wide lg:gap-24"
     aria-labelledby="privacy-title"
   >
     <div class="max-w-md">
-      <h2 id="privacy-title" class="text-headline font-bold text-balance">
+      <p class="label text-accent-ink">Privacy</p>
+      <h2 id="privacy-title" class="mt-4 font-serif text-headline font-normal text-balance">
         Your resume stays in this browser.
       </h2>
       <p class="mt-5 text-body text-ink-muted">
         Tailory saves as you type and keeps named drafts on this device. Clearing site data deletes
         them, so export JSON when you want a copy.
       </p>
-      <a
-        href="/privacy"
-        class="mt-6 inline-block text-body font-medium text-ink underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-ink"
-      >
+      <a href="/privacy" class="link-underline mt-6 inline-block text-body font-medium">
         Privacy policy
       </a>
     </div>
 
-    <div class="drafts" aria-hidden="true">
-      <p class="drafts__tag">This browser</p>
-      <div class="rounded-card border border-line bg-surface shadow-card">
-        <p class="border-b border-line px-5 py-3 text-meta font-semibold">Saved drafts</p>
-        <ul>
-          {
-            drafts.map((draft) => (
-              <li class="flex items-baseline justify-between gap-4 border-b border-line px-5 py-3 last:border-b-0">
-                <span class="text-meta font-medium">{draft.name}</span>
-                <span class="text-label whitespace-nowrap text-ink-subtle tabular-nums">{draft.saved}</span>
-              </li>
-            ))
-          }
-        </ul>
+    <div class="drafts self-center" aria-hidden="true">
+      <div class="flex items-baseline justify-between gap-4 pb-3">
+        <p class="font-serif text-title">Saved drafts</p>
+        <p class="label text-ink-subtle">This browser</p>
       </div>
+      <div class="rule-double"></div>
+      <ul>
+        {
+          drafts.map((draft) => (
+            <li class="drafts__row">
+              <span class="font-serif text-[1.0625rem]">{draft.name}</span>
+              <span class="drafts__leader" />
+              <span class="text-meta whitespace-nowrap text-ink-muted tabular-nums">
+                {draft.saved}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
   <!-- Call to action -->
-  <section class="graph-paper border-t border-line">
-    <div class="mx-auto max-w-page px-gutter py-section md:px-gutter-wide">
-      <div
-        class="mx-auto flex max-w-3xl flex-col items-start gap-6 rounded-sheet bg-sheet px-7 py-9 shadow-sheet sm:flex-row sm:items-center sm:justify-between sm:px-10"
-      >
-        <h2 class="text-[1.625rem] leading-tight font-bold tracking-[-0.02em] text-balance">
-          Start with the resume you have.
-        </h2>
-        <a
-          href="/editor"
-          class="inline-flex h-12 shrink-0 items-center rounded-control bg-ink px-6 text-body font-semibold text-on-ink transition-colors hover:bg-accent-strong"
-        >
-          Open editor
-        </a>
-      </div>
+  <section class="mx-auto max-w-page px-gutter pb-section md:px-gutter-wide">
+    <div class="border-t border-rule pt-section text-center">
+      <h2 class="mx-auto max-w-[18ch] font-serif text-headline font-normal text-balance">
+        Start with the resume you have.
+      </h2>
+      <p class="mt-4 text-body text-ink-muted">No account, nothing to install.</p>
+      <a href="/editor" class="btn-primary mt-8 h-12 px-6 text-body">Open editor</a>
     </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .hero__grid {
-    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  .specimens :global(.specimens__sheet) {
+    --sheet-scale: 0.13;
   }
 
-  .feature-card {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-card);
-    background: var(--color-surface);
-  }
-
-  .feature-card__visual {
-    display: flex;
-    height: 8.5rem;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid var(--color-line);
-    background-color: var(--color-paper);
-  }
-
-  .feature-card__title {
-    padding: 1.25rem 1.25rem 0;
-    font-size: var(--text-title);
-    line-height: var(--text-title--line-height);
-    letter-spacing: var(--text-title--letter-spacing);
-    font-weight: 650;
-  }
-
-  .feature-card__text {
-    padding: 0.375rem 1.25rem 1.375rem;
-    font-size: var(--text-meta);
-    line-height: var(--text-meta--line-height);
-    color: var(--color-ink-muted);
-  }
-
-  @media (min-width: 40rem) {
-    .feature-card__visual {
-      height: 10rem;
+  @media (min-width: 25rem) {
+    .specimens :global(.specimens__sheet) {
+      --sheet-scale: 0.155;
     }
   }
 
-  .template-fan {
-    position: relative;
-    width: 9.5rem;
-    height: 7.5rem;
+  @media (min-width: 40rem) {
+    .specimens :global(.specimens__sheet) {
+      --sheet-scale: 0.25;
+    }
   }
 
-  .template-fan :global(.template-fan__sheet) {
-    --sheet-scale: 0.135;
-    position: absolute;
-    top: 0;
+  @media (min-width: 48rem) {
+    .specimens :global(.specimens__sheet) {
+      --sheet-scale: 0.3;
+    }
   }
 
-  .template-fan :global(.template-fan__sheet:nth-child(1)) {
-    left: 0;
-    top: 0.75rem;
+  @media (min-width: 64rem) {
+    .specimens :global(.specimens__sheet) {
+      --sheet-scale: 0.4;
+    }
   }
 
-  .template-fan :global(.template-fan__sheet:nth-child(2)) {
-    left: 2.25rem;
-    top: 0.375rem;
+  @media (min-width: 80rem) {
+    .specimens :global(.specimens__sheet) {
+      --sheet-scale: 0.45;
+    }
   }
 
-  .template-fan :global(.template-fan__sheet:nth-child(3)) {
-    left: 4.5rem;
+  .drafts__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--color-rule);
   }
 
-  .drafts {
-    position: relative;
-    padding: 2.25rem 1.25rem 1.25rem;
-    border: 2px dashed var(--color-accent);
-    border-radius: calc(var(--radius-card) + 0.5rem);
-  }
-
-  .drafts__tag {
-    position: absolute;
-    top: -0.7rem;
-    left: 1.25rem;
-    padding: 0 0.5rem;
-    background: var(--color-paper);
-    font-size: var(--text-label);
-    font-weight: 600;
-    color: var(--color-accent);
+  /* Dot leaders, as in a table of contents. */
+  .drafts__leader {
+    flex: 1 1 auto;
+    min-width: 1rem;
+    height: 1px;
+    background-image: radial-gradient(circle, var(--color-rule-strong) 1px, transparent 1.2px);
+    background-size: 6px 2px;
+    background-repeat: repeat-x;
   }
 </style>

@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
   <title id="title">Tailory</title>
-  <rect width="32" height="32" rx="7" fill="#1d1c19"/>
-  <path d="M9 6h9.5L23 10.5V26H9z" fill="#fffdf9"/>
-  <path d="M18.5 6v4.5H23" fill="#e2dccf"/>
-  <path d="M12 13.5h8" stroke="#2f45c4" stroke-width="2" stroke-linecap="round"/>
-  <path d="M12 17.5h8M12 21h5.5" stroke="#1d1c19" stroke-width="1.5" stroke-linecap="round"/>
+  <rect width="32" height="32" rx="3" fill="#e9b23c"/>
+  <path d="M7 7h18v5.5h-1.6l-.7-2.6h-4.9V23l2.7.6V25H11.5v-1.4l2.7-.6V9.9H9.3l-.7 2.6H7z" fill="#151a2c"/>
 </svg>

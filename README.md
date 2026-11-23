@@ -89,4 +89,5 @@ Release and contribution workflow notes live in [CONTRIBUTING.md](./CONTRIBUTING
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE). The fonts in `public/fonts` are under the SIL Open Font License;
+their licence texts sit next to them.

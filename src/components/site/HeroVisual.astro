@@ -1,108 +1,244 @@
 ---
-// Static hero composition: a real resume render with a fragment of the editor beside it.
-// A later change animates this; it can replace the whole component without touching the page.
+// Static hero figure: a real resume render with numbered notes in its margins, like an
+// annotated plate in a book. A later change animates this; it can replace the whole
+// component without touching the page.
 import ResumeSheet from "@/components/site/ResumeSheet.astro";
+
+// `at` is how far down the page each note's leader points, as a fraction of its height.
+const notes = [
+  {
+    side: "left",
+    at: 0.055,
+    title: "Import",
+    text: "Open a PDF, DOCX, or JSON resume, or start blank.",
+  },
+  {
+    side: "left",
+    at: 0.37,
+    title: "Edit",
+    text: "Change any section in a form. The page updates as you type.",
+  },
+  {
+    side: "right",
+    at: 0.8,
+    title: "Export",
+    text: "Download a text PDF to send, or JSON to open again later.",
+  },
+] as const;
 ---
 
-<div class="hero-visual" data-hero-visual>
-  <ResumeSheet class="hero-visual__sheet" template="modern" />
+<figure class="hero-figure">
+  <div class="hero-figure__plate">
+    <ResumeSheet class="hero-figure__sheet" template="modern" />
 
-  <div class="hero-visual__editor" aria-hidden="true">
-    <div class="flex items-center justify-between border-b border-line px-4 py-2.5">
-      <span class="text-label font-semibold text-ink">Work</span>
-      <span class="text-label text-ink-subtle">1 of 2</span>
-    </div>
-    <div class="space-y-3 px-4 pt-3 pb-4">
-      <div>
-        <span class="text-label font-medium text-ink-muted">Company</span>
-        <div class="hero-visual__field">Fieldnote</div>
-      </div>
-      <div>
-        <span class="text-label font-medium text-ink-muted">Position</span>
-        <div class="hero-visual__field hero-visual__field--active">
-          Senior product designer<span class="hero-visual__caret"></span>
-        </div>
-      </div>
-    </div>
+    <ol class="hero-figure__notes">
+      {
+        notes.map((note, index) => (
+          <li
+            class:list={["hero-note", `hero-note--${note.side}`]}
+            style={{ "--at": String(note.at) }}
+          >
+            <span class="hero-note__number" aria-hidden="true">
+              {index + 1}
+            </span>
+            <span class="hero-note__leader" aria-hidden="true" />
+            <span class="hero-note__body">
+              <span class="hero-note__title">{note.title}</span>
+              <span class="hero-note__text">{note.text}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ol>
   </div>
-</div>
+
+  <figcaption class="hero-figure__caption">
+    <span class="label text-ink">Fig. 1</span>
+    <span class="font-serif italic">A sample resume in the Modern template.</span>
+  </figcaption>
+</figure>
 
 <style>
-  .hero-visual {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    padding-bottom: 2.25rem;
+  .hero-figure {
+    --sheet-scale: 0.42;
+    --sheet-h: calc(842px * var(--sheet-scale));
   }
 
-  .hero-visual :global(.hero-visual__sheet) {
-    --sheet-scale: 0.46;
-    flex-shrink: 0;
+  .hero-figure__plate {
+    display: grid;
+    justify-items: center;
+    gap: 2.5rem;
   }
 
-  /* Mark the entry the editor fragment is changing, like chalk on cloth. */
-  .hero-visual
-    :global(.resume-document__section:nth-of-type(2) .resume-document__entry:first-of-type) {
-    outline: 2px dashed var(--color-accent);
-    outline-offset: 6px;
-    border-radius: 2px;
+  .hero-figure :global(.hero-figure__sheet) {
+    --sheet-scale: inherit;
   }
 
-  .hero-visual__editor {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 13.5rem;
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-card);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-card);
+  .hero-figure__notes {
+    display: grid;
+    width: 100%;
+    max-width: 40rem;
+    gap: 1.5rem;
   }
 
-  .hero-visual__field {
-    margin-top: 0.25rem;
-    border: 1px solid var(--color-line-strong);
-    border-radius: var(--radius-control);
-    background: var(--color-sheet);
-    padding: 0.4rem 0.625rem;
-    font-size: var(--text-label);
-    line-height: 1.4;
-    color: var(--color-ink);
-    white-space: nowrap;
+  .hero-note {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.875rem;
+    align-items: start;
   }
 
-  .hero-visual__field--active {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-soft);
-  }
-
-  .hero-visual__caret {
-    display: inline-block;
-    width: 1.5px;
-    height: 1.05em;
-    margin-left: 1px;
-    vertical-align: -0.15em;
+  .hero-note__number {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
     background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .hero-note__leader {
+    display: none;
+  }
+
+  .hero-note__body {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .hero-note__title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .hero-note__text {
+    font-size: var(--text-meta);
+    line-height: var(--text-meta--line-height);
+    color: var(--color-ink-muted);
+  }
+
+  .hero-figure__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-top: 2.5rem;
+    font-size: var(--text-meta);
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 24rem) {
+    .hero-figure {
+      --sheet-scale: 0.5;
+    }
   }
 
   @media (min-width: 40rem) {
-    .hero-visual {
-      padding-bottom: 2.5rem;
+    .hero-figure {
+      --sheet-scale: 0.62;
     }
-    .hero-visual :global(.hero-visual__sheet) {
-      --sheet-scale: 0.66;
+    .hero-figure__notes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.75rem;
     }
-    .hero-visual__editor {
-      width: 16rem;
-    }
-    .hero-visual__field {
-      font-size: var(--text-meta);
+    .hero-note {
+      grid-template-columns: 1fr;
+      gap: 0.625rem;
     }
   }
 
+  /* Wide screens: the notes move into the margins with a leader to the edge of the page. */
   @media (min-width: 64rem) {
-    .hero-visual :global(.hero-visual__sheet) {
-      --sheet-scale: 0.72;
+    .hero-figure {
+      --sheet-scale: 0.6;
+    }
+
+    .hero-figure__plate {
+      position: relative;
+      gap: 0;
+    }
+
+    .hero-figure__notes {
+      position: absolute;
+      inset: 0;
+      max-width: none;
+      display: block;
+    }
+
+    .hero-note {
+      position: absolute;
+      top: calc(var(--sheet-h) * var(--at));
+      width: calc(50% - 680px * var(--sheet-scale) / 2);
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+    }
+
+    .hero-note--left {
+      left: 0;
+      flex-direction: row-reverse;
+    }
+
+    .hero-note--right {
+      right: 0;
+    }
+
+    .hero-note__body {
+      flex: 0 1 13.5rem;
+    }
+
+    .hero-note--left .hero-note__body {
+      text-align: right;
+    }
+
+    .hero-note__leader {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 1.5rem;
+      height: 1px;
+      margin: 0.875rem 0.75rem 0;
+      background: var(--color-rule-strong);
+    }
+
+    /* The number sits on the page edge, half over the sheet. */
+    .hero-note__number {
+      flex: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-note--left .hero-note__number {
+      margin-right: -0.875rem;
+    }
+
+    .hero-note--right .hero-note__number {
+      margin-left: -0.875rem;
+      order: -1;
+    }
+
+    .hero-note--right .hero-note__leader {
+      order: 0;
+    }
+
+    .hero-note--right .hero-note__body {
+      order: 1;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .hero-figure {
+      --sheet-scale: 0.74;
     }
   }
 </style>

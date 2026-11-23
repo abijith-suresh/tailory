@@ -2,10 +2,16 @@
 // Renders a resume with the editor's own template code (static HTML, no client JS).
 // The sheet keeps the preview's 680px page width and is scaled down with --sheet-scale.
 import ResumeDocument from "@/components/resume/ResumeDocument";
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
+import {
+  RESUME_PREVIEW_FONT_FAMILY,
+  RESUME_PREVIEW_PAGE_MIN_HEIGHT,
+  resolveResumeDesignSettings,
+} from "@/lib/resume/design";
 import { TEMPLATE_REGISTRY } from "@/lib/templates/registry";
 import { createSampleResume } from "@/lib/templates/sample-resume";
 import type { TemplateId } from "@/types/template";
+
+const PAGE_WIDTH = 680;
 
 interface Props {
   template?: TemplateId;
@@ -21,11 +27,11 @@ const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[
 <div class:list={["resume-sheet", className]} role="img" aria-label={label}>
   <div
     aria-hidden="true"
-    class="resume-sheet__page resume-document__page bg-sheet p-10 text-xs leading-relaxed text-ink"
+    class="resume-sheet__page resume-document__page bg-sheet p-10 text-xs leading-relaxed"
     style={{
-      "font-family": design.previewFontFamily,
-      width: `${design.previewPageWidth}px`,
-      height: `${design.previewPageMinHeight}px`,
+      "font-family": RESUME_PREVIEW_FONT_FAMILY,
+      width: `${PAGE_WIDTH}px`,
+      height: `${RESUME_PREVIEW_PAGE_MIN_HEIGHT}px`,
     }}
   >
     <ResumeDocument design={design} resume={resume} />
@@ -41,6 +47,7 @@ const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[
     overflow: hidden;
     border-radius: var(--radius-sheet);
     background: var(--color-sheet);
+    outline: 1px solid var(--color-rule);
     box-shadow: var(--shadow-sheet);
   }
 

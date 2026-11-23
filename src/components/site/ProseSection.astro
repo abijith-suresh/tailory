@@ -1,5 +1,5 @@
 ---
-// One titled block of a text page. Sits in the same 44rem column as PageIntro.
+// One titled block of a text page: the title in the left column, the text on the right.
 interface Props {
   title: string;
   id?: string;
@@ -8,9 +8,12 @@ interface Props {
 const { title, id } = Astro.props;
 ---
 
-<section class="border-t border-line py-7" id={id}>
-  <h2 class="text-title font-semibold">{title}</h2>
-  <div class="prose-section mt-2 space-y-3 text-body text-ink-muted">
+<section
+  class="grid gap-2 border-b border-rule py-7 md:grid-cols-[17rem_minmax(0,1fr)] md:gap-10 md:py-8"
+  id={id}
+>
+  <h2 class="font-serif text-title font-medium text-balance">{title}</h2>
+  <div class="prose-section max-w-measure space-y-3 text-body text-ink-muted md:pt-0.5">
     <slot />
   </div>
 </section>
@@ -19,12 +22,12 @@ const { title, id } = Astro.props;
   .prose-section :global(a) {
     color: var(--color-ink);
     text-decoration: underline;
-    text-decoration-color: var(--color-line-strong);
-    text-underline-offset: 4px;
+    text-decoration-color: var(--color-rule-strong);
+    text-underline-offset: 0.3em;
     transition: text-decoration-color 150ms;
   }
 
   .prose-section :global(a:hover) {
-    text-decoration-color: var(--color-ink);
+    text-decoration-color: var(--color-accent-ink);
   }
 </style>

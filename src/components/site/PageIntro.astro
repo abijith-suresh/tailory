@@ -1,26 +1,19 @@
 ---
-// Title block for text pages. The heading and the body below share one column so their
-// left edges line up at every width.
+// Title block for text pages. Shares the text column with ProseSection so left edges line up.
 interface Props {
   title: string;
+  kicker?: string;
   lead?: string;
   meta?: string;
 }
 
-const { title, lead, meta } = Astro.props;
+const { title, kicker, lead, meta } = Astro.props;
 ---
 
-<header class="relative overflow-hidden">
-  <div class="graph-paper page-intro__grid absolute inset-0" aria-hidden="true"></div>
-  <div class="relative mx-auto max-w-[44rem] px-gutter pt-14 pb-10 md:pt-20 md:pb-12">
-    <h1 class="text-headline font-bold text-balance">{title}</h1>
-    {lead && <p class="mt-4 text-lead text-ink-muted">{lead}</p>}
-    {meta && <p class="mt-4 text-meta text-ink-subtle">{meta}</p>}
-  </div>
+<header class="mx-auto max-w-text px-gutter pt-12 md:px-gutter-wide md:pt-20">
+  {kicker && <p class="label mb-4 text-accent-ink">{kicker}</p>}
+  <h1 class="font-serif text-headline font-normal text-balance">{title}</h1>
+  {lead && <p class="mt-5 max-w-measure text-lead text-ink-muted">{lead}</p>}
+  {meta && <p class="mt-4 text-meta text-ink-subtle">{meta}</p>}
+  <div class="rule-double mt-10 md:mt-12" aria-hidden="true"></div>
 </header>
-
-<style>
-  .page-intro__grid {
-    mask-image: linear-gradient(to bottom, black 30%, transparent);
-  }
-</style>

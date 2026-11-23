@@ -2,8 +2,8 @@
 
 /* Self-hosted fonts. Licence texts sit next to the files in public/fonts. */
 @font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("/fonts/BricolageGrotesque-latin.woff2") format("woff2");
+  font-family: "Newsreader";
+  src: url("/fonts/Newsreader-latin.woff2") format("woff2");
   font-weight: 200 800;
   font-style: normal;
   font-display: swap;
@@ -11,9 +11,45 @@
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("/fonts/BricolageGrotesque-latin-ext.woff2") format("woff2");
+  font-family: "Newsreader";
+  src: url("/fonts/Newsreader-latin-ext.woff2") format("woff2");
   font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/Newsreader-Italic-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/Newsreader-Italic-latin-ext.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("/fonts/SchibstedGrotesk-latin.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("/fonts/SchibstedGrotesk-latin-ext.woff2") format("woff2");
+  font-weight: 400 900;
   font-style: normal;
   font-display: swap;
   unicode-range:
@@ -57,94 +93,136 @@
 }
 
 /*
- * Design tokens. Ink on paper with one accent.
- * Marketing pages use these now; the editor adopts them in a follow-up.
- * Names avoid Tailwind's defaults so existing editor classes keep their values.
+ * Design tokens, named for the role a value plays rather than the page that uses it.
+ * The marketing site uses them now; the editor adopts them next. A dark theme only has to
+ * redefine the --color-* values. Names avoid Tailwind's defaults so existing editor classes
+ * keep their values.
  */
 @theme {
-  --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
   --font-resume: "Roboto", Arial, sans-serif;
 
-  /* Colour. Contrast on paper: ink 15.4:1, ink-muted 8.4:1, ink-subtle 5.1:1, accent 6.8:1. */
-  --color-paper: #f6f3ec;
-  --color-surface: #fffdf9;
+  /*
+   * Colour. Contrast on surface: ink 15.4:1, ink-muted 8.0:1, ink-subtle 5.1:1, accent-ink 5.8:1,
+   * rule-strong 3.3:1 (enough for control borders). Ink on accent 9.0:1.
+   */
+  --color-surface: #f0f2f5;
+  --color-surface-raised: #fafbfc;
+  --color-surface-sunken: #e5e8ee;
   --color-sheet: #ffffff;
-  --color-ink: #1d1c19;
-  --color-ink-muted: #4a4740;
-  --color-ink-subtle: #6b675e;
-  --color-line: #e2dccf;
-  --color-line-strong: #b9b1a1;
-  --color-grid: rgb(29 28 25 / 0.055);
-  --color-grid-major: rgb(29 28 25 / 0.09);
-  --color-accent: #2f45c4;
-  --color-accent-strong: #23359c;
-  --color-accent-soft: #e6e9f8;
-  --color-on-accent: #ffffff;
-  --color-on-ink: #f6f3ec;
+  --color-ink: #151a2c;
+  --color-ink-muted: #42495e;
+  --color-ink-subtle: #5f667b;
+  --color-rule: #d3d8e1;
+  --color-rule-strong: #7d8497;
+  --color-accent: #e9b23c;
+  --color-accent-hover: #d99f22;
+  --color-accent-ink: #7f5509;
+  --color-accent-wash: #f7e5b8;
+  --color-on-accent: #151a2c;
+  --color-focus: #151a2c;
+  --color-shadow: rgb(21 26 44 / 0.14);
 
-  /* Type scale */
-  --text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);
-  --text-display--line-height: 1.02;
-  --text-display--letter-spacing: -0.03em;
-  --text-headline: clamp(1.875rem, 1.5rem + 1.5vw, 2.75rem);
-  --text-headline--line-height: 1.08;
-  --text-headline--letter-spacing: -0.025em;
-  --text-title: 1.25rem;
-  --text-title--line-height: 1.3;
-  --text-title--letter-spacing: -0.01em;
+  /* Type scale. Display and headline sizes are set in the serif. */
+  --text-display: clamp(2.75rem, 1.4rem + 5.4vw, 6.25rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.022em;
+  --text-headline: clamp(2rem, 1.45rem + 2.2vw, 3.25rem);
+  --text-headline--line-height: 1.05;
+  --text-headline--letter-spacing: -0.015em;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.005em;
   --text-lead: 1.1875rem;
   --text-lead--line-height: 1.55;
   --text-body: 1rem;
   --text-body--line-height: 1.6;
   --text-meta: 0.875rem;
   --text-meta--line-height: 1.5;
-  --text-label: 0.8125rem;
+  --text-label: 0.75rem;
   --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
 
   /* Spacing and layout */
-  --spacing-gutter: 1.25rem;
-  --spacing-gutter-wide: 2rem;
-  --spacing-section: clamp(4rem, 3rem + 4vw, 7rem);
-  --container-page: 72rem;
-  --container-prose: 40rem;
+  --spacing-gutter: 1rem;
+  --spacing-gutter-wide: 2.5rem;
+  --spacing-section: clamp(4rem, 2.75rem + 5vw, 8rem);
+  --container-page: 76rem;
+  --container-text: 60rem;
+  --container-measure: 36rem;
 
-  /* Radius */
-  --radius-control: 0.375rem;
-  --radius-card: 0.625rem;
-  --radius-sheet: 0.125rem;
+  /* Radius. Small and square, like cut paper. */
+  --radius-control: 0.1875rem;
+  --radius-card: 0.25rem;
+  --radius-sheet: 0.0625rem;
 
   /* Elevation */
-  --shadow-sheet: 0 1px 2px rgb(29 28 25 / 0.06), 0 12px 32px -8px rgb(29 28 25 / 0.18);
-  --shadow-card: 0 1px 2px rgb(29 28 25 / 0.05), 0 6px 16px -6px rgb(29 28 25 / 0.12);
+  --shadow-sheet: 0 1px 1px var(--color-shadow), 0 18px 40px -18px var(--color-shadow);
+  --shadow-card: 0 1px 1px var(--color-shadow), 0 8px 20px -12px var(--color-shadow);
 }
 
 /* Focus-visible styles for keyboard accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
-/* ── Tailoring marks ─────────────────────────────────────────────────── */
-
-/* Faint graph paper, 24px cells with a heavier line every fifth cell. */
-.graph-paper {
-  background-image:
-    linear-gradient(var(--color-grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-grid-major) 1px, transparent 1px),
-    linear-gradient(var(--color-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
-  background-size:
-    120px 120px,
-    120px 120px,
-    24px 24px,
-    24px 24px;
-  background-position: -1px -1px;
+::selection {
+  background: var(--color-accent-wash);
+  color: var(--color-ink);
 }
 
-/* A dashed seam. Set the colour with text-* utilities. */
-.stitch {
-  height: 2px;
-  background-image: repeating-linear-gradient(90deg, currentColor 0 10px, transparent 10px 17px);
+/* Serif display text uses old-style figures and true ligatures. */
+.font-serif {
+  font-feature-settings: "kern", "liga", "onum";
+}
+
+/* A small-capitals label in the sans, used for kickers and figure labels. */
+.label {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Thick-and-thin double rule, as under a masthead. */
+.rule-double {
+  height: 4px;
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
+}
+
+/* Primary and secondary actions. */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-control);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 600;
+  transition: background-color 150ms;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.link-underline {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color 150ms;
+}
+
+.link-underline:hover {
+  text-decoration-color: var(--color-accent-ink);
 }
 
 /* ── Editor section transitions ─────────────────────────────────────── */

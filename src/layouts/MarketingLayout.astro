@@ -46,17 +46,17 @@ const footerGroups = [
 ---
 
 <Layout title={title} description={description} noindex={noindex}>
-  <div class="flex min-h-screen flex-col bg-paper text-ink">
+  <div class="flex min-h-screen flex-col bg-surface text-ink">
     <a
       href="#main"
-      class="sr-only z-50 rounded-control bg-ink px-4 py-2 text-meta text-on-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      class="sr-only z-50 rounded-control bg-ink px-4 py-2 text-meta text-surface focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
     >
       Skip to content
     </a>
 
-    <header class="sticky top-0 z-40 border-b border-line bg-paper/92 backdrop-blur-sm">
+    <header class="sticky top-0 z-40 border-b border-rule bg-surface/95 backdrop-blur-sm">
       <nav
-        class="mx-auto flex h-16 max-w-page items-center gap-6 px-gutter md:px-gutter-wide"
+        class="mx-auto flex h-16 max-w-page items-center gap-4 px-gutter md:gap-7 md:px-gutter-wide"
         aria-label="Main"
       >
         <a href="/" class="mr-auto rounded-control" aria-label="Tailory home">
@@ -70,7 +70,7 @@ const footerGroups = [
                 <a
                   href={link.href}
                   aria-current={path === link.href ? "page" : undefined}
-                  class="text-meta font-medium text-ink-muted underline-offset-[6px] transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-accent aria-[current=page]:decoration-2"
+                  class="text-meta font-medium text-ink-muted underline-offset-[0.4em] transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-accent aria-[current=page]:decoration-2"
                 >
                   {link.label}
                 </a>
@@ -89,17 +89,12 @@ const footerGroups = [
           </li>
         </ul>
 
-        <a
-          href="/editor"
-          class="inline-flex h-9 items-center rounded-control bg-ink px-4 text-meta font-semibold text-on-ink transition-colors hover:bg-accent-strong"
-        >
-          Open editor
-        </a>
+        <a href="/editor" class="btn-primary h-9 px-4 text-meta whitespace-nowrap"> Open editor </a>
 
         <button
           id="menu-button"
           type="button"
-          class="-mr-2 flex size-10 items-center justify-center rounded-control text-ink md:hidden"
+          class="-mr-2 -ml-1 flex size-10 items-center justify-center rounded-control text-ink md:hidden"
           aria-label="Menu"
           aria-expanded="false"
           aria-controls="menu-panel"
@@ -121,7 +116,7 @@ const footerGroups = [
         </button>
       </nav>
 
-      <div id="menu-panel" class="border-t border-line md:hidden" hidden>
+      <div id="menu-panel" class="border-t border-rule md:hidden" hidden>
         <ul class="mx-auto flex max-w-page flex-col px-gutter py-2">
           {
             navLinks.map((link) => (
@@ -154,10 +149,9 @@ const footerGroups = [
       <slot />
     </main>
 
-    <footer class="border-t border-line">
-      <div
-        class="mx-auto grid max-w-page gap-10 px-gutter py-12 md:grid-cols-[1fr_auto] md:px-gutter-wide md:py-14"
-      >
+    <footer class="mx-auto w-full max-w-page px-gutter md:px-gutter-wide">
+      <div class="rule-double" aria-hidden="true"></div>
+      <div class="grid gap-10 py-12 md:grid-cols-[1fr_auto] md:py-14">
         <div class="max-w-xs">
           <a href="/" class="inline-block rounded-control" aria-label="Tailory home">
             <Logo />
@@ -166,11 +160,11 @@ const footerGroups = [
           <p class="mt-1 text-meta text-ink-subtle">Open source, MIT license.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 sm:gap-x-14">
+        <div class="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 sm:gap-x-16">
           {
             footerGroups.map((group) => (
               <div>
-                <h2 class="text-label font-semibold text-ink">{group.title}</h2>
+                <h2 class="label text-ink-subtle">{group.title}</h2>
                 <ul class="mt-3 space-y-2">
                   {group.links.map((link) => (
                     <li>

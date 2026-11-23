@@ -6,14 +6,12 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<span class:list={["inline-flex items-center gap-2 text-ink", className]}>
+<span class:list={["inline-flex items-center gap-2.5 text-ink", className]}>
   <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" class="shrink-0">
-    <rect width="32" height="32" rx="7" class="fill-ink"></rect>
-    <path d="M9 6h9.5L23 10.5V26H9z" class="fill-surface"></path>
-    <path d="M18.5 6v4.5H23" class="fill-line"></path>
-    <path d="M12 13.5h8" class="stroke-accent" stroke-width="2" stroke-linecap="round"></path>
-    <path d="M12 17.5h8M12 21h5.5" class="stroke-ink" stroke-width="1.5" stroke-linecap="round"
-    ></path>
+    <rect width="32" height="32" rx="3" class="fill-accent"></rect>
+    <path
+      d="M7 7h18v5.5h-1.6l-.7-2.6h-4.9V23l2.7.6V25H11.5v-1.4l2.7-.6V9.9H9.3l-.7 2.6H7z"
+      class="fill-on-accent"></path>
   </svg>
-  <span class="text-[1.3125rem] leading-none font-bold tracking-[-0.03em]">Tailory</span>
+  <span class="font-serif text-[1.5rem] leading-none font-medium tracking-[-0.01em]">Tailory</span>
 </span>
