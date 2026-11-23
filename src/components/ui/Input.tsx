@@ -35,5 +35,4 @@ const Input: Component<InputProps> = (props) => (
 
 export default Input;
 
-// Kept for backward-compatibility with consumers that import inputClass directly
 export const inputClass = `${inputBase} ${inputNormal}`;

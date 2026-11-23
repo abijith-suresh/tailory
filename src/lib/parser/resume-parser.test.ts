@@ -438,4 +438,77 @@ Available on request.
       reference: "Engineering Manager Available on request.",
     });
   });
+
+  it("keeps summary text that starts with a section keyword", async () => {
+    const result = await parseResume(`JANE DOE
+jane@example.com
+
+PROFESSIONAL SUMMARY
+Experienced software engineer building web applications.
+
+EXPERIENCE
+Acme Corp
+Engineer
+Jan 2021 - Present
+• Shipped features
+`);
+
+    expect(result.data.basics.summary).toBe(
+      "Experienced software engineer building web applications."
+    );
+    expect(result.data.work).toHaveLength(1);
+    expect(result.data.work?.[0]?.name).toBe("Acme Corp");
+  });
+
+  it("still reads inline headings with a separator", async () => {
+    const result = await parseResume(`JANE DOE
+jane@example.com
+
+Summary: Backend engineer focused on APIs.
+Skills - TypeScript, Go
+`);
+
+    expect(result.data.basics.summary).toBe("Backend engineer focused on APIs.");
+    expect(result.data.skills?.map((skill) => skill.name)).toEqual(
+      expect.arrayContaining(["TypeScript", "Go"])
+    );
+  });
+
+  it("does not read large numbers as years", async () => {
+    const result = await parseResume(`JANE DOE
+jane@example.com
+
+EXPERIENCE
+Acme Corp
+Engineer
+Served 10000 users
+
+Beta Inc
+Developer
+Cut spend by 2500 dollars
+`);
+
+    expect(result.data.work).toHaveLength(2);
+    expect(result.data.work?.map((job) => [job.name, job.startDate, job.endDate])).toEqual([
+      ["Acme Corp", "", ""],
+      ["Beta Inc", "", ""],
+    ]);
+  });
+
+  it("still reads plausible years as dates", async () => {
+    const result = await parseResume(`JANE DOE
+jane@example.com
+
+EDUCATION
+University of Technology
+Bachelor of Science
+1999 - 2003
+`);
+
+    expect(result.data.education?.[0]).toMatchObject({
+      institution: "University of Technology",
+      startDate: "1999",
+      endDate: "2003",
+    });
+  });
 });

@@ -1,5 +1,6 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 
+import { downloadBlob, sanitizeFilenameBase } from "@/lib/export/download";
 import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
 import { validateUploadFile } from "@/lib/upload/guardrails";
@@ -99,14 +100,8 @@ const CommandBar: Component = () => {
       setExportError("");
       setIsExportingJson(true);
       const contents = exportJsonResumeString(JSON.parse(JSON.stringify(resume)));
-      const filename = `${resume.basics.name.trim().replace(/\s+/g, "_") || "resume"}.json`;
-      const blob = new Blob([contents], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
+      const filename = `${sanitizeFilenameBase(resume.basics.name)}.json`;
+      downloadBlob(new Blob([contents], { type: "application/json" }), filename);
     } catch (error) {
       setExportError(
         error instanceof Error ? error.message : "Unable to export this resume as JSON right now."

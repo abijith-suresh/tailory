@@ -19,6 +19,10 @@ const canShare = vi.fn(() => false);
 const createObjectURL = vi.fn(() => "blob:tailory-pdf");
 const revokeObjectURL = vi.fn();
 const click = vi.fn();
+const pointerState = { coarse: false, anyFine: true };
+const matchMedia = vi.fn((query: string) => ({
+  matches: query === "(pointer: coarse)" ? pointerState.coarse : pointerState.anyFine,
+}));
 
 vi.mock("pdfmake/build/pdfmake", () => ({
   default: {
@@ -75,6 +79,8 @@ describe("exportPDF", () => {
     createObjectURL.mockReset().mockReturnValue("blob:tailory-pdf");
     revokeObjectURL.mockReset();
     click.mockReset();
+    pointerState.coarse = false;
+    pointerState.anyFine = true;
 
     Object.defineProperty(globalThis, "navigator", {
       configurable: true,
@@ -101,6 +107,7 @@ describe("exportPDF", () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: {
+        matchMedia,
         setTimeout: vi.fn((fn: () => void) => fn()),
       },
     });
@@ -175,9 +182,11 @@ describe("exportPDF", () => {
     });
   });
 
-  it("uses native share when files can be shared", async () => {
+  it("uses native share on touch-first devices when files can be shared", async () => {
     const { exportPDF } = await import("./pdf-export");
 
+    pointerState.coarse = true;
+    pointerState.anyFine = false;
     canShare.mockReturnValue(true);
 
     await exportPDF(createTemplateFixture(), "modern");
@@ -186,14 +195,63 @@ describe("exportPDF", () => {
     expect(click).not.toHaveBeenCalled();
   });
 
+  it("downloads on desktop even when the browser can share files", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    canShare.mockReturnValue(true);
+
+    await exportPDF(createTemplateFixture(), "modern");
+
+    expect(share).not.toHaveBeenCalled();
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("downloads on touch devices that also have a fine pointer", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    pointerState.coarse = true;
+    pointerState.anyFine = true;
+    canShare.mockReturnValue(true);
+
+    await exportPDF(createTemplateFixture(), "modern");
+
+    expect(share).not.toHaveBeenCalled();
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("stays quiet when the user cancels the share sheet", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    pointerState.coarse = true;
+    pointerState.anyFine = false;
+    canShare.mockReturnValue(true);
+    share.mockRejectedValue(new DOMException("Share canceled", "AbortError"));
+
+    await expect(exportPDF(createTemplateFixture(), "modern")).resolves.toBeUndefined();
+
+    expect(click).not.toHaveBeenCalled();
+  });
+
+  it("falls back to download when sharing fails for another reason", async () => {
+    const { exportPDF } = await import("./pdf-export");
+
+    pointerState.coarse = true;
+    pointerState.anyFine = false;
+    canShare.mockReturnValue(true);
+    share.mockRejectedValue(new DOMException("Not allowed", "NotAllowedError"));
+
+    await exportPDF(createTemplateFixture(), "modern");
+
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
   it.each(["modern", "minimal", "compact-ats"] as const)(
-    "creates a valid pdf definition for %s and propagates options",
+    "creates a valid pdf definition for %s and propagates the accent color",
     async (template) => {
       const { exportPDF } = await import("./pdf-export");
 
       await exportPDF(createTemplateFixture(), template, {
         accentColor: "#7c3aed",
-        pageFormat: "Letter",
       });
 
       expect(createPdf).toHaveBeenCalledTimes(1);
@@ -208,7 +266,7 @@ describe("exportPDF", () => {
       expect(docDefinition.content.length).toBeGreaterThan(0);
       expect(docDefinition.styles).toBeTruthy();
       expect(docDefinition.defaultStyle.font).toBe("Roboto");
-      expect(docDefinition.pageSize).toBe("LETTER");
+      expect(docDefinition.pageSize).toBe("A4");
       expect(collectNestedValues(docDefinition.content)).not.toContain(null);
       expect(collectNestedValues(docDefinition.content)).not.toContain(undefined);
 
