@@ -163,8 +163,8 @@
 }
 
 /*
- * Scale of the home page's resume sheet, which keeps the editor's 680px page width. The tape uses
- * it too, so one inch on the tape is one inch of the 8.5-inch page on every page of the site.
+ * Scale of the home page's resume sheet. It keeps the editor's 680px page width and shows it at
+ * full size once the page column is wide enough.
  */
 :root {
   --page-scale: 0.4;
@@ -176,19 +176,19 @@
   }
 }
 
+@media (min-width: 30rem) {
+  :root {
+    --page-scale: 0.64;
+  }
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --page-scale: 0.88;
+  }
+}
+
 @media (min-width: 48rem) {
-  :root {
-    --page-scale: 0.6;
-  }
-}
-
-@media (min-width: 64rem) {
-  :root {
-    --page-scale: 0.82;
-  }
-}
-
-@media (min-width: 80rem) {
   :root {
     --page-scale: 1;
   }
@@ -318,4 +318,47 @@ textarea {
 
 .resume-document__link {
   color: var(--resume-accent);
+}
+
+/*
+ * Crop marks: hairlines just outside each corner of a page, as on a printer's proof. They mark the
+ * page's trim without a frame around it. The marks reach --crop-reach past the page on each side.
+ */
+.crop-marks {
+  --crop-len: 0.375rem;
+  --crop-gap: 0.25rem;
+  --crop-reach: calc(var(--crop-len) + var(--crop-gap));
+  --crop-line: linear-gradient(var(--color-rule-strong), var(--color-rule-strong));
+  position: relative;
+}
+
+.crop-marks::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--crop-reach));
+  pointer-events: none;
+  background:
+    var(--crop-line) left 0 top var(--crop-reach) / var(--crop-len) 1px,
+    var(--crop-line) right 0 top var(--crop-reach) / var(--crop-len) 1px,
+    var(--crop-line) left 0 bottom var(--crop-reach) / var(--crop-len) 1px,
+    var(--crop-line) right 0 bottom var(--crop-reach) / var(--crop-len) 1px,
+    var(--crop-line) left var(--crop-reach) top 0 / 1px var(--crop-len),
+    var(--crop-line) right var(--crop-reach) top 0 / 1px var(--crop-len),
+    var(--crop-line) left var(--crop-reach) bottom 0 / 1px var(--crop-len),
+    var(--crop-line) right var(--crop-reach) bottom 0 / 1px var(--crop-len);
+  background-repeat: no-repeat;
+}
+
+/* Below 24rem the page fills the column, so there is no room for the marks. */
+@media (max-width: 23.99rem) {
+  .crop-marks::before {
+    display: none;
+  }
+}
+
+@media (min-width: 48rem) {
+  .crop-marks {
+    --crop-len: 1.25rem;
+    --crop-gap: 0.75rem;
+  }
 }
