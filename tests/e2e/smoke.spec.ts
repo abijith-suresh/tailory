@@ -14,7 +14,7 @@ test("home page renders the hero", async ({ page }) => {
   ).toBeVisible();
 });
 
-for (const path of ["/faq", "/privacy", "/terms"]) {
+for (const path of ["/faq", "/privacy"]) {
   test(`${path} renders`, async ({ page }) => {
     const response = await page.goto(path);
 

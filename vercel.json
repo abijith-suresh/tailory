@@ -18,6 +18,11 @@
       "source": "/changelog",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/",
+      "permanent": true
     }
   ]
 }
