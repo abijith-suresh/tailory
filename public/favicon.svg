@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
   <title id="title">Tailory</title>
-  <rect width="32" height="32" rx="3" fill="#e9b23c"/>
-  <path d="M7 7h18v5.5h-1.6l-.7-2.6h-4.9V23l2.7.6V25H11.5v-1.4l2.7-.6V9.9H9.3l-.7 2.6H7z" fill="#151a2c"/>
+  <style>.end{fill:#1a1a1d}@media (prefers-color-scheme:dark){.end{fill:#b9b9b2}}</style>
+  <path d="M3 3h26v8.5h-8.5V26h-9V11.5H3z" fill="#e9b23c"/>
+  <path d="M11.5 14h4.5v1.75h-4.5zM11.5 18h2.5v1.75h-2.5zM11.5 22h4.5v1.75h-4.5z" fill="#1a1a1d"/>
+  <path class="end" d="M10 25.5h12V29a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1z"/>
 </svg>

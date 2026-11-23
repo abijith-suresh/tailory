@@ -6,12 +6,14 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<span class:list={["inline-flex items-center gap-2.5 text-ink", className]}>
+<span class:list={["inline-flex items-center gap-2 text-ink", className]}>
+  <!-- A T cut from tape: ticks down the stem and the metal end at its foot. -->
   <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" class="shrink-0">
-    <rect width="32" height="32" rx="3" class="fill-accent"></rect>
+    <path d="M3 3h26v8.5h-8.5V26h-9V11.5H3z" class="fill-accent"></path>
     <path
-      d="M7 7h18v5.5h-1.6l-.7-2.6h-4.9V23l2.7.6V25H11.5v-1.4l2.7-.6V9.9H9.3l-.7 2.6H7z"
+      d="M11.5 14h4.5v1.75h-4.5zM11.5 18h2.5v1.75h-2.5zM11.5 22h4.5v1.75h-4.5z"
       class="fill-on-accent"></path>
+    <path d="M10 25.5h12V29a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1z" class="fill-ink"></path>
   </svg>
   <span class="font-serif text-[1.5rem] leading-none font-medium tracking-[-0.01em]">Tailory</span>
 </span>
