@@ -1,5 +1,6 @@
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 
+import { PDF_FONT_FAMILY } from "@/lib/export/fonts";
 import {
   renderBulletLines,
   renderDivider,
@@ -11,10 +12,6 @@ import type {
   ResumeRenderModel,
   ResumeSectionModel,
 } from "@/lib/templates/render-model";
-
-interface PdfRenderOptions {
-  fontFamily: string;
-}
 
 function renderEntryBody(
   entry: ResumeEntryModel,
@@ -67,7 +64,6 @@ function renderModernSection(section: ResumeSectionModel, model: ResumeRenderMod
         lineWidth: 1,
         margin: spacing.before(6),
         pageMargins: model.pageMargins,
-        pageWidth: model.design.pageWidth,
       }),
     ],
   } satisfies Content;
@@ -120,17 +116,13 @@ function renderCompactSection(section: ResumeSectionModel, model: ResumeRenderMo
           renderDivider({
             color: "#d1d5db",
             pageMargins: model.pageMargins,
-            pageWidth: model.design.pageWidth,
           }),
         ]
       : []),
   ];
 }
 
-export function renderPdfResumeModel(
-  model: ResumeRenderModel,
-  options: PdfRenderOptions
-): TDocumentDefinitions {
+export function renderPdfResumeModel(model: ResumeRenderModel): TDocumentDefinitions {
   if (model.template === "modern") {
     return {
       content: [
@@ -164,9 +156,9 @@ export function renderPdfResumeModel(
         bullet: { fontSize: 10, color: "#111827", lineHeight: 1.4 },
         link: { fontSize: 9, color: model.design.accentColor, decoration: "underline" },
       },
-      defaultStyle: { font: options.fontFamily, fontSize: 10 },
+      defaultStyle: { font: PDF_FONT_FAMILY, fontSize: 10 },
       pageMargins: model.pageMargins,
-      pageSize: model.design.pageSize,
+      pageSize: "A4",
     };
   }
 
@@ -188,7 +180,6 @@ export function renderPdfResumeModel(
               renderDivider({
                 color: "#d1d5db",
                 pageMargins: model.pageMargins,
-                pageWidth: model.design.pageWidth,
               }),
             ]
           : []),
@@ -210,9 +201,9 @@ export function renderPdfResumeModel(
         body: { fontSize: 9.5, color: "#111827", lineHeight: 1.35 },
         link: { fontSize: 9, color: model.design.accentColor, decoration: "underline" },
       },
-      defaultStyle: { font: options.fontFamily, fontSize: 9.5 },
+      defaultStyle: { font: PDF_FONT_FAMILY, fontSize: 9.5 },
       pageMargins: model.pageMargins,
-      pageSize: model.design.pageSize,
+      pageSize: "A4",
     };
   }
 
@@ -244,8 +235,8 @@ export function renderPdfResumeModel(
       body: { fontSize: 10, color: "#374151", lineHeight: 1.4 },
       link: { fontSize: 9, color: model.design.accentColor, decoration: "underline" },
     },
-    defaultStyle: { font: options.fontFamily, fontSize: 10 },
+    defaultStyle: { font: PDF_FONT_FAMILY, fontSize: 10 },
     pageMargins: model.pageMargins,
-    pageSize: model.design.pageSize,
+    pageSize: "A4",
   };
 }

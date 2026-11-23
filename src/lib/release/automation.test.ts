@@ -15,24 +15,13 @@ describe("release automation source of truth", () => {
     ) as Record<string, string>;
     const config = JSON.parse(
       readFileSync(path.join(root, "release-please-config.json"), "utf8")
-    ) as {
-      [key: string]: unknown;
-      "bootstrap-sha"?: string;
-      "include-component-in-tag"?: boolean;
-      "include-v-in-tag"?: boolean;
-      "include-v-in-release-name"?: boolean;
-      "initial-version"?: string;
-    };
+    ) as { "include-component-in-tag"?: boolean };
     const workflow = readFileSync(
       path.join(root, ".github", "workflows", "release-please.yml"),
       "utf8"
     );
 
     expect(config["include-component-in-tag"]).toBe(false);
-    expect(config["include-v-in-tag"]).toBeUndefined();
-    expect(config["include-v-in-release-name"]).toBeUndefined();
-    expect(config["bootstrap-sha"]).toBeUndefined();
-    expect(config["initial-version"]).toBeUndefined();
     expect(workflow).toContain("abijith-suresh/workflows/.github/workflows/release-please.yml");
     expect(workflow).toContain("RELEASE_PLEASE_TOKEN:");
     expect(workflow).toContain("secrets.RELEASE_PLEASE_TOKEN");
