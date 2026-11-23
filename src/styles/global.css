@@ -104,32 +104,32 @@
   --font-resume: "Roboto", Arial, sans-serif;
 
   /*
-   * Colour. A neutral grey paper and a near-black ink, with marigold as the one accent.
-   * Contrast on surface: ink 14.1:1, ink-muted 7.7:1, ink-subtle 5.3:1, accent-ink 5.8:1,
-   * rule-strong 3.3:1 (enough for control borders). Ink on accent 9.0:1.
+   * Colour. A light, cool paper and a near-black ink, with marigold as the one accent.
+   * Contrast on surface: ink 16.1:1, ink-muted 8.4:1, ink-subtle 6.0:1, accent-ink 6.5:1,
+   * rule-strong 3.3:1 (enough for control borders). Ink on accent 9.2:1.
    * Paper edges are drawn with `edge` lines, so depth doesn't depend on a shadow.
    */
-  --color-surface: #e7e8e6;
-  --color-surface-raised: #f4f5f3;
-  --color-surface-sunken: #dbdcd9;
+  --color-surface: #f3f4f1;
+  --color-surface-raised: #fafbf9;
+  --color-surface-sunken: #e8e9e5;
   --color-sheet: #ffffff;
-  --color-ink: #1a1a1d;
-  --color-ink-muted: #45464b;
-  --color-ink-subtle: #5d5e63;
-  --color-rule: #c7c8c5;
-  --color-rule-strong: #7e7f7c;
-  --color-edge: #b3b4b1;
+  --color-ink: #17181b;
+  --color-ink-muted: #45474c;
+  --color-ink-subtle: #5b5d63;
+  --color-rule: #dcded9;
+  --color-rule-strong: #85878a;
+  --color-edge: #c9cbc6;
   --color-accent: #e9b23c;
   --color-accent-hover: #d99f22;
   --color-accent-edge: #a87a14;
   --color-accent-ink: #77500a;
   --color-accent-wash: #f5e1ad;
-  --color-on-accent: #1a1a1d;
-  --color-focus: #1a1a1d;
-  --color-shadow: rgb(26 26 29 / 0.12);
+  --color-on-accent: #17181b;
+  --color-focus: #17181b;
+  --color-shadow: rgb(23 24 27 / 0.1);
 
   /* Type scale. Display and headline sizes are set in the serif. */
-  --text-display: clamp(2.75rem, 1.4rem + 5.4vw, 6.25rem);
+  --text-display: clamp(2.625rem, 1.5rem + 4.5vw, 5.5rem);
   --text-display--line-height: 0.98;
   --text-display--letter-spacing: -0.022em;
   --text-headline: clamp(2rem, 1.45rem + 2.2vw, 3.25rem);
@@ -210,7 +210,7 @@
   font-feature-settings: "kern", "liga", "onum";
 }
 
-/* Primary action. Marigold is kept for this, the tape and the logo. */
+/* Primary action. Marigold is kept for this and the logo. */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -225,26 +225,6 @@
 
 .btn-primary:hover {
   background: var(--color-accent-hover);
-}
-
-/* Secondary action: an ink outline. */
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 1px solid var(--color-ink);
-  border-radius: var(--radius-control);
-  color: var(--color-ink);
-  font-weight: 600;
-  transition:
-    background-color 150ms,
-    color 150ms;
-}
-
-.btn-outline:hover {
-  background: var(--color-ink);
-  color: var(--color-surface);
 }
 
 .link-underline {
