@@ -42,7 +42,7 @@
     "@playwright/test": "^1.65.1",
     "@solidjs/testing-library": "^0.8.10",
     "@tailwindcss/vite": "^4.3.5",
-    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/jest-dom": "^8.0.0",
     "@types/pdfmake": "^0.3.3",
     "@vitest/coverage-v8": "5.1.1",
     "@vitest/ui": "^5.1.1",
