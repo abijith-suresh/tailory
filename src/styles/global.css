@@ -104,21 +104,22 @@
   --font-resume: "Roboto", Arial, sans-serif;
 
   /*
-   * Colour. A light, cool paper and a near-black ink, with marigold as the one accent.
-   * Contrast on surface: ink 16.1:1, ink-muted 8.4:1, ink-subtle 6.0:1, accent-ink 6.5:1,
-   * rule-strong 3.3:1 (enough for control borders). Ink on accent 9.2:1.
+   * Colour. White paper and a near-black ink, with marigold as the one accent.
+   * Contrast on surface: ink 17.8:1, ink-muted 9.3:1, ink-subtle 6.6:1, accent-ink 7.2:1,
+   * rule-strong 3.6:1 (enough for control borders). Ink on accent 9.2:1. On surface-sunken,
+   * ink-subtle is still 6.0:1.
    * Paper edges are drawn with `edge` lines, so depth doesn't depend on a shadow.
    */
-  --color-surface: #f3f4f1;
-  --color-surface-raised: #fafbf9;
-  --color-surface-sunken: #e8e9e5;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f3f4f1;
   --color-sheet: #ffffff;
   --color-ink: #17181b;
   --color-ink-muted: #45474c;
   --color-ink-subtle: #5b5d63;
-  --color-rule: #dcded9;
+  --color-rule: #e3e4e0;
   --color-rule-strong: #85878a;
-  --color-edge: #c9cbc6;
+  --color-edge: #cfd1cc;
   --color-accent: #e9b23c;
   --color-accent-hover: #d99f22;
   --color-accent-edge: #a87a14;
