@@ -8,7 +8,7 @@ const repoUrl = "https://github.com/abijith-suresh/tailory";
 const faqs = [
   {
     q: "Is Tailory free?",
-    a: "Yes. The source is on GitHub under the MIT license.",
+    a: "Yes. It costs nothing, and the source is on GitHub under the MIT license.",
   },
   {
     q: "Does my resume leave my browser?",
@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     q: "Which files can I import?",
-    a: "PDF, DOCX, and JSON, up to 10 MB. Scanned PDFs hold pictures of text, so Tailory can't read them.",
+    a: "PDF, DOCX, and JSON, up to 10 MB. Scanned PDFs hold pictures of text, so Tailory can’t read them.",
   },
   {
     q: "Can I start without a file?",
@@ -24,23 +24,23 @@ const faqs = [
   },
   {
     q: "Does it work with JSON Resume?",
-    a: "Tailory imports and exports JSON Resume-style data for the sections it supports. It doesn't check files against the official schema.",
+    a: "Tailory imports and exports JSON Resume-style data for the sections it supports. It doesn’t check files against the official schema.",
   },
   {
     q: "Where are my drafts saved?",
-    a: "In this browser's storage for the site. Clearing site data deletes them, so export JSON to keep a copy.",
+    a: "In this browser’s storage for the site. Clearing site data deletes them, so export JSON to keep a copy.",
   },
   {
-    q: "How do the templates differ?",
-    a: "Modern has a ruled header and lines between sections. Minimal leaves out the decoration. Compact fits more on a page.",
+    q: "Can I change the template?",
+    a: "Yes. Pick one above the preview. Your content carries over.",
   },
   {
     q: "Will hiring software read my PDF?",
-    a: "Tailory can't promise how an employer's software reads a resume. The exported PDF holds selectable text, not an image of it.",
+    a: "Tailory can’t promise how an employer’s software reads a resume. The exported PDF holds selectable text, not an image of it.",
   },
   {
     q: "Does Tailory work offline?",
-    a: "Not reliably. The editor doesn't need a server once it has loaded, but Tailory isn't built as an offline app.",
+    a: "Not reliably. The editor doesn’t need a server once it has loaded, but Tailory isn’t built as an offline app.",
   },
   {
     q: "Which browsers work?",
@@ -53,8 +53,8 @@ const faqs = [
   title="FAQ"
   description="Answers about Tailory: where your resume is stored, which files it imports, JSON Resume support, templates, and browsers."
 >
-  <PageIntro kicker="FAQ" title="Questions and answers" />
-  <div class="mx-auto max-w-text px-gutter pb-section md:px-gutter-wide">
+  <PageIntro title="FAQ" />
+  <div class="mx-auto max-w-page px-gutter pb-16 md:px-gutter-wide md:pb-24">
     {
       faqs.map((item) => (
         <ProseSection title={item.q}>

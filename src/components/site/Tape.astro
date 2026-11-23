@@ -1,0 +1,96 @@
+---
+// A tailor's tape measure drawn in CSS: inch numbers with half, quarter and eighth ticks on
+// both edges. Set --tape-inch on a parent to put it to scale. Decorative only.
+// Each number is printed just right of its own inch line; a tape that starts at 0 gets an end cap
+// instead of a 0.
+interface Props {
+  class?: string;
+  /** First number printed on the tape. */
+  from?: number;
+  /** How many inches to print. Extra length is clipped. */
+  length?: number;
+  /** A number to print reversed out, in ink. */
+  mark?: number;
+}
+
+const { class: className, from = 0, length = 80, mark } = Astro.props;
+const inches = Array.from({ length }, (_, index) => from + index);
+---
+
+<div class:list={["tape", { "tape--end": from === 0 }, className]} aria-hidden="true">
+  {
+    inches.map((inch) => (
+      <span class:list={["tape__inch", { "tape__inch--marked": inch === mark }]}>
+        {inch > 0 && <span>{inch}</span>}
+      </span>
+    ))
+  }
+</div>
+
+<style>
+  .tape {
+    --inch: var(--tape-inch, 4rem);
+    --tick: var(--color-on-accent);
+    display: flex;
+    height: 2.75rem;
+    overflow: hidden;
+    background-color: var(--color-accent);
+    background-image:
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px),
+      linear-gradient(to right, var(--tick) 1px, transparent 1px);
+    background-size:
+      var(--inch) 0.875rem,
+      var(--inch) 0.875rem,
+      calc(var(--inch) / 2) 0.625rem,
+      calc(var(--inch) / 2) 0.625rem,
+      calc(var(--inch) / 4) 0.4375rem,
+      calc(var(--inch) / 4) 0.4375rem,
+      calc(var(--inch) / 8) 0.25rem,
+      calc(var(--inch) / 8) 0.25rem;
+    background-position:
+      0 0,
+      0 100%,
+      0 0,
+      0 100%,
+      0 0,
+      0 100%,
+      0 0,
+      0 100%;
+    background-repeat: repeat-x;
+    box-shadow:
+      0 1px 1px var(--color-shadow),
+      0 10px 18px -10px var(--color-shadow);
+  }
+
+  /* The metal end of a tape. */
+  .tape--end {
+    border-left: 0.3125rem solid var(--color-ink-muted);
+  }
+
+  .tape__inch {
+    flex: none;
+    width: var(--inch);
+    align-self: center;
+    padding-left: 0.25rem;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-on-accent);
+  }
+
+  .tape__inch--marked span {
+    margin-left: -0.125rem;
+    padding: 0.25rem 0.3125rem;
+    background: var(--color-on-accent);
+    color: var(--color-accent);
+  }
+</style>

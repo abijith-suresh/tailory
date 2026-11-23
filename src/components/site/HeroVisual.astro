@@ -1,243 +1,71 @@
 ---
-// Static hero figure: a real resume render with numbered notes in its margins, like an
-// annotated plate in a book. A later change animates this; it can replace the whole
-// component without touching the page.
+// Static hero: a real resume render with a tape measure laid across its foot. The tape is to
+// scale with the 8.5-inch page, starts at its left edge and runs off the screen, so the page
+// must clip it (overflow-x: clip). A later change animates this; it can replace the component.
 import ResumeSheet from "@/components/site/ResumeSheet.astro";
-
-// `at` is how far down the page each note's leader points, as a fraction of its height.
-const notes = [
-  {
-    side: "left",
-    at: 0.055,
-    title: "Import",
-    text: "Open a PDF, DOCX, or JSON resume, or start blank.",
-  },
-  {
-    side: "left",
-    at: 0.37,
-    title: "Edit",
-    text: "Change any section in a form. The page updates as you type.",
-  },
-  {
-    side: "right",
-    at: 0.8,
-    title: "Export",
-    text: "Download a text PDF to send, or JSON to open again later.",
-  },
-] as const;
+import Tape from "@/components/site/Tape.astro";
 ---
 
-<figure class="hero-figure">
-  <div class="hero-figure__plate">
-    <ResumeSheet class="hero-figure__sheet" template="modern" />
-
-    <ol class="hero-figure__notes">
-      {
-        notes.map((note, index) => (
-          <li
-            class:list={["hero-note", `hero-note--${note.side}`]}
-            style={{ "--at": String(note.at) }}
-          >
-            <span class="hero-note__number" aria-hidden="true">
-              {index + 1}
-            </span>
-            <span class="hero-note__leader" aria-hidden="true" />
-            <span class="hero-note__body">
-              <span class="hero-note__title">{note.title}</span>
-              <span class="hero-note__text">{note.text}</span>
-            </span>
-          </li>
-        ))
-      }
-    </ol>
-  </div>
-
-  <figcaption class="hero-figure__caption">
-    <span class="label text-ink">Fig. 1</span>
-    <span class="font-serif italic">A sample resume in the Modern template.</span>
-  </figcaption>
-</figure>
+<div class="hero-visual">
+  <ResumeSheet class="hero-visual__sheet" template="modern" />
+  <Tape class="hero-visual__tape" length={60} />
+</div>
 
 <style>
-  .hero-figure {
+  .hero-visual {
     --sheet-scale: 0.42;
-    --sheet-h: calc(842px * var(--sheet-scale));
+    /* The sheet is 8.5 inches wide. */
+    --tape-inch: calc(680px * var(--sheet-scale) / 8.5);
+    --tape-gap: 2.5rem;
+    position: relative;
+    justify-self: start;
+    padding-bottom: var(--tape-gap);
   }
 
-  .hero-figure__plate {
-    display: grid;
-    justify-items: center;
-    gap: 2.5rem;
-  }
-
-  .hero-figure :global(.hero-figure__sheet) {
+  .hero-visual :global(.hero-visual__sheet) {
     --sheet-scale: inherit;
   }
 
-  .hero-figure__notes {
-    display: grid;
-    width: 100%;
-    max-width: 40rem;
-    gap: 1.5rem;
-  }
-
-  .hero-note {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.875rem;
-    align-items: start;
-  }
-
-  .hero-note__number {
-    display: inline-flex;
-    width: 1.75rem;
-    height: 1.75rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: var(--color-accent);
-    color: var(--color-on-accent);
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    font-style: italic;
-    font-weight: 600;
-    line-height: 1;
-  }
-
-  .hero-note__leader {
-    display: none;
-  }
-
-  .hero-note__body {
-    display: grid;
-    gap: 0.125rem;
-  }
-
-  .hero-note__title {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-    font-weight: 500;
-    color: var(--color-ink);
-  }
-
-  .hero-note__text {
-    font-size: var(--text-meta);
-    line-height: var(--text-meta--line-height);
-    color: var(--color-ink-muted);
-  }
-
-  .hero-figure__caption {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-    margin-top: 2.5rem;
-    font-size: var(--text-meta);
-    color: var(--color-ink-muted);
+  /*
+   * The tape's end cap hooks over the page's left edge, so 0 sits on the edge. It crosses the
+   * blank foot of the page, below the resume's last line.
+   */
+  .hero-visual :global(.hero-visual__tape) {
+    position: absolute;
+    bottom: calc(var(--tape-gap) - 1rem);
+    left: -0.3125rem;
+    width: 240rem;
+    height: 2.25rem;
+    transform: rotate(-3deg);
+    transform-origin: 0 50%;
   }
 
   @media (min-width: 24rem) {
-    .hero-figure {
+    .hero-visual {
       --sheet-scale: 0.5;
     }
   }
 
   @media (min-width: 40rem) {
-    .hero-figure {
-      --sheet-scale: 0.62;
+    .hero-visual {
+      --sheet-scale: 0.7;
+      --tape-gap: 3.5rem;
     }
-    .hero-figure__notes {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.75rem;
-    }
-    .hero-note {
-      grid-template-columns: 1fr;
-      gap: 0.625rem;
+    .hero-visual :global(.hero-visual__tape) {
+      height: 2.75rem;
+      bottom: calc(var(--tape-gap) - 1.25rem);
+      transform: rotate(-2.5deg);
     }
   }
 
-  /* Wide screens: the notes move into the margins with a leader to the edge of the page. */
   @media (min-width: 64rem) {
-    .hero-figure {
-      --sheet-scale: 0.6;
-    }
-
-    .hero-figure__plate {
-      position: relative;
-      gap: 0;
-    }
-
-    .hero-figure__notes {
-      position: absolute;
-      inset: 0;
-      max-width: none;
-      display: block;
-    }
-
-    .hero-note {
-      position: absolute;
-      top: calc(var(--sheet-h) * var(--at));
-      width: calc(50% - 680px * var(--sheet-scale) / 2);
-      display: flex;
-      align-items: flex-start;
-      gap: 0;
-    }
-
-    .hero-note--left {
-      left: 0;
-      flex-direction: row-reverse;
-    }
-
-    .hero-note--right {
-      right: 0;
-    }
-
-    .hero-note__body {
-      flex: 0 1 13.5rem;
-    }
-
-    .hero-note--left .hero-note__body {
-      text-align: right;
-    }
-
-    .hero-note__leader {
-      display: block;
-      flex: 1 1 auto;
-      min-width: 1.5rem;
-      height: 1px;
-      margin: 0.875rem 0.75rem 0;
-      background: var(--color-rule-strong);
-    }
-
-    /* The number sits on the page edge, half over the sheet. */
-    .hero-note__number {
-      flex: none;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-note--left .hero-note__number {
-      margin-right: -0.875rem;
-    }
-
-    .hero-note--right .hero-note__number {
-      margin-left: -0.875rem;
-      order: -1;
-    }
-
-    .hero-note--right .hero-note__leader {
-      order: 0;
-    }
-
-    .hero-note--right .hero-note__body {
-      order: 1;
+    .hero-visual {
+      --sheet-scale: 0.64;
     }
   }
 
   @media (min-width: 80rem) {
-    .hero-figure {
+    .hero-visual {
       --sheet-scale: 0.74;
     }
   }

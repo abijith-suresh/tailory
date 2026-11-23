@@ -140,16 +140,12 @@
   --text-body--line-height: 1.6;
   --text-meta: 0.875rem;
   --text-meta--line-height: 1.5;
-  --text-label: 0.75rem;
-  --text-label--line-height: 1.4;
-  --text-label--letter-spacing: 0.08em;
 
   /* Spacing and layout */
   --spacing-gutter: 1rem;
   --spacing-gutter-wide: 2.5rem;
   --spacing-section: clamp(4rem, 2.75rem + 5vw, 8rem);
   --container-page: 76rem;
-  --container-text: 60rem;
   --container-measure: 36rem;
 
   /* Radius. Small and square, like cut paper. */
@@ -178,24 +174,7 @@
   font-feature-settings: "kern", "liga", "onum";
 }
 
-/* A small-capitals label in the sans, used for kickers and figure labels. */
-.label {
-  font-family: var(--font-sans);
-  font-size: var(--text-label);
-  line-height: var(--text-label--line-height);
-  letter-spacing: var(--text-label--letter-spacing);
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-/* Thick-and-thin double rule, as under a masthead. */
-.rule-double {
-  height: 4px;
-  border-top: 2px solid var(--color-ink);
-  border-bottom: 1px solid var(--color-ink);
-}
-
-/* Primary and secondary actions. */
+/* Primary action. Marigold is kept for this, the tape and the logo. */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -210,6 +189,26 @@
 
 .btn-primary:hover {
   background: var(--color-accent-hover);
+}
+
+/* Secondary action: an ink outline. */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  font-weight: 600;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+
+.btn-outline:hover {
+  background: var(--color-ink);
+  color: var(--color-surface);
 }
 
 .link-underline {

@@ -8,18 +8,18 @@ const repoUrl = "https://github.com/abijith-suresh/tailory";
 
 <MarketingLayout
   title="Privacy"
-  description="Tailory's privacy policy. Your resume and drafts stay in your browser; Tailory doesn't collect them."
+  description="Tailory’s privacy policy. Your resume and drafts stay in your browser; Tailory doesn’t collect them."
 >
   <PageIntro
     title="Privacy"
-    lead="Tailory doesn't collect your resume. It stays in your browser unless you export it."
+    lead="Tailory doesn’t collect your resume. It stays in this browser."
     meta="Last updated November 19, 2026"
   />
-  <div class="mx-auto max-w-text px-gutter pb-section md:px-gutter-wide">
+  <div class="mx-auto max-w-page px-gutter pb-16 md:px-gutter-wide md:pb-24">
     <ProseSection title="What stays in your browser">
       <p>
-        Your resume, its autosave, and your named drafts are saved in this browser's storage for
-        the site (IndexedDB). Other sites can't read them. Clearing site data deletes them, and
+        Your resume, its autosave, and your saved drafts are kept in this browser’s storage for
+        the site (IndexedDB). Other sites can’t read them. Clearing site data deletes them, and
         Tailory has no copy to restore.
       </p>
     </ProseSection>
@@ -33,25 +33,24 @@ const repoUrl = "https://github.com/abijith-suresh/tailory";
 
     <ProseSection title="Hosting">
       <p>
-        Vercel serves the site's files, fonts included. Like any web host, Vercel may log request
-        details such as IP address, browser, and time. Your resume is not part of those requests.
+        Vercel hosts the site, fonts included, so pages load nothing from other servers. Like any
+        web host, Vercel may log request details such as IP address, browser, and time. Your resume
+        is not part of those requests.
       </p>
     </ProseSection>
 
-    <ProseSection title="Changes">
+    <ProseSection title="Changes and questions">
       <p>
         Changes to this policy are published in the <a
           href={repoUrl}
           target="_blank"
           rel="noopener noreferrer">GitHub repository</a
+        >. For questions, <a
+          href={`${repoUrl}/issues`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="whitespace-nowrap">open an issue</a
         >.
-      </p>
-    </ProseSection>
-
-    <ProseSection title="Questions">
-      <p>
-        <a href={`${repoUrl}/issues`} target="_blank" rel="noopener noreferrer">Open an issue on
-        GitHub</a>.
       </p>
     </ProseSection>
   </div>

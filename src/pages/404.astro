@@ -1,52 +1,49 @@
 ---
+import Tape from "@/components/site/Tape.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 ---
 
-<MarketingLayout title="Page not found" description="This page doesn't exist." noindex>
-  <section
-    class="mx-auto grid max-w-page items-center gap-12 px-gutter py-section md:grid-cols-[auto_minmax(0,28rem)] md:justify-center md:gap-16 md:px-gutter-wide lg:gap-24"
-  >
-    <!-- A blank page with only its folio printed. -->
-    <div class="not-found__page" aria-hidden="true">
-      <span class="font-serif italic">404</span>
-    </div>
-
-    <div class="max-w-md">
-      <p class="label text-accent-ink">Page not found</p>
-      <h1 class="mt-4 font-serif text-headline font-normal">This page isn't here.</h1>
-      <p class="mt-5 text-body text-ink-muted">
-        The link may be out of date. Your drafts are still in this browser.
-      </p>
-      <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
-        <a href="/" class="btn-primary h-12 px-6 text-body">Go to the home page</a>
-        <a href="/editor" class="link-underline text-body font-medium">Open editor</a>
-      </div>
+<MarketingLayout title="Page not found" description="This page doesn’t exist." noindex>
+  <section class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
+    <h1 class="max-w-[14ch] font-serif text-display font-normal text-balance">
+      This page isn’t here.
+    </h1>
+    <p class="mt-6 max-w-md text-lead text-ink-muted">
+      The link may be out of date. Your drafts are still in this browser.
+    </p>
+    <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+      <a href="/editor" class="btn-primary h-12 px-6 text-body">Open editor</a>
+      <a href="/" class="link-underline text-body font-medium">Home page</a>
     </div>
   </section>
+
+  <div class="not-found__tape">
+    <Tape from={396} length={60} mark={404} />
+  </div>
 </MarketingLayout>
 
 <style>
-  .not-found__page {
-    display: flex;
-    width: 10rem;
-    aspect-ratio: 680 / 842;
-    align-items: flex-end;
-    justify-content: center;
-    justify-self: center;
-    padding-bottom: 0.875rem;
-    border-radius: var(--radius-sheet);
-    background: var(--color-sheet);
-    box-shadow: var(--shadow-sheet);
-    outline: 1px solid var(--color-rule);
-    font-size: 0.9375rem;
-    color: var(--color-ink-subtle);
+  /* The tape starts off the left edge so the 404 inch line falls on the text column's edge. */
+  .not-found__tape {
+    margin-block: 4rem;
+    overflow-x: clip;
+  }
+
+  .not-found__tape :global(.tape) {
+    width: 200rem;
+    margin-left: calc(var(--spacing-gutter) - 32rem);
+    transform: rotate(-1.5deg);
+    transform-origin: 32rem 50%;
   }
 
   @media (min-width: 48rem) {
-    .not-found__page {
-      width: 15rem;
-      padding-bottom: 1.25rem;
-      font-size: 1.0625rem;
+    .not-found__tape {
+      margin-top: 6rem;
+    }
+    .not-found__tape :global(.tape) {
+      margin-left: calc(
+        max(var(--spacing-gutter-wide), (100% - var(--container-page)) / 2 + var(--spacing-gutter-wide)) - 32rem
+      );
     }
   }
 </style>

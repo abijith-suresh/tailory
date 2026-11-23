@@ -1,19 +1,17 @@
 ---
-// Title block for text pages. Shares the text column with ProseSection so left edges line up.
+// Title block for text pages. Shares the page container with ProseSection so left edges line up.
 interface Props {
   title: string;
-  kicker?: string;
   lead?: string;
   meta?: string;
 }
 
-const { title, kicker, lead, meta } = Astro.props;
+const { title, lead, meta } = Astro.props;
 ---
 
-<header class="mx-auto max-w-text px-gutter pt-12 md:px-gutter-wide md:pt-20">
-  {kicker && <p class="label mb-4 text-accent-ink">{kicker}</p>}
+<header class="mx-auto max-w-page px-gutter pt-12 md:px-gutter-wide md:pt-20">
   <h1 class="font-serif text-headline font-normal text-balance">{title}</h1>
   {lead && <p class="mt-5 max-w-measure text-lead text-ink-muted">{lead}</p>}
   {meta && <p class="mt-4 text-meta text-ink-subtle">{meta}</p>}
-  <div class="rule-double mt-10 md:mt-12" aria-hidden="true"></div>
+  <div class="mt-10 border-t border-ink md:mt-12" aria-hidden="true"></div>
 </header>

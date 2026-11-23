@@ -19,26 +19,13 @@ const navLinks = [
   { label: "Privacy", href: "/privacy" },
 ];
 
-const footerGroups = [
-  {
-    title: "Product",
-    links: [
-      { label: "Editor", href: "/editor" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Releases", href: `${repoUrl}/releases`, external: true },
-    ],
-  },
-  {
-    title: "Project",
-    links: [
-      { label: "GitHub", href: repoUrl, external: true },
-      { label: "Report an issue", href: `${repoUrl}/issues`, external: true },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [{ label: "Privacy", href: "/privacy" }],
-  },
+const footerLinks = [
+  { label: "Editor", href: "/editor" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "GitHub", href: repoUrl, external: true },
+  { label: "Releases", href: `${repoUrl}/releases`, external: true },
+  { label: "Report an issue", href: `${repoUrl}/issues`, external: true },
 ];
 ---
 
@@ -56,7 +43,7 @@ const footerGroups = [
         class="mx-auto flex h-16 max-w-page items-center gap-4 px-gutter md:gap-7 md:px-gutter-wide"
         aria-label="Main"
       >
-        <a href="/" class="mr-auto rounded-control" aria-label="Tailory home">
+        <a href="/" class="mr-auto flex rounded-control" aria-label="Tailory home">
           <Logo />
         </a>
 
@@ -67,7 +54,7 @@ const footerGroups = [
                 <a
                   href={link.href}
                   aria-current={path === link.href ? "page" : undefined}
-                  class="text-meta font-medium text-ink-muted underline-offset-[0.4em] transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-accent aria-[current=page]:decoration-2"
+                  class="text-meta font-medium text-ink-muted underline-offset-[0.4em] transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-1"
                 >
                   {link.label}
                 </a>
@@ -86,7 +73,7 @@ const footerGroups = [
           </li>
         </ul>
 
-        <a href="/editor" class="btn-primary h-9 px-4 text-meta whitespace-nowrap"> Open editor </a>
+        <a href="/editor" class="btn-outline h-9 px-4 text-meta whitespace-nowrap">Open editor</a>
 
         <button
           id="menu-button"
@@ -147,40 +134,36 @@ const footerGroups = [
     </main>
 
     <footer class="mx-auto w-full max-w-page px-gutter md:px-gutter-wide">
-      <div class="rule-double" aria-hidden="true"></div>
-      <div class="grid gap-10 py-12 md:grid-cols-[1fr_auto] md:py-14">
-        <div class="max-w-xs">
+      <div class="border-t border-ink" aria-hidden="true"></div>
+      <div
+        class="grid gap-x-12 gap-y-8 pt-10 pb-12 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:pb-14"
+      >
+        <div>
           <a href="/" class="inline-block rounded-control" aria-label="Tailory home">
             <Logo />
           </a>
-          <p class="mt-4 text-meta text-ink-muted">A resume editor that runs in your browser.</p>
-          <p class="mt-1 text-meta text-ink-subtle">Open source, MIT license.</p>
+          <p class="mt-4 text-meta text-ink-subtle">MIT licensed, provided as is.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 sm:gap-x-16">
-          {
-            footerGroups.map((group) => (
-              <div>
-                <h2 class="label text-ink-subtle">{group.title}</h2>
-                <ul class="mt-3 space-y-2">
-                  {group.links.map((link) => (
-                    <li>
-                      <a
-                        href={link.href}
-                        target={link.external ? "_blank" : undefined}
-                        rel={link.external ? "noopener noreferrer" : undefined}
-                        class="inline-flex items-center gap-1 text-meta text-ink-muted transition-colors hover:text-ink"
-                      >
-                        {link.label}
-                        {link.external && <ExternalIcon />}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
-        </div>
+        <nav aria-label="Footer">
+          <ul class="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3 md:flex md:gap-x-7">
+            {
+              footerLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    class="inline-flex items-center gap-1 text-meta text-ink-muted transition-colors hover:text-ink"
+                  >
+                    {link.label}
+                    {link.external && <ExternalIcon />}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
       </div>
     </footer>
   </div>

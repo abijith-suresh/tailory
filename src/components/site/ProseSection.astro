@@ -9,11 +9,11 @@ const { title, id } = Astro.props;
 ---
 
 <section
-  class="grid gap-2 border-b border-rule py-7 md:grid-cols-[17rem_minmax(0,1fr)] md:gap-10 md:py-8"
+  class="grid gap-2 border-b border-rule py-7 last:border-b-0 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:gap-10 md:py-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]"
   id={id}
 >
   <h2 class="font-serif text-title font-medium text-balance">{title}</h2>
-  <div class="prose-section max-w-measure space-y-3 text-body text-ink-muted md:pt-0.5">
+  <div class="prose-section max-w-[40rem] space-y-3 text-body text-ink">
     <slot />
   </div>
 </section>

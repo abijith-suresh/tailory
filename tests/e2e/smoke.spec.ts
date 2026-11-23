@@ -8,9 +8,8 @@ test("home page renders the hero", async ({ page }) => {
   const heading = page.getByRole("heading", { level: 1 });
   await expect(heading).toBeVisible();
   await expect(heading).toHaveText("The resume editor that stays in your browser.");
-  const hero = page.getByRole("figure", { name: /Fig\. 1/ });
   await expect(
-    hero.getByRole("img", { name: /sample resume in the Modern template/ })
+    page.getByRole("img", { name: /sample resume in the Modern template/ })
   ).toBeVisible();
 });
 
@@ -27,6 +26,6 @@ test("unknown routes show the not-found page", async ({ page }) => {
   const response = await page.goto("/does-not-exist");
 
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page isn't here.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("This page isn’t here.");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
 });
