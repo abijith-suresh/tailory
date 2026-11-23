@@ -6,13 +6,14 @@ Try it: https://tailory-nine.vercel.app
 
 ## What it does
 
-- Open a PDF, DOCX or JSON Resume file and edit the result.
+- Open a resume file and edit the result.
+  - JSON Resume files and Tailory's own JSON export are read in full. Support is not fully validated against the official schema.
+  - Text-based PDFs and DOCX files are read on a best-effort basis. Check what Tailory found before you export.
+  - Scanned or image-only PDFs do not work, because they have no text to read. Tailory tells you when it finds none.
 - See a live preview as you type.
-- Pick from three templates: Modern, Minimal and Compact ATS.
+- Choose a template: Modern, Minimal or Compact ATS.
 - Export a PDF or a JSON file.
 - Autosave and keep named drafts on your device.
-
-JSON Resume support is not fully validated against the official schema.
 
 ## Privacy
 
