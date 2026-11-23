@@ -9,12 +9,9 @@ const { class: className, compact = false } = Astro.props;
 ---
 
 <span class:list={["inline-flex items-center gap-2 text-ink", className]}>
-  <!-- A T cut from tape: ticks down the stem and the metal end at its foot. -->
+  <!-- A T cut from tape, with the tape's metal end at its foot. -->
   <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" class="shrink-0">
     <path d="M3 3h26v8.5h-8.5V26h-9V11.5H3z" class="fill-accent"></path>
-    <path
-      d="M11.5 14h4.5v1.75h-4.5zM11.5 18h2.5v1.75h-2.5zM11.5 22h4.5v1.75h-4.5z"
-      class="fill-on-accent"></path>
     <path d="M10 25.5h12V29a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1z" class="fill-ink"></path>
   </svg>
   <span
