@@ -1,119 +1,58 @@
 ---
-// A tailor's tape measure drawn in CSS, laid flat across the full width of the page. Decorative.
-// It is to scale with the home page's resume sheet (see --page-scale), and prints one number,
-// reversed out in ink, where it marks something.
+// A short length of tailor's tape that marks one inch. Decorative; the 404 page uses it.
 interface Props {
   class?: string;
-  /**
-   * Where the `zero` inch line sits: the content's left edge, or the left edge of a resume sheet
-   * set flush right in the page container.
-   */
-  start?: "content" | "sheet";
-  /** The inch whose line sits at the start. */
-  zero: number;
-  /** The inch to mark. A half inch prints as ½. */
+  /** The inch to mark. It sits one inch in from the tape's left end. */
   mark: number;
 }
 
-const { class: className, start = "content", zero, mark } = Astro.props;
-const label = mark % 1 === 0.5 ? `${Math.floor(mark)}½` : String(mark);
+const { class: className, mark } = Astro.props;
 ---
 
-<div class:list={["tape", { "tape--sheet": start === "sheet" }, className]} aria-hidden="true">
-  <div class="tape__strip" style={{ "--tape-at": mark - zero }}>
-    <span class="tape__mark">{label}</span>
-  </div>
+<div class:list={["tape", className]} aria-hidden="true">
+  <span class="tape__mark">{mark}</span>
 </div>
 
 <style>
+  /* Inch, half, quarter and eighth ticks on both edges, phased so an inch line falls on the mark. */
   .tape {
-    --tape-gutter: var(--spacing-gutter);
-    --tape-height: 2.25rem;
-    --tape-inch: calc(80px * var(--page-scale));
-    --tape-content: calc(min(100cqw, var(--container-page)) - 2 * var(--tape-gutter));
-    --tape-edge: max(var(--tape-gutter), (100cqw - var(--container-page)) / 2 + var(--tape-gutter));
-    --tape-start: var(--tape-edge);
+    --inch: 6rem;
     --tick: var(--color-on-accent);
-    container-type: inline-size;
-    position: relative;
-    height: var(--tape-height);
-    overflow: clip;
-    background: var(--color-accent);
-    border-block: 1px solid var(--color-accent-edge);
-  }
-
-  .tape--sheet {
-    --tape-start: calc(var(--tape-edge) + var(--tape-content) - 680px * var(--page-scale));
-  }
-
-  /*
-   * Inch, half and quarter ticks on both edges, phased so an inch line falls on the start. Eighths
-   * join once an inch is wide enough to keep them apart.
-   */
-  .tape__strip {
-    position: relative;
-    height: 100%;
     --tick-line: linear-gradient(to right, var(--tick) 1px, transparent 1px);
+    position: relative;
+    height: 2.5rem;
+    overflow: clip;
+    border: 1px solid var(--color-accent-edge);
+    border-radius: var(--radius-control);
+    background-color: var(--color-accent);
     background-image:
       var(--tick-line), var(--tick-line), var(--tick-line), var(--tick-line), var(--tick-line),
-      var(--tick-line);
+      var(--tick-line), var(--tick-line), var(--tick-line);
     background-size:
-      var(--tape-inch) 44%,
-      var(--tape-inch) 44%,
-      calc(var(--tape-inch) / 2) 32%,
-      calc(var(--tape-inch) / 2) 32%,
-      calc(var(--tape-inch) / 4) 20%,
-      calc(var(--tape-inch) / 4) 20%;
-    background-position-x: var(--tape-start);
-    background-position-y: 0, 100%, 0, 100%, 0, 100%;
+      var(--inch) 42%,
+      var(--inch) 42%,
+      calc(var(--inch) / 2) 30%,
+      calc(var(--inch) / 2) 30%,
+      calc(var(--inch) / 4) 20%,
+      calc(var(--inch) / 4) 20%,
+      calc(var(--inch) / 8) 12%,
+      calc(var(--inch) / 8) 12%;
+    background-position-x: var(--inch);
+    background-position-y: 0, 100%, 0, 100%, 0, 100%, 0, 100%;
     background-repeat: repeat-x;
   }
 
   .tape__mark {
     position: absolute;
     top: 50%;
-    left: calc(var(--tape-start) + var(--tape-at) * var(--tape-inch));
+    left: var(--inch);
     translate: 0 -50%;
-    padding: 0.3125rem 0.5rem;
+    padding: 0.25rem 0.4375rem;
     background: var(--color-on-accent);
-    font-family: var(--font-sans);
     font-size: 0.9375rem;
     font-weight: 700;
     line-height: 1;
-    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     color: var(--color-accent);
-  }
-
-  /* On a sheet, the mark ends on its line so it stays over the page and on screen. */
-  .tape--sheet .tape__mark {
-    translate: -100% -50%;
-  }
-
-  @media (min-width: 48rem) {
-    .tape {
-      --tape-gutter: var(--spacing-gutter-wide);
-      --tape-height: 3rem;
-    }
-
-    .tape__strip {
-      background-image:
-        var(--tick-line), var(--tick-line), var(--tick-line), var(--tick-line), var(--tick-line),
-        var(--tick-line), var(--tick-line), var(--tick-line);
-      background-size:
-        var(--tape-inch) 44%,
-        var(--tape-inch) 44%,
-        calc(var(--tape-inch) / 2) 32%,
-        calc(var(--tape-inch) / 2) 32%,
-        calc(var(--tape-inch) / 4) 22%,
-        calc(var(--tape-inch) / 4) 22%,
-        calc(var(--tape-inch) / 8) 13%,
-        calc(var(--tape-inch) / 8) 13%;
-      background-position-y: 0, 100%, 0, 100%, 0, 100%, 0, 100%;
-    }
-
-    .tape__mark {
-      font-size: 1.0625rem;
-    }
   }
 </style>

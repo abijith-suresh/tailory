@@ -4,7 +4,8 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 ---
 
 <MarketingLayout title="Page not found" description="This page doesn’t exist." noindex>
-  <section class="mx-auto max-w-page px-gutter pt-10 pb-12 md:px-gutter-wide md:pt-16 md:pb-16">
+  <section class="mx-auto max-w-page px-gutter pt-12 pb-20 md:px-gutter-wide md:pt-20 md:pb-28">
+    <Tape class="mb-10 max-w-[19rem] md:mb-12" mark={404} />
     <h1 class="font-serif text-display font-normal text-balance">This page isn’t here.</h1>
     <p class="mt-6 max-w-md text-lead text-ink-muted">
       The link may be out of date. Your drafts are still in this browser.
@@ -14,7 +15,4 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
       <a href="/" class="link-underline text-body font-medium">Home page</a>
     </div>
   </section>
-
-  <!-- Inch 404 sits on the text's left edge. -->
-  <Tape class="mb-16 md:mb-20" zero={404} mark={404} />
 </MarketingLayout>
