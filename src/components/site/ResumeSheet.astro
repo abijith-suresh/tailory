@@ -9,6 +9,7 @@ import {
 } from "@/lib/resume/design";
 import { TEMPLATE_REGISTRY } from "@/lib/templates/registry";
 import { createSampleResume } from "@/lib/templates/sample-resume";
+import type { ResumeSchema } from "@/types/resume";
 import type { TemplateId } from "@/types/template";
 
 const PAGE_WIDTH = 680;
@@ -16,14 +17,12 @@ const PAGE_WIDTH = 680;
 interface Props {
   template?: TemplateId;
   class?: string;
-  /** Replace the title line, to show a copy of the sample tailored for another role. */
-  jobTitle?: string;
+  /** The resume to render. Defaults to the full sample resume. */
+  resume?: ResumeSchema;
 }
 
-const { template = "modern", class: className, jobTitle } = Astro.props;
+const { template = "modern", class: className, resume = createSampleResume() } = Astro.props;
 const design = resolveResumeDesignSettings({ template });
-const resume = createSampleResume();
-if (jobTitle) resume.basics.label = jobTitle;
 const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[template].label} template`;
 ---
 
@@ -49,7 +48,6 @@ const label = `${resume.basics.name}'s sample resume in the ${TEMPLATE_REGISTRY[
     height: calc(842px * var(--sheet-scale));
     overflow: hidden;
     background: var(--color-sheet);
-    outline: 1px solid var(--color-edge);
     box-shadow: var(--shadow-sheet);
   }
 

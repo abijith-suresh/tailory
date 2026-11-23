@@ -26,31 +26,27 @@ const footerLinks = [
 ---
 
 <Layout title={title} description={description} noindex={noindex}>
-  <div class="flex min-h-screen flex-col bg-surface text-ink">
+  <div class="flex min-h-screen flex-col bg-canvas text-fg">
     <a
       href="#main"
-      class="sr-only z-50 rounded-button-sm bg-ink px-4 py-2 text-ui-sm text-surface focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      class="sr-only z-50 rounded-button bg-fg px-4 py-2 text-ui-sm text-canvas focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
     >
       Skip to content
     </a>
 
-    <header class="sticky top-0 z-40 border-b border-rule bg-surface/95 backdrop-blur-sm">
-      <nav
-        class="mx-auto flex h-15 max-w-page items-center gap-4 px-4 md:gap-8 md:px-10"
-        aria-label="Main"
-      >
-        <a href="/" class="mr-auto flex rounded-xs" aria-label="Tailory home">
+    <header class="site-x">
+      <nav class="flex h-16 items-center gap-1 md:gap-2" aria-label="Main">
+        <a href="/" class="mr-auto flex min-h-11 items-center rounded-sm" aria-label="Tailory home">
           <Logo compact />
         </a>
-
-        <ul class="flex items-center gap-4 md:gap-8">
+        <ul class="flex items-center gap-1">
           {
             navLinks.map((link) => (
               <li>
                 <a
                   href={link.href}
                   aria-current={path === link.href ? "page" : undefined}
-                  class="inline-flex min-h-11 items-center text-ui-sm text-ink-muted underline-offset-8 transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-1"
+                  class="btn-quiet h-11 px-3 text-ui-sm underline-offset-8 md:h-9 aria-[current=page]:underline aria-[current=page]:decoration-primary aria-[current=page]:decoration-2"
                 >
                   {link.label}
                 </a>
@@ -58,8 +54,9 @@ const footerLinks = [
             ))
           }
         </ul>
-
-        <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm md:h-9">Open editor</a>
+        <a href="/editor" class="btn-primary ml-1 h-11 px-4 text-ui-sm md:ml-2 md:h-9">
+          Open editor
+        </a>
       </nav>
     </header>
 
@@ -67,36 +64,38 @@ const footerLinks = [
       <slot />
     </main>
 
-    <footer class="mx-auto w-full max-w-page px-4 md:px-10">
+    <!-- Phones: the logo and licence share a row, with the links below. From md, one row. -->
+    <footer class="border-t border-line">
       <div
-        class="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 border-t border-rule pt-10 pb-12 md:pb-16"
+        class="site-x grid grid-cols-[1fr_auto] items-center py-6 max-md:pb-8 md:flex md:justify-between md:gap-12"
       >
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <a href="/" class="inline-flex rounded-xs" aria-label="Tailory home">
-            <Logo />
-          </a>
-          <p class="text-body-sm text-ink-subtle">MIT licensed, provided as is.</p>
+        <a href="/" class="flex min-h-11 w-fit items-center rounded-sm" aria-label="Tailory home">
+          <Logo />
+        </a>
+        <div class="contents text-body-sm text-fg-muted md:flex md:items-center md:gap-3">
+          <p>MIT licensed</p>
+          <span class="max-md:hidden" aria-hidden="true">·</span>
+          <nav class="col-span-2" aria-label="Footer">
+            <ul class="flex flex-wrap items-center gap-x-3">
+              {
+                footerLinks.map((link, i) => (
+                  <li class="flex items-center gap-x-3">
+                    {i > 0 && <span aria-hidden="true">·</span>}
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex min-h-11 items-center gap-1 transition-colors hover:text-fg"
+                    >
+                      {link.label}
+                      <ExternalIcon />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
         </div>
-
-        <nav aria-label="Footer">
-          <ul class="flex flex-wrap gap-x-8">
-            {
-              footerLinks.map((link) => (
-                <li>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex min-h-11 items-center gap-1 text-ui-sm text-ink-muted transition-colors hover:text-ink"
-                  >
-                    {link.label}
-                    <ExternalIcon />
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
       </div>
     </footer>
   </div>

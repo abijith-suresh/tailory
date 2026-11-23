@@ -1,98 +1,87 @@
 ---
-import HeroVisual from "@/components/site/HeroVisual.astro";
-import ProseSection from "@/components/site/ProseSection.astro";
+import VersionBoard from "@/components/site/VersionBoard.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
-const steps = [
+const points = [
   {
     title: "Start from what you have",
-    text: "Open a PDF, DOCX, or JSON resume up to 10 MB, and Tailory reads it in this tab. Or start from a blank page.",
+    text: "Open a PDF, DOCX or JSON resume. Tailory reads it in this tab and fills in the sections.",
   },
   {
-    title: "Edit with a live preview",
-    text: "Each section has its own form, and the preview updates as you type. Switch templates without retyping.",
+    title: "One master, many versions",
+    text: "Each job gets its own version. Edit a role once and every version that uses it updates.",
   },
   {
-    title: "Export a PDF or JSON",
-    text: "The PDF holds selectable text, not a picture of it. JSON keeps your content, so you can open it again.",
-  },
-  {
-    title: "Saved in this browser",
-    text: "Your work autosaves, and you can keep named drafts. Clearing site data deletes them, so export JSON to keep a copy.",
+    title: "Export a real PDF",
+    text: "Selectable text, set to the page count you choose. Or export JSON and pick it up again later.",
   },
 ];
 
 const imports = [
-  {
-    format: "JSON",
-    how: "The most reliable. Tailory reads each supported section field by field.",
-  },
-  { format: "DOCX", how: "Tailory reads the text and sorts it into sections. Check them after." },
-  {
-    format: "PDF",
-    how: "Best effort, and text PDFs only. A scanned PDF is a picture of text, which Tailory can’t read.",
-  },
+  { format: "JSON", how: "Read field by field. The most reliable." },
+  { format: "DOCX", how: "Text sorted into sections. Check them after." },
+  { format: "PDF", how: "Text PDFs only, best effort. Scanned pages can’t be read." },
 ];
 ---
 
 <MarketingLayout
-  title="Tailory · The resume editor that stays in your browser"
-  description="Import a PDF, DOCX, or JSON resume, edit it with a live preview, and export a PDF or JSON. Your resume stays in your browser."
+  title="Tailory · Cut your resume to fit the job"
+  description="Keep your whole career in one place and choose what goes into each application. Import a PDF, DOCX or JSON resume and export a text PDF. Nothing leaves your browser."
 >
-  <!--
-    Hero. From 64rem it uses the two-column grid of the section below: the headline and the four
-    steps fill the left column, beside the page.
-  -->
   <section
-    class="mx-auto grid max-w-page gap-y-12 px-4 pt-12 md:px-10 md:pt-16 lg:grid-cols-[minmax(0,var(--container-rail))_minmax(0,1fr)] lg:grid-rows-[auto_1fr_auto] lg:gap-x-10 lg:pt-20"
+    class="site-x grid gap-10 pt-10 pb-16 md:gap-12 md:pt-16 md:pb-20 xl:grid-cols-[minmax(0,--spacing(72))_minmax(0,1fr)] xl:items-center"
   >
-    <div class="lg:col-start-1 lg:row-start-1">
-      <h1 class="max-w-measure text-heading-3 text-balance md:text-heading-1">
-        The resume editor that stays in your browser.
+    <div class="lg:grid lg:grid-cols-2 lg:items-end lg:gap-12 xl:block">
+      <h1
+        class="max-w-measure text-heading-3 text-balance max-[24rem]:text-heading-4 md:text-heading-1"
+      >
+        Cut your resume to fit the job.
       </h1>
-      <p class="mt-4 text-body-lg text-pretty text-ink-muted md:mt-6">
-        No account, no upload. Free and open source.
-      </p>
-      <a href="/editor" class="btn-primary mt-8 h-11 px-5 text-ui-sm md:h-9">Open editor</a>
+      <div>
+        <p class="mt-4 max-w-measure text-body-lg text-pretty text-fg-muted md:mt-6 lg:mt-0 xl:mt-6">
+          Keep your whole career in one place, then choose what goes into each application. No
+          account, and nothing leaves your browser.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3 lg:mt-6 xl:mt-8">
+          <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm md:h-9">Open editor</a>
+          <a href="/editor" class="btn-quiet h-11 px-4 text-ui-sm md:h-9">
+            Import a resume <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
     </div>
 
-    <figure class="lg:col-start-2 lg:row-span-3 lg:row-start-1">
-      <HeroVisual />
-      <figcaption class="mt-4 text-body-sm text-ink-subtle md:mt-10">
-        A sample resume in the editor’s Modern template.
-      </figcaption>
-    </figure>
-
-    <ul
-      class="divide-y divide-rule border-t border-ink lg:col-start-1 lg:row-start-2 lg:self-end"
-    >
-      {
-        steps.map((step) => (
-          <li class="py-4 lg:py-3">
-            <h2 class="text-heading-6 text-balance">{step.title}</h2>
-            <p class="mt-1 max-w-measure text-body-md text-pretty text-ink-muted lg:text-body-sm">
-              {step.text}
-            </p>
-          </li>
-        ))
-      }
-    </ul>
+    <VersionBoard />
   </section>
 
-  <div class="mx-auto max-w-page px-4 pt-16 pb-12 md:px-10 md:pb-16 lg:pt-20">
-    <div class="border-t border-ink" aria-hidden="true"></div>
+  <section class="border-t border-line">
+    <div class="site-x grid gap-8 py-12 md:grid-cols-3 md:gap-12 md:py-16">
+      {
+        points.map((point) => (
+          <div>
+            <h2 class="text-heading-6 text-balance">{point.title}</h2>
+            <p class="mt-2 max-w-measure text-body-md text-pretty text-fg-muted">{point.text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
 
-    <ProseSection title="What imports well">
-      <dl class="divide-y divide-rule">
-        {
-          imports.map((item) => (
-            <div class="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[--spacing(18)_minmax(0,1fr)] sm:gap-4">
-              <dt class="text-ui-md">{item.format}</dt>
-              <dd class="max-w-measure text-pretty text-ink-muted">{item.how}</dd>
-            </div>
-          ))
-        }
-      </dl>
-    </ProseSection>
-  </div>
+  <section class="border-t border-line">
+    <div class="site-x py-12 md:py-16">
+      <div class="split gap-y-4 md:items-baseline">
+        <h2 class="text-heading-5 text-balance">What imports well</h2>
+        <dl class="grid grid-cols-[--spacing(20)_minmax(0,1fr)] text-body-md md:grid-cols-[--spacing(24)_minmax(0,1fr)]">
+          {
+            imports.map((item) => (
+              <>
+                <dt class="border-b border-line py-3 text-ui-md">{item.format}</dt>
+                <dd class="border-b border-line py-3 text-pretty text-fg-muted">{item.how}</dd>
+              </>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
 </MarketingLayout>

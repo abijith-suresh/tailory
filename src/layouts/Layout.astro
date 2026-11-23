@@ -34,7 +34,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <meta name="robots" content={noindex ? "noindex" : "index, follow"} />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f4f3ef" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -47,7 +47,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Tailory: the headline The resume editor that stays in your browser, above a sample resume page with crop marks at its corners."
+      content="Tailory: the headline Cut your resume to fit the job, beside a list of resume highlights with some ticked and the resume page that shows only those."
     />
 
     <!-- Twitter Card -->
@@ -59,10 +59,9 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preload" href="/fonts/Newsreader-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link
       rel="preload"
-      href="/fonts/SchibstedGrotesk-latin.woff2"
+      href="/fonts/HankenGrotesk-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -72,7 +71,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
     <title>{pageTitle}</title>
     <slot name="head" />
   </head>
-  <body class="min-h-screen bg-surface font-sans text-ink antialiased">
+  <body class="min-h-screen bg-canvas font-sans text-fg antialiased">
     <slot />
   </body>
 </html>

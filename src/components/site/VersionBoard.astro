@@ -1,0 +1,157 @@
+---
+// Static picture of one resume version: the master list with the highlights this version keeps
+// ticked, beside the real render of the resume with only those highlights.
+import ResumeSheet from "@/components/site/ResumeSheet.astro";
+import Tickbox from "@/components/site/Tickbox.astro";
+import { createSampleResume } from "@/lib/templates/sample-resume";
+
+interface Item {
+  /** Short label for the list. */
+  label: string;
+  keep: boolean;
+}
+
+// One entry per sample highlight, in the same order as the sample resume.
+const workItems: Item[][] = [
+  [
+    { label: "Redesigned scheduling for 4,000 field teams", keep: true },
+    { label: "Built the shared design system", keep: true },
+    { label: "Weekly design critique", keep: false },
+  ],
+  [
+    { label: "Cut time to first report to 40 min", keep: true },
+    { label: "Billing, roles and audit log", keep: false },
+    { label: "Ran 60+ customer interviews", keep: true },
+  ],
+];
+
+const resume = createSampleResume();
+const groups = [
+  ...resume.work.map((work, i) => ({ name: work.name, items: workItems[i] ?? [] })),
+  {
+    name: "Projects",
+    items: resume.projects.map((project) => ({ label: project.name, keep: true })),
+  },
+];
+
+resume.work = resume.work.map((work, i) => ({
+  ...work,
+  highlights: work.highlights?.filter((_, j) => workItems[i]?.[j]?.keep ?? true),
+}));
+
+const highlights = workItems.flat();
+const kept = highlights.filter((item) => item.keep).length;
+---
+
+<figure
+  class="version-board grid gap-4 overflow-hidden rounded-2xl bg-surface p-4 ring-1 ring-line md:grid-cols-[minmax(0,1fr)_auto] md:gap-6"
+>
+  <figcaption class="sr-only">
+    An example version of a resume for a product designer job at Linear: {kept} of
+    {highlights.length} highlights are ticked, and the resume beside the list shows only those.
+  </figcaption>
+
+  <div class="flex flex-col" aria-hidden="true">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-2 pt-1">
+      <span class="text-ui-sm">Product designer · Linear</span>
+      <span class="shrink-0 font-mono text-ui-xs text-keep">{kept} of {highlights.length} kept</span>
+    </div>
+
+    <div class="mb-4">
+      {
+        groups.map((group) => (
+        <div class="mt-3">
+          <p class="px-2 py-1 text-ui-xs text-fg-subtle">{group.name}</p>
+          <ul>
+            {group.items.map((item) => (
+              <li
+                class:list={[
+                  "flex items-start gap-3 rounded-lg p-2 text-body-sm",
+                  { "text-fg-subtle": !item.keep },
+                ]}
+              >
+                <Tickbox on={item.keep} />
+                <span class:list={["text-pretty", { "line-through decoration-cut": !item.keep }]}>
+                  {item.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-auto flex justify-between gap-4 border-t border-line px-2 pt-3 pb-1 text-ui-xs">
+      <span class="text-fg-subtle">Target</span>
+      <span>1 page · fits</span>
+    </div>
+  </div>
+
+  <!-- On phones the page is cropped by the card's bottom edge, so it shows the part that changed. -->
+  <div class="version-board__sheet max-md:border-t max-md:border-line max-md:pt-4 md:self-start">
+    <ResumeSheet resume={resume} class="mx-auto" />
+  </div>
+</figure>
+
+<style>
+  /* The page's scale at each width, so the sheet fills its column without overflowing it. */
+  .version-board {
+    --sheet-scale: 0.37;
+  }
+
+  .version-board :global(.resume-sheet) {
+    --sheet-scale: inherit;
+  }
+
+  @media (max-width: 47.99rem) {
+    .version-board__sheet {
+      height: calc(842px * var(--sheet-scale) * 0.62 + var(--spacing) * 4);
+      margin-bottom: calc(var(--spacing) * -4);
+      overflow: hidden;
+    }
+  }
+
+  @media (min-width: 22.5rem) {
+    .version-board {
+      --sheet-scale: 0.43;
+    }
+  }
+
+  @media (min-width: 24rem) {
+    .version-board {
+      --sheet-scale: 0.47;
+    }
+  }
+
+  @media (min-width: 27rem) {
+    .version-board {
+      --sheet-scale: 0.52;
+    }
+  }
+
+  @media (min-width: 30rem) {
+    .version-board {
+      --sheet-scale: 0.6;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .version-board {
+      --sheet-scale: 0.5;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .version-board {
+      --sheet-scale: 0.56;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .version-board {
+      --sheet-scale: 0.6;
+    }
+  }
+
+</style>

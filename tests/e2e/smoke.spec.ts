@@ -3,14 +3,25 @@ import { expect, test } from "@playwright/test";
 test("home page renders the hero", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page).toHaveTitle("Tailory · The resume editor that stays in your browser");
+  await expect(page).toHaveTitle("Tailory · Cut your resume to fit the job");
 
   const heading = page.getByRole("heading", { level: 1 });
   await expect(heading).toBeVisible();
-  await expect(heading).toHaveText("The resume editor that stays in your browser.");
+  await expect(heading).toHaveText("Cut your resume to fit the job.");
   await expect(
     page.getByRole("img", { name: /sample resume in the Modern template/ })
   ).toBeVisible();
+});
+
+test("both hero actions open the editor", async ({ page }) => {
+  await page.goto("/");
+
+  const main = page.getByRole("main");
+  await expect(main.getByRole("link", { name: "Open editor" })).toHaveAttribute("href", "/editor");
+  await expect(main.getByRole("link", { name: /Import a resume/ })).toHaveAttribute(
+    "href",
+    "/editor"
+  );
 });
 
 for (const path of ["/faq", "/privacy"]) {
