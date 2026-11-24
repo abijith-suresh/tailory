@@ -16,6 +16,14 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    {
+      // Marketing pages only. The editor flow and the desktop header assertions
+      // assume a desktop layout, so they stay on the desktop projects.
+      name: "mobile-chromium",
+      testMatch: "**/smoke.spec.ts",
+      grepInvert: /GitHub links sit in the footer/,
+      use: { ...devices["Pixel 7"] },
+    },
   ],
   webServer: {
     command: `bun run preview --host 127.0.0.1 --port ${port}`,

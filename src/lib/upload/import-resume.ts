@@ -1,5 +1,5 @@
 import { parseJsonResumeImport } from "@/lib/resume/json";
-import { validateUploadFileContent, type SupportedUploadExtension } from "@/lib/upload/guardrails";
+import { type SupportedUploadExtension, validateUploadFileContent } from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
 import type { ResumeSchema } from "@/types/resume";
 

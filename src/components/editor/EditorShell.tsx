@@ -1,7 +1,7 @@
 import { type Component, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
-import { SECTION_DEFINITIONS, TOTAL_SECTIONS, getSectionDefinition } from "@/lib/sections/registry";
+import { getSectionDefinition, SECTION_DEFINITIONS, TOTAL_SECTIONS } from "@/lib/sections/registry";
 import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
