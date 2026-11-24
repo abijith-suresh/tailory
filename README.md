@@ -8,6 +8,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - **Structured editing**: Edit basics, summary, work, education, skills, projects, certifications, languages, interests, references, volunteer work, awards, and publications.
 - **Live preview**: See the current resume render update as you edit.
 - **Templates**: Switch the layout at any time without retyping your content.
+- **Page target**: Pick how many pages the master or a version should fit on. If it runs over, Tailory tightens spacing, then text size a little, within each template's limits, and says so with an Undo. If it still runs over, the preview marks where the next page starts and says roughly how many lines are over. It never drops content. The preview and the PDF use the same tightening and the same page breaks.
 - **Export**: Download a PDF or export the current resume as JSON.
 - **Local drafts**: Autosave and named drafts are stored in IndexedDB on your device. Saving a draft under an existing name updates it. Importing a file or loading a draft first saves the resume you were editing as a draft.
 
@@ -17,7 +18,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - Several imported fields also have no editor controls yet: social profiles, street address and postal code, work summaries, project dates/keywords/roles, education URLs and courses, and skill levels. They are preserved in drafts and JSON round-trips but cannot be edited in the form UI.
 - JSON Resume support is implemented through Tailory's normalization layer; it is **not yet formally validated against the official schema package**
 - Tailory is browser-only and privacy-first, but it is **not an offline-first PWA**. There is no service worker, so the first load still depends on normal browser and network behavior.
-- The preview is designed to stay close to export output, but the exported PDF remains the final source of truth
+- The preview draws the same document the PDF is printed from, and its page count and page breaks come from the PDF's own layout. Browser and PDF text shaping can still differ slightly, so the exported PDF remains the final source of truth
 - On touch-first devices (phones and tablets with no mouse or trackpad) that support the Web Share API, exporting a PDF may open the system share sheet instead of downloading a file. Desktop browsers always download.
 - Tailory does not score resumes or guarantee ATS or hiring outcomes. PDF export is text-based, but how an employer's system reads it is outside Tailory's control.
 
