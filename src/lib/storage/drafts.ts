@@ -22,6 +22,7 @@ export function cloneResumeData(data: ResumeSchema): ResumeSchema {
 
 export async function restoreAutosaveDraft(): Promise<{
   available: boolean;
+  readFailed?: boolean;
   draft?: ResumeDraft;
   snapshotJson?: string;
 }> {
@@ -32,6 +33,10 @@ export async function restoreAutosaveDraft(): Promise<{
   }
 
   const draft = await getDraft(AUTOSAVE_DRAFT_ID);
+
+  if (draft === null) {
+    return { available: true, readFailed: true };
+  }
 
   if (!draft) {
     return { available: true };
@@ -66,6 +71,19 @@ export async function saveAutosaveDraft(snapshotJson: string): Promise<boolean> 
     updatedAt: now,
     resumeData: normalizedData,
   });
+}
+
+let persistRequested = false;
+
+/** Asks the browser once not to clear saved drafts when it runs low on space. */
+export function requestPersistentStorage() {
+  if (persistRequested) return;
+  persistRequested = true;
+  try {
+    void navigator.storage?.persist?.().catch(() => undefined);
+  } catch {
+    // Not supported; drafts still work without it.
+  }
 }
 
 /** Saves a named draft, updating the existing draft with the same name instead of adding another. */

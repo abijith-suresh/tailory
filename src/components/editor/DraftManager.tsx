@@ -10,8 +10,15 @@ import {
 import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
 import { AUTOSAVE_DRAFT_ID, deleteDraft, listDrafts, type ResumeDraft } from "@/lib/storage/db";
-import { restoreAutosaveDraft, saveAutosaveDraft, saveNamedDraft } from "@/lib/storage/drafts";
-import { loadResume, resume, setDraftStorageError } from "@/store/resume";
+import {
+  requestPersistentStorage,
+  restoreAutosaveDraft,
+  saveAutosaveDraft,
+  saveNamedDraft,
+} from "@/lib/storage/drafts";
+import { joinEditorTabs } from "@/lib/storage/editor-tabs";
+import { loadResume, resume, setDraftStorageError, setOtherTabActive } from "@/store/resume";
+import { EMPTY_RESUME } from "@/types/resume";
 import { replaceResume } from "./replace-resume";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -21,6 +28,9 @@ const SAVE_FAILED_MESSAGE =
   "Couldn't save your changes in this browser. Export JSON to keep a copy.";
 const STORAGE_UNAVAILABLE_MESSAGE =
   "Drafts aren't available in this browser, so changes won't be saved. Export JSON to keep a copy.";
+const READ_FAILED_MESSAGE =
+  "Couldn't load your saved resume, so changes here won't be saved. Reload the page to try again.";
+const EMPTY_SNAPSHOT = serializeNormalizedResume(EMPTY_RESUME);
 
 interface DraftManagerProps {
   dark?: boolean;
@@ -32,6 +42,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   const [listError, setListError] = createSignal("");
   const [showList, setShowList] = createSignal(false);
   const [storageAvailable, setStorageAvailable] = createSignal(true);
+  const [isActiveTab, setIsActiveTab] = createSignal(true);
   const [hasHydratedAutosave, setHasHydratedAutosave] = createSignal(false);
   const [lastAutosaveSnapshot, setLastAutosaveSnapshot] = createSignal<string>();
   const [popupTop, setPopupTop] = createSignal(0);
@@ -67,6 +78,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     setStatus("saved");
     setDraftStorageError("");
     queueStatusReset();
+    requestPersistentStorage();
   };
 
   const performSave = async (snapshot: string) => {
@@ -107,28 +119,52 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   window.addEventListener("pagehide", flushAutosave);
   document.addEventListener("visibilitychange", flushWhenHidden);
 
-  onMount(async () => {
+  // Loads the saved resume and turns autosave on. Autosave stays off when the saved resume can't be
+  // read, so an empty editor never overwrites it.
+  const restoreFromStorage = async () => {
     const restored = await restoreAutosaveDraft();
     if (isDisposed) return;
     setStorageAvailable(restored.available);
 
-    if (!restored.available) {
+    if (!restored.available || restored.readFailed) {
+      setHasHydratedAutosave(false);
       setStatus("error");
-      setDraftStorageError(STORAGE_UNAVAILABLE_MESSAGE);
+      setDraftStorageError(restored.available ? READ_FAILED_MESSAGE : STORAGE_UNAVAILABLE_MESSAGE);
       return;
     }
 
-    if (restored.draft) {
-      setLastAutosaveSnapshot(restored.snapshotJson);
-      loadResume(restored.draft.resumeData);
-    }
-
+    setDraftStorageError("");
+    if (restored.draft) loadResume(restored.draft.resumeData);
+    // Only save once the resume differs from what is stored, or from the empty resume when
+    // nothing is stored yet.
+    setLastAutosaveSnapshot(restored.snapshotJson ?? EMPTY_SNAPSHOT);
     setHasHydratedAutosave(true);
+  };
+
+  // Only the most recently opened editor tab autosaves. Older tabs stop saving until the user
+  // takes over, which reloads the resume from storage.
+  const takeOver = async () => {
+    editorTabs.claim();
+    setOtherTabActive(null);
+    await restoreFromStorage();
+    if (!isDisposed) setIsActiveTab(true);
+  };
+
+  const editorTabs = joinEditorTabs(() => {
+    if (isDisposed) return;
+    flushAutosave();
+    setIsActiveTab(false);
+    setOtherTabActive({ takeOver: () => void takeOver() });
+  });
+
+  onMount(async () => {
+    editorTabs.claim();
+    await restoreFromStorage();
   });
 
   // Auto-save on store changes (debounced)
   createEffect(() => {
-    if (!hasHydratedAutosave() || !storageAvailable()) return;
+    if (!hasHydratedAutosave() || !storageAvailable() || !isActiveTab()) return;
 
     // Reactive read of the resume store fields that trigger saves
     const snapshot = serializeNormalizedResume(resume);
@@ -226,6 +262,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
     window.removeEventListener("pagehide", flushAutosave);
     document.removeEventListener("visibilitychange", flushWhenHidden);
+    editorTabs.close();
+    setOtherTabActive(null);
   });
 
   const btnClass = () =>
