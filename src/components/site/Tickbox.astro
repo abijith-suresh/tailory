@@ -1,0 +1,40 @@
+---
+// A drawn tickbox for the site's pictures of a resume version. Decorative; not a form control.
+interface Props {
+  on?: boolean;
+}
+
+const { on = false } = Astro.props;
+---
+
+<span class:list={["tickbox", { "tickbox--on": on }]} aria-hidden="true"></span>
+
+<style>
+  .tickbox {
+    position: relative;
+    flex: none;
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+    margin-top: 2px;
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0 1.5px var(--color-cut);
+  }
+
+  .tickbox--on {
+    background: var(--color-keep);
+    box-shadow: none;
+  }
+
+  /* The tick, drawn as the two lower edges of a rotated box. */
+  .tickbox--on::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid var(--color-on-primary);
+    border-width: 0 2px 2px 0;
+    rotate: 45deg;
+  }
+</style>
