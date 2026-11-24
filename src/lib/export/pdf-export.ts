@@ -1,32 +1,22 @@
-import type { TDocumentDefinitions } from "pdfmake/interfaces";
+import { fitResume } from "@/lib/fit/fit";
+import { measurePages } from "@/lib/fit/measure-pdf";
+import { UNTIGHTENED } from "@/lib/fit/steps";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
-import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
-import type { ResumeSectionKey } from "@/types/document";
+import type { PageFit, ResumeSectionKey } from "@/types/document";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { downloadBlob, isTouchFirstDevice, sanitizeFilenameBase } from "./download";
-import { type PdfMakeFontRuntime, registerPdfFonts } from "./fonts";
-
-let fontRegistrationPromise: Promise<void> | null = null;
-
-async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promise<void> {
-  if (!fontRegistrationPromise) {
-    fontRegistrationPromise = registerPdfFonts(pdfMake);
-  }
-
-  return fontRegistrationPromise;
-}
+import { buildPdfDocument } from "./pdf-document";
+import { loadPdfMake } from "./pdfmake-runtime";
 
 function getFilename(resume: ResumeSchema, versionName?: string): string {
   const version = versionName?.trim() ? `_${sanitizeFilenameBase(versionName)}` : "";
   return `${sanitizeFilenameBase(resume.basics.name)}${version}_resume.pdf`;
 }
 
-interface BrowserPdfDocument {
-  getBlob: () => Promise<Blob>;
-}
-
 interface PdfExportOptions {
   accentColor?: string;
+  /** A page target to fit, tightened as the preview tightens it. */
+  pageFit?: PageFit;
   /** A version's section order; see `resolveVersion` for the resume itself. */
   sectionOrder?: readonly ResumeSectionKey[];
   /** Added to the file name, so each version's PDF gets its own. */
@@ -76,19 +66,20 @@ export async function exportPDF(
     throw new ResumeExportValidationError(validation.message ?? "Resume is not ready to export.");
   }
 
-  // pdfmake accesses `window` on import — must be dynamic inside a browser callback
-  const pdfMakeModule = await import("pdfmake/build/pdfmake");
-  const pdfMake = pdfMakeModule.default as PdfMakeFontRuntime & {
-    createPdf: (docDefinition: TDocumentDefinitions) => BrowserPdfDocument;
-  };
-
-  await ensurePdfMakeFontsRegistered(pdfMake);
-
-  const docDef = loadPdfTemplateRenderer(template)(validation.normalizedResume, {
-    accentColor: options.accentColor,
-    sectionOrder: options.sectionOrder,
-  });
-  const filename = getFilename(validation.normalizedResume, options.versionName);
+  const pdfMake = await loadPdfMake();
+  const normalized = validation.normalizedResume;
+  const { accentColor, sectionOrder, pageFit } = options;
+  // The same search the preview runs, so the PDF has the pages the preview shows.
+  const fitStep = pageFit
+    ? (
+        await fitResume(
+          { resume: normalized, template, accentColor, sectionOrder, ...pageFit },
+          measurePages
+        )
+      ).step
+    : UNTIGHTENED;
+  const docDef = buildPdfDocument(normalized, template, { accentColor, sectionOrder, fitStep });
+  const filename = getFilename(normalized, options.versionName);
   const blob = await pdfMake.createPdf(docDef).getBlob();
 
   if (await maybeSharePdf(blob, filename)) {

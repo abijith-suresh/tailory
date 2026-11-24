@@ -1,0 +1,82 @@
+{
+  "basics": {
+    "name": "Ada Fixture",
+    "label": "Software Engineer",
+    "email": "ada.fixture@example.com",
+    "phone": "+1 555-010-0199",
+    "summary": "Builds small, reliable tools that run in the browser. Cares about clear writing, fast pages and privacy."
+  },
+  "work": [
+    {
+      "name": "Company A",
+      "position": "Senior Software Engineer",
+      "startDate": "2016-01",
+      "endDate": "2017-12",
+      "highlights": [
+        "Led work item 1 at Company A, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 2 at Company A, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 3 at Company A, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 4 at Company A, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 5 at Company A, shipping a faster editor and a calmer review process for the team."
+      ]
+    },
+    {
+      "name": "Company B",
+      "position": "Senior Software Engineer",
+      "startDate": "2018-01",
+      "endDate": "2019-12",
+      "highlights": [
+        "Led work item 1 at Company B, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 2 at Company B, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 3 at Company B, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 4 at Company B, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 5 at Company B, shipping a faster editor and a calmer review process for the team."
+      ]
+    },
+    {
+      "name": "Company C",
+      "position": "Senior Software Engineer",
+      "startDate": "2020-01",
+      "endDate": "2021-12",
+      "highlights": [
+        "Led work item 1 at Company C, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 2 at Company C, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 3 at Company C, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 4 at Company C, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 5 at Company C, shipping a faster editor and a calmer review process for the team."
+      ]
+    },
+    {
+      "name": "Company D",
+      "position": "Senior Software Engineer",
+      "startDate": "2022-01",
+      "endDate": "2023-12",
+      "highlights": [
+        "Led work item 1 at Company D, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 2 at Company D, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 3 at Company D, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 4 at Company D, shipping a faster editor and a calmer review process for the team.",
+        "Led work item 5 at Company D, shipping a faster editor and a calmer review process for the team."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Example University",
+      "area": "Computer Science",
+      "studyType": "BSc",
+      "startDate": "2012-09",
+      "endDate": "2016-06"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Languages",
+      "keywords": ["TypeScript", "Rust", "Go"]
+    },
+    {
+      "name": "Tools",
+      "keywords": ["Solid", "Astro", "Playwright"]
+    }
+  ]
+}

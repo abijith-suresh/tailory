@@ -13,7 +13,7 @@ type DeepPartial<T> = {
 const addFonts = vi.fn();
 const addVirtualFileSystem = vi.fn();
 const getBlob = vi.fn(async () => new Blob(["pdf"], { type: "application/pdf" }));
-const createPdf = vi.fn(() => ({ getBlob }));
+const createPdf = vi.fn((_doc: unknown) => ({ getBlob }));
 const share = vi.fn();
 const canShare = vi.fn(() => false);
 const createObjectURL = vi.fn(() => "blob:tailory-pdf");
@@ -132,6 +132,24 @@ describe("exportPDF", () => {
         Roboto: expect.objectContaining({ normal: "Roboto-Regular.ttf" }),
       })
     );
+  });
+
+  it("prints sections in the version's order", async () => {
+    const { exportPDF } = await import("./pdf-export");
+    const resume = createResume({
+      basics: { name: "Jane Doe", summary: "Builds tools." },
+      skills: [{ id: "skill-1", name: "TypeScript" }],
+    });
+    const titles = () =>
+      collectNestedValues(createPdf.mock.calls.at(-1)?.[0]).filter(
+        (value) => value === "SUMMARY" || value === "SKILLS"
+      );
+
+    await exportPDF(resume, "modern");
+    expect(titles()).toEqual(["SUMMARY", "SKILLS"]);
+
+    await exportPDF(resume, "modern", { sectionOrder: ["skills", "summary"] });
+    expect(titles()).toEqual(["SKILLS", "SUMMARY"]);
   });
 
   it("rejects obviously empty resumes before invoking pdfmake", async () => {
