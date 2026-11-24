@@ -1,0 +1,17 @@
+---
+// Title block for text pages. Shares the page container with ProseSection so left edges line up.
+interface Props {
+  title: string;
+  lead?: string;
+  meta?: string;
+}
+
+const { title, lead, meta } = Astro.props;
+---
+
+<header class="site-x pt-10 md:pt-16">
+  <h1 class="text-heading-4 text-balance md:text-heading-3">{title}</h1>
+  {lead && <p class="mt-4 max-w-measure text-body-lg text-pretty text-fg-muted">{lead}</p>}
+  {meta && <p class="mt-3 text-body-sm text-fg-muted">{meta}</p>}
+  <div class="split mt-8 border-t border-line md:mt-12" aria-hidden="true"></div>
+</header>

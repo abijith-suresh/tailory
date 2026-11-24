@@ -3,14 +3,14 @@ import { type Component, createSignal, For, Show } from "solid-js";
 import { downloadBlob, sanitizeFilenameBase } from "@/lib/export/download";
 import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
-import { validateUploadFile } from "@/lib/upload/guardrails";
-import { importResumeFile } from "@/lib/upload/import-resume";
 import {
-  SECTION_DEFINITIONS,
-  TOTAL_SECTIONS,
   getCompletedSectionsCount,
   isSectionComplete,
+  SECTION_DEFINITIONS,
+  TOTAL_SECTIONS,
 } from "@/lib/sections/registry";
+import { validateUploadFile } from "@/lib/upload/guardrails";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import {
   activeSection,
   resume,
@@ -128,7 +128,7 @@ const CommandBar: Component = () => {
       <a
         href="/"
         class="mr-2 shrink-0 text-lg font-bold tracking-tight text-white"
-        style={{ "font-family": "'Lora', serif" }}
+        style={{ "font-family": "var(--font-sans)" }}
         aria-label="Tailory home"
       >
         Tailory
@@ -167,7 +167,6 @@ const CommandBar: Component = () => {
             dominant-baseline="central"
             fill="white"
             font-size="9"
-            font-family="'DM Sans', sans-serif"
             font-weight="600"
           >
             {completedCount()}/{TOTAL_SECTIONS}

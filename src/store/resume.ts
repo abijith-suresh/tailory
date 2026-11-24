@@ -3,6 +3,7 @@ import { createStore } from "solid-js/store";
 
 import { DEFAULT_RESUME_ACCENT_COLOR } from "@/lib/resume/design";
 import { normalizeResume } from "@/lib/resume/normalize";
+import type { ImportFeedback } from "@/lib/upload/import-resume";
 import type { ResumeSchema, SectionId } from "@/types/resume";
 import { EMPTY_RESUME } from "@/types/resume";
 import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
@@ -18,15 +19,6 @@ export const [selectedTemplate, setSelectedTemplate] =
 export const [selectedAccentColor] = createSignal(DEFAULT_RESUME_ACCENT_COLOR);
 
 export const [activeSection, setActiveSection] = createSignal<SectionId>("basics");
-
-export interface ImportFeedback {
-  confidence: number;
-  work: number;
-  education: number;
-  skills: number;
-  projects: number;
-  certificates: number;
-}
 
 export const [exportError, setExportError] = createSignal("");
 

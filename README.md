@@ -7,7 +7,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 - **Client-side import**: Open PDF, DOCX, and `.json` resume files locally in your browser.
 - **Structured editing**: Edit basics, summary, work, education, skills, projects, certifications, languages, interests, and references.
 - **Live preview**: See the current resume render update as you edit.
-- **Three templates**: Modern, Minimal, and Compact ATS.
+- **Templates**: Switch the layout at any time without retyping your content.
 - **Export**: Download a PDF or export the current resume as JSON.
 - **Local drafts**: Autosave and named drafts are stored in IndexedDB on your device. Saving a draft under an existing name updates it. Importing a file or loading a draft first saves the resume you were editing as a draft.
 
@@ -41,11 +41,11 @@ Supported top-level sections are:
 - `references`
 - `projects`
 
-Tailory ignores `$schema` and `meta` during import. It normalizes supported content into its internal schema, removes internal entry IDs during export, rejects unknown top-level fields, and reports malformed section shapes instead of silently dropping them.
+Tailory imports the sections above and skips any other top-level field, such as `$schema`, `meta`, or a custom key. After an import it lists the skipped field names so nothing is dropped silently. It normalizes supported content into its internal schema, removes internal entry IDs during export, and reports malformed section shapes instead of silently dropping them.
 
 Tailory does not claim full validation against the upstream official JSON Resume schema package. Some supported sections can import, survive normalization, and render in preview and PDF export without having first-class editor controls yet.
 
-Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, required identity fields are missing, or unsupported top-level fields would be silently discarded.
+Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, or required identity fields are missing.
 
 ## Privacy and storage
 
@@ -89,4 +89,5 @@ Release and contribution workflow notes live in [CONTRIBUTING.md](./CONTRIBUTING
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE). The fonts in `public/fonts` are under the SIL Open Font License;
+their licence texts sit next to them.

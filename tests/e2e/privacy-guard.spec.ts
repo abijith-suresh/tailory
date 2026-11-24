@@ -13,10 +13,6 @@ const RESUME_CONTENT = [
   EDITED_LABEL,
 ];
 
-// TODO: remove after #166 lands. The layout still loads Google Fonts until then. These requests are
-// aborted below so the test needs no network, and only a bodyless GET may reach these hosts.
-const PENDING_REMOVAL_FONT_HOSTS = new Set(["fonts.googleapis.com", "fonts.gstatic.com"]);
-
 // Observes HTTP requests from pages, subframes and dedicated workers, plus page WebSockets.
 // WebSockets opened inside workers are not observed. Anything that is not a plain GET/HEAD to the
 // app's own origin, or that carries resume content, is reported as a violation and aborted.
@@ -40,9 +36,6 @@ async function observeNetwork(context: BrowserContext, origin: string) {
     if (url.origin === origin) {
       return readOnly && request.postDataBuffer() === null ? null : "sends a body or mutates";
     }
-    if (PENDING_REMOVAL_FONT_HOSTS.has(url.hostname)) {
-      return readOnly && request.postDataBuffer() === null ? null : "sends a body or mutates";
-    }
     return "leaves the app origin";
   };
 
@@ -54,8 +47,7 @@ async function observeNetwork(context: BrowserContext, origin: string) {
 
   await context.route("**/*", (route) => {
     const request = route.request();
-    const { hostname, protocol } = new URL(request.url());
-    if (PENDING_REMOVAL_FONT_HOSTS.has(hostname)) return route.abort();
+    const { protocol } = new URL(request.url());
     if (inspect(request) && protocol !== "data:" && protocol !== "blob:") {
       return route.abort("blockedbyclient");
     }

@@ -57,4 +57,22 @@ describe("EditorLayout toasts", () => {
 
     expect(queryByRole("alert")).toBeNull();
   });
+
+  it("lists ignored JSON fields in a short notice", () => {
+    const { getByRole } = render(() => <EditorLayout />);
+
+    setImportFeedback({ ignoredFields: ["meta", "custom"] });
+
+    expect(getByRole("status").textContent).toBe(
+      "Tailory doesn't use these fields, so they weren't imported: meta, custom."
+    );
+  });
+
+  it("caps a long list of ignored fields", () => {
+    const { getByRole } = render(() => <EditorLayout />);
+
+    setImportFeedback({ ignoredFields: ["a", "b", "c", "d", "e", "f", "g"] });
+
+    expect(getByRole("status").textContent).toContain("a, b, c, d, e, and 2 more.");
+  });
 });

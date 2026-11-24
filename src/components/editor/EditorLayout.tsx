@@ -108,6 +108,37 @@ function ErrorToast(props: { message: () => string; onDismiss: () => void; persi
   );
 }
 
+const MAX_LISTED_IGNORED_FIELDS = 5;
+
+function ignoredFieldsMessage(fields: string[]): string {
+  const listed = fields.slice(0, MAX_LISTED_IGNORED_FIELDS).join(", ");
+  const rest = fields.length - MAX_LISTED_IGNORED_FIELDS;
+  const names = rest > 0 ? `${listed}, and ${rest} more` : listed;
+  return `Tailory doesn't use these fields, so they weren't imported: ${names}.`;
+}
+
+function IgnoredFieldsNotice(props: { fields: string[] }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      class="flex w-full items-start gap-3 rounded-lg border bg-white px-4 py-3 shadow-xl shadow-black/10"
+      style={{ "border-color": "#fcd34d", "pointer-events": "auto" }}
+    >
+      <div
+        class="mt-0.5 h-4 w-1 shrink-0 rounded-full"
+        style={{ background: "#b45309" }}
+        aria-hidden="true"
+      />
+      <p class="flex-1 text-sm leading-snug text-gray-700">{ignoredFieldsMessage(props.fields)}</p>
+      <DismissButton
+        onDismiss={() => setImportFeedback(null)}
+        class="shrink-0 text-gray-400 transition-colors hover:text-gray-600"
+      />
+    </div>
+  );
+}
+
 function ImportSuccessToast() {
   useAutoDismiss(
     () => importFeedback() !== null,
@@ -118,6 +149,10 @@ function ImportSuccessToast() {
     <Show when={importFeedback()}>
       {(feedback) => {
         const fb = feedback();
+        if ("ignoredFields" in fb) {
+          return <IgnoredFieldsNotice fields={fb.ignoredFields} />;
+        }
+
         const parts: string[] = [];
         if (fb.work > 0) parts.push(`${fb.work} job${fb.work > 1 ? "s" : ""}`);
         if (fb.education > 0) parts.push(`${fb.education} degree${fb.education > 1 ? "s" : ""}`);

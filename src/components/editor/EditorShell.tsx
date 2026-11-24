@@ -1,7 +1,7 @@
 import { type Component, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 
-import { SECTION_DEFINITIONS, TOTAL_SECTIONS, getSectionDefinition } from "@/lib/sections/registry";
+import { getSectionDefinition, SECTION_DEFINITIONS, TOTAL_SECTIONS } from "@/lib/sections/registry";
 import { activeSection, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import BasicsForm from "./BasicsForm";
@@ -59,7 +59,7 @@ const EditorShell: Component = () => {
           <div class="min-w-0 flex-1">
             <h2
               class="text-base font-semibold"
-              style={{ color: "#0e2418", "font-family": "'Lora', serif" }}
+              style={{ color: "#0e2418", "font-family": "var(--font-sans)" }}
             >
               {currentSection()?.label}
             </h2>

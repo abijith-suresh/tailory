@@ -1,0 +1,15 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<!-- The wordmark sets the logo's baseline, so the logo lines up with text beside it. -->
+<span class:list={["inline-flex items-center gap-2 text-fg", className]}>
+  <svg viewBox="-1 0 22 22" aria-hidden="true" class="size-6 shrink-0">
+    <path d="M1 2h18v5h-6v13H7V7H1z" class="fill-primary"></path>
+  </svg>
+  <span class="self-baseline text-heading-6" translate="no">Tailory</span>
+</span>

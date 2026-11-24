@@ -1,324 +1,101 @@
 ---
+import ExternalIcon from "@/components/site/ExternalIcon.astro";
+import Logo from "@/components/site/Logo.astro";
 import Layout from "@/layouts/Layout.astro";
 
 interface Props {
   title?: string;
   description?: string;
+  noindex?: boolean;
 }
 
-const { title = "Tailory", description } = Astro.props;
+const { title = "Tailory", description, noindex } = Astro.props;
+
+const repoUrl = "https://github.com/abijith-suresh/tailory";
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 
 const navLinks = [
-  { label: "Features", href: "/features" },
-  { label: "Changelog", href: "/changelog" },
-  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Privacy", href: "/privacy" },
+];
+
+const footerLinks = [
+  ...navLinks,
+  { label: "GitHub", href: repoUrl, external: true },
+  { label: "Report an issue", href: `${repoUrl}/issues`, external: true },
 ];
 ---
 
-<Layout title={title} description={description}>
-  <div
-    class="min-h-screen bg-[#f4f8f5] text-[#0e2418]"
-    style="font-family: 'DM Sans', system-ui, sans-serif"
-    transition:animate="slide"
-  >
-    <!-- Nav -->
-    <header class="border-b border-[#ccddd4] bg-[#f4f8f5]">
-      <nav class="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-        <a
-          href="/"
-          class="text-xl font-bold tracking-tight text-[#1d6648] no-underline"
-          style="font-family: 'Lora', Georgia, serif"
-        >
-          Tailory
-        </a>
+<Layout title={title} description={description} noindex={noindex}>
+  <div class="flex min-h-screen flex-col bg-canvas text-fg">
+    <a
+      href="#main"
+      class="sr-only z-50 rounded-button bg-fg px-4 py-2 text-ui-sm text-canvas focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+    >
+      Skip to content
+    </a>
 
-        <!-- Desktop nav links (md+) -->
-        <div class="hidden items-center gap-8 md:flex">
+    <header class="site-x">
+      <nav class="flex h-16 items-center gap-1 md:gap-2" aria-label="Main">
+        <a href="/" class="mr-auto flex min-h-11 items-center rounded-sm" aria-label="Tailory home">
+          <Logo />
+        </a>
+        <!-- Phones show only the logo and the editor; FAQ and Privacy are in the footer. -->
+        <ul class="flex items-center gap-1 max-sm:hidden">
           {
             navLinks.map((link) => (
-              <a
-                href={link.href}
-                class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-              >
-                {link.label}
-              </a>
+              <li>
+                <a
+                  href={link.href}
+                  aria-current={path === link.href ? "page" : undefined}
+                  class="btn-quiet h-11 px-3 text-ui-sm underline-offset-8 md:h-9 aria-[current=page]:underline aria-[current=page]:decoration-primary aria-[current=page]:decoration-2"
+                >
+                  {link.label}
+                </a>
+              </li>
             ))
           }
-          <a
-            href="https://github.com/abijith-suresh/tailory"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-          >
-            GitHub ↗
-          </a>
-          <a
-            href="/editor"
-            class="inline-block rounded-md bg-[#1d6648] px-5 py-2 text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
-          >
-            Open Editor →
-          </a>
-        </div>
-
-        <!-- Mobile hamburger button (hidden on md+) -->
-        <button
-          id="nav-open-btn"
-          class="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-md md:hidden"
-          aria-label="Open navigation menu"
-          aria-expanded="false"
-          aria-controls="nav-drawer"
-        >
-          <span
-            class="line-top block h-[2px] w-5 origin-center rounded-full bg-[#1d6648] transition-transform duration-300"
-          ></span>
-          <span
-            class="line-mid block h-[2px] w-5 rounded-full bg-[#1d6648] transition-opacity duration-300"
-          ></span>
-          <span
-            class="line-bot block h-[2px] w-5 origin-center rounded-full bg-[#1d6648] transition-transform duration-300"
-          ></span>
-        </button>
+        </ul>
+        <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm sm:ml-2 md:h-9">
+          Open editor
+        </a>
       </nav>
     </header>
 
-    <!-- Mobile nav backdrop -->
-    <div
-      id="nav-backdrop"
-      class="fixed inset-0 z-40 bg-black/40 opacity-0 transition-opacity duration-300"
-      style="pointer-events: none"
-      aria-hidden="true"
-    >
-    </div>
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
 
-    <!-- Mobile side drawer -->
-    <div
-      id="nav-drawer"
-      class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col border-l border-[#ccddd4] bg-[#f4f8f5] shadow-xl transition-transform duration-300 ease-in-out"
-      aria-label="Navigation drawer"
-      role="dialog"
-      aria-modal="true"
-    >
-      <!-- Drawer header: close button -->
-      <div class="flex items-center justify-between border-b border-[#ccddd4] px-6 py-5">
-        <span class="text-lg font-bold text-[#1d6648]" style="font-family: 'Lora', Georgia, serif">
-          Tailory
-        </span>
-        <button
-          id="nav-close-btn"
-          class="flex h-8 w-8 items-center justify-center rounded-md text-[#3d6650] transition-colors hover:bg-[#ccddd4]/50 hover:text-[#1d6648]"
-          aria-label="Close navigation menu"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M2 2L14 14M14 2L2 14"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"></path>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Drawer nav links -->
-      <nav class="flex flex-1 flex-col gap-1 px-6 py-6">
-        {
-          navLinks.map((link) => (
-            <a
-              href={link.href}
-              class="drawer-link block rounded-md px-3 py-3 text-base font-medium text-[#3d6650] transition-colors hover:bg-[#ccddd4]/40 hover:text-[#1d6648]"
-            >
-              {link.label}
-            </a>
-          ))
-        }
-        <a
-          href="https://github.com/abijith-suresh/tailory"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="drawer-link block rounded-md px-3 py-3 text-base font-medium text-[#3d6650] transition-colors hover:bg-[#ccddd4]/40 hover:text-[#1d6648]"
-        >
-          GitHub ↗
+    <!-- Phones stack the logo, the links and the licence. From md, one row on a shared baseline. -->
+    <footer class="border-t border-line">
+      <div
+        class="site-x flex flex-col items-start gap-4 pt-6 pb-8 text-body-sm text-fg-muted md:flex-row md:items-baseline md:gap-x-6 md:pb-6"
+      >
+        <a href="/" class="flex min-h-11 items-center rounded-sm" aria-label="Tailory home">
+          <Logo />
         </a>
-      </nav>
-
-      <!-- Drawer CTA -->
-      <div class="border-t border-[#ccddd4] px-6 py-6">
-        <a
-          href="/editor"
-          class="drawer-link block w-full rounded-md bg-[#1d6648] px-5 py-3 text-center text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] active:scale-95"
-        >
-          Open Editor →
-        </a>
-      </div>
-    </div>
-
-    <!-- Page content -->
-    <slot />
-
-    <!-- Mobile nav toggle script -->
-    <script>
-      const setupNav = () => {
-        const openBtn = document.getElementById("nav-open-btn");
-        const closeBtn = document.getElementById("nav-close-btn");
-        const backdrop = document.getElementById("nav-backdrop");
-        const drawerLinks = document.querySelectorAll(".drawer-link");
-
-        const open = () => {
-          document.body.classList.add("nav-open");
-          openBtn?.setAttribute("aria-expanded", "true");
-        };
-
-        const close = () => {
-          document.body.classList.remove("nav-open");
-          openBtn?.setAttribute("aria-expanded", "false");
-        };
-
-        openBtn?.addEventListener("click", open);
-        closeBtn?.addEventListener("click", close);
-        backdrop?.addEventListener("click", close);
-
-        drawerLinks.forEach((link) => link.addEventListener("click", close));
-
-        const onKeydown = (e: KeyboardEvent) => {
-          if (e.key === "Escape") close();
-        };
-        document.removeEventListener("keydown", onKeydown as EventListener);
-        document.addEventListener("keydown", onKeydown as EventListener);
-      };
-
-      setupNav();
-      document.addEventListener("astro:page-load", setupNav);
-    </script>
-
-    <!-- Scroll reveal observer -->
-    <script>
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              observer.unobserve(entry.target);
+        <nav class="md:order-last md:ml-auto" aria-label="Footer">
+          <ul class="grid grid-cols-[auto_auto] gap-x-10 sm:flex sm:gap-x-6">
+            {
+              footerLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    aria-current={path === link.href ? "page" : undefined}
+                    class="inline-flex min-h-11 items-center gap-1 underline-offset-4 transition-colors hover:text-fg max-sm:min-w-11 aria-[current=page]:text-fg aria-[current=page]:underline aria-[current=page]:decoration-primary aria-[current=page]:decoration-2"
+                  >
+                    {link.label}
+                    {link.external && <ExternalIcon />}
+                  </a>
+                </li>
+              ))
             }
-          });
-        },
-        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
-      );
-
-      const setupReveal = () => {
-        document.querySelectorAll("[data-reveal]").forEach((el) => observer.observe(el));
-      };
-
-      setupReveal();
-      document.addEventListener("astro:page-load", setupReveal);
-    </script>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#ccddd4] bg-[#f4f8f5]">
-      <div class="mx-auto max-w-6xl px-8 py-12">
-        <div class="flex flex-col gap-10 md:flex-row md:justify-between">
-          <!-- Left: copyright -->
-          <div>
-            <p
-              class="mb-2 text-lg font-bold text-[#1d6648]"
-              style="font-family: 'Lora', Georgia, serif"
-            >
-              Tailory
-            </p>
-            <p class="text-sm text-[#a0b8ab]">© 2026 Tailory — MIT licensed</p>
-          </div>
-          <!-- Right: link groups -->
-          <div class="flex flex-wrap gap-12">
-            <div>
-              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
-                Product
-              </p>
-              <nav class="flex flex-col gap-2">
-                <a
-                  href="/features"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >Features</a
-                >
-                <a
-                  href="/changelog"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >Changelog</a
-                >
-                <a
-                  href="/editor"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >Open Editor</a
-                >
-              </nav>
-            </div>
-            <div>
-              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
-                Project
-              </p>
-              <nav class="flex flex-col gap-2">
-                <a
-                  href="/about"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >About</a
-                >
-                <a
-                  href="/faq"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >FAQ</a
-                >
-                <a
-                  href="https://github.com/abijith-suresh/tailory"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >GitHub ↗</a
-                >
-              </nav>
-            </div>
-            <div>
-              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#a0b8ab]">
-                Legal
-              </p>
-              <nav class="flex flex-col gap-2">
-                <a
-                  href="/privacy"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >Privacy</a
-                >
-                <a
-                  href="/terms"
-                  class="relative text-sm text-[#3d6650] transition-colors hover:text-[#1d6648] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#1d6648] after:transition-all hover:after:w-full"
-                  >Terms</a
-                >
-              </nav>
-            </div>
-          </div>
-        </div>
+          </ul>
+        </nav>
+        <p>MIT licensed</p>
       </div>
     </footer>
   </div>
 </Layout>
-
-<style is:global>
-  body.nav-open #nav-drawer {
-    translate: 0 0;
-  }
-  body.nav-open #nav-backdrop {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  body.nav-open #nav-open-btn .line-top {
-    transform: translateY(7px) rotate(45deg);
-  }
-  body.nav-open #nav-open-btn .line-mid {
-    opacity: 0;
-  }
-  body.nav-open #nav-open-btn .line-bot {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-</style>
