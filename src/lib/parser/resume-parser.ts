@@ -1,3 +1,4 @@
+import { toHighlights } from "@/lib/resume/highlights";
 import type {
   ResumeAward,
   ResumeBasics,
@@ -710,7 +711,7 @@ function parseWork(text: string): ResumeWork[] {
         detailLines.length > 1 ? (detailLines[1] ?? parsedHeader.position) : parsedHeader.position,
       startDate: dates.startDate,
       endDate: dates.endDate,
-      highlights,
+      highlights: toHighlights(highlights),
     });
   }
 
@@ -741,7 +742,7 @@ function parseVolunteer(text: string): ResumeVolunteer[] {
         detailLines.length > 1 ? (detailLines[1] ?? parsedHeader.position) : parsedHeader.position,
       startDate: dates.startDate,
       endDate: dates.endDate,
-      highlights,
+      highlights: toHighlights(highlights),
     });
   }
 
@@ -946,7 +947,7 @@ function parseProjects(text: string): ResumeProject[] {
       id: crypto.randomUUID(),
       name: detailLines[0] ?? lines[0] ?? "",
       description: detailLines[1] ?? "",
-      highlights,
+      highlights: toHighlights(highlights),
       url: extractUrl(block),
     });
   }

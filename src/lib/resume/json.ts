@@ -1,8 +1,10 @@
+import { createId } from "@/lib/resume/ids";
 import { normalizeResume } from "@/lib/resume/normalize";
 import type {
   ResumeAward,
   ResumeCertificate,
   ResumeEducation,
+  ResumeHighlight,
   ResumeInterest,
   ResumeLanguage,
   ResumeProject,
@@ -51,6 +53,17 @@ function ensureArray(value: unknown, fieldName: string): unknown[] {
 
 function parseString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+/** JSON Resume bullets are plain strings; Tailory gives each one an id. */
+function parseHighlights(value: unknown): ResumeHighlight[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value
+    .filter((text): text is string => typeof text === "string")
+    .map((text) => ({ id: createId(), text }));
 }
 
 function parseBasics(input: unknown): Record<string, unknown> {
@@ -153,9 +166,7 @@ export function parseJsonResumeDocument(document: unknown): ResumeSchema {
       startDate: parseString(entry.startDate),
       endDate: parseString(entry.endDate),
       summary: parseString(entry.summary),
-      highlights: Array.isArray(entry.highlights)
-        ? entry.highlights.filter((value): value is string => typeof value === "string")
-        : undefined,
+      highlights: parseHighlights(entry.highlights),
     })) as ResumeSchema["work"],
     volunteer: parseObjectArray(document.volunteer, "volunteer", (entry) => ({
       organization: parseString(entry.organization),
@@ -164,9 +175,7 @@ export function parseJsonResumeDocument(document: unknown): ResumeSchema {
       startDate: parseString(entry.startDate),
       endDate: parseString(entry.endDate),
       summary: parseString(entry.summary),
-      highlights: Array.isArray(entry.highlights)
-        ? entry.highlights.filter((value): value is string => typeof value === "string")
-        : undefined,
+      highlights: parseHighlights(entry.highlights),
     })) as ResumeSchema["volunteer"],
     education: parseObjectArray(document.education, "education", (entry) => ({
       institution: parseString(entry.institution),
@@ -223,9 +232,7 @@ export function parseJsonResumeDocument(document: unknown): ResumeSchema {
     projects: parseObjectArray(document.projects, "projects", (entry) => ({
       name: parseString(entry.name),
       description: parseString(entry.description),
-      highlights: Array.isArray(entry.highlights)
-        ? entry.highlights.filter((value): value is string => typeof value === "string")
-        : undefined,
+      highlights: parseHighlights(entry.highlights),
       keywords: Array.isArray(entry.keywords)
         ? entry.keywords.filter((value): value is string => typeof value === "string")
         : undefined,
@@ -356,6 +363,11 @@ function exportEntry<T extends { id: string }>(entry: T): Record<string, unknown
   const exported: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(rest)) {
+    if (key === "highlights" && Array.isArray(value)) {
+      exported[key] = (value as ResumeHighlight[]).map((highlight) => highlight.text);
+      continue;
+    }
+
     if (typeof value === "string" && DATE_FIELDS.has(key)) {
       if (key === "endDate" && PRESENT_DATE_RE.test(value.trim())) {
         continue;

@@ -6,6 +6,7 @@ import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { createId } from "@/lib/resume/ids";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeProject } from "@/types/resume";
 
@@ -46,13 +47,13 @@ const ProjectsForm: Component = () => {
       (p) => p?.id === id,
       produce((p: ResumeProject) => {
         if (!p.highlights) p.highlights = [];
-        p.highlights.push("");
+        p.highlights.push({ id: createId(), text: "" });
       })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("projects", (p) => p?.id === id, "highlights", idx, value);
+    setResume("projects", (p) => p?.id === id, "highlights", idx, "text", value);
   };
 
   const removeHighlight = (id: string, idx: number) => {

@@ -1,3 +1,4 @@
+import { toHighlights } from "@/lib/resume/highlights";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 /**
@@ -25,11 +26,11 @@ export function createSampleResume(): ResumeSchema {
         position: "Senior product designer",
         startDate: "Mar 2022",
         endDate: "Present",
-        highlights: [
+        highlights: toHighlights([
           "Redesigned scheduling for 4,000 field teams; support tickets fell by a third",
           "Built the design system the web and mobile apps now share",
           "Run weekly critique for a team of six designers",
-        ],
+        ]),
       },
       {
         id: "work-2",
@@ -37,11 +38,11 @@ export function createSampleResume(): ResumeSchema {
         position: "Product designer",
         startDate: "Jun 2018",
         endDate: "Feb 2022",
-        highlights: [
+        highlights: toHighlights([
           "Led onboarding research and cut time to first report from 3 days to 40 minutes",
           "Shipped billing, roles, and audit log for the enterprise plan",
           "Ran 60+ customer interviews and set up the research repository",
-        ],
+        ]),
       },
     ],
     education: [

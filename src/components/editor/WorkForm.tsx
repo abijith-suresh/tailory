@@ -5,6 +5,7 @@ import FormField from "@/components/ui/FormField";
 import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
+import { createId } from "@/lib/resume/ids";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeWork } from "@/types/resume";
 
@@ -42,13 +43,13 @@ const WorkForm: Component = () => {
       (w) => w?.id === id,
       produce((w: ResumeWork) => {
         if (!w.highlights) w.highlights = [];
-        w.highlights.push("");
+        w.highlights.push({ id: createId(), text: "" });
       })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("work", (w) => w?.id === id, "highlights", idx, value);
+    setResume("work", (w) => w?.id === id, "highlights", idx, "text", value);
   };
 
   const removeHighlight = (id: string, idx: number) => {

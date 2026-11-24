@@ -6,6 +6,7 @@ import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { createId } from "@/lib/resume/ids";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeVolunteer } from "@/types/resume";
 
@@ -48,13 +49,13 @@ const VolunteerForm: Component = () => {
       (v) => v?.id === id,
       produce((v: ResumeVolunteer) => {
         if (!v.highlights) v.highlights = [];
-        v.highlights.push("");
+        v.highlights.push({ id: createId(), text: "" });
       })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("volunteer", (v) => v?.id === id, "highlights", idx, value);
+    setResume("volunteer", (v) => v?.id === id, "highlights", idx, "text", value);
   };
 
   const removeHighlight = (id: string, idx: number) => {

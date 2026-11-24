@@ -1,3 +1,4 @@
+import { toHighlights } from "@/lib/resume/highlights";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 export function createTemplateFixture(): ResumeSchema {
@@ -26,16 +27,16 @@ export function createTemplateFixture(): ResumeSchema {
         position: "Senior Software Engineer, Resume Export Platform",
         startDate: "Jan 2021",
         endDate: "Present",
-        highlights: [
+        highlights: toHighlights([
           "Led export pipeline rewrite across all templates",
           "Fixed bullet rendering, divider sizing, and long URL formatting regressions",
-        ],
+        ]),
       },
       {
         id: "work-2",
         name: "No Date Example Co",
         position: "Engineer",
-        highlights: ["Exercises missing-date layout handling"],
+        highlights: toHighlights(["Exercises missing-date layout handling"]),
       },
     ],
     education: [
@@ -59,7 +60,10 @@ export function createTemplateFixture(): ResumeSchema {
         id: "project-1",
         name: "Template Export Hardening Suite",
         description: "Regression coverage for export templates.",
-        highlights: ["Protects bullet rendering", "Verifies long URL and contact formatting"],
+        highlights: toHighlights([
+          "Protects bullet rendering",
+          "Verifies long URL and contact formatting",
+        ]),
         url: "https://github.com/janedoe/template-export-hardening-suite",
       },
     ],
@@ -89,10 +93,10 @@ export function createUnicodeTemplateFixture(): ResumeSchema {
       startDate: "2022",
       endDate: "Present",
       summary: "Improved text fidelity for imported resume content.",
-      highlights: [
+      highlights: toHighlights([
         "Handled names like Jose Alvarez and Chloe Moreau without glyph corruption",
         "Preserved bullets • and symbols such as pi and checkmarks in export text",
-      ],
+      ]),
     },
   ];
 

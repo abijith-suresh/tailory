@@ -85,7 +85,7 @@ function buildRoleEntriesSection<T extends ResumeWork | ResumeVolunteer>(
       subtitleMode: options.subtitleMode,
       meta: formatDateRange(entry.startDate, entry.endDate),
       body: entry.summary,
-      bullets: entry.highlights,
+      bullets: entry.highlights?.map((highlight) => highlight.text),
       spacerAfter: options.spacerAfter,
     }),
   });
@@ -209,7 +209,7 @@ export function buildProjectsSection(
       title: entry.name,
       meta: options.resolveMeta?.(entry),
       body: entry.description,
-      bullets: entry.highlights,
+      bullets: entry.highlights?.map((highlight) => highlight.text),
       link: options.resolveLink?.(entry.url),
       spacerAfter: options.spacerAfter,
     }),
