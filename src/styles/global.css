@@ -170,7 +170,7 @@
 
   /*
    * Spacing. Tailwind's unit stays at 4px; use whole steps only. Layout widths are whole steps
-   * too: page 320 (content plus its side padding), measure 144, rail 80 (the hero's text column).
+   * too: page 320 (content plus its side padding), measure 144, rail 80 (the split's title column).
    */
   --spacing: 0.25rem;
   --container-page: 80rem;
@@ -366,8 +366,8 @@ textarea {
 }
 
 /*
- * The site's two-column split for titled rows: a title column, then a text column that stops at
- * the measure. Rows are capped to that width, so their rules end where the text does.
+ * The site's two-column split for titled rows: a title column, then a text column. Rows run to the
+ * page's right edge so their rules line up with other sections; text inside sets its own measure.
  */
 @utility split {
   display: grid;
@@ -376,12 +376,10 @@ textarea {
   @variant md {
     grid-template-columns: --spacing(72) minmax(0, 1fr);
     column-gap: --spacing(10);
-    max-width: calc(--spacing(82) + var(--container-measure));
   }
 
   @variant xl {
     grid-template-columns: var(--container-rail) minmax(0, 1fr);
     column-gap: --spacing(12);
-    max-width: calc(var(--container-rail) + --spacing(12) + var(--container-measure));
   }
 }

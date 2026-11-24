@@ -5,7 +5,7 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
 <MarketingLayout title="Page not found" description="This page doesn’t exist." noindex>
   <section
-    class="site-x grid gap-10 pt-10 pb-20 md:pt-16 md:pb-28 lg:grid-cols-[minmax(0,var(--container-measure))_--spacing(80)] lg:items-center lg:gap-16 lg:py-32"
+    class="site-x grid gap-10 pt-10 pb-20 md:pt-16 md:pb-28 lg:grid-cols-[minmax(0,var(--container-measure))_minmax(0,1fr)] lg:items-center lg:gap-16 lg:py-32"
   >
     <div>
       <h1 class="text-heading-4 text-balance md:text-heading-3">This page isn’t here.</h1>
@@ -19,7 +19,7 @@ import MarketingLayout from "@/layouts/MarketingLayout.astro";
     </div>
 
     <!-- The site's tick list, with this page left out. -->
-    <ul class="max-w-80 rounded-2xl bg-surface p-2 ring-1 ring-line" aria-hidden="true">
+    <ul class="w-full max-w-80 rounded-2xl bg-surface p-2 ring-1 ring-line lg:justify-self-end" aria-hidden="true">
       <li class="flex items-start gap-3 rounded-lg p-2 text-body-sm">
         <Tickbox on />
         <span class="flex-1">Your drafts</span>
