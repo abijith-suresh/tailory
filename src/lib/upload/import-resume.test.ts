@@ -1,30 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const processUploadedFile = vi.fn();
-const parseJsonResumeString = vi.fn();
+const parseJsonResumeImport = vi.fn();
 
 vi.mock("@/lib/upload/process-file", () => ({
   processUploadedFile,
 }));
 
 vi.mock("@/lib/resume/json", () => ({
-  parseJsonResumeString,
+  parseJsonResumeImport,
 }));
 
 describe("importResumeFile", () => {
   beforeEach(() => {
     processUploadedFile.mockReset();
-    parseJsonResumeString.mockReset();
+    parseJsonResumeImport.mockReset();
   });
 
   it("routes JSON files through the JSON Resume parser", async () => {
-    parseJsonResumeString.mockReturnValue({
-      basics: { name: "Jane Doe" },
-      work: [],
-      education: [],
-      skills: [],
-      projects: [],
-      certificates: [],
+    parseJsonResumeImport.mockReturnValue({
+      resume: {
+        basics: { name: "Jane Doe" },
+        work: [],
+        education: [],
+        skills: [],
+        projects: [],
+        certificates: [],
+      },
+      ignoredFields: [],
     });
 
     const { importResumeFile } = await import("./import-resume");
@@ -44,6 +47,34 @@ describe("importResumeFile", () => {
       },
     });
     expect(processUploadedFile).not.toHaveBeenCalled();
+  });
+
+  it("returns the ignored JSON field names as feedback", async () => {
+    const resume = { basics: { name: "Jane Doe" } };
+    parseJsonResumeImport.mockReturnValue({ resume, ignoredFields: ["meta", "custom"] });
+
+    const { importResumeFile } = await import("./import-resume");
+    const file = new File(["{}"], "resume.json", { type: "application/json" });
+
+    await expect(importResumeFile(file, "json")).resolves.toEqual({
+      success: true,
+      resume,
+      feedback: { ignoredFields: ["meta", "custom"] },
+    });
+  });
+
+  it("returns a parse failure as an import error", async () => {
+    parseJsonResumeImport.mockImplementation(() => {
+      throw new Error("Invalid JSON Resume: 'work' must be an array.");
+    });
+
+    const { importResumeFile } = await import("./import-resume");
+    const file = new File(["{}"], "resume.json", { type: "application/json" });
+
+    await expect(importResumeFile(file, "json")).resolves.toEqual({
+      success: false,
+      error: "Invalid JSON Resume: 'work' must be an array.",
+    });
   });
 
   it("routes PDF and DOCX files through the parser pipeline and returns feedback", async () => {

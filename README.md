@@ -7,7 +7,7 @@ Try it: https://tailory-nine.vercel.app
 ## What it does
 
 - Open a resume file and edit the result.
-  - JSON Resume files and Tailory's own JSON export are read in full. Support is not fully validated against the official schema.
+  - JSON Resume files and Tailory's own JSON export are read in full. Tailory skips fields it doesn't use and names them. Support is not fully validated against the official schema.
   - Text-based PDFs and DOCX files are read on a best-effort basis. Check what Tailory found before you export.
   - Scanned or image-only PDFs do not work, because they have no text to read. Tailory tells you when it finds none.
 - See a live preview as you type.

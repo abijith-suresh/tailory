@@ -6,6 +6,7 @@ import {
   exportJsonResumeDocument,
   exportJsonResumeString,
   parseJsonResumeDocument,
+  parseJsonResumeImport,
   parseJsonResumeString,
 } from "./json";
 
@@ -94,28 +95,74 @@ describe("JSON Resume parsing", () => {
     ).toThrowError("Invalid JSON Resume: 'work' must be an array.");
   });
 
-  it("rejects unsupported top-level fields with actionable feedback", () => {
-    expect(() =>
-      parseJsonResumeDocument({
-        basics: { name: "Jane Doe" },
-        portfolio: { website: "https://janedoe.dev" },
+  it("imports a document with $schema and meta and reports them as ignored", () => {
+    const { resume, ignoredFields } = parseJsonResumeImport(
+      JSON.stringify({
+        $schema: "https://jsonresume.org/schema",
+        meta: { theme: "kendall" },
+        basics: { name: "Jane Doe", email: "jane@example.com" },
+        skills: [{ name: "TypeScript" }],
       })
-    ).toThrowError(
-      "Unsupported JSON Resume fields: portfolio. Tailory currently supports basics, work, volunteer, education, awards, certificates, publications, skills, languages, interests, references, and projects."
     );
+
+    expect(resume.basics).toMatchObject({ name: "Jane Doe", email: "jane@example.com" });
+    expect(resume.skills).toHaveLength(1);
+    expect(ignoredFields).toEqual(["$schema", "meta"]);
   });
 
-  it("ignores JSON Resume metadata fields that Tailory does not store", () => {
-    const parsed = parseJsonResumeDocument({
-      $schema: "https://jsonresume.org/schema",
-      meta: { theme: "kendall" },
-      basics: { name: "Jane Doe", email: "jane@example.com" },
+  it("imports a document with an unknown custom key and reports it as ignored", () => {
+    const { resume, ignoredFields } = parseJsonResumeImport(
+      JSON.stringify({
+        basics: { name: "Jane Doe" },
+        portfolio: { website: "https://janedoe.dev" },
+        custom: 1,
+      })
+    );
+
+    expect(resume.basics.name).toBe("Jane Doe");
+    expect(resume).not.toHaveProperty("portfolio");
+    expect(resume).not.toHaveProperty("custom");
+    expect(ignoredFields).toEqual(["portfolio", "custom"]);
+  });
+
+  it("reports no ignored fields for a document with only supported sections", () => {
+    const { ignoredFields } = parseJsonResumeImport(
+      JSON.stringify({ basics: { name: "Jane Doe" }, work: [] })
+    );
+
+    expect(ignoredFields).toEqual([]);
+  });
+
+  it("reports no ignored fields when re-importing Tailory's own export", () => {
+    const source = createResume({
+      basics: { name: "Jane Doe", label: "Engineer", email: "jane@example.com" },
+      work: [{ id: "work-1", name: "Acme", position: "Engineer" }],
+      skills: [{ id: "skill-1", name: "TypeScript", keywords: ["web"] }],
     });
 
-    expect(parsed.basics).toMatchObject({
-      name: "Jane Doe",
-      email: "jane@example.com",
-    });
+    const { resume, ignoredFields } = parseJsonResumeImport(exportJsonResumeString(source));
+
+    expect(ignoredFields).toEqual([]);
+    expect(resume.basics.name).toBe("Jane Doe");
+  });
+
+  it("still rejects documents that are not JSON objects", () => {
+    for (const source of ["[]", '"text"', "42", "null"]) {
+      expect(() => parseJsonResumeImport(source)).toThrowError(
+        "Invalid JSON Resume: top-level document must be an object."
+      );
+    }
+  });
+
+  it("still rejects wrongly typed known sections when unknown fields are present", () => {
+    expect(() =>
+      parseJsonResumeImport(
+        JSON.stringify({ meta: {}, custom: true, basics: { name: "Jane Doe" }, skills: "none" })
+      )
+    ).toThrowError("Invalid JSON Resume: 'skills' must be an array.");
+    expect(() => parseJsonResumeImport(JSON.stringify({ basics: "Jane Doe" }))).toThrowError(
+      "Invalid JSON Resume: 'basics' must be an object."
+    );
   });
 
   it("rejects documents without basic identity fields", () => {
