@@ -41,11 +41,11 @@ Supported top-level sections are:
 - `references`
 - `projects`
 
-Tailory ignores `$schema` and `meta` during import. It normalizes supported content into its internal schema, removes internal entry IDs during export, rejects unknown top-level fields, and reports malformed section shapes instead of silently dropping them.
+Tailory imports the sections above and skips any other top-level field, such as `$schema`, `meta`, or a custom key. After an import it lists the skipped field names so nothing is dropped silently. It normalizes supported content into its internal schema, removes internal entry IDs during export, and reports malformed section shapes instead of silently dropping them.
 
 Tailory does not claim full validation against the upstream official JSON Resume schema package. Some supported sections can import, survive normalization, and render in preview and PDF export without having first-class editor controls yet.
 
-Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, required identity fields are missing, or unsupported top-level fields would be silently discarded.
+Tailory rejects JSON files when the top-level value is not an object, a supported section has the wrong shape, or required identity fields are missing.
 
 ## Privacy and storage
 

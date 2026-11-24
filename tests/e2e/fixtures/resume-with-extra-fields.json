@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "meta": { "theme": "kendall" },
+  "custom": { "note": "not part of JSON Resume" },
+  "basics": {
+    "name": "Ada Fixture",
+    "label": "Software Engineer",
+    "email": "ada.fixture@example.com"
+  }
+}
