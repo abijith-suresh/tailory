@@ -6,6 +6,8 @@ import { buildCompactAtsRenderModel, compactAtsTemplate } from "@/lib/templates/
 import { buildMinimalRenderModel, minimalTemplate } from "@/lib/templates/minimal";
 import { buildModernRenderModel, modernTemplate } from "@/lib/templates/modern";
 import type { ResumeRenderModel } from "@/lib/templates/render-model";
+import { applySectionOrder } from "@/lib/versions/section-order";
+import type { ResumeSectionKey } from "@/types/document";
 import type { ResumeSchema } from "@/types/resume";
 import { TEMPLATE_IDS, type TemplateId } from "@/types/template";
 
@@ -66,7 +68,11 @@ export function loadPdfTemplateRenderer(templateId: TemplateId): PdfTemplateRend
 
 export function buildResumeRenderModel(
   resume: ResumeSchema,
-  design: ResumeDesignSettings
+  design: ResumeDesignSettings,
+  sectionOrder?: readonly ResumeSectionKey[]
 ): ResumeRenderModel {
-  return TEMPLATE_REGISTRY[design.template].buildRenderModel(resume, design);
+  return applySectionOrder(
+    TEMPLATE_REGISTRY[design.template].buildRenderModel(resume, design),
+    sectionOrder
+  );
 }

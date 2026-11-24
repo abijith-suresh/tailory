@@ -6,6 +6,7 @@ import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import { createId } from "@/lib/resume/ids";
+import { deleteEntry, deleteHighlight } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeWork } from "@/types/resume";
 
@@ -26,7 +27,7 @@ const WorkForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("work", (w) => (w ?? []).filter((e) => e.id !== id));
+    deleteEntry("work", id);
   };
 
   const reorder = (items: ResumeWork[]) => {
@@ -53,13 +54,8 @@ const WorkForm: Component = () => {
   };
 
   const removeHighlight = (id: string, idx: number) => {
-    setResume(
-      "work",
-      (w) => w?.id === id,
-      produce((w: ResumeWork) => {
-        w.highlights?.splice(idx, 1);
-      })
-    );
+    const highlight = resume.work?.find((entry) => entry.id === id)?.highlights?.[idx];
+    if (highlight) deleteHighlight("work", id, highlight.id);
   };
 
   return (

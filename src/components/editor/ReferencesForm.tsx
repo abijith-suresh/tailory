@@ -4,6 +4,7 @@ import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeReference } from "@/types/resume";
 
@@ -21,7 +22,7 @@ const ReferencesForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("references", (entries) => (entries ?? []).filter((entry) => entry.id !== id));
+    deleteEntry("references", id);
   };
 
   const reorder = (items: ResumeReference[]) => {

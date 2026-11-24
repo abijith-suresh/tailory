@@ -2,6 +2,7 @@ import type { Component } from "solid-js";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeCertificate } from "@/types/resume";
 
@@ -21,7 +22,7 @@ const CertificatesForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("certificates", (c) => (c ?? []).filter((e) => e.id !== id));
+    deleteEntry("certificates", id);
   };
 
   const reorder = (items: ResumeCertificate[]) => {

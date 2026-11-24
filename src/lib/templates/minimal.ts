@@ -22,6 +22,7 @@ import {
   buildVolunteerSection,
   buildWorkSection,
 } from "@/lib/templates/section-builders";
+import { applySectionOrder } from "@/lib/versions/section-order";
 import type { ResumeSchema } from "@/types/resume";
 
 const PAGE_MARGINS = [50, 50, 50, 50] as const;
@@ -97,5 +98,7 @@ export function minimalTemplate(
     accentColor: options.accentColor,
   });
 
-  return renderPdfResumeModel(buildMinimalRenderModel(resume, design));
+  return renderPdfResumeModel(
+    applySectionOrder(buildMinimalRenderModel(resume, design), options.sectionOrder)
+  );
 }

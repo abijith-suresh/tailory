@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
 import { createId } from "@/lib/resume/ids";
+import { deleteEntry, deleteHighlight } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeProject } from "@/types/resume";
 
@@ -26,7 +27,7 @@ const ProjectsForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("projects", (p) => (p ?? []).filter((e) => e.id !== id));
+    deleteEntry("projects", id);
   };
 
   const reorder = (items: ResumeProject[]) => {
@@ -57,13 +58,8 @@ const ProjectsForm: Component = () => {
   };
 
   const removeHighlight = (id: string, idx: number) => {
-    setResume(
-      "projects",
-      (p) => p?.id === id,
-      produce((p: ResumeProject) => {
-        p.highlights?.splice(idx, 1);
-      })
-    );
+    const highlight = resume.projects?.find((entry) => entry.id === id)?.highlights?.[idx];
+    if (highlight) deleteHighlight("projects", id, highlight.id);
   };
 
   return (

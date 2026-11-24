@@ -1,6 +1,7 @@
 import { type Component, createSignal, For } from "solid-js";
 
 import { inputClass } from "@/components/ui/Input";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeSkill } from "@/types/resume";
 
@@ -24,7 +25,7 @@ const SkillsForm: Component = () => {
   };
 
   const removeSkill = (id: string) => {
-    setResume("skills", (s) => (s ?? []).filter((skill) => skill.id !== id));
+    deleteEntry("skills", id);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {

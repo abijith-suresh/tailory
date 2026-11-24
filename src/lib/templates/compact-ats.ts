@@ -22,6 +22,7 @@ import {
   buildVolunteerSection,
   buildWorkSection,
 } from "@/lib/templates/section-builders";
+import { applySectionOrder } from "@/lib/versions/section-order";
 import type { ResumeSchema } from "@/types/resume";
 
 // Compact template (id "compact-ats", kept for saved drafts): single column, dense layout.
@@ -160,5 +161,7 @@ export function compactAtsTemplate(
     accentColor: options.accentColor,
   });
 
-  return renderPdfResumeModel(buildCompactAtsRenderModel(resume, design));
+  return renderPdfResumeModel(
+    applySectionOrder(buildCompactAtsRenderModel(resume, design), options.sectionOrder)
+  );
 }

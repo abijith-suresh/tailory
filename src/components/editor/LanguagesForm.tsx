@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeLanguage } from "@/types/resume";
 
@@ -20,7 +21,7 @@ const LanguagesForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("languages", (entries) => (entries ?? []).filter((entry) => entry.id !== id));
+    deleteEntry("languages", id);
   };
 
   const reorder = (items: ResumeLanguage[]) => {

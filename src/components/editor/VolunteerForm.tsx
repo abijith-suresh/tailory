@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
 import { createId } from "@/lib/resume/ids";
+import { deleteEntry, deleteHighlight } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeVolunteer } from "@/types/resume";
 
@@ -28,7 +29,7 @@ const VolunteerForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("volunteer", (v) => (v ?? []).filter((e) => e.id !== id));
+    deleteEntry("volunteer", id);
   };
 
   const reorder = (items: ResumeVolunteer[]) => {
@@ -59,13 +60,8 @@ const VolunteerForm: Component = () => {
   };
 
   const removeHighlight = (id: string, idx: number) => {
-    setResume(
-      "volunteer",
-      (v) => v?.id === id,
-      produce((v: ResumeVolunteer) => {
-        v.highlights?.splice(idx, 1);
-      })
-    );
+    const highlight = resume.volunteer?.find((entry) => entry.id === id)?.highlights?.[idx];
+    if (highlight) deleteHighlight("volunteer", id, highlight.id);
   };
 
   return (

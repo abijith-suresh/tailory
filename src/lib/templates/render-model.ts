@@ -1,4 +1,5 @@
 import type { PdfMargin, ResumeDesignSettings } from "@/lib/resume/design";
+import type { ResumeSectionKey } from "@/types/document";
 import type { TemplateId } from "@/types/template";
 
 export interface ResumeHeaderModel {
@@ -24,19 +25,7 @@ export interface ResumeEntryModel {
 export interface ResumeSectionModel {
   dividerAfter?: boolean;
   entries?: ResumeEntryModel[];
-  id:
-    | "summary"
-    | "work"
-    | "volunteer"
-    | "education"
-    | "awards"
-    | "publications"
-    | "skills"
-    | "languages"
-    | "interests"
-    | "projects"
-    | "references"
-    | "certificates";
+  id: ResumeSectionKey;
   kind: "text" | "entries";
   text?: string;
   title: string;

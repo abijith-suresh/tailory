@@ -4,6 +4,7 @@ import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeAward } from "@/types/resume";
 
@@ -23,7 +24,7 @@ const AwardsForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("awards", (a) => (a ?? []).filter((e) => e.id !== id));
+    deleteEntry("awards", id);
   };
 
   const reorder = (items: ResumeAward[]) => {

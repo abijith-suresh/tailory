@@ -1,6 +1,7 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
 import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
+import type { ResumeSectionKey } from "@/types/document";
 import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { downloadBlob, isTouchFirstDevice, sanitizeFilenameBase } from "./download";
 import { type PdfMakeFontRuntime, registerPdfFonts } from "./fonts";
@@ -25,6 +26,8 @@ interface BrowserPdfDocument {
 
 interface PdfExportOptions {
   accentColor?: string;
+  /** A version's section order; see `resolveVersion` for the resume itself. */
+  sectionOrder?: readonly ResumeSectionKey[];
 }
 
 async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
@@ -80,6 +83,7 @@ export async function exportPDF(
 
   const docDef = loadPdfTemplateRenderer(template)(validation.normalizedResume, {
     accentColor: options.accentColor,
+    sectionOrder: options.sectionOrder,
   });
   const filename = getFilename(validation.normalizedResume);
   const blob = await pdfMake.createPdf(docDef).getBlob();

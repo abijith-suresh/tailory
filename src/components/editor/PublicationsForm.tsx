@@ -4,6 +4,7 @@ import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumePublication } from "@/types/resume";
 
@@ -24,7 +25,7 @@ const PublicationsForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("publications", (p) => (p ?? []).filter((e) => e.id !== id));
+    deleteEntry("publications", id);
   };
 
   const reorder = (items: ResumePublication[]) => {

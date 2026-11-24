@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
+import { deleteEntry } from "@/store/document";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeInterest } from "@/types/resume";
 
@@ -27,7 +28,7 @@ const InterestsForm: Component = () => {
   };
 
   const removeEntry = (id: string) => {
-    setResume("interests", (entries) => (entries ?? []).filter((entry) => entry.id !== id));
+    deleteEntry("interests", id);
   };
 
   const reorder = (items: ResumeInterest[]) => {

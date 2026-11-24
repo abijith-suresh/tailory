@@ -23,6 +23,7 @@ import {
   buildVolunteerSection,
   buildWorkSection,
 } from "@/lib/templates/section-builders";
+import { applySectionOrder } from "@/lib/versions/section-order";
 import type { ResumeSchema } from "@/types/resume";
 
 const PAGE_MARGINS = [45, 45, 45, 45] as const;
@@ -130,5 +131,7 @@ export function modernTemplate(
     accentColor: options.accentColor,
   });
 
-  return renderPdfResumeModel(buildModernRenderModel(resume, design));
+  return renderPdfResumeModel(
+    applySectionOrder(buildModernRenderModel(resume, design), options.sectionOrder)
+  );
 }
