@@ -7,9 +7,16 @@ vi.mock("@/lib/upload/process-file", () => ({
   processUploadedFile,
 }));
 
-vi.mock("@/lib/resume/json", () => ({
+vi.mock("@/lib/resume/json", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/resume/json")>()),
   parseJsonResumeImport,
 }));
+
+/** A resume with no versions, as an import gives it. */
+const documentFor = (name: string) => ({
+  master: expect.objectContaining({ basics: expect.objectContaining({ name }) }),
+  versions: [],
+});
 
 describe("importResumeFile", () => {
   beforeEach(() => {
@@ -37,14 +44,7 @@ describe("importResumeFile", () => {
 
     await expect(importResumeFile(file, "json")).resolves.toEqual({
       success: true,
-      resume: {
-        basics: { name: "Jane Doe" },
-        work: [],
-        education: [],
-        skills: [],
-        projects: [],
-        certificates: [],
-      },
+      document: documentFor("Jane Doe"),
     });
     expect(processUploadedFile).not.toHaveBeenCalled();
   });
@@ -58,8 +58,40 @@ describe("importResumeFile", () => {
 
     await expect(importResumeFile(file, "json")).resolves.toEqual({
       success: true,
-      resume,
+      document: documentFor("Jane Doe"),
       feedback: { ignoredFields: ["meta", "custom"] },
+    });
+  });
+
+  it("reads a Tailory backup with its versions instead of as a JSON Resume", async () => {
+    const { exportBackupString } = await import("@/lib/resume/backup");
+    const { createDocument, createVersion } = await import("@/lib/versions/document");
+    const { EMPTY_RESUME } = await import("@/types/resume");
+    const master = structuredClone(EMPTY_RESUME);
+    master.basics.name = "Jane Doe";
+    const backup = { ...createDocument(master), versions: [createVersion({ name: "Acme" })] };
+
+    const { importResumeFile } = await import("./import-resume");
+    const file = new File([exportBackupString(backup)], "backup.json", {
+      type: "application/json",
+    });
+
+    await expect(importResumeFile(file, "json")).resolves.toEqual({
+      success: true,
+      document: backup,
+    });
+    expect(parseJsonResumeImport).not.toHaveBeenCalled();
+  });
+
+  it("returns a backup that can't be read as an import error", async () => {
+    const { importResumeFile } = await import("./import-resume");
+    const file = new File([JSON.stringify({ format: "tailory-backup", version: 99 })], "b.json", {
+      type: "application/json",
+    });
+
+    await expect(importResumeFile(file, "json")).resolves.toEqual({
+      success: false,
+      error: "This backup comes from a newer Tailory. Reload the page and try again.",
     });
   });
 
@@ -98,13 +130,13 @@ describe("importResumeFile", () => {
 
     await expect(importResumeFile(file, "pdf")).resolves.toEqual({
       success: true,
-      resume: {
-        basics: { name: "Jane Doe" },
-        work: [{ id: "work-1", name: "Acme", position: "Engineer" }],
-        education: [],
-        skills: [{ id: "skill-1", name: "TypeScript" }],
-        projects: [],
-        certificates: [],
+      document: {
+        master: expect.objectContaining({
+          basics: expect.objectContaining({ name: "Jane Doe" }),
+          work: [expect.objectContaining({ id: "work-1", name: "Acme", position: "Engineer" })],
+          skills: [expect.objectContaining({ id: "skill-1", name: "TypeScript" })],
+        }),
+        versions: [],
       },
       feedback: {
         confidence: 82,

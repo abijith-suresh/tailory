@@ -12,12 +12,13 @@ Status: live.
 
 ## Sources of Truth
 
-| Fact                                         | Where                     |
-| -------------------------------------------- | ------------------------- |
-| Product intent                               | § The Project (this file) |
-| Runtime behavior                             | code + tests              |
-| Commands & deps                              | `package.json`            |
-| How to work here                             | `CONTRIBUTING.md`         |
-| User-visible behavior & JSON Resume contract | `README.md`               |
+| Fact                                         | Where                              |
+| -------------------------------------------- | ---------------------------------- |
+| Product intent                               | § The Project (this file)          |
+| Runtime behavior                             | code + tests                       |
+| Commands & deps                              | `package.json`                     |
+| How to work here                             | `CONTRIBUTING.md`                  |
+| User-visible behavior & JSON Resume contract | `README.md`                        |
+| Tailory backup file format                   | `src/lib/resume/backup.ts` + tests |
 
 Code and tests are the authority; this file never overrides executable truth.

@@ -46,18 +46,15 @@ describe("CommandBar import", () => {
   });
 
   it("replaces the resume through the copy-keeping path", async () => {
-    const imported = structuredClone(EMPTY_RESUME);
-    mocks.importResumeFile.mockResolvedValue({ success: true, resume: imported, feedback });
+    const imported = { master: structuredClone(EMPTY_RESUME), versions: [] };
+    mocks.importResumeFile.mockResolvedValue({ success: true, document: imported, feedback });
     mocks.replaceResume.mockResolvedValue(true);
     const { getByLabelText } = render(() => <CommandBar />);
 
     chooseFile(getByLabelText("Import resume file"));
     await flush();
 
-    expect(mocks.replaceResume).toHaveBeenCalledWith(
-      { master: expect.objectContaining({ basics: expect.any(Object) }), versions: [] },
-      "import"
-    );
+    expect(mocks.replaceResume).toHaveBeenCalledWith(imported, "import");
     expect(importFeedback()).toEqual(feedback);
   });
 

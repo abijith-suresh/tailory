@@ -1,7 +1,9 @@
+import { isTailoryBackup, parseBackupDocument } from "@/lib/resume/backup";
 import { parseJsonResumeImport } from "@/lib/resume/json";
 import { type SupportedUploadExtension, validateUploadFileContent } from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
-import type { ResumeSchema } from "@/types/resume";
+import { createDocument } from "@/lib/versions/document";
+import type { ResumeDocument } from "@/types/document";
 
 /** What a PDF or DOCX import found, with a confidence score for the parse. */
 export interface ParsedImportFeedback {
@@ -22,7 +24,8 @@ export type ImportFeedback = ParsedImportFeedback | IgnoredFieldsFeedback;
 
 export interface ImportResumeSuccess {
   success: true;
-  resume: ResumeSchema;
+  /** A Tailory backup brings its versions; any other file gives a resume with no versions. */
+  document: ResumeDocument;
   feedback?: ImportFeedback;
 }
 
@@ -32,6 +35,28 @@ export interface ImportResumeFailure {
 }
 
 export type ImportResumeOutcome = ImportResumeSuccess | ImportResumeFailure;
+
+function parseJsonFile(text: string): ImportResumeSuccess {
+  const backup = parseBackupIfPresent(text);
+  if (backup) return { success: true, document: backup };
+
+  const { resume, ignoredFields } = parseJsonResumeImport(text);
+  const document = createDocument(resume);
+  return ignoredFields.length > 0
+    ? { success: true, document, feedback: { ignoredFields } }
+    : { success: true, document };
+}
+
+function parseBackupIfPresent(text: string): ResumeDocument | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // Not JSON at all; the JSON Resume parser reports that.
+    return null;
+  }
+  return isTailoryBackup(parsed) ? parseBackupDocument(parsed) : null;
+}
 
 export async function importResumeFile(
   file: File,
@@ -44,11 +69,7 @@ export async function importResumeFile(
 
   if (extension === "json") {
     try {
-      const text = await file.text();
-      const { resume, ignoredFields } = parseJsonResumeImport(text);
-      return ignoredFields.length > 0
-        ? { success: true, resume, feedback: { ignoredFields } }
-        : { success: true, resume };
+      return parseJsonFile(await file.text());
     } catch (error) {
       return {
         success: false,
@@ -70,7 +91,7 @@ export async function importResumeFile(
 
   return {
     success: true,
-    resume: result.data,
+    document: createDocument(result.data),
     feedback: {
       confidence: result.confidence,
       work: result.data.work?.length ?? 0,
