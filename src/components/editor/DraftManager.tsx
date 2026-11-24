@@ -7,7 +7,6 @@ import {
   onMount,
   Show,
 } from "solid-js";
-import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
 import { AUTOSAVE_DRAFT_ID, deleteDraft, listDrafts, type ResumeDraft } from "@/lib/storage/db";
 import {
@@ -17,7 +16,9 @@ import {
   saveNamedDraft,
 } from "@/lib/storage/drafts";
 import { joinEditorTabs } from "@/lib/storage/editor-tabs";
-import { loadResume, resume, setDraftStorageError, setOtherTabActive } from "@/store/resume";
+import { createDocument, serializeDocument } from "@/lib/versions/document";
+import { currentDocument, loadDocument } from "@/store/document";
+import { setDraftStorageError, setOtherTabActive } from "@/store/resume";
 import { EMPTY_RESUME } from "@/types/resume";
 import { replaceResume } from "./replace-resume";
 
@@ -30,7 +31,7 @@ const STORAGE_UNAVAILABLE_MESSAGE =
   "Drafts aren't available in this browser, so changes won't be saved. Export JSON to keep a copy.";
 const READ_FAILED_MESSAGE =
   "Couldn't load your saved resume, so changes here won't be saved. Reload the page to try again.";
-const EMPTY_SNAPSHOT = serializeNormalizedResume(EMPTY_RESUME);
+const EMPTY_SNAPSHOT = serializeDocument(createDocument(EMPTY_RESUME));
 
 interface DraftManagerProps {
   dark?: boolean;
@@ -134,7 +135,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
     }
 
     setDraftStorageError("");
-    if (restored.draft) loadResume(restored.draft.resumeData);
+    if (restored.draft) loadDocument(restored.draft.document);
     // Only save once the resume differs from what is stored, or from the empty resume when
     // nothing is stored yet.
     setLastAutosaveSnapshot(restored.snapshotJson ?? EMPTY_SNAPSHOT);
@@ -166,8 +167,8 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   createEffect(() => {
     if (!hasHydratedAutosave() || !storageAvailable() || !isActiveTab()) return;
 
-    // Reactive read of the resume store fields that trigger saves
-    const snapshot = serializeNormalizedResume(resume);
+    // Reactive read of the master and the versions, so a change to either triggers a save
+    const snapshot = serializeDocument(currentDocument());
 
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     autoSaveTimer = null;
@@ -180,7 +181,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
 
   const handleSaveDraft = async () => {
     setStatus("saving");
-    const saved = await saveNamedDraft(resume);
+    const saved = await saveNamedDraft(currentDocument());
     if (isDisposed) return;
 
     if (!saved) {
@@ -221,7 +222,7 @@ const DraftManager: Component<DraftManagerProps> = (props) => {
   };
 
   const loadDraft = async (draft: ResumeDraft) => {
-    if (await replaceResume(draft.resumeData, "draft")) closeList();
+    if (await replaceResume(draft.document, "draft")) closeList();
   };
 
   const removeDraft = async (e: MouseEvent, draft: ResumeDraft) => {

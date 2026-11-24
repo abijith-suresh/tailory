@@ -1,15 +1,22 @@
-import { type IDBPDatabase, openDB } from "idb";
-import { normalizeResume } from "@/lib/resume/normalize";
-import type { ResumeSchema } from "@/types/resume";
+import { type IDBPDatabase, type IDBPTransaction, openDB, type StoreNames } from "idb";
+import { normalizeDocument } from "@/lib/versions/document";
+import type { ResumeDocument } from "@/types/document";
+import { readDraftRecord } from "./migrate";
 
 export const AUTOSAVE_DRAFT_ID = "autosave";
+
+/**
+ * Version 1 stored a draft's resume as `resumeData`. Version 2 stores a document: the master
+ * resume and its versions.
+ */
+export const DB_VERSION = 2;
 
 export interface ResumeDraft {
   id: string;
   name: string;
   createdAt: number;
   updatedAt: number;
-  resumeData: ResumeSchema;
+  document: ResumeDocument;
 }
 
 interface TailoryDB {
@@ -29,14 +36,66 @@ function resetDbConnection() {
   _db = null;
 }
 
+/**
+ * Rewrites every version 1 draft as a document. Any failure aborts the upgrade, which leaves the
+ * old drafts as they were and the database at version 1.
+ */
+async function migrateDraftsToDocuments(
+  tx: IDBPTransaction<TailoryDB, StoreNames<TailoryDB>[], "versionchange">
+) {
+  // An abort is reported through the failed open; don't also leave it unhandled here.
+  tx.done.catch(() => undefined);
+  try {
+    let cursor = await tx.objectStore("drafts").openCursor();
+    while (cursor) {
+      await cursor.update(readDraftRecord(cursor.value));
+      cursor = await cursor.continue();
+    }
+  } catch {
+    try {
+      tx.abort();
+    } catch {
+      // Already aborted by the failed request.
+    }
+  }
+}
+
+/**
+ * Opens the database, upgrading it if needed. Fails instead of waiting when an older Tailory in
+ * another tab holds the database open: once that tab closed, the editor would load the saved
+ * resume over anything typed in the meantime.
+ */
+function openTailoryDB(): Promise<IDBPDatabase<TailoryDB>> {
+  return new Promise((resolve, reject) => {
+    let gaveUp = false;
+    openDB<TailoryDB>("tailory", DB_VERSION, {
+      upgrade(db, oldVersion, _newVersion, tx) {
+        if (oldVersion < 1) {
+          db.createObjectStore("drafts", { keyPath: "id" });
+          return;
+        }
+        if (oldVersion < 2) void migrateDraftsToDocuments(tx);
+      },
+      blocked() {
+        gaveUp = true;
+        reject(new Error("Another tab is using an older version of the database."));
+      },
+      // Let a newer Tailory in another tab upgrade the database instead of waiting on this one.
+      blocking() {
+        _db?.close();
+        resetDbConnection();
+      },
+    }).then((db) => {
+      if (gaveUp) db.close();
+      else resolve(db);
+    }, reject);
+  });
+}
+
 async function getDB(): Promise<IDBPDatabase<TailoryDB>> {
   if (_db) return _db;
   try {
-    _db = await openDB<TailoryDB>("tailory", 1, {
-      upgrade(db) {
-        db.createObjectStore("drafts", { keyPath: "id" });
-      },
-    });
+    _db = await openTailoryDB();
     return _db;
   } catch (error) {
     resetDbConnection();
@@ -62,7 +121,7 @@ export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
     const savedDraft = {
       ...draft,
       name: draft.name.trim() || "Untitled",
-      resumeData: normalizeResume(draft.resumeData),
+      document: normalizeDocument(draft.document),
       createdAt: createdAt ?? draft.createdAt,
     };
 
@@ -86,13 +145,7 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined | nu
     const db = await getDB();
     const draft = await db.get("drafts", id);
     knownCreatedAt.set(id, draft?.createdAt ?? null);
-    return draft
-      ? {
-          ...draft,
-          name: draft.name.trim() || "Untitled",
-          resumeData: normalizeResume(draft.resumeData),
-        }
-      : undefined;
+    return draft ? readDraftRecord(draft) : undefined;
   } catch {
     resetDbConnection();
     return null;
@@ -104,13 +157,7 @@ export async function listDrafts(): Promise<ResumeDraft[] | null> {
   try {
     const db = await getDB();
     const all = await db.getAll("drafts");
-    return all
-      .map((draft) => ({
-        ...draft,
-        name: draft.name.trim() || "Untitled",
-        resumeData: normalizeResume(draft.resumeData),
-      }))
-      .sort((a, b) => b.updatedAt - a.updatedAt);
+    return all.map(readDraftRecord).sort((a, b) => b.updatedAt - a.updatedAt);
   } catch {
     resetDbConnection();
     return null;

@@ -54,7 +54,10 @@ describe("CommandBar import", () => {
     chooseFile(getByLabelText("Import resume file"));
     await flush();
 
-    expect(mocks.replaceResume).toHaveBeenCalledWith(imported, "import");
+    expect(mocks.replaceResume).toHaveBeenCalledWith(
+      { master: expect.objectContaining({ basics: expect.any(Object) }), versions: [] },
+      "import"
+    );
     expect(importFeedback()).toEqual(feedback);
   });
 

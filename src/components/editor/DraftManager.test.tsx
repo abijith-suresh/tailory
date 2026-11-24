@@ -3,9 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import DraftManager from "@/components/editor/DraftManager";
 import type { ResumeDraft } from "@/lib/storage/db";
+import { createDocument } from "@/lib/versions/document";
+import { createVersion, loadDocument, versions } from "@/store/document";
 import {
   draftStorageError,
-  loadResume,
   otherTabActive,
   resume,
   setDraftStorageError,
@@ -38,7 +39,13 @@ function resumeNamed(name: string): ResumeSchema {
 }
 
 function seedDraft(id: string, name: string) {
-  db.drafts.set(id, { id, name, createdAt: 1, updatedAt: 1, resumeData: resumeNamed(name) });
+  db.drafts.set(id, {
+    id,
+    name,
+    createdAt: 1,
+    updatedAt: 1,
+    document: createDocument(resumeNamed(name)),
+  });
 }
 
 const autosaveCalls = () => db.saveDraft.mock.calls.filter(([draft]) => draft.id === "autosave");
@@ -72,7 +79,7 @@ afterEach(() => {
   db.saveDraft.mockReset();
   db.listDrafts.mockReset();
   db.deleteDraft.mockReset();
-  loadResume(structuredClone(EMPTY_RESUME));
+  loadDocument(createDocument(EMPTY_RESUME));
   setDraftStorageError("");
 });
 
@@ -88,7 +95,25 @@ describe("DraftManager autosave", () => {
     await flush();
 
     expect(autosaveCalls()).toHaveLength(1);
-    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane");
+    expect(db.drafts.get("autosave")?.document.master.basics.name).toBe("Jane");
+  });
+
+  it("autosaves changes to versions, and restores them on the next visit", async () => {
+    seedDraft("autosave", "Jane");
+    const { unmount } = await renderManager();
+
+    createVersion({ name: "Acme" });
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(autosaveCalls()).toHaveLength(1);
+    expect(db.drafts.get("autosave")?.document.versions).toEqual([
+      expect.objectContaining({ name: "Acme" }),
+    ]);
+
+    unmount();
+    loadDocument(createDocument(EMPTY_RESUME));
+    await renderManager();
+    expect(versions).toEqual([expect.objectContaining({ name: "Acme" })]);
   });
 
   it("saves pending edits right away when the tab is hidden", async () => {
@@ -145,7 +170,7 @@ describe("DraftManager autosave", () => {
     await vi.advanceTimersByTimeAsync(2000);
 
     expect(autosaveCalls()).toHaveLength(2);
-    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane Doe");
+    expect(db.drafts.get("autosave")?.document.master.basics.name).toBe("Jane Doe");
     expect(draftStorageError()).toBe("");
     expect(getByRole("status")).toHaveTextContent("Changes saved");
   });
@@ -174,7 +199,7 @@ describe("DraftManager startup", () => {
     await flush();
 
     expect(autosaveCalls()).toHaveLength(0);
-    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane");
+    expect(db.drafts.get("autosave")?.document.master.basics.name).toBe("Jane");
     expect(draftStorageError()).toBe(
       "Couldn't load your saved resume, so changes here won't be saved. Reload the page to try again."
     );
@@ -223,7 +248,7 @@ describe("DraftManager with the editor open in two tabs", () => {
     await openInOtherTab();
     await flush();
     expect(autosaveCalls()).toHaveLength(1);
-    expect(db.drafts.get("autosave")?.resumeData.basics.name).toBe("Jane");
+    expect(db.drafts.get("autosave")?.document.master.basics.name).toBe("Jane");
 
     setResume("basics", "name", "Jane Doe");
     await vi.advanceTimersByTimeAsync(2000);
@@ -250,7 +275,7 @@ describe("DraftManager with the editor open in two tabs", () => {
     await vi.advanceTimersByTimeAsync(2000);
 
     expect(autosaveCalls()).toHaveLength(1);
-    expect(db.drafts.get("autosave")?.resumeData.basics.label).toBe("Engineer");
+    expect(db.drafts.get("autosave")?.document.master.basics.label).toBe("Engineer");
   });
 });
 
@@ -270,7 +295,7 @@ describe("DraftManager named drafts", () => {
 
     const named = [...db.drafts.values()].filter((draft) => draft.id !== "autosave");
     expect(named).toHaveLength(1);
-    expect(named[0].resumeData.basics.label).toBe("Engineer");
+    expect(named[0].document.master.basics.label).toBe("Engineer");
   });
 
   it("shows an error instead of an empty list when drafts can't be loaded", async () => {
@@ -333,6 +358,6 @@ describe("DraftManager named drafts", () => {
     expect(resume.basics.name).toBe("Alex");
     const copy = [...db.drafts.values()].find((draft) => draft.id.startsWith("copy-"));
     expect(copy?.name).toBe("Jane (before loading draft)");
-    expect(copy?.resumeData.basics.name).toBe("Jane");
+    expect(copy?.document.master.basics.name).toBe("Jane");
   });
 });

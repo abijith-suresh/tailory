@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ResumeDocument } from "@/types/document";
 import type { ResumeSchema } from "@/types/resume";
 
 interface DraftRecord {
@@ -6,7 +7,7 @@ interface DraftRecord {
   name: string;
   createdAt: number;
   updatedAt: number;
-  resumeData: ResumeSchema;
+  document: ResumeDocument;
 }
 
 const sampleResume = (name: string): ResumeSchema => ({
@@ -31,8 +32,22 @@ const sampleResume = (name: string): ResumeSchema => ({
   certificates: [],
 });
 
+/** A draft as IndexedDB version 1 stored it. */
+interface LegacyDraftRecord {
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+  resumeData: ResumeSchema;
+}
+
+const sampleDocument = (name: string): ResumeDocument => ({
+  master: sampleResume(name),
+  versions: [],
+});
+
 function createOpenDbMock(options?: {
-  seed?: Array<[string, DraftRecord]>;
+  seed?: Array<[string, DraftRecord | LegacyDraftRecord]>;
   openError?: Error;
   putError?: Error;
   getError?: Error;
@@ -41,7 +56,7 @@ function createOpenDbMock(options?: {
 }) {
   const drafts = new Map(options?.seed ?? []);
 
-  const put = vi.fn(async (_store: string, draft: DraftRecord) => {
+  const put = vi.fn(async (_store: string, draft: DraftRecord | LegacyDraftRecord) => {
     if (options?.putError) {
       throw options.putError;
     }
@@ -127,7 +142,7 @@ describe("draft storage", () => {
             name: "Jane",
             createdAt: 123,
             updatedAt: 456,
-            resumeData: sampleResume("Jane"),
+            document: sampleDocument("Jane"),
           },
         ],
       ],
@@ -138,7 +153,7 @@ describe("draft storage", () => {
       name: "Jane Doe",
       createdAt: 999,
       updatedAt: 789,
-      resumeData: sampleResume("Jane Doe"),
+      document: sampleDocument("Jane Doe"),
     });
 
     expect(saved).toBe(true);
@@ -158,28 +173,34 @@ describe("draft storage", () => {
         name: "  ",
         createdAt: 1,
         updatedAt: 2,
-        resumeData: {
-          ...sampleResume("  Jane Doe  "),
-          basics: {
-            ...sampleResume("  Jane Doe  ").basics,
-            url: "janedoe.dev ",
+        document: {
+          master: {
+            ...sampleResume("  Jane Doe  "),
+            basics: {
+              ...sampleResume("  Jane Doe  ").basics,
+              url: "janedoe.dev ",
+            },
+            skills: [
+              { id: "skill-1", name: " TypeScript ", keywords: [] },
+              { id: "skill-2", name: " ", keywords: [] },
+            ],
           },
-          skills: [
-            { id: "skill-1", name: " TypeScript ", keywords: [] },
-            { id: "skill-2", name: " ", keywords: [] },
-          ],
+          versions: [],
         },
       })
     ).resolves.toBe(true);
 
     await expect(storage.getDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toMatchObject({
       name: "Untitled",
-      resumeData: {
-        basics: expect.objectContaining({
-          name: "Jane Doe",
-          url: "https://janedoe.dev",
-        }),
-        skills: [expect.objectContaining({ id: "skill-1", name: "TypeScript" })],
+      document: {
+        master: {
+          basics: expect.objectContaining({
+            name: "Jane Doe",
+            url: "https://janedoe.dev",
+          }),
+          skills: [expect.objectContaining({ id: "skill-1", name: "TypeScript" })],
+        },
+        versions: [],
       },
     });
   });
@@ -194,7 +215,7 @@ describe("draft storage", () => {
         name: "Jane",
         createdAt: 1,
         updatedAt: 1,
-        resumeData: sampleResume("Jane"),
+        document: sampleDocument("Jane"),
       })
     ).resolves.toBe(false);
     await expect(storage.getDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBeNull();
@@ -212,7 +233,7 @@ describe("draft storage", () => {
             name: "Jane",
             createdAt: 123,
             updatedAt: 456,
-            resumeData: sampleResume("Jane"),
+            document: sampleDocument("Jane"),
           },
         ],
       ],
@@ -227,7 +248,7 @@ describe("draft storage", () => {
       name: "Jane Doe",
       createdAt: 999,
       updatedAt: 789,
-      resumeData: sampleResume("Jane Doe"),
+      document: sampleDocument("Jane Doe"),
     });
     for (let i = 0; i < 5; i++) await Promise.resolve();
 
@@ -246,7 +267,7 @@ describe("draft storage", () => {
       name: "Jane",
       createdAt: 1,
       updatedAt: 1,
-      resumeData: sampleResume("Jane"),
+      document: sampleDocument("Jane"),
     };
 
     await expect(storage.saveDraft(draft)).resolves.toBe(false);
@@ -269,7 +290,7 @@ describe("draft storage", () => {
     await expect(storage.listDrafts()).resolves.toBeNull();
   });
 
-  it("lists normalized drafts in descending updated order", async () => {
+  it("lists normalized drafts in descending updated order, reading the version 1 shape", async () => {
     const { storage } = await loadStorageModule({
       seed: [
         [
@@ -308,20 +329,26 @@ describe("draft storage", () => {
       expect.objectContaining({
         id: "newer",
         name: "Untitled",
-        resumeData: expect.objectContaining({
-          basics: expect.objectContaining({
-            name: "Alex Doe",
-            url: "https://alex.dev",
+        document: {
+          master: expect.objectContaining({
+            basics: expect.objectContaining({
+              name: "Alex Doe",
+              url: "https://alex.dev",
+            }),
           }),
-        }),
+          versions: [],
+        },
       }),
       expect.objectContaining({
         id: "older",
         name: "Older Draft",
-        resumeData: expect.objectContaining({
-          basics: expect.objectContaining({ name: "Jane Doe" }),
-          skills: [expect.objectContaining({ name: "TypeScript" })],
-        }),
+        document: {
+          master: expect.objectContaining({
+            basics: expect.objectContaining({ name: "Jane Doe" }),
+            skills: [expect.objectContaining({ name: "TypeScript" })],
+          }),
+          versions: [],
+        },
       }),
     ]);
   });

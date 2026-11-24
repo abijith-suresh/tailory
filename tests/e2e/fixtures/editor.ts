@@ -41,7 +41,7 @@ export async function waitForAutosave(page: Page) {
                 get.onerror = () => reject(get.error);
                 get.onsuccess = () => {
                   db.close();
-                  resolve(get.result?.resumeData?.basics?.label);
+                  resolve(get.result?.document?.master?.basics?.label);
                 };
               };
             })
@@ -49,4 +49,43 @@ export async function waitForAutosave(page: Page) {
       { timeout: 20_000 }
     )
     .toBe(EDITED_LABEL);
+}
+
+/** Creates the database as Tailory's first storage version did, with a saved resume in it. */
+export async function seedVersion1Autosave(page: Page, name: string) {
+  await page.evaluate(
+    (savedName) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open("tailory", 1);
+        open.onupgradeneeded = () => open.result.createObjectStore("drafts", { keyPath: "id" });
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const db = open.result;
+          const tx = db.transaction("drafts", "readwrite");
+          tx.objectStore("drafts").put({
+            id: "autosave",
+            name: savedName,
+            createdAt: 1,
+            updatedAt: 1,
+            resumeData: {
+              basics: { name: savedName, label: "Saved before versions" },
+              work: [
+                {
+                  id: "work-1",
+                  name: "Example Labs",
+                  position: "Engineer",
+                  highlights: ["Kept through the upgrade"],
+                },
+              ],
+            },
+          });
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    name
+  );
 }

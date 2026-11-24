@@ -1,4 +1,3 @@
-import { normalizeResume, serializeNormalizedResume } from "@/lib/resume/normalize";
 import {
   AUTOSAVE_DRAFT_ID,
   getDraft,
@@ -7,7 +6,9 @@ import {
   type ResumeDraft,
   saveDraft,
 } from "@/lib/storage/db";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
+import { createDocument, normalizeDocument, serializeDocument } from "@/lib/versions/document";
+import type { ResumeDocument } from "@/types/document";
+import { EMPTY_RESUME } from "@/types/resume";
 
 export type ReplaceReason = "import" | "draft";
 
@@ -16,8 +17,10 @@ const COPY_NAME_SUFFIX: Record<ReplaceReason, string> = {
   draft: "before loading draft",
 };
 
-export function cloneResumeData(data: ResumeSchema): ResumeSchema {
-  return normalizeResume(data);
+const EMPTY_SNAPSHOT = serializeDocument(createDocument(EMPTY_RESUME));
+
+function draftName(document: ResumeDocument): string {
+  return document.master.basics.name.trim() || "Untitled";
 }
 
 export async function restoreAutosaveDraft(): Promise<{
@@ -42,34 +45,31 @@ export async function restoreAutosaveDraft(): Promise<{
     return { available: true };
   }
 
+  const document = normalizeDocument(draft.document);
   return {
     available: true,
-    draft: {
-      ...draft,
-      resumeData: cloneResumeData(draft.resumeData),
-    },
-    snapshotJson: serializeNormalizedResume(draft.resumeData),
+    draft: { ...draft, document },
+    snapshotJson: serializeDocument(document),
   };
 }
 
 export async function saveAutosaveDraft(snapshotJson: string): Promise<boolean> {
-  let data: ResumeSchema;
+  let document: ResumeDocument;
 
   try {
-    data = JSON.parse(snapshotJson) as ResumeSchema;
+    document = normalizeDocument(JSON.parse(snapshotJson));
   } catch {
     return false;
   }
 
-  const normalizedData = cloneResumeData(data);
   const now = Date.now();
 
   return saveDraft({
     id: AUTOSAVE_DRAFT_ID,
-    name: normalizedData.basics?.name || "Untitled",
+    name: draftName(document),
     createdAt: now,
     updatedAt: now,
-    resumeData: normalizedData,
+    document,
   });
 }
 
@@ -87,8 +87,9 @@ export function requestPersistentStorage() {
 }
 
 /** Saves a named draft, updating the existing draft with the same name instead of adding another. */
-export async function saveNamedDraft(data: ResumeSchema): Promise<boolean> {
-  const name = data.basics.name.trim() || "Untitled";
+export async function saveNamedDraft(current: ResumeDocument): Promise<boolean> {
+  const document = normalizeDocument(current);
+  const name = draftName(document);
   const drafts = await listDrafts();
   if (drafts === null) return false;
 
@@ -100,7 +101,7 @@ export async function saveNamedDraft(data: ResumeSchema): Promise<boolean> {
     name,
     createdAt: now,
     updatedAt: now,
-    resumeData: cloneResumeData(data),
+    document,
   });
 }
 
@@ -109,15 +110,12 @@ export async function saveNamedDraft(data: ResumeSchema): Promise<boolean> {
  * replacement, or already saved as a named draft.
  */
 export async function keepCopyBeforeReplacing(
-  current: ResumeSchema,
-  incoming: ResumeSchema,
+  current: ResumeDocument,
+  incoming: ResumeDocument,
   reason: ReplaceReason
 ): Promise<"not-needed" | "saved" | "failed"> {
-  const snapshot = serializeNormalizedResume(current);
-  if (
-    snapshot === serializeNormalizedResume(EMPTY_RESUME) ||
-    snapshot === serializeNormalizedResume(incoming)
-  ) {
+  const snapshot = serializeDocument(current);
+  if (snapshot === EMPTY_SNAPSHOT || snapshot === serializeDocument(incoming)) {
     return "not-needed";
   }
 
@@ -125,19 +123,18 @@ export async function keepCopyBeforeReplacing(
   if (drafts === null) return "failed";
 
   const alreadySaved = drafts.some(
-    (draft) =>
-      draft.id !== AUTOSAVE_DRAFT_ID && serializeNormalizedResume(draft.resumeData) === snapshot
+    (draft) => draft.id !== AUTOSAVE_DRAFT_ID && serializeDocument(draft.document) === snapshot
   );
   if (alreadySaved) return "not-needed";
 
-  const data = cloneResumeData(current);
+  const document = normalizeDocument(current);
   const now = Date.now();
   const saved = await saveDraft({
     id: `copy-${now}`,
-    name: `${data.basics.name || "Untitled"} (${COPY_NAME_SUFFIX[reason]})`,
+    name: `${draftName(document)} (${COPY_NAME_SUFFIX[reason]})`,
     createdAt: now,
     updatedAt: now,
-    resumeData: data,
+    document,
   });
 
   return saved ? "saved" : "failed";

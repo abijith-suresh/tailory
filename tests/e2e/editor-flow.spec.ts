@@ -6,6 +6,7 @@ import {
   editLabel,
   FIXTURE_NAME,
   importFixtureResume,
+  seedVersion1Autosave,
   waitForAutosave,
 } from "./fixtures/editor";
 
@@ -51,4 +52,23 @@ test("import a JSON Resume with fields Tailory does not use and see which were s
     "Tailory doesn't use these fields, so they weren't imported: $schema, meta, custom."
   );
   await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("open a resume saved before versions existed and keep editing it", async ({ page }) => {
+  await page.goto("/");
+  await seedVersion1Autosave(page, FIXTURE_NAME);
+
+  await page.goto("/editor");
+  await expect(page.getByRole("textbox", { name: "Full Name" })).toHaveValue(FIXTURE_NAME);
+  await expect(page.getByRole("textbox", { name: "Title / Label" })).toHaveValue(
+    "Saved before versions"
+  );
+
+  await editLabel(page);
+  await waitForAutosave(page);
+
+  const jsonDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export JSON" }).click();
+  const exported = JSON.parse(await readFile(await (await jsonDownload).path(), "utf8"));
+  expect(exported.work[0].highlights).toEqual(["Kept through the upgrade"]);
 });

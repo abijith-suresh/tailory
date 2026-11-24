@@ -46,6 +46,7 @@
     "@types/pdfmake": "^0.3.3",
     "@vitest/coverage-v8": "5.1.1",
     "@vitest/ui": "^5.1.1",
+    "fake-indexeddb": "^6.2.8",
     "husky": "^9.1.7",
     "jsdom": "^31.0.1",
     "lint-staged": "^17.6.1",

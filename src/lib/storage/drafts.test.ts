@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { serializeNormalizedResume } from "@/lib/resume/normalize";
+import { createDocument, createVersion, serializeDocument } from "@/lib/versions/document";
+import type { ResumeDocument } from "@/types/document";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 type DeepPartial<T> = {
@@ -23,8 +24,12 @@ vi.mock("@/lib/storage/db", () => ({
   saveDraft,
 }));
 
-function storedDraft(id: string, resumeData: ResumeSchema, name = resumeData.basics.name) {
-  return { id, name, createdAt: 1, updatedAt: 1, resumeData };
+function doc(master: ResumeSchema, versions: ResumeDocument["versions"] = []): ResumeDocument {
+  return { master, versions };
+}
+
+function storedDraft(id: string, document: ResumeDocument, name = document.master.basics.name) {
+  return { id, name, createdAt: 1, updatedAt: 1, document };
 }
 
 function createResume(overrides?: DeepPartial<ResumeSchema>): ResumeSchema {
@@ -102,7 +107,7 @@ describe("autosave draft helpers", () => {
       name: "Jane Draft",
       createdAt: 100,
       updatedAt: 200,
-      resumeData: rawResume,
+      document: doc(rawResume),
     });
 
     const { restoreAutosaveDraft } = await import("./drafts");
@@ -113,19 +118,22 @@ describe("autosave draft helpers", () => {
       draft: {
         id: "autosave",
         name: "Jane Draft",
-        resumeData: {
-          basics: expect.objectContaining({
-            name: "Jane Doe",
-            url: "https://janedoe.dev",
-          }),
-          skills: [expect.objectContaining({ name: "TypeScript", keywords: ["testing"] })],
+        document: {
+          master: {
+            basics: expect.objectContaining({
+              name: "Jane Doe",
+              url: "https://janedoe.dev",
+            }),
+            skills: [expect.objectContaining({ name: "TypeScript", keywords: ["testing"] })],
+          },
+          versions: [],
         },
       },
-      snapshotJson: serializeNormalizedResume(rawResume),
+      snapshotJson: serializeDocument(createDocument(rawResume)),
     });
 
-    expect(result.draft?.resumeData).not.toBe(rawResume);
-    result.draft?.resumeData.skills?.push({ id: "skill-2", name: "New Skill", keywords: [] });
+    expect(result.draft?.document.master).not.toBe(rawResume);
+    result.draft?.document.master.skills?.push({ id: "skill-2", name: "New Skill", keywords: [] });
     expect(rawResume.skills).toHaveLength(1);
   });
 
@@ -142,16 +150,19 @@ describe("autosave draft helpers", () => {
 
     const { saveAutosaveDraft } = await import("./drafts");
 
-    await expect(saveAutosaveDraft(JSON.stringify(rawResume))).resolves.toBe(true);
+    await expect(saveAutosaveDraft(JSON.stringify(doc(rawResume)))).resolves.toBe(true);
     expect(saveDraft).toHaveBeenCalledWith({
       id: "autosave",
       name: "Jane Doe",
       createdAt: 1234567890,
       updatedAt: 1234567890,
-      resumeData: expect.objectContaining({
-        basics: expect.objectContaining({ name: "Jane Doe" }),
-        projects: [expect.objectContaining({ name: "Portfolio", url: "https://janedoe.dev" })],
-      }),
+      document: {
+        master: expect.objectContaining({
+          basics: expect.objectContaining({ name: "Jane Doe" }),
+          projects: [expect.objectContaining({ name: "Portfolio", url: "https://janedoe.dev" })],
+        }),
+        versions: [],
+      },
     });
 
     nowSpy.mockRestore();
@@ -174,13 +185,13 @@ describe("named drafts", () => {
   it("updates the draft that already has the same name", async () => {
     const resume = createResume({ basics: { name: "Jane Doe" } });
     listDrafts.mockResolvedValue([
-      storedDraft("autosave", resume),
-      storedDraft("draft-1", createResume({ basics: { name: "Jane Doe", label: "Old" } })),
+      storedDraft("autosave", doc(resume)),
+      storedDraft("draft-1", doc(createResume({ basics: { name: "Jane Doe", label: "Old" } }))),
     ]);
 
     const { saveNamedDraft } = await import("./drafts");
 
-    await expect(saveNamedDraft(resume)).resolves.toBe(true);
+    await expect(saveNamedDraft(doc(resume))).resolves.toBe(true);
     expect(saveDraft).toHaveBeenCalledTimes(1);
     expect(saveDraft).toHaveBeenCalledWith(
       expect.objectContaining({ id: "draft-1", name: "Jane Doe" })
@@ -190,12 +201,12 @@ describe("named drafts", () => {
   it("creates a new draft when no draft has the name", async () => {
     vi.spyOn(Date, "now").mockReturnValue(42);
     listDrafts.mockResolvedValue([
-      storedDraft("draft-1", createResume({ basics: { name: "Alex" } })),
+      storedDraft("draft-1", doc(createResume({ basics: { name: "Alex" } }))),
     ]);
 
     const { saveNamedDraft } = await import("./drafts");
 
-    await expect(saveNamedDraft(createResume())).resolves.toBe(true);
+    await expect(saveNamedDraft(doc(createResume()))).resolves.toBe(true);
     expect(saveDraft).toHaveBeenCalledWith(
       expect.objectContaining({ id: "draft-42", name: "Untitled" })
     );
@@ -207,14 +218,16 @@ describe("named drafts", () => {
 
     const { saveNamedDraft } = await import("./drafts");
 
-    await expect(saveNamedDraft(createResume({ basics: { name: "Jane" } }))).resolves.toBe(false);
+    await expect(saveNamedDraft(doc(createResume({ basics: { name: "Jane" } })))).resolves.toBe(
+      false
+    );
     expect(saveDraft).not.toHaveBeenCalled();
   });
 });
 
 describe("keeping a copy before replacing the resume", () => {
-  const current = createResume({ basics: { name: "Jane Doe", label: "Engineer" } });
-  const incoming = createResume({ basics: { name: "Imported" } });
+  const current = doc(createResume({ basics: { name: "Jane Doe", label: "Engineer" } }));
+  const incoming = doc(createResume({ basics: { name: "Imported" } }));
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -231,9 +244,12 @@ describe("keeping a copy before replacing the resume", () => {
       expect.objectContaining({
         id: "copy-7",
         name: "Jane Doe (before import)",
-        resumeData: expect.objectContaining({
-          basics: expect.objectContaining({ label: "Engineer" }),
-        }),
+        document: {
+          master: expect.objectContaining({
+            basics: expect.objectContaining({ label: "Engineer" }),
+          }),
+          versions: [],
+        },
       })
     );
 
@@ -247,7 +263,7 @@ describe("keeping a copy before replacing the resume", () => {
   it("skips an empty resume", async () => {
     const { keepCopyBeforeReplacing } = await import("./drafts");
 
-    await expect(keepCopyBeforeReplacing(createResume(), incoming, "import")).resolves.toBe(
+    await expect(keepCopyBeforeReplacing(doc(createResume()), incoming, "import")).resolves.toBe(
       "not-needed"
     );
     expect(saveDraft).not.toHaveBeenCalled();
@@ -266,6 +282,20 @@ describe("keeping a copy before replacing the resume", () => {
 
     await expect(keepCopyBeforeReplacing(current, incoming, "draft")).resolves.toBe("not-needed");
     expect(saveDraft).not.toHaveBeenCalled();
+  });
+
+  it("saves a copy when only the versions would change", async () => {
+    const withVersion = doc(current.master, [createVersion({ name: "Acme" })]);
+    const { keepCopyBeforeReplacing } = await import("./drafts");
+
+    await expect(keepCopyBeforeReplacing(withVersion, current, "draft")).resolves.toBe("saved");
+    expect(saveDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          versions: [expect.objectContaining({ name: "Acme" })],
+        }),
+      })
+    );
   });
 
   it("still saves a copy when only the autosave matches", async () => {

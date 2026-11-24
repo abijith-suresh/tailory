@@ -11,6 +11,7 @@ import {
 } from "@/lib/sections/registry";
 import { validateUploadFile } from "@/lib/upload/guardrails";
 import { importResumeFile } from "@/lib/upload/import-resume";
+import { createDocument } from "@/lib/versions/document";
 import {
   activeSection,
   resume,
@@ -84,7 +85,7 @@ const CommandBar: Component = () => {
         return;
       }
 
-      if (!(await replaceResume(outcome.resume, "import"))) return;
+      if (!(await replaceResume(createDocument(outcome.resume), "import"))) return;
       if (outcome.feedback) {
         setImportFeedback(outcome.feedback);
       }
