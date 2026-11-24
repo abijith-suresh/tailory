@@ -180,8 +180,14 @@ describe("draft storage", () => {
       })
     ).resolves.toBe(false);
     await expect(storage.getDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBeUndefined();
-    await expect(storage.listDrafts()).resolves.toEqual([]);
+    await expect(storage.listDrafts()).resolves.toBeNull();
     await expect(storage.deleteDraft(storage.AUTOSAVE_DRAFT_ID)).resolves.toBe(false);
+  });
+
+  it("returns null instead of an empty list when drafts can't be read", async () => {
+    const { storage } = await loadStorageModule({ getAllError: new Error("read failed") });
+
+    await expect(storage.listDrafts()).resolves.toBeNull();
   });
 
   it("lists normalized drafts in descending updated order", async () => {

@@ -45,7 +45,9 @@ test("import a JSON Resume with fields Tailory does not use and see which were s
   await page.getByLabel("Import resume file", { exact: true }).setInputFiles(EXTRA_FIELDS_FIXTURE);
 
   await expect(page.getByRole("textbox", { name: "Full Name" })).toHaveValue(FIXTURE_NAME);
-  await expect(page.getByRole("status")).toHaveText(
+  await expect(
+    page.getByRole("status").filter({ hasText: "Tailory doesn't use these fields" })
+  ).toHaveText(
     "Tailory doesn't use these fields, so they weren't imported: $schema, meta, custom."
   );
   await expect(page.getByRole("alert")).toHaveCount(0);
