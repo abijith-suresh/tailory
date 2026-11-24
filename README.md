@@ -11,13 +11,13 @@ Try it: https://tailory-nine.vercel.app
   - Text-based PDFs and DOCX files are read on a best-effort basis. Check what Tailory found before you export.
   - Scanned or image-only PDFs do not work, because they have no text to read. Tailory tells you when it finds none.
 - See a live preview as you type.
-- Choose a template: Modern, Minimal or Compact ATS.
+- Choose a template: Modern, Minimal or Compact.
 - Export a PDF or a JSON file.
 - Autosave and keep named drafts on your device.
 
 ## Privacy
 
-There is no account and no server that processes resumes. Your resume stays in your browser. Autosaves and named drafts live in your browser's storage. Your browser removes them when you clear site data. The pages load fonts from Google Fonts, and your resume is not part of those requests.
+There is no account and no server that processes resumes. Your resume stays in your browser. Autosaves and named drafts live in your browser's storage. Your browser removes them when you clear site data. The site serves its own fonts, so no request goes to a font service.
 
 ## Run it locally
 
@@ -41,4 +41,4 @@ Tailory's own code is MIT-licensed (see [LICENSE](LICENSE)). It ships other proj
 - DOCX import uses [mammoth](https://github.com/mwilliamson/mammoth.js), which is BSD-2-Clause.
 - Drafts use [idb](https://github.com/jakearchibald/idb), which is ISC.
 - Exported PDFs embed Roboto, which comes with [pdfmake](https://github.com/bpampuch/pdfmake) and is under the SIL Open Font License. Its text is in `public/fonts/OFL-Roboto.txt`.
-- The interface font, [Geist](https://github.com/vercel/geist-font), is under the SIL Open Font License. Its text is in `public/fonts/OFL-Geist.txt`.
+- The interface uses [Hanken Grotesk](https://github.com/marcologous/hanken-grotesk) and [Geist Mono](https://github.com/vercel/geist-font), both under the SIL Open Font License. Their texts are in `public/fonts/OFL-HankenGrotesk.txt` and `public/fonts/OFL-GeistMono.txt`.

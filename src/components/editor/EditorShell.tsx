@@ -59,7 +59,7 @@ const EditorShell: Component = () => {
           <div class="min-w-0 flex-1">
             <h2
               class="text-base font-semibold"
-              style={{ color: "#0e2418", "font-family": "'Lora', serif" }}
+              style={{ color: "#0e2418", "font-family": "var(--font-sans)" }}
             >
               {currentSection()?.label}
             </h2>

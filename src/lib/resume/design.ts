@@ -13,7 +13,7 @@ export interface ResumeDesignSettings {
 }
 
 export const DEFAULT_RESUME_ACCENT_COLOR = "#1d6648";
-export const RESUME_PREVIEW_FONT_FAMILY = '"Roboto", "Geist", Arial, sans-serif';
+export const RESUME_PREVIEW_FONT_FAMILY = '"Roboto", Arial, sans-serif';
 export const RESUME_PREVIEW_PAGE_MIN_HEIGHT = 842;
 
 export function resolveResumeDesignSettings(input: ResumeDesignInput): ResumeDesignSettings {

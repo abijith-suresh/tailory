@@ -1,0 +1,36 @@
+---
+import Tickbox from "@/components/site/Tickbox.astro";
+import MarketingLayout from "@/layouts/MarketingLayout.astro";
+---
+
+<MarketingLayout title="Page not found" description="This page doesn’t exist." noindex>
+  <section
+    class="site-x grid gap-10 pt-10 pb-20 md:pt-16 md:pb-28 lg:grid-cols-[minmax(0,var(--container-measure))_minmax(0,1fr)] lg:items-center lg:gap-16 lg:py-32"
+  >
+    <div>
+      <h1 class="text-heading-4 text-balance md:text-heading-3">This page isn’t here.</h1>
+      <p class="mt-4 max-w-measure text-body-lg text-pretty text-fg-muted">
+        The link may be out of date. Your drafts are still in this browser.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm md:h-9">Open editor</a>
+        <a href="/" class="btn-quiet h-11 px-4 text-ui-sm md:h-9">Home page</a>
+      </div>
+    </div>
+
+    <!-- The site's tick list, with this page left out. -->
+    <ul class="w-full max-w-80 rounded-2xl bg-surface p-2 ring-1 ring-line lg:justify-self-end" aria-hidden="true">
+      <li class="flex items-start gap-3 rounded-lg p-2 text-body-sm">
+        <Tickbox on />
+        <span class="flex-1">Your drafts</span>
+        <span class="self-center font-mono text-ui-xs text-keep">kept</span>
+      </li>
+      <li class="flex items-start gap-3 rounded-lg p-2 text-body-sm text-fg-subtle">
+        <Tickbox />
+        <span class="flex-1 line-through decoration-cut">This page</span>
+        <span class="self-center font-mono text-ui-xs">404</span>
+      </li>
+    </ul>
+  </section>
+</MarketingLayout>
+

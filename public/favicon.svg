@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 0 22 22" role="img" aria-labelledby="title">
   <title id="title">Tailory</title>
-  <rect width="64" height="64" rx="16" fill="#1d6648"/>
-  <path d="M18 19h28M32 19v27M24 46h16" fill="none" stroke="#f4f8f5" stroke-linecap="round" stroke-width="5"/>
+  <style>path{fill:#2b3fd1}@media (prefers-color-scheme:dark){path{fill:#8d9bff}}</style>
+  <path d="M1 2h18v5h-6v13H7V7H1z"/>
 </svg>

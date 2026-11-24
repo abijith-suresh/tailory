@@ -59,7 +59,6 @@ const ResumePreview: Component = () => {
               dominant-baseline="central"
               fill="#0e2418"
               font-size="9"
-              font-family="'DM Sans', sans-serif"
               font-weight="600"
             >
               {completedCount()}/{TOTAL_SECTIONS}
