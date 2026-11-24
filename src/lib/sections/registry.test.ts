@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  SECTION_DEFINITIONS,
-  TOTAL_SECTIONS,
   getCompletedSectionsCount,
   getSectionDefinition,
   isResumeEmpty,
   isSectionComplete,
+  SECTION_DEFINITIONS,
+  TOTAL_SECTIONS,
 } from "@/lib/sections/registry";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 

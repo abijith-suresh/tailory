@@ -5,7 +5,7 @@ import {
   RESUME_PREVIEW_PAGE_MIN_HEIGHT,
   resolveResumeDesignSettings,
 } from "@/lib/resume/design";
-import { TOTAL_SECTIONS, getCompletedSectionsCount, isResumeEmpty } from "@/lib/sections/registry";
+import { getCompletedSectionsCount, isResumeEmpty, TOTAL_SECTIONS } from "@/lib/sections/registry";
 import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 
@@ -59,7 +59,6 @@ const ResumePreview: Component = () => {
               dominant-baseline="central"
               fill="#0e2418"
               font-size="9"
-              font-family="'DM Sans', sans-serif"
               font-weight="600"
             >
               {completedCount()}/{TOTAL_SECTIONS}

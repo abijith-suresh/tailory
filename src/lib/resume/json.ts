@@ -29,12 +29,9 @@ export const JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS = [
   "projects",
 ] as const;
 
-export const JSON_RESUME_IGNORED_TOP_LEVEL_FIELDS = ["$schema", "meta"] as const;
-
-const JSON_RESUME_ALLOWED_TOP_LEVEL_FIELDS = new Set<string>([
-  ...JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS,
-  ...JSON_RESUME_IGNORED_TOP_LEVEL_FIELDS,
-]);
+const JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELD_SET = new Set<string>(
+  JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS
+);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -111,43 +108,40 @@ function parseObjectArray<T>(
 }
 
 export function parseJsonResumeString(source: string): ResumeSchema {
-  let parsed: unknown;
+  return parseJsonResumeDocument(parseJsonSource(source));
+}
 
+function parseJsonSource(source: string): unknown {
   try {
-    parsed = JSON.parse(source);
+    return JSON.parse(source);
   } catch {
     throw new Error("Invalid JSON file. Please upload a valid JSON Resume document.");
   }
-
-  return parseJsonResumeDocument(parsed);
 }
 
-function findUnsupportedTopLevelFields(document: Record<string, unknown>): string[] {
-  return Object.keys(document).filter((key) => !JSON_RESUME_ALLOWED_TOP_LEVEL_FIELDS.has(key));
+/**
+ * Top-level fields Tailory does not model (`meta`, `$schema`, custom keys). Import skips
+ * them and the caller reports the names, so the user knows what was left out.
+ */
+function findIgnoredTopLevelFields(document: Record<string, unknown>): string[] {
+  return Object.keys(document).filter((key) => !JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELD_SET.has(key));
 }
 
-function formatSupportedTopLevelFields(): string {
-  const fields = [...JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS];
-  const lastField = fields.pop();
+export interface JsonResumeImport {
+  resume: ResumeSchema;
+  ignoredFields: string[];
+}
 
-  if (!lastField) {
-    return "";
-  }
+export function parseJsonResumeImport(source: string): JsonResumeImport {
+  const document = parseJsonSource(source);
+  const resume = parseJsonResumeDocument(document);
 
-  return fields.length > 0 ? `${fields.join(", ")}, and ${lastField}` : lastField;
+  return { resume, ignoredFields: isRecord(document) ? findIgnoredTopLevelFields(document) : [] };
 }
 
 export function parseJsonResumeDocument(document: unknown): ResumeSchema {
   if (!isRecord(document)) {
     throw new Error("Invalid JSON Resume: top-level document must be an object.");
-  }
-
-  const unsupportedFields = findUnsupportedTopLevelFields(document);
-
-  if (unsupportedFields.length > 0) {
-    throw new Error(
-      `Unsupported JSON Resume fields: ${unsupportedFields.join(", ")}. Tailory currently supports ${formatSupportedTopLevelFields()}.`
-    );
   }
 
   const normalized = normalizeResume({

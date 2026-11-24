@@ -1,234 +1,87 @@
 ---
+import VersionBoard from "@/components/site/VersionBoard.astro";
 import MarketingLayout from "@/layouts/MarketingLayout.astro";
 
-const features = [
+const points = [
   {
-    n: "01",
-    term: "PDF, DOCX & JSON Import",
-    def: "Bring in an existing resume as a PDF, DOCX, or JSON document without sending it to an application server.",
+    title: "Start from what you have",
+    text: "Open a PDF, DOCX or JSON resume. Tailory reads it in this tab and fills in the sections.",
   },
   {
-    n: "02",
-    term: "Auto-Parsing",
-    def: "Heuristic parsing maps raw text into structured JSON Resume fields automatically.",
+    title: "One master, many versions",
+    text: "Each job gets its own version. Edit a role once and every version that uses it updates.",
   },
   {
-    n: "03",
-    term: "Live Preview",
-    def: "See your resume rendered in real time as you make edits — no save required.",
-  },
-  {
-    n: "04",
-    term: "Three Templates",
-    def: "Modern, Minimal, and Compact ATS — each optimised for a different context.",
-  },
-  {
-    n: "05",
-    term: "PDF & JSON Export",
-    def: "Download a machine-readable PDF for applications or export structured JSON for portability.",
-  },
-  {
-    n: "06",
-    term: "Draft Storage",
-    def: "Your work saves automatically to your browser's IndexedDB — never to a server.",
+    title: "Export a real PDF",
+    text: "Selectable text, set to the page count you choose. Or export JSON and pick it up again later.",
   },
 ];
 
-const steps = [
-  {
-    title: "Upload",
-    desc: "Import an existing PDF, DOCX, or JSON resume, or begin from a blank form.",
-  },
-  { title: "Edit", desc: "Refine every field in a calm structured editor. No formatting fights." },
-  { title: "Export", desc: "Download a polished, text-based PDF in one click." },
-];
-
-const tabs = ["Basics", "Summary", "Work", "Education"];
-const formFields = [
-  { label: "Full name", val: "Alex Johnson" },
-  { label: "Email", val: "alex@example.com" },
-  { label: "Location", val: "San Francisco, CA" },
+const imports = [
+  { format: "JSON", how: "Read field by field. The most reliable." },
+  { format: "DOCX", how: "Text sorted into sections. Check them after." },
+  { format: "PDF", how: "Text PDFs only, best effort. Scanned pages can’t be read." },
 ];
 ---
 
 <MarketingLayout
-  title="Tailory — Resume editor that belongs to you"
-  description="A fully client-side resume editor. Import PDF, DOCX, or JSON Resume data, edit it locally, preview live, and export PDF or JSON in your browser."
+  title="Tailory · Cut your resume to fit the job"
+  description="Keep your whole career in one place and choose what goes into each application. Import a PDF, DOCX or JSON resume and export a text PDF. Nothing leaves your browser."
 >
-  <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-8 pb-20 pt-24" data-reveal>
-    <p class="mb-8 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">
-      Client-side resume editor
-    </p>
-    <h1
-      class="mb-8 max-w-3xl leading-[1.05] text-[#0e2418]"
-      style="font-family: 'Lora', Georgia, serif; font-size: clamp(52px, 6.5vw, 80px); font-weight: 700"
-    >
-      The resume editor that <em style="color: #1d6648; font-style: italic">belongs to you.</em>
-    </h1>
-    <div class="mb-10 h-px w-20 bg-[#ccddd4]"></div>
-    <p class="mb-10 max-w-xl text-lg leading-relaxed text-[#3d6650]">
-      Import a PDF, DOCX, or JSON resume, edit every field in a calm structured interface, and
-      export a text-based PDF or structured JSON — without sending resume data to an application
-      server.
-    </p>
-    <div class="flex flex-wrap items-center gap-4">
-      <a
-        href="/editor"
-        class="inline-block rounded-md bg-[#1d6648] px-7 py-3 text-sm font-medium text-white transition-[background-color,transform] hover:bg-[#155236] hover:-translate-y-px active:scale-95 active:translate-y-0"
+  <section
+    class="site-x grid gap-10 pt-10 pb-16 md:gap-12 md:pt-16 md:pb-20 xl:grid-cols-[minmax(0,--spacing(128))_minmax(0,1fr)] xl:items-center xl:gap-12"
+  >
+    <div class="lg:grid lg:grid-cols-2 lg:items-end lg:gap-12 xl:block">
+      <h1
+        class="max-w-measure text-heading-3 text-balance max-[24rem]:text-heading-4 md:text-heading-1"
       >
-        Open the editor →
-      </a>
-      <div class="flex flex-wrap gap-3">
-        {
-          ["No account", "Local only", "Open source"].map((chip) => (
-            <span
-              aria-hidden="true"
-              class="rounded-full border border-[#ccddd4] bg-white px-4 py-1.5 text-xs font-medium text-[#3d6650]"
-            >
-              {chip}
-            </span>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- App Preview Mockup -->
-  <section class="mx-auto max-w-6xl px-8 pb-24" data-reveal data-reveal-delay="100">
-    <p class="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-[#a0b8ab]">Editor preview</p>
-    <div class="overflow-hidden rounded-xl border border-[#ccddd4] shadow-lg shadow-[#1d6648]/5">
-      <!-- Top bar -->
-      <div class="flex items-center border-b border-[#ccddd4] bg-white px-4 py-2.5">
-        <span
-          class="mr-6 text-sm font-bold text-[#1d6648]"
-          style="font-family: 'Lora', Georgia, serif"
-        >
-          Tailory
-        </span>
-        <div class="flex">
-          {
-            tabs.map((tab, i) => (
-              <div
-                class:list={[
-                  "border-b-2 px-4 py-2 text-xs font-medium transition-colors",
-                  i === 0 ? "border-[#1d6648] text-[#1d6648]" : "border-transparent text-[#a0b8ab]",
-                ]}
-              >
-                {tab}
-              </div>
-            ))
-          }
-        </div>
-        <div class="ml-auto">
-          <span class="rounded bg-[#1d6648] px-3 py-1 text-xs font-medium text-white"
-            >Export PDF</span
-          >
-        </div>
-      </div>
-      <!-- Split pane -->
-      <div class="flex" style="height: 260px">
-        <!-- Left: Editor panel -->
-        <div class="w-1/2 overflow-hidden border-r border-[#ccddd4] bg-[#f4f8f5] p-5">
-          <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#a0b8ab]">
-            Basics
-          </p>
-          {
-            formFields.map((field) => (
-              <div class="mb-3">
-                <p class="mb-1 text-[11px] font-medium text-[#3d6650]">{field.label}</p>
-                <div class="rounded border border-[#ccddd4] bg-white px-3 py-2 text-xs text-[#0e2418]">
-                  {field.val}
-                </div>
-              </div>
-            ))
-          }
-        </div>
-        <!-- Right: Preview panel -->
-        <div class="w-1/2 bg-[#f4f8f5] p-5">
-          <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[#a0b8ab]">
-            Preview
-          </p>
-          <div class="rounded border border-[#ccddd4] bg-white p-4">
-            <div class="mb-2 h-3 w-28 rounded bg-[#1d6648]/20"></div>
-            <div class="mb-4 h-2 w-20 rounded bg-[#ccddd4]"></div>
-            <div class="mb-1.5 h-2 w-full rounded bg-[#ccddd4]"></div>
-            <div class="mb-1.5 h-2 w-5/6 rounded bg-[#ccddd4]"></div>
-            <div class="mb-4 h-2 w-4/5 rounded bg-[#ccddd4]"></div>
-            <div class="mb-1 h-2 w-16 rounded bg-[#1d6648]/40"></div>
-            <div class="mb-1.5 h-2 w-full rounded bg-[#ccddd4]"></div>
-            <div class="h-2 w-3/4 rounded bg-[#ccddd4]"></div>
-          </div>
+        Cut your resume to fit the job.
+      </h1>
+      <div>
+        <p class="mt-4 max-w-[30em] text-body-lg text-pretty text-fg-muted md:mt-6 lg:mt-0 xl:mt-6">
+          Keep your whole career in one place, then choose what goes into each application. No
+          account, and nothing leaves your browser.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3 lg:mt-6 xl:mt-8">
+          <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm md:h-9">Open editor</a>
+          <a href="/editor" class="btn-quiet h-11 px-4 text-ui-sm md:h-9">
+            Import a resume <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
     </div>
+
+    <VersionBoard />
   </section>
 
-  <!-- Divider -->
-  <div class="mx-auto max-w-6xl border-t border-[#ccddd4] px-8"></div>
-
-  <!-- Features — numbered list -->
-  <section class="mx-auto max-w-6xl px-8 py-24">
-    <p class="mb-16 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">What it does</p>
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <section class="border-t border-line">
+    <div class="site-x grid gap-8 py-12 md:grid-cols-3 md:gap-12 md:py-16">
       {
-        features.map((f, i) => (
-          <div
-            class="flex gap-6 border-t border-[#ccddd4] pt-6 transition-all duration-200 hover:border-[#ccddd4] hover:-translate-y-0.5"
-            data-reveal
-            data-reveal-delay={String(Math.min(i * 100, 400))}
-          >
-            <span class="shrink-0 text-sm font-medium text-[#a0b8ab]">{f.n}</span>
-            <div>
-              <h3 class="mb-1.5 text-base font-semibold text-[#0e2418]">{f.term}</h3>
-              <p class="text-sm leading-relaxed text-[#3d6650]">{f.def}</p>
-            </div>
+        points.map((point) => (
+          <div>
+            <h2 class="text-heading-6 text-balance">{point.title}</h2>
+            <p class="mt-2 max-w-measure text-body-md text-pretty text-fg-muted">{point.text}</p>
           </div>
         ))
       }
     </div>
   </section>
 
-  <!-- Divider -->
-  <div class="mx-auto max-w-6xl border-t border-[#ccddd4] px-8"></div>
-
-  <!-- How it works -->
-  <section class="mx-auto max-w-6xl px-8 py-24">
-    <p class="mb-16 text-xs font-medium uppercase tracking-[0.25em] text-[#a0b8ab]">How it works</p>
-    <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-      {
-        steps.map((s, i) => (
-          <div data-reveal data-reveal-delay={String(i * 100)}>
-            <div class="mb-5 flex h-9 w-9 items-center justify-center rounded-full border border-[#1d6648] text-sm font-semibold text-[#1d6648]">
-              {i + 1}
-            </div>
-            <h3
-              class="mb-3 text-xl font-bold text-[#0e2418]"
-              style="font-family: 'Lora', Georgia, serif"
-            >
-              {s.title}
-            </h3>
-            <p class="text-sm leading-relaxed text-[#3d6650]">{s.desc}</p>
-          </div>
-        ))
-      }
+  <section class="border-t border-line">
+    <div class="site-x py-12 md:py-16">
+      <div class="split gap-y-4 md:items-baseline">
+        <h2 class="text-heading-5 text-balance">What imports well</h2>
+        <dl class="grid grid-cols-[--spacing(20)_minmax(0,1fr)] text-body-md md:grid-cols-[--spacing(24)_minmax(0,1fr)]">
+          {
+            imports.map((item) => (
+              <>
+                <dt class="border-b border-line py-3 text-ui-md">{item.format}</dt>
+                <dd class="border-b border-line py-3 text-pretty text-fg-muted">{item.how}</dd>
+              </>
+            ))
+          }
+        </dl>
+      </div>
     </div>
   </section>
-
-  <!-- Privacy callout -->
-  <div class="bg-[#0e2418]">
-    <div class="mx-auto max-w-6xl px-8 py-20" data-reveal>
-      <p class="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-[#3d6650]">Privacy</p>
-      <h2
-        class="mb-5 max-w-3xl leading-tight text-white"
-        style="font-family: 'Lora', Georgia, serif; font-size: clamp(28px, 3.5vw, 46px); font-weight: 700"
-      >
-        Your resume is your business. We have no way of seeing it.
-      </h2>
-      <p class="max-w-lg text-base leading-relaxed text-[#3d6650]">
-        No telemetry. No cloud sync. No accounts required. Tailory runs entirely in your browser —
-        your data stays exactly where it belongs.
-      </p>
-    </div>
-  </div>
 </MarketingLayout>
