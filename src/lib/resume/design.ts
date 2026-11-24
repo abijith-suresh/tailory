@@ -12,7 +12,8 @@ export interface ResumeDesignSettings {
   accentColor: string;
 }
 
-export const DEFAULT_RESUME_ACCENT_COLOR = "#1d6648";
+/** The site's ink. A colour the user picks replaces it. */
+export const DEFAULT_RESUME_ACCENT_COLOR = "#1b1c20";
 export const RESUME_PREVIEW_FONT_FAMILY = '"Roboto", Arial, sans-serif';
 export const RESUME_PREVIEW_PAGE_MIN_HEIGHT = 842;
 

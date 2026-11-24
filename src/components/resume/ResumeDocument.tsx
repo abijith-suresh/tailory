@@ -18,7 +18,7 @@ function renderSectionTitle(
     return (
       <h2
         class="resume-document__section-title mb-1 border-b pb-0.5 text-xs font-bold uppercase tracking-widest"
-        style={{ color: accentColor, "border-color": "#ccddd4" }}
+        style={{ color: accentColor, "border-color": "#d1d5db" }}
       >
         {section.title}
       </h2>

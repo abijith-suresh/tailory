@@ -1,13 +1,13 @@
 import { fireEvent, render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import EditorLayout from "@/components/editor/EditorLayout";
+import EditorToasts from "@/components/editor/EditorToasts";
 import {
   setDraftStorageError,
-  setOtherTabActive,
   setExportError,
   setImportError,
   setImportFeedback,
+  setOtherTabActive,
 } from "@/store/resume";
 
 afterEach(() => {
@@ -19,10 +19,10 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("EditorLayout toasts", () => {
+describe("EditorToasts", () => {
   it("shows an export error toast and dismisses it after five seconds", async () => {
     vi.useFakeTimers();
-    const { queryByRole } = render(() => <EditorLayout />);
+    const { queryByRole } = render(() => <EditorToasts />);
 
     setExportError("Add your name before exporting.");
 
@@ -35,7 +35,7 @@ describe("EditorLayout toasts", () => {
   });
 
   it("dismisses an import error toast through its button", () => {
-    const { getByRole, getByLabelText, queryByRole } = render(() => <EditorLayout />);
+    const { getByRole, getByLabelText, queryByRole } = render(() => <EditorToasts />);
 
     setImportError("Unsupported JSON Resume fields: nope.");
     expect(getByRole("alert").textContent).toContain("Unsupported JSON Resume fields");
@@ -47,7 +47,7 @@ describe("EditorLayout toasts", () => {
 
   it("keeps the draft storage error on screen until it is dismissed", async () => {
     vi.useFakeTimers();
-    const { getByRole, getByLabelText, queryByRole } = render(() => <EditorLayout />);
+    const { getByRole, getByLabelText, queryByRole } = render(() => <EditorToasts />);
 
     setDraftStorageError("Couldn't save your changes in this browser. Export JSON to keep a copy.");
     vi.advanceTimersByTime(60_000);
@@ -61,7 +61,7 @@ describe("EditorLayout toasts", () => {
   });
 
   it("lists ignored JSON fields in a short notice", () => {
-    const { getByRole } = render(() => <EditorLayout />);
+    const { getByRole } = render(() => <EditorToasts />);
 
     setImportFeedback({ ignoredFields: ["meta", "custom"] });
 
@@ -70,8 +70,23 @@ describe("EditorLayout toasts", () => {
     );
   });
 
+  it("says what a PDF or DOCX import found", () => {
+    const { getByRole } = render(() => <EditorToasts />);
+
+    setImportFeedback({
+      confidence: 90,
+      work: 2,
+      education: 1,
+      skills: 0,
+      projects: 0,
+      certificates: 0,
+    });
+
+    expect(getByRole("status").textContent).toBe("Imported. Found 2 jobs, 1 school.");
+  });
+
   it("caps a long list of ignored fields", () => {
-    const { getByRole } = render(() => <EditorLayout />);
+    const { getByRole } = render(() => <EditorToasts />);
 
     setImportFeedback({ ignoredFields: ["a", "b", "c", "d", "e", "f", "g"] });
 
@@ -81,7 +96,7 @@ describe("EditorLayout toasts", () => {
   it("offers to use this tab when the editor is open in another tab", async () => {
     vi.useFakeTimers();
     const takeOver = vi.fn();
-    const { getByRole, queryByLabelText } = render(() => <EditorLayout />);
+    const { getByRole, queryByLabelText } = render(() => <EditorToasts />);
 
     setOtherTabActive({ takeOver });
     vi.advanceTimersByTime(60_000);
