@@ -3,6 +3,10 @@ import { expect, type Page } from "@playwright/test";
 
 export const RESUME_FIXTURE = fileURLToPath(new URL("./resume.json", import.meta.url));
 
+export const EXTRA_FIELDS_FIXTURE = fileURLToPath(
+  new URL("./resume-with-extra-fields.json", import.meta.url)
+);
+
 export const FIXTURE_NAME = "Ada Fixture";
 export const EDITED_LABEL = "Principal Engineer";
 

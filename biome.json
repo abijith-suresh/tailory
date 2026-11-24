@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.6.5/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "maxSize": 2097152,
@@ -10,6 +10,7 @@
   "linter": {
     "rules": {
       "preset": "recommended",
+      "correctness": { "noUnusedVariables": "error" },
       "style": {
         "useConst": "error"
       },
@@ -25,7 +26,7 @@
       }
     }
   },
-  "assist": { "actions": { "source": { "organizeImports": "off" } } },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
@@ -38,13 +39,15 @@
   "overrides": [
     {
       "includes": ["**/*.md", "**/*.mdx"],
-      "linter": { "rules": { "a11y": { "useAnchorContent": "off" } } }
+      "linter": { "rules": { "a11y": { "useAnchorContent": "off" } } },
+      "assist": { "actions": { "source": { "organizeImports": "off" } } }
     },
     {
       "includes": ["**/*.astro"],
       "linter": {
         "rules": { "correctness": { "noUnusedVariables": "off", "noUnusedImports": "off" } }
-      }
+      },
+      "assist": { "actions": { "source": { "organizeImports": "off" } } }
     },
     {
       "includes": ["scripts/**"],
