@@ -5,7 +5,7 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 ## What Tailory does today
 
 - **Client-side import**: Open PDF, DOCX, and `.json` resume files locally in your browser.
-- **Structured editing**: Edit basics, summary, work, education, skills, projects, certifications, languages, interests, and references.
+- **Structured editing**: Edit basics, summary, work, education, skills, projects, certifications, languages, interests, references, volunteer work, awards, and publications.
 - **Live preview**: See the current resume render update as you edit.
 - **Templates**: Switch the layout at any time without retyping your content.
 - **Export**: Download a PDF or export the current resume as JSON.
@@ -14,7 +14,6 @@ Tailory is a browser-based resume editor. Import a PDF, DOCX, or JSON Resume-sty
 ## Current limits
 
 - Uploads are capped at 10 MB per file. PDF extraction stops at 20 pages, 10,000 positioned text items, or 250,000 extracted characters, whichever comes first.
-- Volunteer work, awards, and publications already render in preview/export and survive JSON round-trips, but are **not yet editable in the form UI**
 - Several imported fields also have no editor controls yet: social profiles, street address and postal code, work summaries, project dates/keywords/roles, education URLs and courses, and skill levels. They are preserved in drafts and JSON round-trips but cannot be edited in the form UI.
 - JSON Resume support is implemented through Tailory's normalization layer; it is **not yet formally validated against the official schema package**
 - Tailory is browser-only and privacy-first, but it is **not an offline-first PWA**. There is no service worker, so the first load still depends on normal browser and network behavior.

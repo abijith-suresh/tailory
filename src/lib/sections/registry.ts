@@ -79,6 +79,27 @@ export const SECTION_DEFINITIONS: readonly SectionDefinition[] = [
     subtitle: "Licenses, certificates, and credentials",
     isComplete: (resume) => (resume.certificates?.length ?? 0) > 0,
   },
+  {
+    id: "volunteer",
+    label: "Volunteer",
+    shortLabel: "Volunteer",
+    subtitle: "Volunteer roles and community work",
+    isComplete: (resume) => (resume.volunteer?.length ?? 0) > 0,
+  },
+  {
+    id: "awards",
+    label: "Awards",
+    shortLabel: "Awards",
+    subtitle: "Honors and recognition",
+    isComplete: (resume) => (resume.awards?.length ?? 0) > 0,
+  },
+  {
+    id: "publications",
+    label: "Publications",
+    shortLabel: "Publications",
+    subtitle: "Articles, papers, and talks",
+    isComplete: (resume) => (resume.publications?.length ?? 0) > 0,
+  },
 ] as const;
 
 export const TOTAL_SECTIONS = SECTION_DEFINITIONS.length;
