@@ -3,14 +3,14 @@ import { type Component, createSignal, For, Show } from "solid-js";
 import { downloadBlob, sanitizeFilenameBase } from "@/lib/export/download";
 import { exportPDF } from "@/lib/export/pdf-export";
 import { exportJsonResumeString } from "@/lib/resume/json";
-import { validateUploadFile } from "@/lib/upload/guardrails";
-import { importResumeFile } from "@/lib/upload/import-resume";
 import {
-  SECTION_DEFINITIONS,
-  TOTAL_SECTIONS,
   getCompletedSectionsCount,
   isSectionComplete,
+  SECTION_DEFINITIONS,
+  TOTAL_SECTIONS,
 } from "@/lib/sections/registry";
+import { validateUploadFile } from "@/lib/upload/guardrails";
+import { importResumeFile } from "@/lib/upload/import-resume";
 import {
   activeSection,
   loadResume,

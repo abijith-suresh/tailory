@@ -5,7 +5,7 @@ import {
   RESUME_PREVIEW_PAGE_MIN_HEIGHT,
   resolveResumeDesignSettings,
 } from "@/lib/resume/design";
-import { TOTAL_SECTIONS, getCompletedSectionsCount, isResumeEmpty } from "@/lib/sections/registry";
+import { getCompletedSectionsCount, isResumeEmpty, TOTAL_SECTIONS } from "@/lib/sections/registry";
 import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 
