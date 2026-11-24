@@ -1,19 +1,29 @@
-import { parseJsonResumeString } from "@/lib/resume/json";
+import { parseJsonResumeImport } from "@/lib/resume/json";
 import { type SupportedUploadExtension, validateUploadFileContent } from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
 import type { ResumeSchema } from "@/types/resume";
 
+/** What a PDF or DOCX import found, with a confidence score for the parse. */
+export interface ParsedImportFeedback {
+  confidence: number;
+  certificates: number;
+  education: number;
+  projects: number;
+  skills: number;
+  work: number;
+}
+
+/** Top-level JSON fields that Tailory does not model and so did not import. */
+export interface IgnoredFieldsFeedback {
+  ignoredFields: string[];
+}
+
+export type ImportFeedback = ParsedImportFeedback | IgnoredFieldsFeedback;
+
 export interface ImportResumeSuccess {
   success: true;
   resume: ResumeSchema;
-  feedback?: {
-    confidence: number;
-    certificates: number;
-    education: number;
-    projects: number;
-    skills: number;
-    work: number;
-  };
+  feedback?: ImportFeedback;
 }
 
 export interface ImportResumeFailure {
@@ -35,8 +45,10 @@ export async function importResumeFile(
   if (extension === "json") {
     try {
       const text = await file.text();
-      const resume = parseJsonResumeString(text);
-      return { success: true, resume };
+      const { resume, ignoredFields } = parseJsonResumeImport(text);
+      return ignoredFields.length > 0
+        ? { success: true, resume, feedback: { ignoredFields } }
+        : { success: true, resume };
     } catch (error) {
       return {
         success: false,
