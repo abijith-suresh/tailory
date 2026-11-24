@@ -41,7 +41,7 @@ test("unknown routes show the not-found page", async ({ page }) => {
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
 });
 
-test("GitHub links sit in the footer, not the header", async ({ page }) => {
+test("the header keeps FAQ and Privacy; GitHub links sit in the footer", async ({ page }) => {
   await page.goto("/");
 
   const header = page.getByRole("navigation", { name: "Main" });
@@ -50,7 +50,25 @@ test("GitHub links sit in the footer, not the header", async ({ page }) => {
   await expect(header.getByRole("link", { name: /GitHub/ })).toHaveCount(0);
 
   const footer = page.getByRole("navigation", { name: "Footer" });
+  await expect(footer.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
+  await expect(footer.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
   await expect(footer.getByRole("link", { name: /GitHub/ })).toBeVisible();
   await expect(footer.getByRole("link", { name: /Report an issue/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Releases/ })).toHaveCount(0);
+});
+
+test("on phones the header shows only the logo and the editor link", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("/");
+
+  const header = page.getByRole("navigation", { name: "Main" });
+  await expect(header.getByRole("link", { name: "Tailory home" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Open editor" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "FAQ" })).toBeHidden();
+  await expect(header.getByRole("link", { name: "Privacy" })).toBeHidden();
+
+  const footer = page.getByRole("navigation", { name: "Footer" });
+  await expect(footer.getByRole("link", { name: "FAQ" })).toBeVisible();
+  await expect(footer.getByRole("link", { name: "Privacy" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

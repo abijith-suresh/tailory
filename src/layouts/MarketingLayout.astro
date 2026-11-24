@@ -20,8 +20,9 @@ const navLinks = [
 ];
 
 const footerLinks = [
-  { label: "GitHub", href: repoUrl },
-  { label: "Report an issue", href: `${repoUrl}/issues` },
+  ...navLinks,
+  { label: "GitHub", href: repoUrl, external: true },
+  { label: "Report an issue", href: `${repoUrl}/issues`, external: true },
 ];
 ---
 
@@ -37,9 +38,10 @@ const footerLinks = [
     <header class="site-x">
       <nav class="flex h-16 items-center gap-1 md:gap-2" aria-label="Main">
         <a href="/" class="mr-auto flex min-h-11 items-center rounded-sm" aria-label="Tailory home">
-          <Logo compact />
+          <Logo />
         </a>
-        <ul class="flex items-center gap-1">
+        <!-- Phones show only the logo and the editor; FAQ and Privacy are in the footer. -->
+        <ul class="flex items-center gap-1 max-sm:hidden">
           {
             navLinks.map((link) => (
               <li>
@@ -54,7 +56,7 @@ const footerLinks = [
             ))
           }
         </ul>
-        <a href="/editor" class="btn-primary ml-1 h-11 px-4 text-ui-sm md:ml-2 md:h-9">
+        <a href="/editor" class="btn-primary h-11 px-4 text-ui-sm sm:ml-2 md:h-9">
           Open editor
         </a>
       </nav>
@@ -64,38 +66,35 @@ const footerLinks = [
       <slot />
     </main>
 
-    <!-- Phones: the logo and licence share a row, with the links below. From md, one row. -->
+    <!-- Phones stack the logo, the links and the licence. From md, one row on a shared baseline. -->
     <footer class="border-t border-line">
       <div
-        class="site-x grid grid-cols-[1fr_auto] items-center py-6 max-md:pb-8 md:flex md:justify-between md:gap-12"
+        class="site-x flex flex-col items-start gap-4 pt-6 pb-8 text-body-sm text-fg-muted md:flex-row md:items-baseline md:gap-x-6 md:pb-6"
       >
-        <a href="/" class="flex min-h-11 w-fit items-center rounded-sm" aria-label="Tailory home">
+        <a href="/" class="flex min-h-11 items-center rounded-sm" aria-label="Tailory home">
           <Logo />
         </a>
-        <div class="contents text-body-sm text-fg-muted md:flex md:items-center md:gap-3">
-          <p>MIT licensed</p>
-          <span class="max-md:hidden" aria-hidden="true">·</span>
-          <nav class="col-span-2" aria-label="Footer">
-            <ul class="flex flex-wrap items-center gap-x-3">
-              {
-                footerLinks.map((link, i) => (
-                  <li class="flex items-center gap-x-3">
-                    {i > 0 && <span aria-hidden="true">·</span>}
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex min-h-11 items-center gap-1 transition-colors hover:text-fg"
-                    >
-                      {link.label}
-                      <ExternalIcon />
-                    </a>
-                  </li>
-                ))
-              }
-            </ul>
-          </nav>
-        </div>
+        <nav class="md:order-last md:ml-auto" aria-label="Footer">
+          <ul class="grid grid-cols-[auto_auto] gap-x-10 sm:flex sm:gap-x-6">
+            {
+              footerLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    aria-current={path === link.href ? "page" : undefined}
+                    class="inline-flex min-h-11 items-center gap-1 underline-offset-4 transition-colors hover:text-fg max-sm:min-w-11 aria-[current=page]:text-fg aria-[current=page]:underline aria-[current=page]:decoration-primary aria-[current=page]:decoration-2"
+                  >
+                    {link.label}
+                    {link.external && <ExternalIcon />}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <p>MIT licensed</p>
       </div>
     </footer>
   </div>
