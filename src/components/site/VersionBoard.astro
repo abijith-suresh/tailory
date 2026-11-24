@@ -44,7 +44,7 @@ const kept = highlights.filter((item) => item.keep).length;
 ---
 
 <figure
-  class="version-board grid gap-4 overflow-hidden rounded-2xl bg-surface p-4 ring-1 ring-line md:grid-cols-[minmax(0,1fr)_auto] md:gap-6"
+  class="version-board grid gap-4 overflow-hidden rounded-2xl bg-surface p-4 ring-1 ring-line md:grid-cols-[minmax(0,1fr)_var(--sheet-column)] md:gap-6"
 >
   <figcaption class="sr-only">
     An example version of a resume for a product designer job at Linear: {kept} of
@@ -92,16 +92,20 @@ const kept = highlights.filter((item) => item.keep).length;
     <span>1 page · fits</span>
   </div>
 
-  <!-- On phones the page is cropped by the card's bottom edge, so it shows the part that changed. -->
-  <div class="version-board__sheet max-md:border-t max-md:border-line max-md:pt-4 md:col-start-2 md:row-start-1 md:self-start">
-    <ResumeSheet resume={resume} class="mx-auto" />
+  <!--
+    The page is cropped by the card rather than shrunk to fit: on phones by the card's bottom edge,
+    from md by the target row's rule, and beside the hero text also on the right.
+  -->
+  <div class="version-board__sheet max-md:border-t max-md:border-line max-md:pt-4 md:col-start-2 md:row-start-1">
+    <ResumeSheet resume={resume} class="max-md:mx-auto" />
   </div>
 </figure>
 
 <style>
-  /* The page's scale at each width, so the sheet fills its column without overflowing it. */
+  /* The page's scale at each width. Phones show the whole width; from md the list sets the height. */
   .version-board {
     --sheet-scale: 0.37;
+    --sheet-column: calc(680px * var(--sheet-scale));
   }
 
   .version-board :global(.resume-sheet) {
@@ -113,6 +117,23 @@ const kept = highlights.filter((item) => item.keep).length;
       height: calc(842px * var(--sheet-scale) * 0.62 + var(--spacing) * 4);
       margin-bottom: calc(var(--spacing) * -4);
       overflow: hidden;
+    }
+  }
+
+  /*
+   * From md the sheet leaves the row height to the list and runs down to the target row's rule,
+   * which crops it. The clip leaves room for the page's shadow on the other three sides.
+   */
+  @media (min-width: 48rem) {
+    .version-board__sheet {
+      position: relative;
+      margin-bottom: calc(var(--spacing) * -6);
+      clip-path: inset(calc(var(--spacing) * -8) calc(var(--spacing) * -8) 0);
+    }
+
+    .version-board__sheet :global(.resume-sheet) {
+      position: absolute;
+      inset: 0 auto auto 0;
     }
   }
 
@@ -142,21 +163,37 @@ const kept = highlights.filter((item) => item.keep).length;
 
   @media (min-width: 48rem) {
     .version-board {
-      --sheet-scale: 0.5;
+      --sheet-scale: 0.52;
     }
   }
 
   @media (min-width: 64rem) {
     .version-board {
-      --sheet-scale: 0.56;
+      --sheet-scale: 0.66;
     }
   }
 
-  /* Beside the hero text the board is narrower, so the page shrinks to leave the list room. */
+  /*
+   * Beside the hero text the card is too narrow for the whole page width and a one-line list, so
+   * the column keeps the list's width and the page is also cropped on the right, in line with the
+   * target row. The cut lines fade into the card instead of stopping mid-word.
+   */
   @media (min-width: 80rem) {
     .version-board {
-      --sheet-scale: 0.42;
+      --sheet-scale: 0.6;
+      --sheet-column: calc(var(--spacing) * 69);
+    }
+
+    .version-board__sheet {
+      clip-path: inset(calc(var(--spacing) * -8) 0 0 calc(var(--spacing) * -8));
+    }
+
+    .version-board__sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: calc(var(--spacing) * 12);
+      background: linear-gradient(to right, transparent, var(--color-surface));
     }
   }
-
 </style>
