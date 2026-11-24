@@ -43,11 +43,18 @@ export interface ResumeVersion {
   templateId: TemplateId;
   /** Pages the version should fit on, or null for no target. */
   pageTarget: number | null;
+  /** Whether Tailory may tighten spacing and text to meet the page target. Undo turns it off. */
+  autoFit: boolean;
   rewordings: Rewording[];
 }
+
+/** How a resume is fitted to pages: the master's settings, or a version's. */
+export type PageFit = Pick<ResumeVersion, "pageTarget" | "autoFit">;
 
 /** One resume: the master with everything in it, and a version per job. */
 export interface ResumeDocument {
   master: ResumeSchema;
   versions: ResumeVersion[];
+  /** The master's page target. Documents saved before page targets have none. */
+  masterFit?: PageFit;
 }

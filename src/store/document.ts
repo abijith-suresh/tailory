@@ -3,6 +3,7 @@ import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import { createId } from "@/lib/resume/ids";
 import {
   createVersion as buildVersion,
+  DEFAULT_PAGE_FIT,
   normalizeDocument,
   normalizePageTarget,
   type VersionDetails,
@@ -15,16 +16,19 @@ import {
 } from "@/lib/versions/items";
 import { sameText } from "@/lib/versions/resolve";
 import { normalizeSectionOrder } from "@/lib/versions/section-order";
-import type { ResumeDocument, ResumeSectionKey, ResumeVersion } from "@/types/document";
+import type { PageFit, ResumeDocument, ResumeSectionKey, ResumeVersion } from "@/types/document";
 import type { TemplateId } from "@/types/template";
 import { resume, selectedTemplate, setResume } from "./resume";
 
 /** The versions of the resume in the editor. The master is the `resume` store. */
 export const [versions, setVersions] = createStore<ResumeVersion[]>([]);
 
+/** The master's page target and whether it may be tightened. Versions keep their own. */
+export const [masterFit, setMasterFit] = createStore<PageFit>({ ...DEFAULT_PAGE_FIT });
+
 /** The resume in the editor as one document. Reads are reactive inside a tracking scope. */
 export function currentDocument(): ResumeDocument {
-  return { master: resume, versions };
+  return { master: resume, versions, masterFit };
 }
 
 /** Replaces the master and every version, for example after an import or loading a draft. */
@@ -32,6 +36,7 @@ export function loadDocument(document: ResumeDocument) {
   const normalized = normalizeDocument(document);
   setResume(normalized.master);
   setVersions(reconcile(normalized.versions, { key: "id" }));
+  setMasterFit(normalized.masterFit ?? { ...DEFAULT_PAGE_FIT });
 }
 
 function updateVersion(versionId: string, update: (version: ResumeVersion) => void) {
@@ -145,10 +150,29 @@ export function setVersionTemplate(versionId: string, templateId: TemplateId) {
   });
 }
 
-/** Sets how many pages a version should fit on. Anything but a whole number of 1 or more clears it. */
-export function setPageTarget(versionId: string, pageTarget: number | null) {
+/**
+ * Sets how many pages a version, or the master (null), should fit on. Anything but a whole number
+ * of 1 or more clears it.
+ */
+export function setPageTarget(versionId: string | null, pageTarget: number | null) {
+  const value = normalizePageTarget(pageTarget);
+  if (versionId === null) {
+    setMasterFit("pageTarget", value);
+    return;
+  }
   updateVersion(versionId, (version) => {
-    version.pageTarget = normalizePageTarget(pageTarget);
+    version.pageTarget = value;
+  });
+}
+
+/** Lets Tailory tighten a version, or the master (null), to meet its target, or stops it. */
+export function setAutoFit(versionId: string | null, autoFit: boolean) {
+  if (versionId === null) {
+    setMasterFit("autoFit", autoFit);
+    return;
+  }
+  updateVersion(versionId, (version) => {
+    version.autoFit = autoFit;
   });
 }
 

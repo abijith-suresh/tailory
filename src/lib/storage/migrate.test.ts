@@ -76,6 +76,7 @@ describe("readDraftRecord", () => {
           skills: [expect.objectContaining({ id: "skill-1", keywords: ["Solid"] })],
         }),
         versions: [],
+        masterFit: { pageTarget: null, autoFit: true },
       },
     });
   });

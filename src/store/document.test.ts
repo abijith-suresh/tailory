@@ -14,7 +14,9 @@ import {
   deleteVersion,
   duplicateVersion,
   loadDocument,
+  masterFit,
   renameVersion,
+  setAutoFit,
   setPageTarget,
   setRewording,
   setSectionOrder,
@@ -122,6 +124,47 @@ describe("managing versions", () => {
 
     setPageTarget(versionId, 0);
     expect(version()?.pageTarget).toBeNull();
+  });
+});
+
+describe("page targets and tightening", () => {
+  it("gives the master its own target, apart from every version", () => {
+    setPageTarget(null, 2);
+    setPageTarget(versionId, 1);
+
+    expect(masterFit.pageTarget).toBe(2);
+    expect(version()?.pageTarget).toBe(1);
+    expect(currentDocument().masterFit).toEqual({ pageTarget: 2, autoFit: true });
+  });
+
+  it("remembers that tightening was undone, for that version only", () => {
+    const other = createVersion({ name: "Globex" });
+    setAutoFit(versionId, false);
+
+    expect(version()?.autoFit).toBe(false);
+    expect(versions.find((v) => v.id === other)?.autoFit).toBe(true);
+    expect(masterFit.autoFit).toBe(true);
+
+    // Saved and loaded again, as autosave and saved copies do.
+    const saved = JSON.parse(JSON.stringify(currentDocument()));
+    loadDocument(createDocument(EMPTY_RESUME));
+    loadDocument(saved);
+    expect(version()?.autoFit).toBe(false);
+  });
+
+  it("remembers the master's undo too, and turns tightening back on", () => {
+    setPageTarget(null, 1);
+    setAutoFit(null, false);
+    const saved = JSON.parse(JSON.stringify(currentDocument()));
+
+    loadDocument(createDocument(EMPTY_RESUME));
+    expect(masterFit).toEqual({ pageTarget: null, autoFit: true });
+
+    loadDocument(saved);
+    expect(masterFit).toEqual({ pageTarget: 1, autoFit: false });
+
+    setAutoFit(null, true);
+    expect(masterFit.autoFit).toBe(true);
   });
 });
 

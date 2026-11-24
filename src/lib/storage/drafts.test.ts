@@ -127,6 +127,7 @@ describe("autosave draft helpers", () => {
             skills: [expect.objectContaining({ name: "TypeScript", keywords: ["testing"] })],
           },
           versions: [],
+          masterFit: { pageTarget: null, autoFit: true },
         },
       },
       snapshotJson: serializeDocument(createDocument(rawResume)),
@@ -162,6 +163,7 @@ describe("autosave draft helpers", () => {
           projects: [expect.objectContaining({ name: "Portfolio", url: "https://janedoe.dev" })],
         }),
         versions: [],
+        masterFit: { pageTarget: null, autoFit: true },
       },
     });
 
@@ -249,6 +251,7 @@ describe("keeping a copy before replacing the resume", () => {
             basics: expect.objectContaining({ label: "Engineer" }),
           }),
           versions: [],
+          masterFit: { pageTarget: null, autoFit: true },
         },
       })
     );

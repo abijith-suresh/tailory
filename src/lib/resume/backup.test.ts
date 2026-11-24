@@ -30,6 +30,7 @@ function documentWithVersions() {
         "certificates",
       ],
       pageTarget: 2,
+      autoFit: false,
       rewordings: [
         { itemId: "bullet-a1", field: "text", text: "Rebuilt scheduling", baseText: "Old text" },
         { itemId: "basics", field: "label", text: "Design lead", baseText: "Product designer" },
@@ -38,10 +39,32 @@ function documentWithVersions() {
     sampleVersion({ id: "version-blank", name: "Blank", templateId: "modern", pageTarget: null }),
   ]);
   job(document.master, 0).startDate = "March 2022";
+  document.masterFit = { pageTarget: 3, autoFit: false };
   return document;
 }
 
 describe("Tailory backup", () => {
+  it("keeps page targets and undone tightening", () => {
+    const restored = parseBackupDocument(
+      JSON.parse(exportBackupString(normalizeDocument(documentWithVersions())))
+    );
+
+    expect(restored.masterFit).toEqual({ pageTarget: 3, autoFit: false });
+    expect(restored.versions.map((version) => version.autoFit)).toEqual([false, true]);
+  });
+
+  it("reads a backup made before page fitting, with tightening on and no master target", () => {
+    const old = JSON.parse(exportBackupString(normalizeDocument(documentWithVersions())));
+    delete old.resume.masterFit;
+    for (const version of old.resume.versions) delete version.autoFit;
+
+    const restored = parseBackupDocument(old);
+
+    expect(restored.masterFit).toEqual({ pageTarget: null, autoFit: true });
+    expect(restored.versions.map((version) => version.autoFit)).toEqual([true, true]);
+    expect(restored.versions[0]?.pageTarget).toBe(2);
+  });
+
   it("writes the format, the version, and the whole resume", () => {
     const document = documentWithVersions();
     const backup = exportBackupDocument(document);

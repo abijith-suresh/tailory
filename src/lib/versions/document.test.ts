@@ -22,6 +22,7 @@ describe("createVersion", () => {
       sectionOrder: [...RESUME_SECTION_KEYS],
       templateId: "modern",
       pageTarget: null,
+      autoFit: true,
       rewordings: [],
     });
   });
@@ -52,6 +53,7 @@ describe("normalizeDocument", () => {
     expect(normalizeDocument(document)).toEqual({
       master: createDocument(sampleMaster()).master,
       versions: document.versions,
+      masterFit: { pageTarget: null, autoFit: true },
     });
   });
 
@@ -130,6 +132,7 @@ describe("normalizeDocument", () => {
       ],
       templateId: "modern",
       pageTarget: null,
+      autoFit: true,
       rewordings: [
         { itemId: "work-a", field: "position", text: "Lead", baseText: "Senior designer" },
       ],

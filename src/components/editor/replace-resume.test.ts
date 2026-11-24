@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { replaceResume } from "@/components/editor/replace-resume";
 import { createDocument } from "@/lib/versions/document";
-import { createVersion, loadDocument, versions } from "@/store/document";
+import { createVersion, loadDocument, masterFit, versions } from "@/store/document";
 import { resume } from "@/store/resume";
 import type { ResumeDocument } from "@/types/document";
 import { EMPTY_RESUME } from "@/types/resume";
@@ -32,7 +32,7 @@ describe("replaceResume", () => {
     await expect(replaceResume(resumeNamed("Alex"), "import")).resolves.toBe(true);
 
     expect(keepCopyBeforeReplacing).toHaveBeenCalledWith(
-      { master: resume, versions },
+      { master: resume, versions, masterFit },
       expect.anything(),
       "import"
     );

@@ -16,6 +16,7 @@ vi.mock("@/lib/resume/json", async (importOriginal) => ({
 const documentFor = (name: string) => ({
   master: expect.objectContaining({ basics: expect.objectContaining({ name }) }),
   versions: [],
+  masterFit: { pageTarget: null, autoFit: true },
 });
 
 describe("importResumeFile", () => {
@@ -137,6 +138,7 @@ describe("importResumeFile", () => {
           skills: [expect.objectContaining({ id: "skill-1", name: "TypeScript" })],
         }),
         versions: [],
+        masterFit: { pageTarget: null, autoFit: true },
       },
       feedback: {
         confidence: 82,

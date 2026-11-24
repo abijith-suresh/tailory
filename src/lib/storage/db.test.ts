@@ -186,6 +186,7 @@ describe("draft storage", () => {
             ],
           },
           versions: [],
+          masterFit: { pageTarget: null, autoFit: true },
         },
       })
     ).resolves.toBe(true);
@@ -201,6 +202,7 @@ describe("draft storage", () => {
           skills: [expect.objectContaining({ id: "skill-1", name: "TypeScript" })],
         },
         versions: [],
+        masterFit: { pageTarget: null, autoFit: true },
       },
     });
   });
@@ -337,6 +339,7 @@ describe("draft storage", () => {
             }),
           }),
           versions: [],
+          masterFit: { pageTarget: null, autoFit: true },
         },
       }),
       expect.objectContaining({
@@ -348,6 +351,7 @@ describe("draft storage", () => {
             skills: [expect.objectContaining({ name: "TypeScript" })],
           }),
           versions: [],
+          masterFit: { pageTarget: null, autoFit: true },
         },
       }),
     ]);

@@ -69,6 +69,7 @@ export function sampleVersion(overrides: Partial<ResumeVersion> = {}): ResumeVer
     ],
     templateId: "minimal",
     pageTarget: 1,
+    autoFit: true,
     rewordings: [],
     ...overrides,
   };

@@ -1,6 +1,6 @@
 import { createId } from "@/lib/resume/ids";
 import { normalizeResume } from "@/lib/resume/normalize";
-import type { ResumeDocument, ResumeVersion, Rewording } from "@/types/document";
+import type { PageFit, ResumeDocument, ResumeVersion, Rewording } from "@/types/document";
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 import { DEFAULT_TEMPLATE_ID, TEMPLATE_IDS, type TemplateId } from "@/types/template";
 import { indexMasterItems, isExcludable, type MasterItem, readMasterText } from "./items";
@@ -28,6 +28,15 @@ export function normalizePageTarget(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value >= 1 ? value : null;
 }
 
+/** No page target, with tightening allowed once one is set. */
+export const DEFAULT_PAGE_FIT: PageFit = { pageTarget: null, autoFit: true };
+
+/** Reads page-fit settings. Tightening stays on unless it was turned off. */
+export function normalizePageFit(value: unknown): PageFit {
+  const source = isRecord(value) ? value : {};
+  return { pageTarget: normalizePageTarget(source.pageTarget), autoFit: source.autoFit !== false };
+}
+
 function normalizeTemplateId(value: unknown): TemplateId {
   return TEMPLATE_IDS.find((id) => id === value) ?? DEFAULT_TEMPLATE_ID;
 }
@@ -42,7 +51,7 @@ export function createVersion(details: VersionDetails): ResumeVersion {
     excluded: [],
     sectionOrder: normalizeSectionOrder(undefined),
     templateId: details.templateId ?? DEFAULT_TEMPLATE_ID,
-    pageTarget: null,
+    ...DEFAULT_PAGE_FIT,
     rewordings: [],
   };
 }
@@ -89,7 +98,7 @@ function normalizeVersion(value: unknown, items: Map<string, MasterItem>): Resum
     excluded: [...new Set(excluded)],
     sectionOrder: normalizeSectionOrder(value.sectionOrder),
     templateId: normalizeTemplateId(value.templateId),
-    pageTarget: normalizePageTarget(value.pageTarget),
+    ...normalizePageFit(value),
     rewordings: normalizeRewordings(value.rewordings, items),
   };
 }
@@ -113,7 +122,7 @@ export function normalizeDocument(value: unknown): ResumeDocument {
     }
   }
 
-  return { master, versions };
+  return { master, versions, masterFit: normalizePageFit(source.masterFit) };
 }
 
 /** A document for a resume with no versions yet. */

@@ -10,6 +10,10 @@ import type { ResumeDocument } from "@/types/document";
  * The master keeps Tailory's ids, so versions still point at the right entries and bullets, and
  * its dates are not converted to JSON Resume's ISO form. A plain JSON Resume file has no `format`
  * field.
+ *
+ * `resume.masterFit` and each version's `autoFit` hold page targets and whether tightening was
+ * undone. Backups made before them leave them out and read back with no master target and
+ * tightening on; older Tailory builds ignore them. Adding them didn't change `version`.
  */
 export const BACKUP_FORMAT = "tailory-backup";
 export const BACKUP_VERSION = 1;
@@ -61,5 +65,5 @@ export function parseBackupDocument(value: unknown): ResumeDocument {
     )
   );
 
-  return normalizeDocument({ master, versions: resume.versions });
+  return normalizeDocument({ master, versions: resume.versions, masterFit: resume.masterFit });
 }
