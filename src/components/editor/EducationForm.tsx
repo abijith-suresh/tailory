@@ -1,108 +1,82 @@
 import type { Component } from "solid-js";
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeEducation } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
 function newEducation(): ResumeEducation {
-  return {
-    id: crypto.randomUUID(),
-    institution: "",
-    area: "",
-    studyType: "",
-    startDate: "",
-    endDate: "",
-  };
+  return { id: createId(), institution: "", area: "", studyType: "", startDate: "", endDate: "" };
 }
+
+type EducationText = "institution" | "studyType" | "area" | "startDate" | "endDate" | "score";
 
 const EducationForm: Component = () => {
   const addEntry = () => {
-    setResume("education", (e) => [...(e ?? []), newEducation()]);
+    const entry = newEducation();
+    setResume("education", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("education", id);
-  };
-
-  const reorder = (items: ResumeEducation[]) => {
-    setResume("education", items);
-  };
-
-  const updateField = <K extends keyof ResumeEducation>(
-    id: string,
-    field: K,
-    value: ResumeEducation[K]
-  ) => {
-    setResume("education", (e) => e?.id === id, field, value);
-  };
+  const field = (item: ResumeEducation, key: EducationText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("education", (e) => e?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.education ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => [item.studyType, item.institution].filter(Boolean).join(", ")}
+      meta={(item) => [item.startDate, item.endDate].filter(Boolean).join(" – ")}
+      onReorder={(items) => setResume("education", items)}
+      onRemove={(id) => deleteEntry("education", id)}
       onAdd={addEntry}
       addLabel="Add education"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <FormField label="Institution" id={`edu-inst-${item.id}`}>
-            <Input
-              id={`edu-inst-${item.id}`}
-              value={item.institution}
-              onInput={(v) => updateField(item.id, "institution", v)}
-              placeholder="University of Technology"
+        <>
+          <VersionedField
+            id={`edu-inst-${item.id}`}
+            label="Institution"
+            placeholder="University of Technology"
+            {...field(item, "institution")}
+          />
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`edu-type-${item.id}`}
+              label="Degree"
+              placeholder="Bachelor of Science"
+              {...field(item, "studyType")}
             />
-          </FormField>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Degree Type" id={`edu-type-${item.id}`}>
-              <Input
-                id={`edu-type-${item.id}`}
-                value={item.studyType ?? ""}
-                onInput={(v) => updateField(item.id, "studyType", v)}
-                placeholder="Bachelor of Science"
-              />
-            </FormField>
-            <FormField label="Field of Study" id={`edu-area-${item.id}`}>
-              <Input
-                id={`edu-area-${item.id}`}
-                value={item.area ?? ""}
-                onInput={(v) => updateField(item.id, "area", v)}
-                placeholder="Computer Science"
-              />
-            </FormField>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Start Date" id={`edu-start-${item.id}`}>
-              <Input
-                id={`edu-start-${item.id}`}
-                value={item.startDate ?? ""}
-                onInput={(v) => updateField(item.id, "startDate", v)}
-                placeholder="2018"
-              />
-            </FormField>
-            <FormField label="End Date" id={`edu-end-${item.id}`}>
-              <Input
-                id={`edu-end-${item.id}`}
-                value={item.endDate ?? ""}
-                onInput={(v) => updateField(item.id, "endDate", v)}
-                placeholder="2022"
-              />
-            </FormField>
-          </div>
-
-          <FormField label="GPA / Score (optional)" id={`edu-score-${item.id}`}>
-            <Input
-              id={`edu-score-${item.id}`}
-              value={item.score ?? ""}
-              onInput={(v) => updateField(item.id, "score", v)}
-              placeholder="3.8 / 4.0"
+            <VersionedField
+              id={`edu-area-${item.id}`}
+              label="Field of study"
+              placeholder="Computer science"
+              {...field(item, "area")}
             />
-          </FormField>
-        </div>
+            <VersionedField
+              id={`edu-start-${item.id}`}
+              label="Start date"
+              placeholder="2018"
+              {...field(item, "startDate")}
+            />
+            <VersionedField
+              id={`edu-end-${item.id}`}
+              label="End date"
+              placeholder="2022"
+              {...field(item, "endDate")}
+            />
+          </div>
+          <VersionedField
+            id={`edu-score-${item.id}`}
+            label="Grade (optional)"
+            placeholder="3.8 / 4.0"
+            {...field(item, "score")}
+          />
+        </>
       )}
     />
   );

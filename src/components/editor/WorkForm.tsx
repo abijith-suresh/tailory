@@ -1,56 +1,42 @@
 import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 
-import FormField from "@/components/ui/FormField";
+import { EntryList } from "@/components/ui/EntryList";
 import HighlightList from "@/components/ui/HighlightList";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
 import { createId } from "@/lib/resume/ids";
 import { deleteEntry, deleteHighlight } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeWork } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
 function newWork(): ResumeWork {
-  return {
-    id: crypto.randomUUID(),
-    name: "",
-    position: "",
-    startDate: "",
-    endDate: "",
-    highlights: [],
-  };
+  return { id: createId(), name: "", position: "", startDate: "", endDate: "", highlights: [] };
 }
+
+type WorkText = "name" | "position" | "startDate" | "endDate" | "url" | "summary";
 
 const WorkForm: Component = () => {
   const addEntry = () => {
-    setResume("work", (w) => [...(w ?? []), newWork()]);
+    const entry = newWork();
+    setResume("work", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("work", id);
-  };
-
-  const reorder = (items: ResumeWork[]) => {
-    setResume("work", items);
-  };
-
-  const updateField = <K extends keyof ResumeWork>(id: string, field: K, value: ResumeWork[K]) => {
+  const updateField = (id: string, field: WorkText, value: string) => {
     setResume("work", (w) => w?.id === id, field, value);
   };
 
   const addHighlight = (id: string) => {
+    const highlight = { id: createId(), text: "" };
     setResume(
       "work",
       (w) => w?.id === id,
       produce((w: ResumeWork) => {
-        if (!w.highlights) w.highlights = [];
-        w.highlights.push({ id: createId(), text: "" });
+        w.highlights = [...(w.highlights ?? []), highlight];
       })
     );
-  };
-
-  const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("work", (w) => w?.id === id, "highlights", idx, "text", value);
+    keepOnlyInActiveVersion(highlight.id);
   };
 
   const removeHighlight = (id: string, idx: number) => {
@@ -58,73 +44,73 @@ const WorkForm: Component = () => {
     if (highlight) deleteHighlight("work", id, highlight.id);
   };
 
+  const field = (item: ResumeWork, key: WorkText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => updateField(item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
+
   return (
-    <ReorderableList
+    <EntryList
       items={resume.work ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => [item.position, item.name].filter(Boolean).join(", ")}
+      meta={(item) => [item.startDate, item.endDate].filter(Boolean).join(" – ")}
+      onReorder={(items) => setResume("work", items)}
+      onRemove={(id) => deleteEntry("work", id)}
       onAdd={addEntry}
       addLabel="Add work experience"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Company" id={`work-name-${item.id}`}>
-              <Input
-                id={`work-name-${item.id}`}
-                value={item.name}
-                onInput={(v) => updateField(item.id, "name", v)}
-                placeholder="Acme Corp"
-              />
-            </FormField>
-            <FormField label="Role / Title" id={`work-pos-${item.id}`}>
-              <Input
-                id={`work-pos-${item.id}`}
-                value={item.position}
-                onInput={(v) => updateField(item.id, "position", v)}
-                placeholder="Software Engineer"
-              />
-            </FormField>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Start Date" id={`work-start-${item.id}`}>
-              <Input
-                id={`work-start-${item.id}`}
-                value={item.startDate ?? ""}
-                onInput={(v) => updateField(item.id, "startDate", v)}
-                placeholder="Jan 2021"
-              />
-            </FormField>
-            <FormField label="End Date" id={`work-end-${item.id}`}>
-              <Input
-                id={`work-end-${item.id}`}
-                value={item.endDate ?? ""}
-                onInput={(v) => updateField(item.id, "endDate", v)}
-                placeholder="Present"
-              />
-            </FormField>
-          </div>
-
-          <FormField label="URL (optional)" id={`work-url-${item.id}`}>
-            <Input
-              id={`work-url-${item.id}`}
-              value={item.url ?? ""}
-              onInput={(v) => updateField(item.id, "url", v)}
-              placeholder="https://acme.com"
+        <>
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`work-name-${item.id}`}
+              label="Company"
+              placeholder="Acme Corp"
+              autocomplete="organization"
+              {...field(item, "name")}
             />
-          </FormField>
-
-          <HighlightList
-            highlights={item.highlights ?? []}
-            idPrefix={`work-highlight-${item.id}`}
-            label="Highlights / Bullets"
-            addLabel="Add bullet"
-            placeholder="Led development of…"
-            onInput={(index, value) => updateHighlight(item.id, index, value)}
-            onRemove={(index) => removeHighlight(item.id, index)}
-            onAdd={() => addHighlight(item.id)}
+            <VersionedField
+              id={`work-pos-${item.id}`}
+              label="Role"
+              placeholder="Software engineer"
+              autocomplete="organization-title"
+              {...field(item, "position")}
+            />
+            <VersionedField
+              id={`work-start-${item.id}`}
+              label="Start date"
+              placeholder="Jan 2021"
+              {...field(item, "startDate")}
+            />
+            <VersionedField
+              id={`work-end-${item.id}`}
+              label="End date"
+              placeholder="Present"
+              {...field(item, "endDate")}
+            />
+          </div>
+          <VersionedField
+            id={`work-url-${item.id}`}
+            label="URL (optional)"
+            type="url"
+            placeholder="https://acme.com"
+            {...field(item, "url")}
           />
-        </div>
+        </>
+      )}
+      renderBullets={(item) => (
+        <HighlightList
+          highlights={item.highlights ?? []}
+          idPrefix={`work-highlight-${item.id}`}
+          label="Highlights"
+          addLabel="Add bullet"
+          placeholder="Led development of…"
+          onInput={(index, value) =>
+            setResume("work", (w) => w?.id === item.id, "highlights", index, "text", value)
+          }
+          onRemove={(index) => removeHighlight(item.id, index)}
+          onAdd={() => addHighlight(item.id)}
+        />
       )}
     />
   );

@@ -1,68 +1,51 @@
 import type { Component } from "solid-js";
 
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeLanguage } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
-function newLanguage(): ResumeLanguage {
-  return {
-    id: crypto.randomUUID(),
-    language: "",
-    fluency: "",
-  };
-}
+type LanguageText = "language" | "fluency";
 
 const LanguagesForm: Component = () => {
   const addEntry = () => {
-    setResume("languages", (entries) => [...(entries ?? []), newLanguage()]);
+    const entry: ResumeLanguage = { id: createId(), language: "", fluency: "" };
+    setResume("languages", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("languages", id);
-  };
-
-  const reorder = (items: ResumeLanguage[]) => {
-    setResume("languages", items);
-  };
-
-  const updateField = <K extends keyof ResumeLanguage>(
-    id: string,
-    field: K,
-    value: ResumeLanguage[K]
-  ) => {
-    setResume("languages", (entry) => entry?.id === id, field, value);
-  };
+  const field = (item: ResumeLanguage, key: LanguageText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("languages", (l) => l?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.languages ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => item.language}
+      meta={(item) => item.fluency ?? ""}
+      onReorder={(items) => setResume("languages", items)}
+      onRemove={(id) => deleteEntry("languages", id)}
       onAdd={addEntry}
       addLabel="Add language"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Language" id={`lang-name-${item.id}`}>
-              <Input
-                id={`lang-name-${item.id}`}
-                value={item.language}
-                onInput={(v) => updateField(item.id, "language", v)}
-                placeholder="English"
-              />
-            </FormField>
-            <FormField label="Fluency" id={`lang-fluency-${item.id}`}>
-              <Input
-                id={`lang-fluency-${item.id}`}
-                value={item.fluency ?? ""}
-                onInput={(v) => updateField(item.id, "fluency", v)}
-                placeholder="Native"
-              />
-            </FormField>
-          </div>
+        <div class="grid gap-4 @md:grid-cols-2">
+          <VersionedField
+            id={`lang-name-${item.id}`}
+            label="Language"
+            placeholder="English"
+            {...field(item, "language")}
+          />
+          <VersionedField
+            id={`lang-fluency-${item.id}`}
+            label="Fluency"
+            placeholder="Native"
+            {...field(item, "fluency")}
+          />
         </div>
       )}
     />

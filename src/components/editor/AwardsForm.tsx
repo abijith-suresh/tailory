@@ -1,91 +1,68 @@
 import type { Component } from "solid-js";
 
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
-import Textarea from "@/components/ui/Textarea";
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeAward } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
-function newAward(): ResumeAward {
-  return {
-    id: crypto.randomUUID(),
-    title: "",
-    awarder: "",
-    date: "",
-    summary: "",
-  };
-}
+type AwardText = "title" | "awarder" | "date" | "summary";
 
 const AwardsForm: Component = () => {
   const addEntry = () => {
-    setResume("awards", (a) => [...(a ?? []), newAward()]);
+    const entry: ResumeAward = { id: createId(), title: "", awarder: "", date: "", summary: "" };
+    setResume("awards", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("awards", id);
-  };
-
-  const reorder = (items: ResumeAward[]) => {
-    setResume("awards", items);
-  };
-
-  const updateField = <K extends keyof ResumeAward>(
-    id: string,
-    field: K,
-    value: ResumeAward[K]
-  ) => {
-    setResume("awards", (a) => a?.id === id, field, value);
-  };
+  const field = (item: ResumeAward, key: AwardText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("awards", (a) => a?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.awards ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => item.title}
+      meta={(item) => item.date ?? ""}
+      onReorder={(items) => setResume("awards", items)}
+      onRemove={(id) => deleteEntry("awards", id)}
       onAdd={addEntry}
       addLabel="Add award"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <FormField label="Award Title" id={`award-title-${item.id}`}>
-            <Input
-              id={`award-title-${item.id}`}
-              value={item.title}
-              onInput={(v) => updateField(item.id, "title", v)}
-              placeholder="Engineering Excellence Award"
+        <>
+          <VersionedField
+            id={`award-title-${item.id}`}
+            label="Award"
+            placeholder="Engineering excellence award"
+            {...field(item, "title")}
+          />
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`award-awarder-${item.id}`}
+              label="Awarded by"
+              placeholder="Acme Corp"
+              {...field(item, "awarder")}
             />
-          </FormField>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Awarded By" id={`award-awarder-${item.id}`}>
-              <Input
-                id={`award-awarder-${item.id}`}
-                value={item.awarder ?? ""}
-                onInput={(v) => updateField(item.id, "awarder", v)}
-                placeholder="Acme Corp"
-              />
-            </FormField>
-            <FormField label="Date" id={`award-date-${item.id}`}>
-              <Input
-                id={`award-date-${item.id}`}
-                value={item.date ?? ""}
-                onInput={(v) => updateField(item.id, "date", v)}
-                placeholder="2023"
-              />
-            </FormField>
+            <VersionedField
+              id={`award-date-${item.id}`}
+              label="Date"
+              placeholder="2023"
+              {...field(item, "date")}
+            />
           </div>
-
-          <FormField label="Summary" id={`award-summary-${item.id}`}>
-            <Textarea
-              id={`award-summary-${item.id}`}
-              value={item.summary ?? ""}
-              onInput={(v) => updateField(item.id, "summary", v)}
-              placeholder="What the award recognized…"
-              rows={2}
-            />
-          </FormField>
-        </div>
+          <VersionedField
+            id={`award-summary-${item.id}`}
+            label="Summary"
+            multiline
+            rows={2}
+            placeholder="What the award recognized…"
+            {...field(item, "summary")}
+          />
+        </>
       )}
     />
   );

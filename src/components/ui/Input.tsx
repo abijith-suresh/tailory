@@ -2,37 +2,46 @@ import type { Component } from "solid-js";
 
 type InputProps = {
   "aria-describedby"?: string;
+  autocomplete?: string;
   class?: string;
   error?: boolean;
   id?: string;
+  name?: string;
   onBlur?: () => void;
   onInput: (value: string) => void;
   placeholder?: string;
+  readOnly?: boolean;
+  required?: boolean;
   type?: string;
   value: string;
 };
 
-const inputBase =
-  "w-full rounded-md border px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1";
+/**
+ * Shared look for text fields. Phones get 44px and 16px text, which also stops iOS from zooming
+ * in on focus. Focus uses the global outline.
+ */
+export const fieldClass =
+  "w-full rounded-md border border-field bg-surface px-3 text-body-md text-fg transition-colors placeholder:text-fg-subtle hover:border-fg-muted read-only:border-line-strong read-only:bg-canvas read-only:text-fg-muted md:text-body-sm aria-invalid:border-danger";
 
-const inputNormal =
-  "border-gray-300 transition-colors duration-150 hover:border-gray-400 focus:border-[#1d6648] focus:ring-[#1d6648]/30";
-const inputError = "border-red-400 focus:border-red-500 focus:ring-red-500/20";
+export const inputClass = `${fieldClass} h-11 md:h-9`;
 
 const Input: Component<InputProps> = (props) => (
   <input
     id={props.id}
+    name={props.name}
     type={props.type ?? "text"}
     value={props.value}
+    autocomplete={props.autocomplete ?? "off"}
+    spellcheck={props.type === "email" || props.type === "url" ? false : undefined}
     onInput={(e) => props.onInput(e.currentTarget.value)}
-    onBlur={props.onBlur}
+    onBlur={() => props.onBlur?.()}
     placeholder={props.placeholder}
+    readOnly={props.readOnly}
+    required={props.required}
     aria-invalid={props.error ? "true" : undefined}
     aria-describedby={props["aria-describedby"]}
-    class={`${inputBase} ${props.error ? inputError : inputNormal} ${props.class ?? ""}`}
+    class={`${inputClass} ${props.class ?? ""}`}
   />
 );
 
 export default Input;
-
-export const inputClass = `${inputBase} ${inputNormal}`;

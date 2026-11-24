@@ -1,19 +1,12 @@
 import type { Component } from "solid-js";
 
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeInterest } from "@/types/resume";
-
-function newInterest(): ResumeInterest {
-  return {
-    id: crypto.randomUUID(),
-    name: "",
-    keywords: [],
-  };
-}
+import VersionedField from "./VersionedField";
 
 function parseKeywords(value: string): string[] {
   return value
@@ -24,52 +17,39 @@ function parseKeywords(value: string): string[] {
 
 const InterestsForm: Component = () => {
   const addEntry = () => {
-    setResume("interests", (entries) => [...(entries ?? []), newInterest()]);
-  };
-
-  const removeEntry = (id: string) => {
-    deleteEntry("interests", id);
-  };
-
-  const reorder = (items: ResumeInterest[]) => {
-    setResume("interests", items);
-  };
-
-  const updateField = <K extends keyof ResumeInterest>(
-    id: string,
-    field: K,
-    value: ResumeInterest[K]
-  ) => {
-    setResume("interests", (entry) => entry?.id === id, field, value);
+    const entry: ResumeInterest = { id: createId(), name: "", keywords: [] };
+    setResume("interests", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.interests ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => item.name}
+      onReorder={(items) => setResume("interests", items)}
+      onRemove={(id) => deleteEntry("interests", id)}
       onAdd={addEntry}
       addLabel="Add interest"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <FormField label="Interest" id={`interest-name-${item.id}`}>
-            <Input
-              id={`interest-name-${item.id}`}
-              value={item.name}
-              onInput={(v) => updateField(item.id, "name", v)}
-              placeholder="Open source"
-            />
-          </FormField>
-
-          <FormField label="Keywords (optional)" id={`interest-keywords-${item.id}`}>
-            <Input
-              id={`interest-keywords-${item.id}`}
-              value={(item.keywords ?? []).join(", ")}
-              onInput={(v) => updateField(item.id, "keywords", parseKeywords(v))}
-              placeholder="community, mentoring, web performance"
-            />
-          </FormField>
-        </div>
+        <>
+          <VersionedField
+            id={`interest-name-${item.id}`}
+            label="Interest"
+            placeholder="Open source"
+            value={item.name}
+            onInput={(value) => setResume("interests", (i) => i?.id === item.id, "name", value)}
+            reword={{ itemId: item.id, field: "name" }}
+          />
+          <VersionedField
+            id={`interest-keywords-${item.id}`}
+            label="Keywords (optional)"
+            placeholder="community, mentoring, web performance"
+            value={(item.keywords ?? []).join(", ")}
+            onInput={(value) =>
+              setResume("interests", (i) => i?.id === item.id, "keywords", parseKeywords(value))
+            }
+          />
+        </>
       )}
     />
   );

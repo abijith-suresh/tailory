@@ -1,19 +1,18 @@
 import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 
-import FormField from "@/components/ui/FormField";
+import { EntryList } from "@/components/ui/EntryList";
 import HighlightList from "@/components/ui/HighlightList";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
-import Textarea from "@/components/ui/Textarea";
 import { createId } from "@/lib/resume/ids";
 import { deleteEntry, deleteHighlight } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeVolunteer } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
 function newVolunteer(): ResumeVolunteer {
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     organization: "",
     position: "",
     startDate: "",
@@ -23,40 +22,25 @@ function newVolunteer(): ResumeVolunteer {
   };
 }
 
+type VolunteerText = "organization" | "position" | "startDate" | "endDate" | "url" | "summary";
+
 const VolunteerForm: Component = () => {
   const addEntry = () => {
-    setResume("volunteer", (v) => [...(v ?? []), newVolunteer()]);
-  };
-
-  const removeEntry = (id: string) => {
-    deleteEntry("volunteer", id);
-  };
-
-  const reorder = (items: ResumeVolunteer[]) => {
-    setResume("volunteer", items);
-  };
-
-  const updateField = <K extends keyof ResumeVolunteer>(
-    id: string,
-    field: K,
-    value: ResumeVolunteer[K]
-  ) => {
-    setResume("volunteer", (v) => v?.id === id, field, value);
+    const entry = newVolunteer();
+    setResume("volunteer", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
   const addHighlight = (id: string) => {
+    const highlight = { id: createId(), text: "" };
     setResume(
       "volunteer",
       (v) => v?.id === id,
       produce((v: ResumeVolunteer) => {
-        if (!v.highlights) v.highlights = [];
-        v.highlights.push({ id: createId(), text: "" });
+        v.highlights = [...(v.highlights ?? []), highlight];
       })
     );
-  };
-
-  const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("volunteer", (v) => v?.id === id, "highlights", idx, "text", value);
+    keepOnlyInActiveVersion(highlight.id);
   };
 
   const removeHighlight = (id: string, idx: number) => {
@@ -64,84 +48,79 @@ const VolunteerForm: Component = () => {
     if (highlight) deleteHighlight("volunteer", id, highlight.id);
   };
 
+  const field = (item: ResumeVolunteer, key: VolunteerText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("volunteer", (v) => v?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
+
   return (
-    <ReorderableList
+    <EntryList
       items={resume.volunteer ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => [item.position, item.organization].filter(Boolean).join(", ")}
+      meta={(item) => [item.startDate, item.endDate].filter(Boolean).join(" – ")}
+      onReorder={(items) => setResume("volunteer", items)}
+      onRemove={(id) => deleteEntry("volunteer", id)}
       onAdd={addEntry}
       addLabel="Add volunteer role"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Organization" id={`volunteer-org-${item.id}`}>
-              <Input
-                id={`volunteer-org-${item.id}`}
-                value={item.organization}
-                onInput={(v) => updateField(item.id, "organization", v)}
-                placeholder="Code Club"
-              />
-            </FormField>
-            <FormField label="Role" id={`volunteer-pos-${item.id}`}>
-              <Input
-                id={`volunteer-pos-${item.id}`}
-                value={item.position}
-                onInput={(v) => updateField(item.id, "position", v)}
-                placeholder="Mentor"
-              />
-            </FormField>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Start Date" id={`volunteer-start-${item.id}`}>
-              <Input
-                id={`volunteer-start-${item.id}`}
-                value={item.startDate ?? ""}
-                onInput={(v) => updateField(item.id, "startDate", v)}
-                placeholder="Mar 2022"
-              />
-            </FormField>
-            <FormField label="End Date" id={`volunteer-end-${item.id}`}>
-              <Input
-                id={`volunteer-end-${item.id}`}
-                value={item.endDate ?? ""}
-                onInput={(v) => updateField(item.id, "endDate", v)}
-                placeholder="Present"
-              />
-            </FormField>
-          </div>
-
-          <FormField label="URL (optional)" id={`volunteer-url-${item.id}`}>
-            <Input
-              id={`volunteer-url-${item.id}`}
-              type="url"
-              value={item.url ?? ""}
-              onInput={(v) => updateField(item.id, "url", v)}
-              placeholder="https://codeclub.org"
+        <>
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`volunteer-org-${item.id}`}
+              label="Organization"
+              placeholder="Code Club"
+              {...field(item, "organization")}
             />
-          </FormField>
-
-          <FormField label="Summary" id={`volunteer-summary-${item.id}`}>
-            <Textarea
-              id={`volunteer-summary-${item.id}`}
-              value={item.summary ?? ""}
-              onInput={(v) => updateField(item.id, "summary", v)}
-              placeholder="What you did and who it helped…"
-              rows={2}
+            <VersionedField
+              id={`volunteer-pos-${item.id}`}
+              label="Role"
+              placeholder="Mentor"
+              {...field(item, "position")}
             />
-          </FormField>
-
-          <HighlightList
-            highlights={item.highlights ?? []}
-            idPrefix={`volunteer-highlight-${item.id}`}
-            label="Highlights / Bullets"
-            addLabel="Add bullet"
-            placeholder="Ran weekly coding sessions for…"
-            onInput={(index, value) => updateHighlight(item.id, index, value)}
-            onRemove={(index) => removeHighlight(item.id, index)}
-            onAdd={() => addHighlight(item.id)}
+            <VersionedField
+              id={`volunteer-start-${item.id}`}
+              label="Start date"
+              placeholder="Mar 2022"
+              {...field(item, "startDate")}
+            />
+            <VersionedField
+              id={`volunteer-end-${item.id}`}
+              label="End date"
+              placeholder="Present"
+              {...field(item, "endDate")}
+            />
+          </div>
+          <VersionedField
+            id={`volunteer-url-${item.id}`}
+            label="URL (optional)"
+            type="url"
+            placeholder="https://codeclub.org"
+            {...field(item, "url")}
           />
-        </div>
+          <VersionedField
+            id={`volunteer-summary-${item.id}`}
+            label="Summary"
+            multiline
+            rows={2}
+            placeholder="What you did and who it helped…"
+            {...field(item, "summary")}
+          />
+        </>
+      )}
+      renderBullets={(item) => (
+        <HighlightList
+          highlights={item.highlights ?? []}
+          idPrefix={`volunteer-highlight-${item.id}`}
+          label="Highlights"
+          addLabel="Add bullet"
+          placeholder="Ran weekly coding sessions for…"
+          onInput={(index, value) =>
+            setResume("volunteer", (v) => v?.id === item.id, "highlights", index, "text", value)
+          }
+          onRemove={(index) => removeHighlight(item.id, index)}
+          onAdd={() => addHighlight(item.id)}
+        />
       )}
     />
   );

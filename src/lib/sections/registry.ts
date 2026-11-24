@@ -1,103 +1,89 @@
+import type { EntrySection } from "@/lib/versions/items";
 import type { ResumeSchema, SectionId } from "@/types/resume";
 
 export interface SectionDefinition {
   readonly id: SectionId;
+  /** The list of entries the section edits, if it edits one. */
+  readonly entries?: EntrySection;
   readonly label: string;
-  readonly shortLabel: string;
-  readonly subtitle: string;
   readonly isComplete: (resume: ResumeSchema) => boolean;
 }
 
 export const SECTION_DEFINITIONS: readonly SectionDefinition[] = [
   {
     id: "basics",
-    label: "Basic Info",
-    shortLabel: "Basics",
-    subtitle: "Name, contact details, and headline",
+    label: "Basics",
     isComplete: (resume) => !!resume.basics.name,
   },
   {
     id: "summary",
     label: "Summary",
-    shortLabel: "Summary",
-    subtitle: "A brief professional overview",
     isComplete: (resume) => !!resume.basics.summary,
   },
   {
     id: "work",
-    label: "Work Experience",
-    shortLabel: "Work",
-    subtitle: "Jobs, roles, and accomplishments",
+    entries: "work",
+    label: "Work experience",
     isComplete: (resume) => (resume.work?.length ?? 0) > 0,
   },
   {
     id: "education",
+    entries: "education",
     label: "Education",
-    shortLabel: "Education",
-    subtitle: "Degrees, institutions, and dates",
     isComplete: (resume) => (resume.education?.length ?? 0) > 0,
   },
   {
     id: "skills",
+    entries: "skills",
     label: "Skills",
-    shortLabel: "Skills",
-    subtitle: "Technical and professional skills",
     isComplete: (resume) => (resume.skills?.length ?? 0) > 0,
   },
   {
     id: "languages",
+    entries: "languages",
     label: "Languages",
-    shortLabel: "Languages",
-    subtitle: "Languages and fluency levels",
     isComplete: (resume) => (resume.languages?.length ?? 0) > 0,
   },
   {
     id: "interests",
+    entries: "interests",
     label: "Interests",
-    shortLabel: "Interests",
-    subtitle: "Communities, hobbies, and focus areas",
     isComplete: (resume) => (resume.interests?.length ?? 0) > 0,
   },
   {
     id: "references",
+    entries: "references",
     label: "References",
-    shortLabel: "References",
-    subtitle: "People who can vouch for your work",
     isComplete: (resume) => (resume.references?.length ?? 0) > 0,
   },
   {
     id: "projects",
+    entries: "projects",
     label: "Projects",
-    shortLabel: "Projects",
-    subtitle: "Personal and professional projects",
     isComplete: (resume) => (resume.projects?.length ?? 0) > 0,
   },
   {
     id: "certs",
+    entries: "certificates",
     label: "Certifications",
-    shortLabel: "Certs",
-    subtitle: "Licenses, certificates, and credentials",
     isComplete: (resume) => (resume.certificates?.length ?? 0) > 0,
   },
   {
     id: "volunteer",
+    entries: "volunteer",
     label: "Volunteer",
-    shortLabel: "Volunteer",
-    subtitle: "Volunteer roles and community work",
     isComplete: (resume) => (resume.volunteer?.length ?? 0) > 0,
   },
   {
     id: "awards",
+    entries: "awards",
     label: "Awards",
-    shortLabel: "Awards",
-    subtitle: "Honors and recognition",
     isComplete: (resume) => (resume.awards?.length ?? 0) > 0,
   },
   {
     id: "publications",
+    entries: "publications",
     label: "Publications",
-    shortLabel: "Publications",
-    subtitle: "Articles, papers, and talks",
     isComplete: (resume) => (resume.publications?.length ?? 0) > 0,
   },
 ] as const;

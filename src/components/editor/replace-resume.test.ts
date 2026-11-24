@@ -8,8 +8,10 @@ import type { ResumeDocument } from "@/types/document";
 import { EMPTY_RESUME } from "@/types/resume";
 
 const keepCopyBeforeReplacing = vi.hoisted(() => vi.fn());
+const requestConfirm = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/storage/drafts", () => ({ keepCopyBeforeReplacing }));
+vi.mock("@/components/ui/confirm", () => ({ requestConfirm }));
 
 function resumeNamed(name: string): ResumeDocument {
   const data = structuredClone(EMPTY_RESUME);
@@ -18,14 +20,13 @@ function resumeNamed(name: string): ResumeDocument {
 }
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  vi.resetAllMocks();
   loadDocument(createDocument(EMPTY_RESUME));
 });
 
 describe("replaceResume", () => {
   it("replaces the resume once a copy is kept", async () => {
     keepCopyBeforeReplacing.mockResolvedValue("saved");
-    const confirm = vi.spyOn(window, "confirm");
     loadDocument(resumeNamed("Jane"));
 
     await expect(replaceResume(resumeNamed("Alex"), "import")).resolves.toBe(true);
@@ -35,7 +36,7 @@ describe("replaceResume", () => {
       expect.anything(),
       "import"
     );
-    expect(confirm).not.toHaveBeenCalled();
+    expect(requestConfirm).not.toHaveBeenCalled();
     expect(resume.basics.name).toBe("Alex");
   });
 
@@ -51,17 +52,17 @@ describe("replaceResume", () => {
 
   it("asks first when the copy can't be saved, and keeps the resume if cancelled", async () => {
     keepCopyBeforeReplacing.mockResolvedValue("failed");
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    requestConfirm.mockResolvedValue(false);
     loadDocument(resumeNamed("Jane"));
 
     await expect(replaceResume(resumeNamed("Alex"), "draft")).resolves.toBe(false);
 
-    expect(confirm).toHaveBeenCalledWith(
-      "Couldn't save a copy of your current resume. Replace it anyway?"
+    expect(requestConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Replace without a copy?", confirmLabel: "Replace anyway" })
     );
     expect(resume.basics.name).toBe("Jane");
 
-    confirm.mockReturnValue(true);
+    requestConfirm.mockResolvedValue(true);
     await expect(replaceResume(resumeNamed("Alex"), "draft")).resolves.toBe(true);
     expect(resume.basics.name).toBe("Alex");
   });

@@ -1,31 +1,32 @@
-import { type Component, createSignal, For } from "solid-js";
+import { type Component, createSignal, For, Show } from "solid-js";
 
+import { iconButton, outlineButton } from "@/components/ui/buttons";
 import { inputClass } from "@/components/ui/Input";
-import { deleteEntry } from "@/store/document";
+import { Close } from "@/components/ui/icons";
+import Tickbox from "@/components/ui/Tickbox";
+import { createId } from "@/lib/resume/ids";
+import { deleteEntry, toggleExcluded } from "@/store/document";
+import { activeVersion, keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeSkill } from "@/types/resume";
 
 function newSkill(name: string): ResumeSkill {
-  return { id: crypto.randomUUID(), name, keywords: [] };
+  return { id: createId(), name, keywords: [] };
 }
 
 const SkillsForm: Component = () => {
   const [inputValue, setInputValue] = createSignal("");
 
   const addSkill = () => {
-    const name = inputValue().trim();
-    if (!name) return;
-    // Handle comma-separated entry
-    const names = name
+    const names = inputValue()
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    setResume("skills", (s) => [...(s ?? []), ...names.map(newSkill)]);
+    if (names.length === 0) return;
+    const skills = names.map(newSkill);
+    setResume("skills", (list) => [...(list ?? []), ...skills]);
+    for (const skill of skills) keepOnlyInActiveVersion(skill.id);
     setInputValue("");
-  };
-
-  const removeSkill = (id: string) => {
-    deleteEntry("skills", id);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -35,51 +36,80 @@ const SkillsForm: Component = () => {
     }
   };
 
+  const isKept = (skill: ResumeSkill) => !activeVersion()?.excluded.includes(skill.id);
+
   return (
     <div class="space-y-4">
-      <div class="flex gap-2">
-        <label for="skills-input" class="sr-only">
-          Add a skill
+      <div>
+        <label for="skills-input" class="mb-1 block text-ui-sm">
+          Add skills
         </label>
-        <input
-          id="skills-input"
-          type="text"
-          value={inputValue()}
-          onInput={(e) => setInputValue(e.currentTarget.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a skill and press Enter or comma…"
-          class={`flex-1 ${inputClass}`}
-        />
-        <button
-          type="button"
-          onClick={addSkill}
-          class="rounded-md bg-[#1d6648] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#155236]"
-        >
-          Add
-        </button>
+        <div class="flex gap-2">
+          <input
+            id="skills-input"
+            name="skills"
+            type="text"
+            autocomplete="off"
+            value={inputValue()}
+            onInput={(e) => setInputValue(e.currentTarget.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="TypeScript, SQL, Figma"
+            aria-describedby="skills-input-hint"
+            class={`min-w-0 flex-1 ${inputClass}`}
+          />
+          <button type="button" onClick={addSkill} class={outlineButton}>
+            Add
+          </button>
+        </div>
+        <p id="skills-input-hint" class="mt-1 text-body-xs text-fg-subtle">
+          Press Enter or type a comma after each one.
+        </p>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <For each={resume.skills ?? []}>
-          {(skill) => (
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#edf4f0] px-3 py-1 text-sm font-medium text-[#1d6648]">
-              {skill.name}
-              <button
-                type="button"
-                onClick={() => removeSkill(skill.id)}
-                aria-label={`Remove ${skill.name}`}
-                class="text-red-400 hover:text-red-600"
-              >
-                ✕
-              </button>
-            </span>
-          )}
-        </For>
-      </div>
-
-      {(resume.skills?.length ?? 0) === 0 && (
-        <p class="text-sm text-gray-400">No skills added yet. Type above to add skills.</p>
-      )}
+      <Show
+        when={(resume.skills?.length ?? 0) > 0}
+        fallback={<p class="text-body-sm text-fg-muted">No skills yet.</p>}
+      >
+        <ul class="flex flex-wrap gap-2" aria-label="Skills">
+          <For each={resume.skills ?? []}>
+            {(skill) => (
+              <li class="flex max-w-full min-w-0 items-center rounded-lg bg-surface ring-1 ring-line">
+                <Show
+                  when={activeVersion()}
+                  fallback={
+                    <>
+                      <span class="min-w-0 py-2 pl-3 text-ui-sm break-words">{skill.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => deleteEntry("skills", skill.id)}
+                        aria-label={`Remove ${skill.name}`}
+                        class={`${iconButton} hover:text-danger`}
+                      >
+                        <Close />
+                      </button>
+                    </>
+                  }
+                >
+                  {(version) => (
+                    <Tickbox
+                      checked={isKept(skill)}
+                      onChange={() => toggleExcluded(version().id, skill.id)}
+                      class="px-3"
+                    >
+                      <span
+                        class="text-ui-sm"
+                        classList={{ "text-fg-subtle line-through decoration-cut": !isKept(skill) }}
+                      >
+                        {skill.name}
+                      </span>
+                    </Tickbox>
+                  )}
+                </Show>
+              </li>
+            )}
+          </For>
+        </ul>
+      </Show>
     </div>
   );
 };

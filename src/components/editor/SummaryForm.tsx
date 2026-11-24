@@ -1,24 +1,22 @@
 import type { Component } from "solid-js";
-import FormField from "@/components/ui/FormField";
-import Textarea from "@/components/ui/Textarea";
+
+import { BASICS_ITEM_ID } from "@/lib/versions/items";
 import { resume, setResume } from "@/store/resume";
+import VersionedField from "./VersionedField";
 
 const SummaryForm: Component = () => (
-  <div class="space-y-4">
-    <FormField
-      label="Professional Summary"
-      id="summary"
-      hint="2–4 sentences highlighting your top skills, experience, and career goals."
-    >
-      <Textarea
-        id="summary"
-        value={resume.basics.summary ?? ""}
-        onInput={(v) => setResume("basics", "summary", v)}
-        placeholder="Results-driven software engineer with 5+ years of experience…"
-        rows={6}
-      />
-    </FormField>
-  </div>
+  <VersionedField
+    id="summary"
+    label="Summary"
+    multiline
+    rows={6}
+    hint="Two to four sentences on what you do and what you're looking for."
+    placeholder="Software engineer with five years of experience in…"
+    value={resume.basics.summary ?? ""}
+    onInput={(value) => setResume("basics", "summary", value)}
+    reword={{ itemId: BASICS_ITEM_ID, field: "summary" }}
+    name="summary"
+  />
 );
 
 export default SummaryForm;

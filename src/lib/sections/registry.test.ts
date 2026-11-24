@@ -11,7 +11,7 @@ import {
 import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 describe("section registry", () => {
-  it("defines all 13 canonical resume sections with labels and descriptions", () => {
+  it("defines all 13 canonical resume sections with labels", () => {
     expect(TOTAL_SECTIONS).toBe(13);
     expect(SECTION_DEFINITIONS.length).toBe(13);
 
@@ -35,8 +35,6 @@ describe("section registry", () => {
 
     for (const section of SECTION_DEFINITIONS) {
       expect(section.label).toBeTruthy();
-      expect(section.shortLabel).toBeTruthy();
-      expect(section.subtitle).toBeTruthy();
       expect(typeof section.isComplete).toBe("function");
     }
   });
@@ -44,13 +42,11 @@ describe("section registry", () => {
   it("retrieves individual section definitions by id", () => {
     const basics = getSectionDefinition("basics");
     expect(basics).toBeDefined();
-    expect(basics?.label).toBe("Basic Info");
-    expect(basics?.shortLabel).toBe("Basics");
+    expect(basics?.label).toBe("Basics");
 
     const work = getSectionDefinition("work");
     expect(work).toBeDefined();
-    expect(work?.label).toBe("Work Experience");
-    expect(work?.shortLabel).toBe("Work");
+    expect(work?.label).toBe("Work experience");
   });
 
   it("evaluates section completeness correctly", () => {

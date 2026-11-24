@@ -1,8 +1,12 @@
 import { type Component, Show } from "solid-js";
-import { Transition } from "solid-transition-group";
-
-import { getSectionDefinition, SECTION_DEFINITIONS, TOTAL_SECTIONS } from "@/lib/sections/registry";
-import { activeSection, setActiveSection } from "@/store/resume";
+import { Dynamic } from "solid-js/web";
+import { outlineButton } from "@/components/ui/buttons";
+import { Plus } from "@/components/ui/icons";
+import { getSectionDefinition, SECTION_DEFINITIONS } from "@/lib/sections/registry";
+import { countKept } from "@/lib/versions/counts";
+import { versions } from "@/store/document";
+import { activeVersion, setVersionDialog } from "@/store/editor";
+import { activeSection, resume, setActiveSection } from "@/store/resume";
 import type { SectionId } from "@/types/resume";
 import AwardsForm from "./AwardsForm";
 import BasicsForm from "./BasicsForm";
@@ -34,121 +38,104 @@ const SECTION_COMPONENTS: Record<SectionId, Component> = {
   publications: PublicationsForm,
 };
 
-// ── EditorShell ───────────────────────────────────────────────────────────────
+/** What the open tab means: which version, and how editing behaves in it. */
+function ModeNote() {
+  return (
+    <Show
+      when={activeVersion()}
+      fallback={
+        <Show
+          when={versions.length === 0}
+          fallback={
+            <p class="text-body-sm text-fg-muted">
+              Master holds everything. Changes here reach every version that hasn't reworded them.
+            </p>
+          }
+        >
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <p class="min-w-0 flex-1 basis-64 text-body-sm text-fg-muted">
+              Master holds everything. Make a version for each job, then untick what it doesn't
+              need.
+            </p>
+            <button type="button" class={outlineButton} onClick={() => setVersionDialog("create")}>
+              <Plus />
+              New version
+            </button>
+          </div>
+        </Show>
+      }
+    >
+      {(version) => {
+        const count = () => countKept(resume, version());
+        // The name is often made from the job already, so don't repeat it.
+        const job = () =>
+          [version().jobTitle, version().company]
+            .filter((part) => part && !version().name.includes(part))
+            .join(" · ");
+        return (
+          <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+              <p class="text-ui-sm">
+                {version().name}
+                <Show when={job()}>
+                  <span class="text-fg-muted"> · {job()}</span>
+                </Show>
+              </p>
+              <p class="font-mono text-ui-xs text-keep">
+                {count().kept} of {count().total} kept
+              </p>
+            </div>
+            <p class="mt-1 text-body-sm text-fg-muted">
+              Untick what this job doesn't need. Text you change here is reworded for this version
+              only.
+            </p>
+          </div>
+        );
+      }}
+    </Show>
+  );
+}
 
-const EditorShell: Component = () => {
-  const currentSection = () => getSectionDefinition(activeSection());
-  const currentIndex = () => SECTION_DEFINITIONS.findIndex((s) => s.id === activeSection());
-  const prevSection = () => (currentIndex() > 0 ? SECTION_DEFINITIONS[currentIndex() - 1] : null);
-  const nextSection = () =>
-    currentIndex() < TOTAL_SECTIONS - 1 ? SECTION_DEFINITIONS[currentIndex() + 1] : null;
-
-  const goToPrevSection = () => {
-    const section = prevSection();
-    if (section) setActiveSection(section.id);
+/** The form for the open section, with a note on what the open tab is. */
+export default function EditorShell() {
+  const section = () => getSectionDefinition(activeSection());
+  const next = () => {
+    const index = SECTION_DEFINITIONS.findIndex((s) => s.id === activeSection());
+    return SECTION_DEFINITIONS[index + 1];
   };
 
-  const goToNextSection = () => {
-    const section = nextSection();
-    if (section) setActiveSection(section.id);
+  const goTo = (id: SectionId) => {
+    setActiveSection(id);
+    document.getElementById("section-heading")?.focus();
   };
 
   return (
-    <div class="flex h-full flex-col" style={{ background: "#f4f8f5" }}>
-      {/* Section header */}
-      <div
-        class="shrink-0 border-b px-6 py-3"
-        style={{ background: "#ffffff", "border-color": "#ccddd4" }}
+    <div class="@container mx-auto w-full max-w-2xl px-4 pt-4 pb-10 md:px-6 md:pt-6">
+      <div class="mb-6 rounded-2xl bg-surface p-4 ring-1 ring-line">
+        <ModeNote />
+      </div>
+      <h2
+        id="section-heading"
+        tabIndex={-1}
+        class="mb-4 text-heading-6 text-balance outline-offset-4"
       >
-        {/* Section title */}
-        <div class="flex items-center justify-between">
-          <div class="min-w-0 flex-1">
-            <h2
-              class="text-base font-semibold"
-              style={{ color: "#0e2418", "font-family": "var(--font-sans)" }}
-            >
-              {currentSection()?.label}
-            </h2>
-            <p class="mt-0.5 text-xs" style={{ color: "#5a7a68" }}>
-              {currentSection()?.subtitle}
-            </p>
-          </div>
-
-          {/* Section nav */}
-          <div class="flex items-center gap-1.5" role="toolbar" aria-label="Section navigation">
+        {section()?.label}
+      </h2>
+      <Dynamic component={SECTION_COMPONENTS[activeSection()]} />
+      <Show when={next()}>
+        {(following) => (
+          <div class="mt-8 flex justify-end border-t border-line pt-4">
             <button
               type="button"
-              onClick={goToPrevSection}
-              disabled={!prevSection()}
-              aria-label={prevSection() ? `Go to ${prevSection()?.label}` : "First section"}
-              class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
-              style={{ color: "#1d6648" }}
+              class="btn-quiet h-11 gap-1.5 px-3 text-ui-sm md:h-9"
+              onClick={() => goTo(following().id)}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <span class="min-w-[3rem] text-center text-xs font-medium" style={{ color: "#5a7a68" }}>
-              {currentIndex() + 1}/{TOTAL_SECTIONS}
-            </span>
-            <button
-              type="button"
-              onClick={goToNextSection}
-              disabled={!nextSection()}
-              aria-label={nextSection() ? `Go to ${nextSection()?.label}` : "Last section"}
-              class="flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:opacity-30"
-              style={{ color: "#1d6648" }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
+              Next: {following().label}
+              <span aria-hidden="true">→</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Form area */}
-      <div
-        id={`panel-${activeSection()}`}
-        role="tabpanel"
-        aria-label={currentSection()?.label}
-        class="relative flex-1 overflow-y-auto"
-      >
-        <Transition name="section" mode="outin">
-          <Show when={currentSection()} keyed>
-            {(section) => {
-              const FormComponent = SECTION_COMPONENTS[section.id];
-              return (
-                <div class="p-6">
-                  <FormComponent />
-                </div>
-              );
-            }}
-          </Show>
-        </Transition>
-      </div>
+        )}
+      </Show>
     </div>
   );
-};
-
-export default EditorShell;
+}

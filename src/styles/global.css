@@ -82,6 +82,7 @@
    * Contrast: fg-muted on canvas 6.5:1. fg-subtle is 4.9:1 on surface but only 4.4:1 on canvas,
    * so set fg-subtle text on surfaces only. Primary on surface 7.7:1, white on primary 7.7:1.
    * keep and cut mark what a resume version includes: keep is the tick, cut is the empty box.
+   * field outlines form controls at 3.2:1 on surface. danger is 6.5:1 on surface.
    */
   --color-canvas: #f4f3ef;
   --color-surface: #ffffff;
@@ -97,6 +98,8 @@
   --color-focus: #2b3fd1;
   --color-keep: #2b3fd1;
   --color-cut: #a0a2aa;
+  --color-field: #8d8f98;
+  --color-danger: #b3261e;
   --color-sheet: #ffffff;
   --color-shadow: rgb(0 0 0 / 0.06);
   --color-shadow-deep: rgb(0 0 0 / 0.18);
@@ -211,6 +214,8 @@
   --color-focus: #8d9bff;
   --color-keep: #8d9bff;
   --color-cut: #5d5f68;
+  --color-field: #6c6e77;
+  --color-danger: #ff8a80;
   --color-shadow: rgb(255 255 255 / 0.06);
   --color-shadow-deep: rgb(0 0 0 / 0.6);
 }
@@ -218,6 +223,16 @@
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* No double-tap zoom delay on controls. */
+a,
+button,
+input,
+label,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
 ::selection {
@@ -269,42 +284,41 @@
   text-decoration-color: var(--color-primary);
 }
 
-/* ── Editor section transitions ─────────────────────────────────────── */
-
-.section-enter,
-.section-exit-to {
-  opacity: 0;
-  transform: translateY(6px);
+/*
+ * The editor's tickbox: a real checkbox drawn like the site's. Its outline uses fg-subtle, not cut,
+ * so an empty box still meets 3:1 against the surface.
+ */
+.tickbox-input {
+  appearance: none;
+  flex: none;
+  width: --spacing(4);
+  height: --spacing(4);
+  margin: 0;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1.5px var(--color-fg-subtle);
+  cursor: pointer;
 }
 
-.section-enter-active,
-.section-exit-active {
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease;
-  will-change: opacity, transform;
+.tickbox-input:checked {
+  background:
+    var(--color-keep)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% no-repeat;
+  box-shadow: none;
 }
 
-.section-enter-to,
-.section-exit {
-  opacity: 1;
-  transform: translateY(0);
+@media (prefers-reduced-motion: no-preference) {
+  .menu-enter {
+    animation: menu-in 120ms ease-out;
+  }
 }
 
-/* ── Draft popup entry ───────────────────────────────────────────────── */
-
-@keyframes popup-in {
+@keyframes menu-in {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.98);
+    transform: translateY(-4px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.draft-popup-enter {
-  animation: popup-in 150ms ease forwards;
 }
 
 /* ── Textarea resize constraint ──────────────────────────────────────── */

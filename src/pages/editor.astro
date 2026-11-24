@@ -1,21 +1,11 @@
 ---
+import EditorApp from "@/components/editor/EditorApp";
 import Layout from "@/layouts/Layout.astro";
-import CommandBar from "@/components/editor/CommandBar";
-import EditorLayout from "@/components/editor/EditorLayout";
 ---
 
 <Layout
   title="Editor"
   description="Edit your resume in a structured form and preview it live. Export a text-based PDF when ready."
 >
-  <div
-    class="flex h-screen flex-col overflow-hidden"
-    style="background: #f4f8f5;"
-    transition:animate="fade"
-  >
-    <!-- Command bar -->
-    <CommandBar client:only="solid-js" />
-
-    <EditorLayout client:only="solid-js" />
-  </div>
+  <EditorApp client:only="solid-js" />
 </Layout>

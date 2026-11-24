@@ -8,28 +8,44 @@ interface FormFieldProps {
   id: string;
   label: string;
   required?: boolean;
+  /** Shown at the end of the label row, such as a "Reworded" mark. */
+  aside?: JSX.Element;
+  /** Keeps the label for screen readers only. */
+  hideLabel?: boolean;
 }
 
+/** A label, its field, and a hint or error under it. Give the field `aria-describedby={hintId}`. */
 const FormField: Component<FormFieldProps> = (props) => (
-  <div class="space-y-1">
-    <label for={props.id} class="block text-sm font-medium text-gray-700">
-      {props.label}
-      <Show when={props.required}>
-        <span aria-hidden="true" class="ml-0.5 text-red-500">
-          *
-        </span>
-      </Show>
-    </label>
+  <div class="min-w-0">
+    <div
+      class={`flex items-baseline justify-between gap-2 ${props.hideLabel ? "" : "mb-1 min-h-5"}`}
+    >
+      <label for={props.id} class={props.hideLabel ? "sr-only" : "text-ui-sm text-fg"}>
+        {props.label}
+        <Show when={props.required}>
+          <span aria-hidden="true" class="text-fg-subtle">
+            {" "}
+            (required)
+          </span>
+        </Show>
+      </label>
+      <Show when={!props.hideLabel}>{props.aside}</Show>
+    </div>
     {props.children}
+    <Show when={props.hideLabel}>
+      <div class="mt-1 empty:hidden">{props.aside}</div>
+    </Show>
     <Show
       when={props.error}
       fallback={
         <Show when={props.hint}>
-          <p class="text-xs text-gray-500">{props.hint}</p>
+          <p id={`${props.id}-hint`} class="mt-1 text-body-xs text-fg-subtle">
+            {props.hint}
+          </p>
         </Show>
       }
     >
-      <p id={`${props.id}-error`} role="alert" class="text-xs text-red-600">
+      <p id={`${props.id}-error`} role="alert" class="mt-1 text-body-xs text-danger">
         {props.error}
       </p>
     </Show>

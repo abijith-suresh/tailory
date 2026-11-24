@@ -1,89 +1,67 @@
 import type { Component } from "solid-js";
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
+
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumeCertificate } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
-function newCertificate(): ResumeCertificate {
-  return {
-    id: crypto.randomUUID(),
-    name: "",
-    issuer: "",
-    date: "",
-    url: "",
-  };
-}
+type CertificateText = "name" | "issuer" | "date" | "url";
 
 const CertificatesForm: Component = () => {
   const addEntry = () => {
-    setResume("certificates", (c) => [...(c ?? []), newCertificate()]);
+    const entry: ResumeCertificate = { id: createId(), name: "", issuer: "", date: "", url: "" };
+    setResume("certificates", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("certificates", id);
-  };
-
-  const reorder = (items: ResumeCertificate[]) => {
-    setResume("certificates", items);
-  };
-
-  const updateField = <K extends keyof ResumeCertificate>(
-    id: string,
-    field: K,
-    value: ResumeCertificate[K]
-  ) => {
-    setResume("certificates", (c) => c?.id === id, field, value);
-  };
+  const field = (item: ResumeCertificate, key: CertificateText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("certificates", (c) => c?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.certificates ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => item.name}
+      meta={(item) => item.date ?? ""}
+      onReorder={(items) => setResume("certificates", items)}
+      onRemove={(id) => deleteEntry("certificates", id)}
       onAdd={addEntry}
       addLabel="Add certificate"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <FormField label="Certificate Name" id={`cert-name-${item.id}`}>
-            <Input
-              id={`cert-name-${item.id}`}
-              value={item.name}
-              onInput={(v) => updateField(item.id, "name", v)}
-              placeholder="AWS Certified Solutions Architect"
+        <>
+          <VersionedField
+            id={`cert-name-${item.id}`}
+            label="Certificate"
+            placeholder="AWS Certified Solutions Architect"
+            {...field(item, "name")}
+          />
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`cert-issuer-${item.id}`}
+              label="Issuer"
+              placeholder="Amazon Web Services"
+              {...field(item, "issuer")}
             />
-          </FormField>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Issuer" id={`cert-issuer-${item.id}`}>
-              <Input
-                id={`cert-issuer-${item.id}`}
-                value={item.issuer ?? ""}
-                onInput={(v) => updateField(item.id, "issuer", v)}
-                placeholder="Amazon Web Services"
-              />
-            </FormField>
-            <FormField label="Date" id={`cert-date-${item.id}`}>
-              <Input
-                id={`cert-date-${item.id}`}
-                value={item.date ?? ""}
-                onInput={(v) => updateField(item.id, "date", v)}
-                placeholder="2023"
-              />
-            </FormField>
+            <VersionedField
+              id={`cert-date-${item.id}`}
+              label="Date"
+              placeholder="2023"
+              {...field(item, "date")}
+            />
           </div>
-
-          <FormField label="URL (optional)" id={`cert-url-${item.id}`}>
-            <Input
-              id={`cert-url-${item.id}`}
-              type="url"
-              value={item.url ?? ""}
-              onInput={(v) => updateField(item.id, "url", v)}
-              placeholder="https://aws.amazon.com/certification/…"
-            />
-          </FormField>
-        </div>
+          <VersionedField
+            id={`cert-url-${item.id}`}
+            label="URL (optional)"
+            type="url"
+            placeholder="https://aws.amazon.com/certification/…"
+            {...field(item, "url")}
+          />
+        </>
       )}
     />
   );

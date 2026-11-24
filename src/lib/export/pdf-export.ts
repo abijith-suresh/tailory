@@ -16,8 +16,9 @@ async function ensurePdfMakeFontsRegistered(pdfMake: PdfMakeFontRuntime): Promis
   return fontRegistrationPromise;
 }
 
-function getFilename(resume: ResumeSchema): string {
-  return `${sanitizeFilenameBase(resume.basics.name)}_resume.pdf`;
+function getFilename(resume: ResumeSchema, versionName?: string): string {
+  const version = versionName?.trim() ? `_${sanitizeFilenameBase(versionName)}` : "";
+  return `${sanitizeFilenameBase(resume.basics.name)}${version}_resume.pdf`;
 }
 
 interface BrowserPdfDocument {
@@ -28,6 +29,8 @@ interface PdfExportOptions {
   accentColor?: string;
   /** A version's section order; see `resolveVersion` for the resume itself. */
   sectionOrder?: readonly ResumeSectionKey[];
+  /** Added to the file name, so each version's PDF gets its own. */
+  versionName?: string;
 }
 
 async function maybeSharePdf(blob: Blob, filename: string): Promise<boolean> {
@@ -85,7 +88,7 @@ export async function exportPDF(
     accentColor: options.accentColor,
     sectionOrder: options.sectionOrder,
   });
-  const filename = getFilename(validation.normalizedResume);
+  const filename = getFilename(validation.normalizedResume, options.versionName);
   const blob = await pdfMake.createPdf(docDef).getBlob();
 
   if (await maybeSharePdf(blob, filename)) {

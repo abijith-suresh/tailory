@@ -1,102 +1,82 @@
 import type { Component } from "solid-js";
 
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import { ReorderableList } from "@/components/ui/ReorderableList";
-import Textarea from "@/components/ui/Textarea";
+import { EntryList } from "@/components/ui/EntryList";
+import { createId } from "@/lib/resume/ids";
 import { deleteEntry } from "@/store/document";
+import { keepOnlyInActiveVersion } from "@/store/editor";
 import { resume, setResume } from "@/store/resume";
 import type { ResumePublication } from "@/types/resume";
+import VersionedField from "./VersionedField";
 
-function newPublication(): ResumePublication {
-  return {
-    id: crypto.randomUUID(),
-    name: "",
-    publisher: "",
-    releaseDate: "",
-    url: "",
-    summary: "",
-  };
-}
+type PublicationText = "name" | "publisher" | "releaseDate" | "url" | "summary";
 
 const PublicationsForm: Component = () => {
   const addEntry = () => {
-    setResume("publications", (p) => [...(p ?? []), newPublication()]);
+    const entry: ResumePublication = {
+      id: createId(),
+      name: "",
+      publisher: "",
+      releaseDate: "",
+      url: "",
+      summary: "",
+    };
+    setResume("publications", (list) => [...(list ?? []), entry]);
+    keepOnlyInActiveVersion(entry.id);
   };
 
-  const removeEntry = (id: string) => {
-    deleteEntry("publications", id);
-  };
-
-  const reorder = (items: ResumePublication[]) => {
-    setResume("publications", items);
-  };
-
-  const updateField = <K extends keyof ResumePublication>(
-    id: string,
-    field: K,
-    value: ResumePublication[K]
-  ) => {
-    setResume("publications", (p) => p?.id === id, field, value);
-  };
+  const field = (item: ResumePublication, key: PublicationText) => ({
+    value: item[key] ?? "",
+    onInput: (value: string) => setResume("publications", (p) => p?.id === item.id, key, value),
+    reword: { itemId: item.id, field: key },
+  });
 
   return (
-    <ReorderableList
+    <EntryList
       items={resume.publications ?? []}
-      onReorder={reorder}
-      onRemove={removeEntry}
+      title={(item) => item.name}
+      meta={(item) => item.releaseDate ?? ""}
+      onReorder={(items) => setResume("publications", items)}
+      onRemove={(id) => deleteEntry("publications", id)}
       onAdd={addEntry}
       addLabel="Add publication"
       renderItem={(item) => (
-        <div class="space-y-3 pr-12">
-          <FormField label="Publication Title" id={`pub-name-${item.id}`}>
-            <Input
-              id={`pub-name-${item.id}`}
-              value={item.name}
-              onInput={(v) => updateField(item.id, "name", v)}
-              placeholder="Scaling Search at Acme"
+        <>
+          <VersionedField
+            id={`pub-name-${item.id}`}
+            label="Title"
+            placeholder="Scaling search at Acme"
+            {...field(item, "name")}
+          />
+          <div class="grid gap-4 @md:grid-cols-2">
+            <VersionedField
+              id={`pub-publisher-${item.id}`}
+              label="Publisher"
+              placeholder="ACM Queue"
+              {...field(item, "publisher")}
             />
-          </FormField>
-
-          <div class="grid grid-cols-2 gap-3">
-            <FormField label="Publisher" id={`pub-publisher-${item.id}`}>
-              <Input
-                id={`pub-publisher-${item.id}`}
-                value={item.publisher ?? ""}
-                onInput={(v) => updateField(item.id, "publisher", v)}
-                placeholder="ACM Queue"
-              />
-            </FormField>
-            <FormField label="Release Date" id={`pub-date-${item.id}`}>
-              <Input
-                id={`pub-date-${item.id}`}
-                value={item.releaseDate ?? ""}
-                onInput={(v) => updateField(item.id, "releaseDate", v)}
-                placeholder="Jun 2024"
-              />
-            </FormField>
+            <VersionedField
+              id={`pub-date-${item.id}`}
+              label="Release date"
+              placeholder="Jun 2024"
+              {...field(item, "releaseDate")}
+            />
           </div>
-
-          <FormField label="URL (optional)" id={`pub-url-${item.id}`}>
-            <Input
-              id={`pub-url-${item.id}`}
-              type="url"
-              value={item.url ?? ""}
-              onInput={(v) => updateField(item.id, "url", v)}
-              placeholder="https://queue.acm.org/…"
-            />
-          </FormField>
-
-          <FormField label="Summary" id={`pub-summary-${item.id}`}>
-            <Textarea
-              id={`pub-summary-${item.id}`}
-              value={item.summary ?? ""}
-              onInput={(v) => updateField(item.id, "summary", v)}
-              placeholder="A short description of the publication…"
-              rows={2}
-            />
-          </FormField>
-        </div>
+          <VersionedField
+            id={`pub-url-${item.id}`}
+            label="URL (optional)"
+            type="url"
+            placeholder="https://queue.acm.org/…"
+            {...field(item, "url")}
+          />
+          <VersionedField
+            id={`pub-summary-${item.id}`}
+            label="Summary"
+            multiline
+            rows={2}
+            placeholder="A short description of the publication…"
+            {...field(item, "summary")}
+          />
+        </>
       )}
     />
   );
