@@ -17,10 +17,9 @@ export default defineConfig({
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
     {
-      // Marketing pages only. The editor flow and the desktop header assertions
-      // assume a desktop layout, so they stay on the desktop projects.
+      // The whole suite on a phone. The marketing header hides FAQ and Privacy there, so that
+      // desktop-only check is left out.
       name: "mobile-chromium",
-      testMatch: "**/smoke.spec.ts",
       grepInvert: /GitHub links sit in the footer/,
       use: { ...devices["Pixel 7"] },
     },

@@ -12,7 +12,10 @@
       "position": "Software Engineer",
       "startDate": "2021-03",
       "endDate": "2024-06",
-      "highlights": ["Shipped a private editor with no server component."]
+      "highlights": [
+        "Shipped a private editor with no server component.",
+        "Cut PDF export time in half."
+      ]
     }
   ],
   "education": [

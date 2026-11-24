@@ -1,5 +1,11 @@
 import { type BrowserContext, expect, type Request, test } from "@playwright/test";
-import { EDITED_LABEL, editLabel, importFixtureResume, waitForAutosave } from "./fixtures/editor";
+import {
+  EDITED_LABEL,
+  editLabel,
+  exportFromMenu,
+  importFixtureResume,
+  waitForAutosave,
+} from "./fixtures/editor";
 
 // Resume content that must never appear in any request: the fixture's values and the edit.
 const RESUME_CONTENT = [
@@ -75,13 +81,9 @@ test("import, edit and export send nothing off the app origin", async ({
   await editLabel(page);
   await waitForAutosave(page);
 
-  const jsonDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Export JSON" }).click();
-  await jsonDownload;
-
-  const pdfDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Export PDF" }).click();
-  await pdfDownload;
+  await exportFromMenu(page, /^JSON Resume of Master/);
+  await exportFromMenu(page, /^PDF of Master/);
+  await exportFromMenu(page, /^Backup/);
 
   // Leave the editor so unload handlers and beacons would run before the check.
   await page.goto("/");
