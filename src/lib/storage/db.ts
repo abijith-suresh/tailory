@@ -21,6 +21,10 @@ interface TailoryDB {
 
 let _db: IDBPDatabase<TailoryDB> | null = null;
 
+// createdAt of drafts this tab has already read or written (null: not stored yet). Knowing it lets
+// saveDraft write without reading first, so a save started as the page closes reaches IndexedDB.
+const knownCreatedAt = new Map<string, number | null>();
+
 function resetDbConnection() {
   _db = null;
 }
@@ -52,17 +56,22 @@ export async function isDraftStorageAvailable(): Promise<boolean> {
 export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
   try {
     const db = await getDB();
-    const existingDraft = await db.get("drafts", draft.id);
-    const normalizedDraft = {
+    const createdAt = knownCreatedAt.has(draft.id)
+      ? knownCreatedAt.get(draft.id)
+      : (await db.get("drafts", draft.id))?.createdAt;
+    const savedDraft = {
       ...draft,
       name: draft.name.trim() || "Untitled",
       resumeData: normalizeResume(draft.resumeData),
+      createdAt: createdAt ?? draft.createdAt,
     };
 
-    await db.put("drafts", {
-      ...normalizedDraft,
-      createdAt: existingDraft?.createdAt ?? normalizedDraft.createdAt,
-    });
+    const tx = db.transaction("drafts", "readwrite");
+    const put = tx.store.put(savedDraft);
+    // Commit now instead of after the next task, which never comes once the page is closing.
+    tx.commit();
+    await Promise.all([put, tx.done]);
+    knownCreatedAt.set(draft.id, savedDraft.createdAt);
 
     return true;
   } catch {
@@ -71,10 +80,12 @@ export async function saveDraft(draft: ResumeDraft): Promise<boolean> {
   }
 }
 
-export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
+/** Returns undefined when there is no such draft and null when it can't be read. */
+export async function getDraft(id: string): Promise<ResumeDraft | undefined | null> {
   try {
     const db = await getDB();
     const draft = await db.get("drafts", id);
+    knownCreatedAt.set(id, draft?.createdAt ?? null);
     return draft
       ? {
           ...draft,
@@ -84,11 +95,12 @@ export async function getDraft(id: string): Promise<ResumeDraft | undefined> {
       : undefined;
   } catch {
     resetDbConnection();
-    return undefined;
+    return null;
   }
 }
 
-export async function listDrafts(): Promise<ResumeDraft[]> {
+/** Returns null when drafts can't be read, so callers can tell a failure from an empty list. */
+export async function listDrafts(): Promise<ResumeDraft[] | null> {
   try {
     const db = await getDB();
     const all = await db.getAll("drafts");
@@ -101,7 +113,7 @@ export async function listDrafts(): Promise<ResumeDraft[]> {
       .sort((a, b) => b.updatedAt - a.updatedAt);
   } catch {
     resetDbConnection();
-    return [];
+    return null;
   }
 }
 
@@ -109,6 +121,7 @@ export async function deleteDraft(id: string): Promise<boolean> {
   try {
     const db = await getDB();
     await db.delete("drafts", id);
+    knownCreatedAt.delete(id);
     return true;
   } catch {
     resetDbConnection();
