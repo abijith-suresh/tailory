@@ -14,6 +14,7 @@ import CertificatesForm from "./CertificatesForm";
 import EducationForm from "./EducationForm";
 import InterestsForm from "./InterestsForm";
 import LanguagesForm from "./LanguagesForm";
+import PageFit from "./PageFit";
 import ProjectsForm from "./ProjectsForm";
 import PublicationsForm from "./PublicationsForm";
 import ReferencesForm from "./ReferencesForm";
@@ -113,6 +114,9 @@ export default function EditorShell() {
     <div class="@container mx-auto w-full max-w-2xl px-4 pt-4 pb-10 md:px-6 md:pt-6">
       <div class="mb-6 rounded-2xl bg-surface p-4 ring-1 ring-line">
         <ModeNote />
+        <div class="mt-3 border-t border-line pt-3">
+          <PageFit />
+        </div>
       </div>
       <h2
         id="section-heading"

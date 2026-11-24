@@ -1,37 +1,41 @@
 import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
 
+import { FitReadout } from "@/components/editor/PageFit";
 import TemplateSelect from "@/components/editor/TemplateSelect";
-import ResumeDocument from "@/components/resume/ResumeDocument";
-import {
-  RESUME_PREVIEW_FONT_FAMILY,
-  RESUME_PREVIEW_PAGE_MIN_HEIGHT,
-  resolveResumeDesignSettings,
-} from "@/lib/resume/design";
+import { fitDocument } from "@/lib/fit/fit";
+import { UNTIGHTENED } from "@/lib/fit/steps";
 import { isResumeEmpty } from "@/lib/sections/registry";
 import { countKept } from "@/lib/versions/counts";
 import { resolveVersion } from "@/lib/versions/resolve";
 import { currentDocument } from "@/store/document";
-import { activeVersion, currentTemplate } from "@/store/editor";
-import { selectedAccentColor } from "@/store/resume";
+import { activeVersion } from "@/store/editor";
+import { shownFit, shownFitInput } from "@/store/fit";
+import PdfPage, { A4_WIDTH_PT, type PageBreakMark, PX_PER_PT } from "./PdfPage";
 
-const PAGE_WIDTH = 680;
+const PAGE_WIDTH = A4_WIDTH_PT * PX_PER_PT;
 /** Canvas padding on each side, in px, matching p-4 and md:p-8. */
 const GUTTER = { narrow: 16, wide: 32 };
 
 /**
- * The open version as it will print, on a page scaled to fit the column. The page keeps its own
- * width and is zoomed, so line breaks match the export.
+ * The open version as it will print, on a page scaled to fit the column. The page is the PDF's own
+ * document drawn at A4 size and zoomed, so line breaks match the export. Page breaks and
+ * tightening come from measuring that document with pdfmake.
  */
 export default function ResumePreview() {
   const [scale, setScale] = createSignal(1);
   let canvas!: HTMLDivElement;
 
   const shown = createMemo(() => resolveVersion(currentDocument(), activeVersion()?.id ?? null));
-  const design = () =>
-    resolveResumeDesignSettings({
-      template: currentTemplate(),
-      accentColor: selectedAccentColor(),
-    });
+  const doc = createMemo(() => fitDocument(shownFitInput(), shownFit()?.step ?? UNTIGHTENED));
+  const breaks = createMemo(() => {
+    const fit = shownFit();
+    const marks = new Map<string, PageBreakMark>();
+    for (const start of fit?.pageStarts ?? []) {
+      const over = fit?.pageTarget != null && start.page > fit.pageTarget;
+      marks.set(start.blockId, { page: start.page, over });
+    }
+    return marks;
+  });
 
   onMount(() => {
     if (typeof ResizeObserver === "undefined") return;
@@ -48,16 +52,19 @@ export default function ResumePreview() {
   return (
     <div class="flex h-full min-h-0 flex-col">
       <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-2 md:hidden">
-        <Show when={activeVersion()} fallback={<p class="text-ui-sm text-fg-muted">Master</p>}>
-          {(version) => {
-            const count = () => countKept(currentDocument().master, version());
-            return (
-              <p class="font-mono text-ui-xs text-keep">
-                {count().kept} of {count().total} kept
-              </p>
-            );
-          }}
-        </Show>
+        <div class="min-w-0">
+          <Show when={activeVersion()} fallback={<p class="text-ui-sm text-fg-muted">Master</p>}>
+            {(version) => {
+              const count = () => countKept(currentDocument().master, version());
+              return (
+                <p class="font-mono text-ui-xs text-keep">
+                  {count().kept} of {count().total} kept
+                </p>
+              );
+            }}
+          </Show>
+          <FitReadout />
+        </div>
         <TemplateSelect id="template-select-phone" />
       </div>
       <div ref={canvas} class="min-h-0 flex-1 overflow-auto p-4 sm:p-8">
@@ -72,19 +79,14 @@ export default function ResumePreview() {
             </div>
           }
         >
-          <div
-            class="resume-document__page mx-auto bg-sheet p-10 text-xs leading-relaxed text-[#111827] shadow-sheet"
-            style={{
-              width: `${PAGE_WIDTH}px`,
-              zoom: scale(),
-              "font-family": RESUME_PREVIEW_FONT_FAMILY,
-              "min-height": `${RESUME_PREVIEW_PAGE_MIN_HEIGHT}px`,
-            }}
+          <PdfPage
+            doc={doc()}
+            breaks={breaks()}
+            class="mx-auto shadow-sheet"
+            style={{ zoom: scale(), "--preview-scale": scale() }}
             role="document"
             aria-label={`Preview of ${activeVersion()?.name ?? "Master"}`}
-          >
-            <ResumeDocument design={design()} resume={shown()} />
-          </div>
+          />
         </Show>
       </div>
     </div>

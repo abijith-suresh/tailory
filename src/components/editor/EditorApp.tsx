@@ -5,6 +5,7 @@ import { Announcer } from "@/components/ui/announcer";
 import { ConfirmHost } from "@/components/ui/confirm";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { activeVersion, type EditorView, editorView, setEditorView } from "@/store/editor";
+import { createFitTracker } from "@/store/fit";
 import { activeSection } from "@/store/resume";
 import { createAutosave } from "./autosave";
 import EditorShell from "./EditorShell";
@@ -61,6 +62,7 @@ function ViewSwitch() {
 /** The whole editor: top bar, then sections, form and preview. */
 export default function EditorApp() {
   const autosave = createAutosave();
+  createFitTracker();
   const hiddenOnPhone = (view: EditorView) => (editorView() === view ? "" : "max-md:hidden");
   let formScroller!: HTMLDivElement;
 

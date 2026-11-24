@@ -5,6 +5,7 @@ import { exportJsonResumeString } from "@/lib/resume/json";
 import { resolveVersion } from "@/lib/versions/resolve";
 import { currentDocument } from "@/store/document";
 import { activeVersion, currentTemplate } from "@/store/editor";
+import { shownPageFit } from "@/store/fit";
 import { resume, selectedAccentColor } from "@/store/resume";
 import type { ResumeSchema } from "@/types/resume";
 
@@ -24,6 +25,8 @@ function filenameBase(): string {
 export async function exportShownPdf() {
   await exportPDF(shownResume(), currentTemplate(), {
     accentColor: selectedAccentColor(),
+    sectionOrder: activeVersion()?.sectionOrder,
+    pageFit: { ...shownPageFit() },
     versionName: activeVersion()?.name,
   });
 }

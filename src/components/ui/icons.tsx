@@ -45,6 +45,11 @@ export const Trash = () => (
     <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
   </Icon>
 );
+export const Minus = () => (
+  <Icon>
+    <path d="M5 12h14" />
+  </Icon>
+);
 export const Plus = () => (
   <Icon>
     <path d="M12 5v14M5 12h14" />

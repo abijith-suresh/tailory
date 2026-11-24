@@ -397,3 +397,51 @@ textarea {
     column-gap: --spacing(12);
   }
 }
+
+/* ── Preview of the PDF ──────────────────────────────────────────────── */
+
+/* Text as pdfmake sets it: line breaks kept, spaces collapsed, long words split. */
+.pdf-text {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Where a new page starts. It takes room of its own so it never covers text, and it is sized
+ * against the preview's zoom (--preview-scale) so the label stays readable on a small page.
+ */
+.page-break {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(24px / var(--preview-scale, 1));
+  color: var(--color-fg-muted);
+  font-family: var(--font-sans);
+}
+
+.page-break::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  border-top: calc(1px / var(--preview-scale, 1)) dashed var(--color-line-strong);
+}
+
+.page-break--over {
+  color: var(--color-danger);
+}
+
+.page-break--over::before {
+  border-top-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+}
+
+.page-break__label {
+  position: relative;
+  padding-inline: calc(8px / var(--preview-scale, 1));
+  background: var(--color-sheet);
+  font-size: calc(12px / var(--preview-scale, 1));
+  line-height: calc(16px / var(--preview-scale, 1));
+  font-weight: 500;
+  white-space: nowrap;
+}
