@@ -1,0 +1,54 @@
+{
+  "name": "tailory-spike",
+  "version": "0.0.0-spike.1",
+  "private": false,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@better-auth/cimd": "^1.7.28",
+    "@better-auth/drizzle-adapter": "^1.7.28",
+    "@better-auth/mcp": "^1.7.28",
+    "@electric-sql/pglite": "^0.6.0",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "@solidjs/meta": "^2.0.0",
+    "@solidjs/router": "^2.0.1",
+    "@solidjs/web": "^2.0.4",
+    "better-auth": "^1.7.28",
+    "drizzle-orm": "^0.45.4",
+    "pdfmake": "^0.3.15",
+    "postgres": "^4.1.1",
+    "solid-js": "^2.0.4",
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "better-auth": {
+      "solid-js": "$solid-js"
+    }
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@solidjs/vite-plugin": "^3.0.1",
+    "@types/node": "^24.19.4",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node dist/server/node.js",
+    "db:generate": "drizzle-kit generate",
+    "build:bundled": "SPIKE_BUNDLE=true vite build",
+    "pack:bundled": "npm run build:bundled && node scripts/pack-bundled.mjs"
+  },
+  "bin": {
+    "tailory": "bin/tailory.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "drizzle"
+  ]
+}

@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    ports: ["4416:4413"]
+    environment:
+      DATABASE_URL: postgres://tailory:tailory@db:5432/tailory
+      SITE_URL: http://localhost:4416
+      BETTER_AUTH_SECRET: change-me-to-32-plus-random-characters
+      TAILORY_EMAIL_PASSWORD: "true"
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_USER: tailory
+      POSTGRES_PASSWORD: tailory
+      POSTGRES_DB: tailory
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tailory"]
+      interval: 2s
+      retries: 20
+volumes:
+  pgdata:

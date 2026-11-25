@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node", "@solidjs/vite-plugin/virtual-modules"],
+    "paths": { "@/*": ["../../src/*"] }
+  },
+  "include": ["src", "scripts", "*.ts"]
+}
