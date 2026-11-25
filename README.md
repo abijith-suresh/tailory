@@ -60,7 +60,7 @@ The site may load normal web assets, but resume content is not sent to an applic
 - [SolidJS](https://solidjs.com)
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [TypeScript](https://www.typescriptlang.org)
-- [Bun](https://bun.sh)
+- [Node.js 24](https://nodejs.org) and npm workspaces
 - [PDF.js](https://mozilla.github.io/pdf.js/)
 - [mammoth](https://github.com/mwilliamson/mammoth.js)
 - [pdfmake](http://pdfmake.org)
@@ -69,24 +69,28 @@ The site may load normal web assets, but resume content is not sent to an applic
 ## Development
 
 ```sh
-bun install
-bun run dev
-bun run verify
+npm ci
+npm run dev
+npm run verify
 ```
 
 Useful individual commands:
 
 ```sh
-bun run type-check
-bun run lint
-bun run format:check
-bun run test
-bun run build
+npm run type-check
+npm run lint
+npm run format:check
+npm run test
+npm run build
+npx playwright install   # once per machine, before browser tests
+npm run test:e2e:build
 ```
+
+The app lives in `apps/site`; the root scripts run it.
 
 Release and contribution workflow notes live in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
-MIT. See [LICENSE](./LICENSE). The fonts in `public/fonts` are under the SIL Open Font License;
+MIT. See [LICENSE](./LICENSE). The fonts in `apps/site/public/fonts` are under the SIL Open Font License;
 their licence texts sit next to them.

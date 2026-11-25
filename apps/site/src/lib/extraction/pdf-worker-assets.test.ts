@@ -3,15 +3,17 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-const root = process.cwd();
-const workerPath = path.join(root, "public", "pdf.worker.min.mjs");
-const sourcePath = path.join(root, "node_modules", "pdfjs-dist", "build", "pdf.worker.min.mjs");
-const pdfModulePath = path.join(root, "src", "lib", "extraction", "pdf.ts");
+import { packageDir, siteRoot } from "@/test/paths";
+
+const pdfjsRoot = packageDir("pdfjs-dist");
+const workerPath = path.join(siteRoot, "public", "pdf.worker.min.mjs");
+const sourcePath = path.join(pdfjsRoot, "build", "pdf.worker.min.mjs");
+const pdfModulePath = path.join(siteRoot, "src", "lib", "extraction", "pdf.ts");
 
 function readPdfjsVersion(): string {
-  const packageJson = JSON.parse(
-    readFileSync(path.join(root, "node_modules", "pdfjs-dist", "package.json"), "utf8")
-  ) as { version: string };
+  const packageJson = JSON.parse(readFileSync(path.join(pdfjsRoot, "package.json"), "utf8")) as {
+    version: string;
+  };
 
   return packageJson.version;
 }

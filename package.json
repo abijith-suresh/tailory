@@ -1,56 +1,39 @@
 {
   "name": "tailory",
+  "private": true,
   "type": "module",
   "version": "0.0.2",
   "license": "MIT",
-  "packageManager": "bun@1.4.1",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "packageManager": "npm@11.16.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "type-check": "tsc --noEmit",
+    "dev": "npm run dev --workspace @tailory/site --",
+    "build": "npm run build --workspace @tailory/site",
+    "preview": "npm run preview --workspace @tailory/site --",
+    "type-check": "npm run type-check --workspaces --if-present",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:build": "bun run build && bun run test:e2e",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "assets:pdf-worker": "node scripts/sync-pdf-worker.mjs",
-    "verify": "bun run type-check && bun run lint && bun run format:check && bun run test:coverage && bun run build",
+    "test": "npm run test --workspaces --if-present --",
+    "test:coverage": "npm run test:coverage --workspaces --if-present --",
+    "test:e2e": "npm run test:e2e --workspace @tailory/site --",
+    "test:e2e:build": "npm run build && npm run test:e2e",
+    "assets:pdf-worker": "npm run assets:pdf-worker --workspace @tailory/site",
+    "verify": "npm run type-check && npm run lint && npm run format:check && npm run test:coverage && npm run build",
     "prepare": "husky"
   },
-  "dependencies": {
-    "astro": "^7.4.13",
-    "idb": "^8.0.4",
-    "mammoth": "^1.13.0",
-    "pdfjs-dist": "^6.5.438",
-    "pdfmake": "^0.3.14",
-    "solid-js": "^1.9.18",
-    "solid-transition-group": "^0.3.0",
-    "tailwindcss": "^4.3.5"
-  },
   "devDependencies": {
-    "@astrojs/solid-js": "^7.1.6",
     "@biomejs/biome": "^2.6.8",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
-    "@playwright/test": "^1.65.1",
-    "@solidjs/testing-library": "^0.8.10",
-    "@tailwindcss/vite": "^4.3.5",
-    "@testing-library/jest-dom": "^8.0.0",
-    "@types/pdfmake": "^0.3.3",
-    "@vitest/coverage-v8": "5.1.1",
-    "@vitest/ui": "^5.1.1",
     "husky": "^9.1.7",
-    "jsdom": "^31.0.1",
-    "lint-staged": "^17.6.1",
-    "typescript": "^7.0.2",
-    "vite-plugin-solid": "^2.11.17",
-    "vitest": "^5.1.1"
+    "lint-staged": "^17.6.1"
   }
 }

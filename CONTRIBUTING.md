@@ -4,14 +4,22 @@ Tailory is a browser-only resume editor. Keep resume data in the browser, keep t
 
 ## Development
 
-Install dependencies and run the local app with Bun:
+Tailory is an npm workspace on Node 24; `mise.toml` pins the Node and npm versions. The app lives
+in `apps/site` (`@tailory/site`); run commands from the repository root, which delegates to it.
 
 ```sh
-bun install
-bun run dev
+npm ci
+npm run dev
 ```
 
-Run `bun run verify` before handoff; add focused tests for what you touched and leave the full
+Browser tests need the Playwright browsers once per machine:
+
+```sh
+npx playwright install
+npm run test:e2e:build
+```
+
+Run `npm run verify` before handoff; add focused tests for what you touched and leave the full
 suite to CI. When you need to narrow down a failure, run the relevant script from `package.json`.
 
 ## Maintenance
@@ -19,10 +27,10 @@ suite to CI. When you need to narrow down a failure, run the relevant script fro
 When you upgrade `pdfjs-dist`, re-sync the worker that the browser loads:
 
 ```sh
-bun run assets:pdf-worker
+npm run assets:pdf-worker
 ```
 
-`public/pdf.worker.min.mjs` must match the installed `pdfjs-dist` build. If it drifts, PDF import fails with an API/worker version mismatch. The guard in `src/lib/extraction/pdf-worker-assets.test.ts` fails `bun run test` when the worker is out of date, so run the command above and commit the updated file as part of the upgrade.
+`apps/site/public/pdf.worker.min.mjs` must match the installed `pdfjs-dist` build. If it drifts, PDF import fails with an API/worker version mismatch. The guard in `apps/site/src/lib/extraction/pdf-worker-assets.test.ts` fails `npm run test` when the worker is out of date, so run the command above and commit the updated file as part of the upgrade.
 
 ## Contribution workflow
 
@@ -31,7 +39,7 @@ bun run assets:pdf-worker
 - Use SolidJS for interactive UI. Do not introduce React or Vue.
 - Keep `pdfmake` dynamically imported in browser runtime code; a module-scope import breaks the
   client-only build.
-- Preview and PDF export share render models under `src/lib/templates/`; template edits affect both
+- Preview and PDF export share render models under `apps/site/src/lib/templates/`; template edits affect both
   paths.
 - Keep parser, editor, preview, export, and draft behavior aligned. Keep README and public copy
   accurate; never advertise unimplemented features.
@@ -46,7 +54,7 @@ Tailory uses Release Please for version bumps, changelog entries, Git tags, and 
 
 These files and conventions stay aligned:
 
-- `package.json` contains the current package version.
+- The root `package.json` contains the current package version.
 - `.release-please-manifest.json` contains Release Please's tracked version.
 - `CHANGELOG.md` contains generated release history after the first baseline release.
 - Git tags use the `vX.Y.Z` format with no component prefix. The `0.0.1` and `0.0.2` tags predate this and stay unprefixed.

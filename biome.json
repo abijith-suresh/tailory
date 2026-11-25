@@ -3,7 +3,7 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "maxSize": 2097152,
-    "includes": ["**/*", "!public/pdf.worker.min.mjs", "!CHANGELOG.md"]
+    "includes": ["**/*", "!apps/site/public/pdf.worker.min.mjs", "!CHANGELOG.md"]
   },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "css": { "parser": { "tailwindDirectives": true } },
@@ -50,7 +50,7 @@
       "assist": { "actions": { "source": { "organizeImports": "off" } } }
     },
     {
-      "includes": ["scripts/**"],
+      "includes": ["apps/*/scripts/**"],
       "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
     }
   ]
