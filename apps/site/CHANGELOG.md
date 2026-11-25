@@ -1,6 +1,10 @@
-# Changelog
+# @tailory/site
 
-## [0.0.2](https://github.com/abijith-suresh/tailory/compare/0.0.1...0.0.2) (2026-09-28)
+Releases up to 0.0.2 were cut by Release Please from the repository root, tagged `0.0.1` and `0.0.2`.
+
+## 0.0.2 (2026-09-28)
+
+[Compare with 0.0.1](https://github.com/abijith-suresh/tailory/compare/0.0.1...0.0.2)
 
 
 ### Bug Fixes

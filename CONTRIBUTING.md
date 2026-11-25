@@ -57,33 +57,19 @@ npm run assets:pdf-worker
 
 ## Releases
 
-Tailory uses Release Please for version bumps, changelog entries, Git tags, and GitHub Releases.
+Changesets versions the workspace packages: `tailory` (`apps/app`), `@tailory/site` (`apps/site`),
+and `@tailory/core` (`packages/core`). All three are private, and nothing is published to npm yet.
 
-These files and conventions stay aligned:
+When a pull request changes what a package ships, add a Changeset:
 
-- The root `package.json` contains the current package version.
-- `.release-please-manifest.json` contains Release Please's tracked version.
-- `CHANGELOG.md` contains generated release history after the first baseline release.
-- Git tags use the `vX.Y.Z` format with no component prefix. The `0.0.1` and `0.0.2` tags predate this and stay unprefixed.
-- GitHub Releases use the matching tag.
+```sh
+npx changeset
+```
 
-The normal release flow is:
+Pick each package you changed, leave the bump at patch, write one line for the changelog, and
+commit the file it creates under `.changeset/`. CI's `changeset` job fails without one; tests,
+READMEs, and pull requests titled `docs`, `ci`, `chore`, `style`, or `test` are exempt.
 
-1. Merge conventional-commit pull requests into `main`.
-2. The Release Please workflow runs on every push to `main`.
-3. Release Please opens or updates a release pull request when it finds user-facing commits since the last release.
-4. Review and merge the generated release pull request.
-5. Release Please creates the matching tag and GitHub Release on the next workflow run.
-
-Do not hand-edit package versions for normal releases or curate generated changelog entries. Keep the workflow pointed at `release-please-config.json` and `.release-please-manifest.json`. The workflow uses the `RELEASE_PLEASE_TOKEN` secret.
-
-The initial reset uses `0.0.1` as the package version and `0.0.0` as the temporary manifest version. Release Please creates the first `0.0.1` release pull request. After that release, the package, manifest, changelog, tag, and GitHub Release should agree.
-
-If release history needs repair:
-
-1. Decide the correct release baseline and tag.
-2. Update `package.json`.
-3. Update `.release-please-manifest.json`.
-4. Keep the Release Please `initial-version` and `bootstrap-sha` options unset; the release automation test asserts they stay undefined.
-5. Repair `CHANGELOG.md` compare links if a changelog already exists.
-6. Confirm that the latest real tag matches the version source of truth before re-enabling automation.
+The Release workflow collects merged Changesets into a "chore: version packages" pull request
+that bumps the versions and updates each package's `CHANGELOG.md`. Merging it records the
+release. Tags and GitHub Releases wait until publishing is enabled. Do not hand-edit versions.
