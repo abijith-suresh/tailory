@@ -11,21 +11,21 @@ keep **SSR on**.
 
 ## Versions tested (2026-11-25)
 
-| Package | Version |
-| --- | --- |
-| node / npm | 24.19.0 / 12.2.0 (image: node:24-slim → 24.22.3) |
-| solid-js, @solidjs/web | 2.0.4 |
-| @solidjs/router | 2.0.1 |
-| @solidjs/meta | 2.0.0 |
-| @solidjs/vite-plugin | 3.0.1 (vite 8.3.8) |
-| better-auth, @better-auth/{mcp,cimd,drizzle-adapter}, `auth` CLI | 1.7.28 |
-| @modelcontextprotocol/server, /client | 2.4.0 (+ legacy @modelcontextprotocol/sdk 1.32.2 client) |
-| drizzle-orm / drizzle-kit | 0.45.4 / 0.31.11 |
-| @electric-sql/pglite | 0.6.0 (reports **PostgreSQL 19.0**) |
-| postgres (postgres-js) | 4.1.1, server postgres:17-alpine (17.11) via podman |
-| pdfmake | 0.3.15 |
-| zod | 4.6.7 |
-| podman / podman-compose | 4.9.3 / 1.0.6 (no Docker on this machine) |
+| Package                                                          | Version                                                  |
+| ---------------------------------------------------------------- | -------------------------------------------------------- |
+| node / npm                                                       | 24.19.0 / 12.2.0 (image: node:24-slim → 24.22.3)         |
+| solid-js, @solidjs/web                                           | 2.0.4                                                    |
+| @solidjs/router                                                  | 2.0.1                                                    |
+| @solidjs/meta                                                    | 2.0.0                                                    |
+| @solidjs/vite-plugin                                             | 3.0.1 (vite 8.3.8)                                       |
+| better-auth, @better-auth/{mcp,cimd,drizzle-adapter}, `auth` CLI | 1.7.28                                                   |
+| @modelcontextprotocol/server, /client                            | 2.4.0 (+ legacy @modelcontextprotocol/sdk 1.32.2 client) |
+| drizzle-orm / drizzle-kit                                        | 0.45.4 / 0.31.11                                         |
+| @electric-sql/pglite                                             | 0.6.0 (reports **PostgreSQL 19.0**)                      |
+| postgres (postgres-js)                                           | 4.1.1, server postgres:17-alpine (17.11) via podman      |
+| pdfmake                                                          | 0.3.15                                                   |
+| zod                                                              | 4.6.7                                                    |
+| podman / podman-compose                                          | 4.9.3 / 1.0.6 (no Docker on this machine)                |
 
 ## Results
 
@@ -40,7 +40,7 @@ keep **SSR on**.
 - **SSR on is the better choice.** With SSR on, middleware sees every page request and
   can 302 to `/sign-in` before rendering. With SSR off, the generated Node
   server answers any `Accept: text/html` GET with `dist/client/index.html`
-  *before* middleware runs (`node-runtime.js`, `spa &&` branch), so
+  _before_ middleware runs (`node-runtime.js`, `spa &&` branch), so
   server-side page gating is impossible and the user sees a flash of the app.
 - Gotchas:
   - Docs say middleware is `(request, next)`. v3.0.1 calls it as
@@ -124,14 +124,14 @@ keep **SSR on**.
 
 ### 5. Packaging: works, ship the bundled variant
 
-| | deps external (`npm pack`) | **bundled** (`npm run pack:bundled`) |
-| --- | --- | --- |
-| tarball / unpacked | 203 kB / 447 kB | 1.1 MB / 4.2 MB |
-| runtime deps | 14 | 2 (`@electric-sql/pglite`, `pdfmake`) |
-| installed node_modules | 109 MB | 54 MB |
-| cold `npx` (empty cache, empty dir) → healthy | 20.8 s | 7.5 s |
-| first boot (incl. PGlite initdb + migrate ≈1.3 s) | 2.0 s | 1.4 s |
-| warm `npx` / direct `node bin` | n/a | 1.2 s / 0.4 s |
+|                                                   | deps external (`npm pack`) | **bundled** (`npm run pack:bundled`)  |
+| ------------------------------------------------- | -------------------------- | ------------------------------------- |
+| tarball / unpacked                                | 203 kB / 447 kB            | 1.1 MB / 4.2 MB                       |
+| runtime deps                                      | 14                         | 2 (`@electric-sql/pglite`, `pdfmake`) |
+| installed node_modules                            | 109 MB                     | 54 MB                                 |
+| cold `npx` (empty cache, empty dir) → healthy     | 20.8 s                     | 7.5 s                                 |
+| first boot (incl. PGlite initdb + migrate ≈1.3 s) | 2.0 s                      | 1.4 s                                 |
+| warm `npx` / direct `node bin`                    | n/a                        | 1.2 s / 0.4 s                         |
 
 - PGlite's WASM ships correctly: `pglite.wasm` 9.5 MB, `pglite.data` 6.3 MB,
   and `initdb.wasm` load from `node_modules/@electric-sql/pglite/dist`. PGlite
