@@ -27,6 +27,69 @@ jobs:
 
   # Repository-local jobs go here; add each one to the gate's needs.
 
+  # A PR that changes a versioned package needs a patch Changeset naming it. The script exempts
+  # docs, ci, chore, style, and test titles. A retitled PR keeps its last result until this job is
+  # re-run.
+  changeset:
+    name: changeset
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the complete pull request history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Read the Node version from mise.toml
+        id: node
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^node[[:space:]]*=[[:space:]]*"\([0-9.]*\)".*/\1/p' mise.toml)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "mise.toml must pin node as major.minor.patch" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install exact npm from package metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_manager="$(node --print "require('./package.json').packageManager ?? ''")"
+          if [[ ! "$package_manager" =~ ^npm@[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json must declare an exact npm packageManager as npm@major.minor.patch" >&2
+            exit 1
+          fi
+          npm install --global "$package_manager"
+
+      - name: Install the Changesets parser without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      # The gate counts a skipped job as a failure, so the version packages PR skips this step
+      # instead of the whole job.
+      - name: Require a Changeset for changed packages
+        if: >-
+          !(
+            github.event.pull_request.head.repo.full_name == github.repository &&
+            github.event.pull_request.head.ref == 'changeset-release/main'
+          )
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: npm run changeset:check
+
   # The server app's migrations against a real Postgres. The ci job's unit tests skip this file.
   app-postgres:
     name: app-postgres
@@ -232,7 +295,7 @@ jobs:
   gate:
     name: gate
     if: ${{ !cancelled() }}
-    needs: [ci, dependency-review, e2e, app-postgres, app-package]
+    needs: [ci, dependency-review, changeset, e2e, app-postgres, app-package]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
