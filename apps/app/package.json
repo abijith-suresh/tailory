@@ -1,0 +1,50 @@
+{
+  "name": "tailory",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "tailory": "bin/tailory.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "drizzle"
+  ],
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node bin/tailory.mjs",
+    "type-check": "tsc --project tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:smoke": "node scripts/smoke.mjs",
+    "pack:tarball": "node scripts/pack.mjs",
+    "prepack": "npm run build",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.6.0"
+  },
+  "devDependencies": {
+    "@solidjs/meta": "^2.0.0",
+    "@solidjs/router": "^2.0.1",
+    "@solidjs/vite-plugin": "^3.0.1",
+    "@solidjs/web": "^2.0.4",
+    "@types/node": "^24.19.4",
+    "@vitest/coverage-v8": "5.1.1",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
+    "postgres": "^4.1.1",
+    "solid-js": "^2.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
+    "zod": "^4.6.7"
+  }
+}

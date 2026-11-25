@@ -1,0 +1,31 @@
+# Tailory with Postgres. Build the tarball first: npm run pack:tarball --workspace tailory
+# Server mode has no sign-in yet, so the app port is published on this computer only.
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:4413:4413"
+    environment:
+      DATABASE_URL: postgres://tailory:${POSTGRES_PASSWORD:-tailory}@db:5432/tailory
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: docker.io/library/postgres:17-alpine@sha256:f9cf3e1f0066f0eb0c48707d864f0ac5941e9ff454a072077d97a4d278d07d73
+    environment:
+      POSTGRES_USER: tailory
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tailory}
+      POSTGRES_DB: tailory
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tailory -d tailory"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  pgdata:

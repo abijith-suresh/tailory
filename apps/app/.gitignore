@@ -1,0 +1,4 @@
+.pack/
+.data/
+# Some global gitignores drop *.sql; the migrations must be committed and shipped.
+!drizzle/*.sql

@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace @tailory/site --",
-    "build": "npm run build --workspace @tailory/site",
+    "dev:app": "npm run dev --workspace tailory --",
+    "build": "npm run build --workspaces --if-present",
     "preview": "npm run preview --workspace @tailory/site --",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "biome lint .",
