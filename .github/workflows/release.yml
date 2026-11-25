@@ -68,4 +68,5 @@ jobs:
           version-script: npm run version-packages
           commit-message: "chore: version packages"
           pr-title: "chore: version packages"
-          github-token: ${{ secrets.RELEASE_TOKEN }}
+          # Falls back to the token Release Please used until RELEASE_TOKEN is added.
+          github-token: ${{ secrets.RELEASE_TOKEN || secrets.RELEASE_PLEASE_TOKEN }}
