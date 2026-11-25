@@ -1,8 +1,8 @@
 version: 2
 
 updates:
-  # npm projects: set package-ecosystem to "npm".
-  - package-ecosystem: "bun"
+  # The root package-lock.json covers every npm workspace (apps/*, packages/*).
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"

@@ -15,7 +15,9 @@ jobs:
     name: CI
     permissions:
       contents: read
-    uses: abijith-suresh/workflows/.github/workflows/ci.yml@c299f85c6c0c73fff9b2a1e420484f5bdb482ff1 # v0.9.0
+    # npm ci, then npm run verify: type-check, lint, format check, unit tests
+    # with coverage, and build.
+    uses: abijith-suresh/workflows/.github/workflows/npm-quality.yml@c299f85c6c0c73fff9b2a1e420484f5bdb482ff1 # v0.9.0
 
   dependency-review:
     name: dependency-review
@@ -25,10 +27,76 @@ jobs:
 
   # Repository-local jobs go here; add each one to the gate's needs.
 
+  e2e:
+    name: e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read the Node version from mise.toml
+        id: node
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^node[[:space:]]*=[[:space:]]*"\([0-9.]*\)".*/\1/p' mise.toml)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "mise.toml must pin node as major.minor.patch" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install exact npm from package metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_manager="$(node --print "require('./package.json').packageManager ?? ''")"
+          if [[ ! "$package_manager" =~ ^npm@[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json must declare an exact npm packageManager as npm@major.minor.patch" >&2
+            exit 1
+          fi
+          npm install --global "$package_manager"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Build
+        run: npm run build
+
+      - name: Run browser tests
+        # test:e2e serves the build from the previous step.
+        run: npm run test:e2e
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-test-results
+          path: |
+            apps/site/test-results/
+            apps/site/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
   gate:
     name: gate
     if: ${{ !cancelled() }}
-    needs: [ci, dependency-review]
+    needs: [ci, dependency-review, e2e]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}

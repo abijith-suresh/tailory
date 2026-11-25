@@ -24,7 +24,7 @@
         },
         "typescript.preferences.importModuleSpecifier": "non-relative",
         "path-intellisense.mappings": {
-          "@": "${workspaceFolder}/src"
+          "@": "${workspaceFolder}/apps/site/src"
         }
       }
     }
@@ -36,6 +36,6 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "bun install",
+  "postCreateCommand": "npm ci",
   "remoteUser": "nodeuser"
 }

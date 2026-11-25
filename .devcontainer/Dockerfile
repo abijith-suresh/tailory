@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Bun
-RUN curl -fsSL https://bun.sh/install | bash
-
 # Install GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
     && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -26,10 +23,6 @@ RUN useradd -m -s /bin/bash nodeuser \
 
 USER nodeuser
 WORKDIR /workspace
-
-# Add Bun to PATH
-ENV BUN_INSTALL="/home/nodeuser/.bun"
-ENV PATH="$BUN_INSTALL/bin:$PATH"
 
 # Expose port for Astro dev server
 EXPOSE 4321

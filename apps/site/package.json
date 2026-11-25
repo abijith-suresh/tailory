@@ -1,0 +1,43 @@
+{
+  "name": "@tailory/site",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "assets:pdf-worker": "node scripts/sync-pdf-worker.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.4.13",
+    "idb": "^8.0.4",
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "^6.5.438",
+    "pdfmake": "^0.3.14",
+    "solid-js": "^1.9.18",
+    "solid-transition-group": "^0.3.0",
+    "tailwindcss": "^4.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/solid-js": "^7.1.6",
+    "@playwright/test": "^1.65.1",
+    "@solidjs/testing-library": "^0.8.10",
+    "@tailwindcss/vite": "^4.3.5",
+    "@testing-library/jest-dom": "^8.0.0",
+    "@types/pdfmake": "^0.3.3",
+    "@vitest/coverage-v8": "5.1.1",
+    "@vitest/ui": "^5.1.1",
+    "jsdom": "^31.0.1",
+    "typescript": "^7.0.2",
+    "vite-plugin-solid": "^2.11.17",
+    "vitest": "^5.1.1"
+  }
+}

@@ -3,9 +3,11 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { repoRoot } from "@/test/paths";
+
 describe("release automation source of truth", () => {
   it("keeps release metadata aligned across package, manifest, and workflow", () => {
-    const root = process.cwd();
+    const root = repoRoot;
     const packageJson = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")) as {
       version: string;
       packageManager?: string;
@@ -33,15 +35,18 @@ describe("release automation source of truth", () => {
     expect(existsSync(path.join(root, "mise.toml"))).toBe(true);
     expect(existsSync(path.join(root, ".bun-version"))).toBe(false);
     expect(existsSync(path.join(root, ".node-version"))).toBe(false);
-    expect(packageJson.packageManager).toBe("bun@1.4.1");
+    expect(existsSync(path.join(root, "bun.lock"))).toBe(false);
+    expect(existsSync(path.join(root, "package-lock.json"))).toBe(true);
+    expect(packageJson.packageManager).toBe("npm@11.16.0");
 
     const mise = readFileSync(path.join(root, "mise.toml"), "utf8");
-    expect(mise).toContain('bun = "1.4.1"');
+    expect(mise).not.toContain("bun");
     expect(mise).toContain('node = "24.20.0"');
+    expect(mise).toContain('npm = "11.16.0"');
   });
 
   it("documents the maintainer release flow in-repo", () => {
-    const docPath = path.join(process.cwd(), "CONTRIBUTING.md");
+    const docPath = path.join(repoRoot, "CONTRIBUTING.md");
 
     expect(existsSync(docPath)).toBe(true);
 

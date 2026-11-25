@@ -4,10 +4,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import EditorLayout from "@/components/editor/EditorLayout";
 import {
   setDraftStorageError,
-  setOtherTabActive,
   setExportError,
   setImportError,
   setImportFeedback,
+  setOtherTabActive,
 } from "@/store/resume";
 
 afterEach(() => {

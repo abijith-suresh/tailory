@@ -26,7 +26,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `bun run preview --host 127.0.0.1 --port ${port}`,
+    command: `npm run preview -- --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     // Astro 7 auto-backgrounds `astro preview` in agentic shells, which makes
     // Playwright treat the server process as exited; keep it in the foreground.
