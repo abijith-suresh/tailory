@@ -1,8 +1,7 @@
+import { exportJsonResumeString } from "@tailory/core";
 import { type Component, createSignal, For, Show } from "solid-js";
-
 import { downloadBlob, sanitizeFilenameBase } from "@/lib/export/download";
 import { exportPDF } from "@/lib/export/pdf-export";
-import { exportJsonResumeString } from "@/lib/resume/json";
 import {
   getCompletedSectionsCount,
   isSectionComplete,

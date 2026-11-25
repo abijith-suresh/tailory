@@ -1,4 +1,4 @@
-import { formatDateRange, joinDefined } from "@/lib/export/template-helpers";
+import { formatDateRange, joinDefined } from "../export/template-helpers.ts";
 import type {
   ResumeAward,
   ResumeCertificate,
@@ -8,9 +8,9 @@ import type {
   ResumeReference,
   ResumeVolunteer,
   ResumeWork,
-} from "@/types/resume";
+} from "../types/resume.ts";
 
-import type { ResumeEntryModel, ResumeSectionModel } from "./render-model";
+import type { ResumeEntryModel, ResumeSectionModel } from "./render-model.ts";
 
 type SectionId = ResumeSectionModel["id"];
 

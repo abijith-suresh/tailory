@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@solidjs/testing-library";
+import { EMPTY_RESUME, type ResumeSchema } from "@tailory/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import DraftManager from "@/components/editor/DraftManager";
 import type { ResumeDraft } from "@/lib/storage/db";
 import {
@@ -11,7 +11,6 @@ import {
   setDraftStorageError,
   setResume,
 } from "@/store/resume";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 const db = vi.hoisted(() => ({
   available: true,

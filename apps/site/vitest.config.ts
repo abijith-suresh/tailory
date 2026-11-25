@@ -19,11 +19,13 @@ export default defineConfig({
       reporter: ["text", "json-summary"],
       reportsDirectory: "./coverage",
       exclude: ["src/test/**", "**/*.d.ts", "**/*.test.*", "**/*.spec.*"],
+      // The resume logic and its tests moved to packages/core, which gates them with higher
+      // thresholds. These floors cover the editor UI, storage, and import code left here.
       thresholds: {
-        branches: 55,
+        branches: 52,
         functions: 50,
-        lines: 70,
-        statements: 65,
+        lines: 68,
+        statements: 63,
       },
     },
   },

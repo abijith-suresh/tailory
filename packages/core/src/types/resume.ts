@@ -1,7 +1,7 @@
 // JSON Resume schema — https://jsonresume.org/schema/
 // Extended with additional fields for Tailory
 
-export type { TemplateId } from "@/types/template";
+export type { TemplateId } from "./template.ts";
 
 export interface ResumeLocation {
   address?: string;

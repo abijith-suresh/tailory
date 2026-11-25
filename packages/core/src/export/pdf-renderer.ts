@@ -1,17 +1,18 @@
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
-
-import { PDF_FONT_FAMILY } from "@/lib/export/fonts";
+import type {
+  ResumeEntryModel,
+  ResumeRenderModel,
+  ResumeSectionModel,
+} from "../templates/render-model.ts";
 import {
   renderBulletLines,
   renderDivider,
   renderEntryHeader,
   spacing,
-} from "@/lib/export/template-helpers";
-import type {
-  ResumeEntryModel,
-  ResumeRenderModel,
-  ResumeSectionModel,
-} from "@/lib/templates/render-model";
+} from "./template-helpers.ts";
+
+/** The font family every template renders with; the browser registers its files before export. */
+export const PDF_FONT_FAMILY = "Roboto";
 
 function renderEntryBody(
   entry: ResumeEntryModel,

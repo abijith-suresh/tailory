@@ -1,8 +1,7 @@
+import { EMPTY_RESUME, type ResumeSchema } from "@tailory/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { replaceResume } from "@/components/editor/replace-resume";
 import { loadResume, resume } from "@/store/resume";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 const keepCopyBeforeReplacing = vi.hoisted(() => vi.fn());
 

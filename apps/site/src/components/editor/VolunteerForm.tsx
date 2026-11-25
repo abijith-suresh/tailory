@@ -1,13 +1,12 @@
+import type { ResumeVolunteer } from "@tailory/core";
 import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
-
 import FormField from "@/components/ui/FormField";
 import HighlightList from "@/components/ui/HighlightList";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
 import { resume, setResume } from "@/store/resume";
-import type { ResumeVolunteer } from "@/types/resume";
 
 function newVolunteer(): ResumeVolunteer {
   return {

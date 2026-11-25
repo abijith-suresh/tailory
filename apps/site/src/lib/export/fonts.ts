@@ -1,4 +1,4 @@
-export const PDF_FONT_FAMILY = "Roboto";
+import { PDF_FONT_FAMILY } from "@tailory/core";
 
 export interface PdfMakeFontRuntime {
   addFonts?: (fonts: Record<string, object>) => void;

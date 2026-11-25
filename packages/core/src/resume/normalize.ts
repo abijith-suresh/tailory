@@ -15,7 +15,7 @@ import {
   type ResumeSkill,
   type ResumeVolunteer,
   type ResumeWork,
-} from "@/types/resume";
+} from "../types/resume.ts";
 
 const MONTH_ABBREVIATIONS: Record<string, string> = {
   jan: "Jan",

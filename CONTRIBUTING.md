@@ -6,6 +6,9 @@ Tailory is a browser-only resume editor. Keep resume data in the browser, keep t
 
 Tailory is an npm workspace on Node 24; `mise.toml` pins the Node and npm versions. The app lives
 in `apps/site` (`@tailory/site`); run commands from the repository root, which delegates to it.
+The resume logic the app shares lives in `packages/core` (`@tailory/core`): types, JSON Resume
+import and export, normalization, the text parser, and the template render models. Workspaces
+import its TypeScript source directly; it has no build step.
 
 ```sh
 npm ci
@@ -39,8 +42,11 @@ npm run assets:pdf-worker
 - Use SolidJS for interactive UI. Do not introduce React or Vue.
 - Keep `pdfmake` dynamically imported in browser runtime code; a module-scope import breaks the
   client-only build.
-- Preview and PDF export share render models under `apps/site/src/lib/templates/`; template edits affect both
-  paths.
+- Preview and PDF export share render models under `packages/core/src/templates/`; template edits
+  affect both paths.
+- Keep `packages/core` free of I/O: no filesystem, network, DOM, IndexedDB, or storage access, and
+  no Solid or Astro imports. Its type-check runs without DOM or Node types to hold that line. File
+  extraction, drafts, and the PDF download stay in `apps/site`.
 - Keep parser, editor, preview, export, and draft behavior aligned. Keep README and public copy
   accurate; never advertise unimplemented features.
 - Add regression coverage when changing import, autosave, parsing, or export behavior.

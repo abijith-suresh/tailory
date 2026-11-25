@@ -1,9 +1,8 @@
+import type { SectionId } from "@tailory/core";
 import { type Component, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
-
 import { getSectionDefinition, SECTION_DEFINITIONS, TOTAL_SECTIONS } from "@/lib/sections/registry";
 import { activeSection, setActiveSection } from "@/store/resume";
-import type { SectionId } from "@/types/resume";
 import AwardsForm from "./AwardsForm";
 import BasicsForm from "./BasicsForm";
 import CertificatesForm from "./CertificatesForm";

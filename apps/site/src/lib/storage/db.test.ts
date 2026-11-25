@@ -1,5 +1,5 @@
+import type { ResumeSchema } from "@tailory/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ResumeSchema } from "@/types/resume";
 
 interface DraftRecord {
   id: string;

@@ -1,4 +1,4 @@
-import type { ParseResult } from "@/lib/parser/resume-parser";
+import type { ParseResult } from "@tailory/core/parser";
 
 export interface ProcessFileSuccess {
   success: true;
@@ -31,7 +31,7 @@ export async function processUploadedFile(
       rawText = await extractTextFromDOCX(file);
     }
 
-    const { parseResume } = await import("@/lib/parser/resume-parser");
+    const { parseResume } = await import("@tailory/core/parser");
     const result = await parseResume(rawText);
     return { success: true, result };
   } catch (err) {

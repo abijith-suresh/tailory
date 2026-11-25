@@ -1,12 +1,15 @@
+import {
+  DEFAULT_RESUME_ACCENT_COLOR,
+  DEFAULT_TEMPLATE_ID,
+  EMPTY_RESUME,
+  normalizeResume,
+  type ResumeSchema,
+  type SectionId,
+  type TemplateId,
+} from "@tailory/core";
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
-
-import { DEFAULT_RESUME_ACCENT_COLOR } from "@/lib/resume/design";
-import { normalizeResume } from "@/lib/resume/normalize";
 import type { ImportFeedback } from "@/lib/upload/import-resume";
-import type { ResumeSchema, SectionId } from "@/types/resume";
-import { EMPTY_RESUME } from "@/types/resume";
-import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/types/template";
 
 // Deep clone to avoid sharing the same reference
 const defaultResume: ResumeSchema = JSON.parse(JSON.stringify(EMPTY_RESUME));

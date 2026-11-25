@@ -1,11 +1,10 @@
+import type { ResumeReference } from "@tailory/core";
 import type { Component } from "solid-js";
-
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import Textarea from "@/components/ui/Textarea";
 import { resume, setResume } from "@/store/resume";
-import type { ResumeReference } from "@/types/resume";
 
 function newReference(): ResumeReference {
   return {

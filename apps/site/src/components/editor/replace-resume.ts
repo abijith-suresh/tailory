@@ -1,6 +1,6 @@
+import type { ResumeSchema } from "@tailory/core";
 import { keepCopyBeforeReplacing, type ReplaceReason } from "@/lib/storage/drafts";
 import { loadResume, resume } from "@/store/resume";
-import type { ResumeSchema } from "@/types/resume";
 
 /**
  * Replaces the resume in the editor after keeping a copy of the current one as a draft.

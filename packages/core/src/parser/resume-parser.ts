@@ -14,10 +14,10 @@ import type {
   ResumeSkill,
   ResumeVolunteer,
   ResumeWork,
-} from "@/types/resume";
-import { EMPTY_RESUME } from "@/types/resume";
-import type { SectionType } from "./section-keywords";
-import { SECTION_KEYWORDS } from "./section-keywords";
+} from "../types/resume.ts";
+import { EMPTY_RESUME } from "../types/resume.ts";
+import type { SectionType } from "./section-keywords.ts";
+import { SECTION_KEYWORDS } from "./section-keywords.ts";
 
 export interface ParseResult {
   data: ResumeSchema;

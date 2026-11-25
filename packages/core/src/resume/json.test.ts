@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
+import { EMPTY_RESUME, type ResumeSchema } from "../types/resume.ts";
 
 import {
   exportJsonResumeDocument,
@@ -8,7 +8,7 @@ import {
   parseJsonResumeDocument,
   parseJsonResumeImport,
   parseJsonResumeString,
-} from "./json";
+} from "./json.ts";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>

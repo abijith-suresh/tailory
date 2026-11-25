@@ -12,7 +12,7 @@ vi.mock("@/lib/extraction/docx", () => ({
   extractTextFromDOCX,
 }));
 
-vi.mock("@/lib/parser/resume-parser", () => ({
+vi.mock("@tailory/core/parser", () => ({
   parseResume,
 }));
 

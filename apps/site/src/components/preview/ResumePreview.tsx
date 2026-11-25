@@ -1,12 +1,12 @@
-import { type Component, For, Show } from "solid-js";
-import ResumeDocument from "@/components/resume/ResumeDocument";
 import {
   RESUME_PREVIEW_FONT_FAMILY,
   RESUME_PREVIEW_PAGE_MIN_HEIGHT,
   resolveResumeDesignSettings,
-} from "@/lib/resume/design";
+  TEMPLATE_OPTIONS,
+} from "@tailory/core";
+import { type Component, For, Show } from "solid-js";
+import ResumeDocument from "@/components/resume/ResumeDocument";
 import { getCompletedSectionsCount, isResumeEmpty, TOTAL_SECTIONS } from "@/lib/sections/registry";
-import { TEMPLATE_OPTIONS } from "@/lib/templates/registry";
 import { resume, selectedAccentColor, selectedTemplate, setSelectedTemplate } from "@/store/resume";
 
 const CIRCUMFERENCE = 2 * Math.PI * 14;

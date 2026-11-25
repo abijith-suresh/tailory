@@ -1,4 +1,3 @@
-import { normalizeResume } from "@/lib/resume/normalize";
 import type {
   ResumeAward,
   ResumeCertificate,
@@ -12,7 +11,8 @@ import type {
   ResumeSkill,
   ResumeVolunteer,
   ResumeWork,
-} from "@/types/resume";
+} from "../types/resume.ts";
+import { normalizeResume } from "./normalize.ts";
 
 export const JSON_RESUME_SUPPORTED_TOP_LEVEL_FIELDS = [
   "basics",

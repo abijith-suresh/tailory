@@ -1,8 +1,7 @@
+import type { ResumeSkill } from "@tailory/core";
 import { type Component, createSignal, For } from "solid-js";
-
 import { inputClass } from "@/components/ui/Input";
 import { resume, setResume } from "@/store/resume";
-import type { ResumeSkill } from "@/types/resume";
 
 function newSkill(name: string): ResumeSkill {
   return { id: crypto.randomUUID(), name, keywords: [] };
