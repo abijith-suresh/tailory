@@ -4,9 +4,10 @@ import path from "node:path";
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { deleteUser } from "../account";
 import { LockError } from "../lock";
-import { openDatabase, pgliteFolder, schema } from ".";
-import { expectedColumns, publicColumns } from "./testing";
+import { LOCAL_USER, openDatabase, pgliteFolder, schema } from ".";
+import { COLUMNS_SNAPSHOT, columnsText, publicColumns } from "./testing";
 
 let dataDir: string;
 
@@ -30,7 +31,9 @@ describe("openDatabase with PGlite", () => {
     try {
       expect(database.driver).toBe("pglite");
       expect(existsSync(pgliteFolder(dataDir))).toBe(true);
-      expect(await publicColumns(database.db)).toEqual(expectedColumns);
+      await expect(columnsText(await publicColumns(database.db))).toMatchFileSnapshot(
+        COLUMNS_SNAPSHOT
+      );
       expect(await installId(database.db)).toMatch(/^[0-9a-f-]{36}$/);
     } finally {
       await database.close();
@@ -45,9 +48,48 @@ describe("openDatabase with PGlite", () => {
     const second = await openDatabase({ dataDir });
     try {
       expect(await installId(second.db)).toBe(id);
-      expect(await publicColumns(second.db)).toEqual(expectedColumns);
+      await expect(columnsText(await publicColumns(second.db))).toMatchFileSnapshot(
+        COLUMNS_SNAPSHOT
+      );
     } finally {
       await second.close();
+    }
+  });
+
+  it("creates local mode's user, once, and creates it again empty after a delete", async () => {
+    const database = await openDatabase({ dataDir, mode: "local" });
+    try {
+      const users = () => database.db.select().from(schema.user);
+      expect(await users()).toMatchObject([LOCAL_USER]);
+      await database.db.insert(schema.session).values({
+        id: "s1",
+        token: "t1",
+        userId: LOCAL_USER.id,
+        expiresAt: new Date(Date.now() + 60_000),
+        updatedAt: new Date(),
+      });
+
+      await deleteUser(database.db, LOCAL_USER.id);
+
+      expect(await users()).toMatchObject([LOCAL_USER]);
+      expect(await database.db.select().from(schema.session)).toEqual([]);
+    } finally {
+      await database.close();
+    }
+    const reopened = await openDatabase({ dataDir, mode: "local" });
+    try {
+      expect(await reopened.db.select().from(schema.user)).toHaveLength(1);
+    } finally {
+      await reopened.close();
+    }
+  });
+
+  it("creates no user outside local mode", async () => {
+    const database = await openDatabase({ dataDir });
+    try {
+      expect(await database.db.select().from(schema.user)).toEqual([]);
+    } finally {
+      await database.close();
     }
   });
 

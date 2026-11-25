@@ -3,7 +3,7 @@ import postgres from "postgres";
 import { describe, expect, it } from "vitest";
 
 import { openDatabase } from ".";
-import { expectedColumns, publicColumns } from "./testing";
+import { COLUMNS_SNAPSHOT, columnsText, publicColumns } from "./testing";
 
 // Runs against a real Postgres when TAILORY_TEST_DATABASE_URL is set (CI's postgres job does);
 // skipped otherwise. The test drops and recreates the public schema, so point it at a scratch
@@ -24,7 +24,9 @@ describe.skipIf(!url)("openDatabase with Postgres", () => {
     const first = await openDatabase({ dataDir: "/unused", databaseUrl: url });
     try {
       expect(first.driver).toBe("postgres");
-      expect(await publicColumns(first.db)).toEqual(expectedColumns);
+      await expect(columnsText(await publicColumns(first.db))).toMatchFileSnapshot(
+        COLUMNS_SNAPSHOT
+      );
     } finally {
       await first.close();
     }

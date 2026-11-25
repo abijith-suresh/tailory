@@ -1,0 +1,144 @@
+account.id text NO
+account.account_id text NO
+account.provider_id text NO
+account.user_id text NO
+account.access_token text YES
+account.refresh_token text YES
+account.id_token text YES
+account.access_token_expires_at timestamp without time zone YES
+account.refresh_token_expires_at timestamp without time zone YES
+account.scope text YES
+account.password text YES
+account.created_at timestamp without time zone NO
+account.updated_at timestamp without time zone NO
+app_meta.key text NO
+app_meta.value text NO
+app_meta.updated_at timestamp with time zone NO
+jwks.id text NO
+jwks.public_key text NO
+jwks.private_key text NO
+jwks.created_at timestamp without time zone NO
+jwks.expires_at timestamp without time zone YES
+jwks.alg text YES
+jwks.crv text YES
+oauth_access_token.id text NO
+oauth_access_token.token text NO
+oauth_access_token.client_id text NO
+oauth_access_token.session_id text YES
+oauth_access_token.user_id text YES
+oauth_access_token.reference_id text YES
+oauth_access_token.authorization_code_id text YES
+oauth_access_token.resources ARRAY YES
+oauth_access_token.requested_user_info_claims ARRAY YES
+oauth_access_token.refresh_id text YES
+oauth_access_token.expires_at timestamp without time zone NO
+oauth_access_token.created_at timestamp without time zone NO
+oauth_access_token.revoked timestamp without time zone YES
+oauth_access_token.confirmation jsonb YES
+oauth_access_token.scopes ARRAY NO
+oauth_client.id text NO
+oauth_client.client_id text NO
+oauth_client.client_secret text YES
+oauth_client.client_discovery_id text YES
+oauth_client.disabled boolean YES
+oauth_client.skip_consent boolean YES
+oauth_client.enable_end_session boolean YES
+oauth_client.subject_type text YES
+oauth_client.scopes ARRAY YES
+oauth_client.client_credentials_scopes ARRAY YES
+oauth_client.user_id text YES
+oauth_client.created_at timestamp without time zone YES
+oauth_client.updated_at timestamp without time zone YES
+oauth_client.name text YES
+oauth_client.uri text YES
+oauth_client.icon text YES
+oauth_client.contacts ARRAY YES
+oauth_client.tos text YES
+oauth_client.policy text YES
+oauth_client.software_id text YES
+oauth_client.software_version text YES
+oauth_client.software_statement text YES
+oauth_client.redirect_uris ARRAY NO
+oauth_client.post_logout_redirect_uris ARRAY YES
+oauth_client.backchannel_logout_uri text YES
+oauth_client.backchannel_logout_session_required boolean YES
+oauth_client.token_endpoint_auth_method text YES
+oauth_client.application_type text YES
+oauth_client.jwks text YES
+oauth_client.jwks_uri text YES
+oauth_client.grant_types ARRAY YES
+oauth_client.response_types ARRAY YES
+oauth_client.require_pkce boolean YES
+oauth_client.dpop_bound_access_tokens boolean YES
+oauth_client.reference_id text YES
+oauth_client.metadata jsonb YES
+oauth_client_assertion.id text NO
+oauth_client_assertion.expires_at timestamp without time zone NO
+oauth_client_resource.id text NO
+oauth_client_resource.client_id text NO
+oauth_client_resource.resource_id text NO
+oauth_client_resource.metadata jsonb YES
+oauth_client_resource.created_at timestamp without time zone YES
+oauth_consent.id text NO
+oauth_consent.client_id text NO
+oauth_consent.user_id text YES
+oauth_consent.reference_id text YES
+oauth_consent.resources ARRAY YES
+oauth_consent.requested_user_info_claims ARRAY YES
+oauth_consent.scopes ARRAY NO
+oauth_consent.created_at timestamp without time zone NO
+oauth_consent.updated_at timestamp without time zone NO
+oauth_refresh_token.id text NO
+oauth_refresh_token.token text NO
+oauth_refresh_token.client_id text NO
+oauth_refresh_token.session_id text YES
+oauth_refresh_token.user_id text NO
+oauth_refresh_token.reference_id text YES
+oauth_refresh_token.authorization_code_id text YES
+oauth_refresh_token.resources ARRAY YES
+oauth_refresh_token.requested_user_info_claims ARRAY YES
+oauth_refresh_token.expires_at timestamp without time zone NO
+oauth_refresh_token.created_at timestamp without time zone NO
+oauth_refresh_token.revoked timestamp without time zone YES
+oauth_refresh_token.rotated_at timestamp without time zone YES
+oauth_refresh_token.rotation_replay_response text YES
+oauth_refresh_token.rotation_replay_expires_at timestamp without time zone YES
+oauth_refresh_token.auth_time timestamp without time zone YES
+oauth_refresh_token.confirmation jsonb YES
+oauth_refresh_token.scopes ARRAY NO
+oauth_resource.id text NO
+oauth_resource.identifier text NO
+oauth_resource.name text NO
+oauth_resource.access_token_ttl integer YES
+oauth_resource.refresh_token_ttl integer YES
+oauth_resource.signing_algorithm text YES
+oauth_resource.signing_key_id text YES
+oauth_resource.allowed_scopes ARRAY YES
+oauth_resource.custom_claims jsonb YES
+oauth_resource.dpop_bound_access_tokens_required boolean YES
+oauth_resource.disabled boolean YES
+oauth_resource.created_at timestamp without time zone YES
+oauth_resource.updated_at timestamp without time zone YES
+oauth_resource.policy_version integer YES
+oauth_resource.metadata jsonb YES
+session.id text NO
+session.expires_at timestamp without time zone NO
+session.token text NO
+session.created_at timestamp without time zone NO
+session.updated_at timestamp without time zone NO
+session.ip_address text YES
+session.user_agent text YES
+session.user_id text NO
+user.id text NO
+user.name text NO
+user.email text NO
+user.email_verified boolean NO
+user.image text YES
+user.created_at timestamp without time zone NO
+user.updated_at timestamp without time zone NO
+verification.id text NO
+verification.identifier text NO
+verification.value text NO
+verification.expires_at timestamp without time zone NO
+verification.created_at timestamp without time zone NO
+verification.updated_at timestamp without time zone NO

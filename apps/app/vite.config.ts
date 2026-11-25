@@ -33,6 +33,7 @@ export default defineConfig(({ command }) => {
     plugins: [
       solid({
         ssr: true,
+        serverFunctions: true,
         start: {
           nodeServer: true,
           middleware: "./src/middleware.ts",

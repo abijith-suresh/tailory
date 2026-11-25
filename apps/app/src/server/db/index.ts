@@ -23,6 +23,8 @@ export type OpenOptions = {
   /** How long to wait for Postgres to accept connections. */
   connectTimeoutMs?: number;
   log?: (message: string) => void;
+  /** Create local mode's user. */
+  localUser?: boolean;
 };
 
 /** Where PGlite keeps its files inside the data dir. */
@@ -42,11 +44,27 @@ const findMigrations = (): string => {
   );
 };
 
-const seed = async (db: Db) => {
+/** Local mode's one user. Every request in local mode acts as this user. */
+export const LOCAL_USER = {
+  id: "local",
+  name: "You",
+  email: "local@tailory.invalid",
+} as const;
+
+/** Creates the local user if it doesn't exist yet. */
+export const ensureLocalUser = async (db: Db) => {
+  await db
+    .insert(schema.user)
+    .values({ ...LOCAL_USER, emailVerified: true })
+    .onConflictDoNothing();
+};
+
+const seed = async (db: Db, options: OpenOptions) => {
   await db
     .insert(schema.appMeta)
     .values({ key: "install_id", value: randomUUID() })
     .onConflictDoNothing();
+  if (options.localUser) await ensureLocalUser(db);
 };
 
 const openPostgres = async (url: string, migrationsFolder: string, options: OpenOptions) => {
@@ -62,7 +80,7 @@ const openPostgres = async (url: string, migrationsFolder: string, options: Open
       onRetry: (_error, attempt) =>
         options.log?.(`Waiting for Postgres to accept connections (attempt ${attempt})`),
     });
-    await seed(db);
+    await seed(db, options);
   } catch (error) {
     await client.end({ timeout: 5 });
     throw error;
@@ -74,7 +92,7 @@ const openPostgres = async (url: string, migrationsFolder: string, options: Open
   };
 };
 
-const openPglite = async (dataDir: string, migrationsFolder: string) => {
+const openPglite = async (dataDir: string, migrationsFolder: string, options: OpenOptions) => {
   const folder = pgliteFolder(dataDir);
   mkdirSync(folder, { recursive: true });
   const lock = acquireLock(path.join(dataDir, "tailory.lock"), folder);
@@ -86,7 +104,7 @@ const openPglite = async (dataDir: string, migrationsFolder: string) => {
     const db = drizzle(client, { schema });
     try {
       await migrate(db, { migrationsFolder });
-      await seed(db);
+      await seed(db, options);
     } catch (error) {
       await client.close();
       throw error;
@@ -110,16 +128,18 @@ const openPglite = async (dataDir: string, migrationsFolder: string) => {
 
 /**
  * Opens the database the config names, Postgres for a `databaseUrl` and PGlite under the data
- * dir otherwise, and applies pending migrations before returning.
+ * dir otherwise, and applies pending migrations before returning. In local mode it also creates
+ * the local user.
  */
 export const openDatabase = async (
-  config: Pick<Config, "dataDir" | "databaseUrl">,
+  config: Pick<Config, "dataDir" | "databaseUrl"> & { mode?: Config["mode"] },
   options: OpenOptions = {}
 ): Promise<Database> => {
   const migrationsFolder = options.migrationsFolder ?? findMigrations();
+  const opts = { ...options, localUser: options.localUser ?? config.mode === "local" };
   return config.databaseUrl
-    ? openPostgres(config.databaseUrl, migrationsFolder, options)
-    : openPglite(config.dataDir, migrationsFolder);
+    ? openPostgres(config.databaseUrl, migrationsFolder, opts)
+    : openPglite(config.dataDir, migrationsFolder, opts);
 };
 
 export { schema };

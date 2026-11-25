@@ -1,5 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 
+import { CLIENT_IP_HEADER, clientIp } from "./server/client-ip";
 import { type Config, ConfigError, parseCommand, USAGE } from "./server/config";
 import { type Database, openDatabase, pgliteFolder } from "./server/db";
 import { isNotReadyError } from "./server/db/retry";
@@ -20,7 +21,7 @@ const displayUrl = (config: Config, port: number) => {
     const host = config.host.includes(":") ? `[${config.host}]` : config.host;
     return `http://${host}:${port}`;
   }
-  return `http://localhost:${port}`;
+  return config.auth?.publicUrl ?? `http://localhost:${port}`;
 };
 
 const listen = (config: Config, listener: NodeListener) =>
@@ -39,6 +40,14 @@ const listen = (config: Config, listener: NodeListener) =>
           return;
         }
       }
+      // Better Auth reads the client IP from this header. Whatever the client sent is replaced.
+      const ip = clientIp({
+        socketAddress: req.socket.remoteAddress,
+        forwardedFor: req.headers["x-forwarded-for"],
+        trustProxy: config.trustProxy,
+      });
+      if (ip) req.headers[CLIENT_IP_HEADER] = ip;
+      else delete req.headers[CLIENT_IP_HEADER];
       void listener(req, res);
     });
     server.once("error", reject);

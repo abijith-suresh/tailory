@@ -26,18 +26,27 @@
     "test:smoke": "node scripts/smoke.mjs",
     "pack:tarball": "node scripts/pack.mjs",
     "prepack": "npm run build",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "auth:generate": "npx --yes auth@1.7.28 generate --config auth-cli.config.ts --output src/server/db/auth-schema.ts --yes && biome format --write src/server/db/auth-schema.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.6.0"
   },
   "devDependencies": {
+    "@better-auth/cimd": "^1.7.28",
+    "@better-auth/drizzle-adapter": "^1.7.28",
+    "@better-auth/mcp": "^1.7.28",
+    "@better-auth/oauth-provider": "^1.7.28",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@modelcontextprotocol/server": "^2.4.0",
     "@solidjs/meta": "^2.0.0",
     "@solidjs/router": "^2.0.1",
     "@solidjs/vite-plugin": "^3.0.1",
     "@solidjs/web": "^2.0.4",
     "@types/node": "^24.19.4",
     "@vitest/coverage-v8": "5.1.1",
+    "better-auth": "^1.7.28",
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.4",
     "postgres": "^4.1.1",

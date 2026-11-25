@@ -36,6 +36,9 @@ describe("loopback middleware", () => {
 
   it("doesn't check hosts in server mode", async () => {
     vi.stubEnv("TAILORY_MODE", "server");
+    vi.stubEnv("TAILORY_AUTH_SECRET", "s".repeat(32));
+    vi.stubEnv("TAILORY_PUBLIC_URL", "https://tailory.example");
+    vi.stubEnv("TAILORY_AUTH_EMAIL_PASSWORD", "true");
     const { response } = run("http://tailory.example/", { host: "tailory.example" });
     expect((await response).status).toBe(200);
   });
