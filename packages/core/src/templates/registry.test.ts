@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { createTemplateFixture } from "@/lib/templates/template-fixtures";
-import { TEMPLATE_IDS } from "@/types/template";
-import { loadPdfTemplateRenderer, TEMPLATE_OPTIONS, TEMPLATE_REGISTRY } from "./registry";
+import { resolveResumeDesignSettings } from "../resume/design.ts";
+import { TEMPLATE_IDS } from "../types/template.ts";
+import { loadPdfTemplateRenderer, TEMPLATE_OPTIONS, TEMPLATE_REGISTRY } from "./registry.ts";
+import { createTemplateFixture } from "./template-fixtures.ts";
 
 describe("template registry", () => {
   it("keeps template option order aligned with supported ids", () => {

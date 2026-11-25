@@ -1,7 +1,6 @@
-import { parseJsonResumeImport } from "@/lib/resume/json";
+import { parseJsonResumeImport, type ResumeSchema } from "@tailory/core";
 import { type SupportedUploadExtension, validateUploadFileContent } from "@/lib/upload/guardrails";
 import { processUploadedFile } from "@/lib/upload/process-file";
-import type { ResumeSchema } from "@/types/resume";
 
 /** What a PDF or DOCX import found, with a confidence score for the parse. */
 export interface ParsedImportFeedback {

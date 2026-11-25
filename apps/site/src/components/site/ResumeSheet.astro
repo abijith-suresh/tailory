@@ -3,14 +3,14 @@
 // The sheet keeps the preview's 680px page width and is scaled down with --sheet-scale.
 import ResumeDocument from "@/components/resume/ResumeDocument";
 import {
+  createSampleResume,
+  resolveResumeDesignSettings,
   RESUME_PREVIEW_FONT_FAMILY,
   RESUME_PREVIEW_PAGE_MIN_HEIGHT,
-  resolveResumeDesignSettings,
-} from "@/lib/resume/design";
-import { TEMPLATE_REGISTRY } from "@/lib/templates/registry";
-import { createSampleResume } from "@/lib/templates/sample-resume";
-import type { ResumeSchema } from "@/types/resume";
-import type { TemplateId } from "@/types/template";
+  type ResumeSchema,
+  TEMPLATE_REGISTRY,
+  type TemplateId,
+} from "@tailory/core";
 
 const PAGE_WIDTH = 680;
 

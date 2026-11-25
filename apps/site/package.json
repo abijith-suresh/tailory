@@ -17,6 +17,7 @@
     "assets:pdf-worker": "node scripts/sync-pdf-worker.mjs"
   },
   "dependencies": {
+    "@tailory/core": "*",
     "astro": "^7.4.13",
     "idb": "^8.0.4",
     "mammoth": "^1.13.0",

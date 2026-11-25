@@ -1,5 +1,5 @@
+import { EMPTY_RESUME, type ResumeSchema } from "@tailory/core";
 import { describe, expect, it } from "vitest";
-
 import {
   getCompletedSectionsCount,
   getSectionDefinition,
@@ -8,7 +8,6 @@ import {
   SECTION_DEFINITIONS,
   TOTAL_SECTIONS,
 } from "@/lib/sections/registry";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 describe("section registry", () => {
   it("defines all 13 canonical resume sections with labels and descriptions", () => {

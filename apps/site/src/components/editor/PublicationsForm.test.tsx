@@ -1,8 +1,7 @@
 import { fireEvent, render } from "@solidjs/testing-library";
+import { exportJsonResumeDocument } from "@tailory/core";
 import { beforeEach, describe, expect, it } from "vitest";
-
 import PublicationsForm from "@/components/editor/PublicationsForm";
-import { exportJsonResumeDocument } from "@/lib/resume/json";
 import { resume, setResume } from "@/store/resume";
 
 beforeEach(() => {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { buildMinimalRenderModel, minimalTemplate } from "./minimal";
-import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-fixtures";
+import { resolveResumeDesignSettings } from "../resume/design.ts";
+import { buildMinimalRenderModel, minimalTemplate } from "./minimal.ts";
+import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-fixtures.ts";
 
 describe("minimalTemplate", () => {
   it("keeps exported contact url and avoids raw bullet glyph text", () => {

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
+import { resolveResumeDesignSettings } from "../resume/design.ts";
 
-import { buildCompactAtsRenderModel, compactAtsTemplate } from "./compact-ats";
-import { createTemplateFixture } from "./template-fixtures";
+import { buildCompactAtsRenderModel, compactAtsTemplate } from "./compact-ats.ts";
+import { createTemplateFixture } from "./template-fixtures.ts";
 
 describe("compactAtsTemplate", () => {
   it("uses dynamic divider widths and ATS-safe bullets", () => {

@@ -1,9 +1,8 @@
 import { fireEvent, render } from "@solidjs/testing-library";
+import { EMPTY_RESUME } from "@tailory/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import CommandBar from "@/components/editor/CommandBar";
 import { importError, importFeedback, setImportError, setImportFeedback } from "@/store/resume";
-import { EMPTY_RESUME } from "@/types/resume";
 
 const mocks = vi.hoisted(() => ({
   importResumeFile: vi.fn(),

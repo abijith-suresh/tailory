@@ -86,7 +86,8 @@ npx playwright install   # once per machine, before browser tests
 npm run test:e2e:build
 ```
 
-The app lives in `apps/site`; the root scripts run it.
+The app lives in `apps/site` and the resume logic it shares lives in `packages/core`; the root
+scripts run both.
 
 Release and contribution workflow notes live in [CONTRIBUTING.md](./CONTRIBUTING.md).
 

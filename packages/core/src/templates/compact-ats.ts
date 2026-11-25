@@ -1,5 +1,5 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-import { renderPdfResumeModel } from "@/lib/export/pdf-renderer";
+import { renderPdfResumeModel } from "../export/pdf-renderer.ts";
 
 import {
   buildProjectMetadata,
@@ -7,10 +7,11 @@ import {
   formatInterestsText,
   formatLanguagesText,
   formatSkillsText,
-} from "@/lib/export/template-helpers";
-import type { PdfTemplateOptions } from "@/lib/export/template-types";
-import { type ResumeDesignSettings, resolveResumeDesignSettings } from "@/lib/resume/design";
-import type { ResumeRenderModel, ResumeSectionModel } from "@/lib/templates/render-model";
+} from "../export/template-helpers.ts";
+import type { PdfTemplateOptions } from "../export/template-types.ts";
+import { type ResumeDesignSettings, resolveResumeDesignSettings } from "../resume/design.ts";
+import type { ResumeSchema } from "../types/resume.ts";
+import type { ResumeRenderModel, ResumeSectionModel } from "./render-model.ts";
 import {
   buildAwardsSection,
   buildCertificatesSection,
@@ -21,8 +22,7 @@ import {
   buildTextSection,
   buildVolunteerSection,
   buildWorkSection,
-} from "@/lib/templates/section-builders";
-import type { ResumeSchema } from "@/types/resume";
+} from "./section-builders.ts";
 
 // Compact template (id "compact-ats", kept for saved drafts): single column, dense layout.
 // No tables, no images, standard fonts.

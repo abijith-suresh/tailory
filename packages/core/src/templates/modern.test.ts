@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveResumeDesignSettings } from "@/lib/resume/design";
-import { buildModernRenderModel, modernTemplate } from "./modern";
-import { createTemplateFixture } from "./template-fixtures";
+import { resolveResumeDesignSettings } from "../resume/design.ts";
+import { buildModernRenderModel, modernTemplate } from "./modern.ts";
+import { createTemplateFixture } from "./template-fixtures.ts";
 
 describe("modernTemplate", () => {
   it("uses dynamic divider widths and avoids raw bullet glyph text", () => {

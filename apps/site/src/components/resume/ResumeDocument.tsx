@@ -1,8 +1,11 @@
+import {
+  buildResumeRenderModel,
+  type ResumeDesignSettings,
+  type ResumeEntryModel,
+  type ResumeSchema,
+  type ResumeSectionModel,
+} from "@tailory/core";
 import { type Component, For, type JSX, Show, splitProps } from "solid-js";
-import type { ResumeDesignSettings } from "@/lib/resume/design";
-import { buildResumeRenderModel } from "@/lib/templates/registry";
-import type { ResumeEntryModel, ResumeSectionModel } from "@/lib/templates/render-model";
-import type { ResumeSchema } from "@/types/resume";
 
 export interface ResumeDocumentProps extends JSX.HTMLAttributes<HTMLDivElement> {
   design: ResumeDesignSettings;

@@ -1,7 +1,11 @@
+import {
+  loadPdfTemplateRenderer,
+  ResumeExportValidationError,
+  type ResumeSchema,
+  type TemplateId,
+  validateResumeForExport,
+} from "@tailory/core";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-import { ResumeExportValidationError, validateResumeForExport } from "@/lib/resume/normalize";
-import { loadPdfTemplateRenderer } from "@/lib/templates/registry";
-import type { ResumeSchema, TemplateId } from "@/types/resume";
 import { downloadBlob, isTouchFirstDevice, sanitizeFilenameBase } from "./download";
 import { type PdfMakeFontRuntime, registerPdfFonts } from "./fonts";
 

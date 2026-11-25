@@ -1,5 +1,5 @@
-import type { PdfMargin, ResumeDesignSettings } from "@/lib/resume/design";
-import type { TemplateId } from "@/types/template";
+import type { PdfMargin, ResumeDesignSettings } from "../resume/design.ts";
+import type { TemplateId } from "../types/template.ts";
 
 export interface ResumeHeaderModel {
   contactLine?: string;

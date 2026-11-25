@@ -1,10 +1,9 @@
+import type { ResumeLanguage } from "@tailory/core";
 import type { Component } from "solid-js";
-
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import { resume, setResume } from "@/store/resume";
-import type { ResumeLanguage } from "@/types/resume";
 
 function newLanguage(): ResumeLanguage {
   return {

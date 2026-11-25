@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseResume } from "./resume-parser";
+import { parseResume } from "./resume-parser.ts";
 
 const SAMPLE_RESUME = `
 JANE DOE

@@ -7,7 +7,7 @@ vi.mock("@/lib/upload/process-file", () => ({
   processUploadedFile,
 }));
 
-vi.mock("@/lib/resume/json", () => ({
+vi.mock("@tailory/core", () => ({
   parseJsonResumeImport,
 }));
 

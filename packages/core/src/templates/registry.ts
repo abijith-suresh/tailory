@@ -1,13 +1,13 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
-import type { PdfTemplateOptions } from "@/lib/export/template-types";
-import type { ResumeDesignSettings } from "@/lib/resume/design";
-import { buildCompactAtsRenderModel, compactAtsTemplate } from "@/lib/templates/compact-ats";
-import { buildMinimalRenderModel, minimalTemplate } from "@/lib/templates/minimal";
-import { buildModernRenderModel, modernTemplate } from "@/lib/templates/modern";
-import type { ResumeRenderModel } from "@/lib/templates/render-model";
-import type { ResumeSchema } from "@/types/resume";
-import { TEMPLATE_IDS, type TemplateId } from "@/types/template";
+import type { PdfTemplateOptions } from "../export/template-types.ts";
+import type { ResumeDesignSettings } from "../resume/design.ts";
+import type { ResumeSchema } from "../types/resume.ts";
+import { TEMPLATE_IDS, type TemplateId } from "../types/template.ts";
+import { buildCompactAtsRenderModel, compactAtsTemplate } from "./compact-ats.ts";
+import { buildMinimalRenderModel, minimalTemplate } from "./minimal.ts";
+import { buildModernRenderModel, modernTemplate } from "./modern.ts";
+import type { ResumeRenderModel } from "./render-model.ts";
 
 type PdfTemplateRenderer = (
   resume: ResumeSchema,

@@ -1,4 +1,4 @@
-import type { ResumeSchema, SectionId } from "@/types/resume";
+import type { ResumeSchema, SectionId } from "@tailory/core";
 
 export interface SectionDefinition {
   readonly id: SectionId;

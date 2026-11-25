@@ -1,9 +1,9 @@
+import type { ResumeCertificate } from "@tailory/core";
 import type { Component } from "solid-js";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
 import { ReorderableList } from "@/components/ui/ReorderableList";
 import { resume, setResume } from "@/store/resume";
-import type { ResumeCertificate } from "@/types/resume";
 
 function newCertificate(): ResumeCertificate {
   return {

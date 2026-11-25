@@ -1,4 +1,4 @@
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
+import { EMPTY_RESUME, type ResumeSchema } from "../types/resume.ts";
 
 /**
  * A realistic one-page resume for the marketing site. The home page renders it with the

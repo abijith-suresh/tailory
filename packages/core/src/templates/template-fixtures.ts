@@ -1,4 +1,4 @@
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
+import { EMPTY_RESUME, type ResumeSchema } from "../types/resume.ts";
 
 export function createTemplateFixture(): ResumeSchema {
   return {

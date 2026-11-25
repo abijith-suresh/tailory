@@ -1,4 +1,4 @@
-import type { TemplateId } from "@/types/template";
+import type { TemplateId } from "../types/template.ts";
 
 export type PdfMargin = [number, number, number, number];
 

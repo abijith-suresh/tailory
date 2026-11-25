@@ -1,6 +1,5 @@
+import { EMPTY_RESUME, type ResumeSchema, serializeNormalizedResume } from "@tailory/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { serializeNormalizedResume } from "@/lib/resume/normalize";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>

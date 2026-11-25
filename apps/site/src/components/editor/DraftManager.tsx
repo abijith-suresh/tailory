@@ -1,3 +1,4 @@
+import { EMPTY_RESUME, serializeNormalizedResume } from "@tailory/core";
 import {
   type Component,
   createEffect,
@@ -7,7 +8,6 @@ import {
   onMount,
   Show,
 } from "solid-js";
-import { serializeNormalizedResume } from "@/lib/resume/normalize";
 import { createSerializedTaskQueue } from "@/lib/storage/autosave-queue";
 import { AUTOSAVE_DRAFT_ID, deleteDraft, listDrafts, type ResumeDraft } from "@/lib/storage/db";
 import {
@@ -18,7 +18,6 @@ import {
 } from "@/lib/storage/drafts";
 import { joinEditorTabs } from "@/lib/storage/editor-tabs";
 import { loadResume, resume, setDraftStorageError, setOtherTabActive } from "@/store/resume";
-import { EMPTY_RESUME } from "@/types/resume";
 import { replaceResume } from "./replace-resume";
 
 type Status = "idle" | "saving" | "saved" | "error";

@@ -1,4 +1,9 @@
-import { normalizeResume, serializeNormalizedResume } from "@/lib/resume/normalize";
+import {
+  EMPTY_RESUME,
+  normalizeResume,
+  type ResumeSchema,
+  serializeNormalizedResume,
+} from "@tailory/core";
 import {
   AUTOSAVE_DRAFT_ID,
   getDraft,
@@ -7,7 +12,6 @@ import {
   type ResumeDraft,
   saveDraft,
 } from "@/lib/storage/db";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
 
 export type ReplaceReason = "import" | "draft";
 

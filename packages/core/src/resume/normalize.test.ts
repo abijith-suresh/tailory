@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { EMPTY_RESUME, type ResumeSchema } from "@/types/resume";
-import { normalizeResume, ResumeExportValidationError, validateResumeForExport } from "./normalize";
+import { EMPTY_RESUME, type ResumeSchema } from "../types/resume.ts";
+import {
+  normalizeResume,
+  ResumeExportValidationError,
+  validateResumeForExport,
+} from "./normalize.ts";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>

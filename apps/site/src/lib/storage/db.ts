@@ -1,6 +1,5 @@
+import { normalizeResume, type ResumeSchema } from "@tailory/core";
 import { type IDBPDatabase, openDB } from "idb";
-import { normalizeResume } from "@/lib/resume/normalize";
-import type { ResumeSchema } from "@/types/resume";
 
 export const AUTOSAVE_DRAFT_ID = "autosave";
 
