@@ -18,8 +18,11 @@ export const publicColumns = async (db: Db) => {
   return list.map((row) => `${row.table}.${row.column} ${row.type} ${row.nullable}`);
 };
 
-export const expectedColumns = [
-  "app_meta.key text NO",
-  "app_meta.value text NO",
-  "app_meta.updated_at timestamp with time zone NO",
-];
+/**
+ * The columns the migrations should build, one per line, shared by the PGlite and Postgres tests
+ * so the two drivers can't drift apart. After a schema change, regenerate it with
+ * `npx vitest run -u src/server/db/pglite.test.ts`.
+ */
+export const COLUMNS_SNAPSHOT = "./__snapshots__/columns.txt";
+
+export const columnsText = (columns: string[]) => `${columns.join("\n")}\n`;

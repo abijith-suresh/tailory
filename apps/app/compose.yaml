@@ -1,5 +1,7 @@
 # Tailory with Postgres. Build the tarball first: npm run pack:tarball --workspace tailory
-# Server mode has no sign-in yet, so the app port is published on this computer only.
+# Needs TAILORY_AUTH_SECRET (32+ random characters). Email and password sign-in is on; set
+# TAILORY_PUBLIC_URL to the HTTPS address of your reverse proxy before exposing the app beyond
+# this computer.
 services:
   app:
     build: .
@@ -7,6 +9,14 @@ services:
       - "127.0.0.1:4413:4413"
     environment:
       DATABASE_URL: postgres://tailory:${POSTGRES_PASSWORD:-tailory}@db:5432/tailory
+      TAILORY_AUTH_SECRET: ${TAILORY_AUTH_SECRET:?Set TAILORY_AUTH_SECRET to 32+ random characters}
+      TAILORY_PUBLIC_URL: ${TAILORY_PUBLIC_URL:-http://127.0.0.1:4413}
+      TAILORY_AUTH_EMAIL_PASSWORD: ${TAILORY_AUTH_EMAIL_PASSWORD:-true}
+      TAILORY_TRUST_PROXY: ${TAILORY_TRUST_PROXY:-false}
+      TAILORY_GITHUB_CLIENT_ID: ${TAILORY_GITHUB_CLIENT_ID:-}
+      TAILORY_GITHUB_CLIENT_SECRET: ${TAILORY_GITHUB_CLIENT_SECRET:-}
+      TAILORY_GOOGLE_CLIENT_ID: ${TAILORY_GOOGLE_CLIENT_ID:-}
+      TAILORY_GOOGLE_CLIENT_SECRET: ${TAILORY_GOOGLE_CLIENT_SECRET:-}
     depends_on:
       db:
         condition: service_healthy

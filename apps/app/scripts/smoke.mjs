@@ -18,6 +18,8 @@ import { request } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
+import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
+
 import { pack } from "./pack.mjs";
 
 const npm = (args, cwd) =>
@@ -137,6 +139,23 @@ try {
     const { status } = await get(`${first.url}${target}`, headers);
     check(status === 403, `GET ${target} with ${JSON.stringify(headers)} answered ${status}`);
   }
+
+  // An MCP client speaking 2026-07-28 connects with no sign-in and calls a tool.
+  const client = new Client(
+    { name: "tailory-smoke", version: "1.0.0" },
+    { versionNegotiation: { mode: "auto" } }
+  );
+  await client.connect(new StreamableHTTPClientTransport(new URL(`${first.url}/mcp`)));
+  const version = client.getNegotiatedProtocolVersion();
+  check(version === "2026-07-28", `MCP negotiated ${version}`);
+  const { tools } = await client.listTools();
+  check(
+    tools.some((tool) => tool.name === "whoami"),
+    "MCP lists no whoami tool"
+  );
+  const whoami = await client.callTool({ name: "whoami", arguments: {} });
+  check(whoami.content[0].text.includes('"mode":"local"'), "whoami didn't answer for local mode");
+  await client.close();
 
   // A second process can't open the same data folder.
   const second = spawn(process.execPath, [bin, ...args], { stdio: ["ignore", "pipe", "pipe"] });
