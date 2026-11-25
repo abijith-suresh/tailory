@@ -90,7 +90,8 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: npm run changeset:check
 
-  # The server app's migrations against a real Postgres. The ci job's unit tests skip this file.
+  # The server app against a real Postgres: migrations, and sign-in plus the MCP flow end to end.
+  # The ci job's unit tests run the same files on PGlite only.
   app-postgres:
     name: app-postgres
     runs-on: ubuntu-24.04
@@ -150,10 +151,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run the database tests against Postgres
+      - name: Run the database and MCP tests against Postgres
         env:
           TAILORY_TEST_DATABASE_URL: postgres://tailory:tailory@127.0.0.1:5432/tailory
-        run: npm run test --workspace tailory -- src/server/db/
+        run: npm run test --workspace tailory -- src/server/db/ src/server/mcp-flow.test.ts
 
   # Packs the server app, installs the tarball in an empty folder, and starts it; then builds
   # the Docker image from the same tarball and runs it with Postgres.
@@ -207,23 +208,35 @@ jobs:
 
       - name: Start the Docker image with Postgres
         working-directory: apps/app
-        run: docker compose up --detach --build --wait --wait-timeout 120
+        run: |
+          TAILORY_AUTH_SECRET="$(openssl rand -hex 32)"
+          export TAILORY_AUTH_SECRET
+          docker compose up --detach --build --wait --wait-timeout 120
 
       - name: Check the container answers
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error http://127.0.0.1:4413/ | grep --quiet "Tailory is running"
+          curl --fail --silent --show-error http://127.0.0.1:4413/sign-in | grep --quiet "Sign in to Tailory"
           curl --fail --silent --show-error http://127.0.0.1:4413/healthz
+
+      - name: Sign in and use MCP against the container
+        env:
+          TAILORY_TEST_SERVER_URL: http://127.0.0.1:4413
+        run: npm run test --workspace tailory -- src/server/remote.test.ts
 
       - name: Show container logs
         if: always()
         working-directory: apps/app
+        env:
+          TAILORY_AUTH_SECRET: unused-when-reading-logs
         run: docker compose logs
 
       - name: Stop the containers
         if: always()
         working-directory: apps/app
+        env:
+          TAILORY_AUTH_SECRET: unused-when-stopping
         run: docker compose down --volumes
 
   e2e:
