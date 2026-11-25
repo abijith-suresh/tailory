@@ -8,7 +8,8 @@ Tailory is an npm workspace on Node 24; `mise.toml` pins the Node and npm versio
 in `apps/site` (`@tailory/site`); run commands from the repository root, which delegates to it.
 The resume logic the app shares lives in `packages/core` (`@tailory/core`): types, JSON Resume
 import and export, normalization, the text parser, and the template render models. Workspaces
-import its TypeScript source directly; it has no build step.
+import its TypeScript source directly; it has no build step. The server app lives in `apps/app`
+(npm package `tailory`, not published yet); its README covers running it locally and in Docker.
 
 ```sh
 npm ci
