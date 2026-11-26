@@ -54,6 +54,19 @@ Drafts and autosaves are stored in IndexedDB. Clearing site data in your browser
 
 The site may load normal web assets, but resume content is not sent to an application server.
 
+## Try the dev build
+
+Every change to the server app (`apps/app`) on `main` publishes a dev build: the npm package
+`tailory` and the image `ghcr.io/abijith-suresh/tailory`. Dev builds are untested snapshots, not
+releases, and the server app's pages are still placeholders. There are no stable releases yet.
+
+```sh
+npx tailory@dev            # or: npm i -g tailory@dev && tailory
+```
+
+This starts local mode on `http://127.0.0.1:4413` with data in `~/.tailory`. To run the image
+instead, see [apps/app/README.md](./apps/app/README.md#try-the-dev-build).
+
 ## Stack
 
 - [Astro 7](https://astro.build)

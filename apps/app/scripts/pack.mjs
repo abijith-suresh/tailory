@@ -24,7 +24,9 @@ export const pack = () => {
   npm(["run", "build"], "inherit");
   // The build already ran; skipping prepack keeps the JSON report alone on stdout.
   const output = npm(["pack", "--json", "--ignore-scripts", "--pack-destination", packDir], "pipe");
-  const [info] = JSON.parse(output);
+  // npm 11 prints an array of reports; npm 12 prints an object keyed by package name.
+  const report = JSON.parse(output);
+  const [info] = Array.isArray(report) ? report : Object.values(report);
   return {
     file: path.join(packDir, info.filename),
     size: info.size,

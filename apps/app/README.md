@@ -3,7 +3,34 @@
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
 handles sign-in, and serves an MCP endpoint with the resume tools agents use. The app shell and
 navigation are in place, but the Applications, Profile and Connect an agent screens are still
-empty. Not published to npm yet.
+empty. Dev builds only; no stable release yet.
+
+## Try the dev build
+
+Every change to this app or `packages/core` on `main` publishes a dev build to npm under the `dev`
+tag, versioned `0.0.0-dev.<UTC timestamp>`, and to GHCR as `dev` and the same version. Dev builds
+are untested snapshots, not releases. Until the first stable release, npm's `latest` tag also
+points at the newest dev build.
+
+```sh
+npx tailory@dev
+# or install it:
+npm i -g tailory@dev
+tailory
+```
+
+The image runs in server mode, so it needs a secret, its public URL, and a sign-in method:
+
+```sh
+docker run --rm -p 127.0.0.1:4413:4413 -v tailory-data:/data \
+  -e TAILORY_AUTH_SECRET="$(openssl rand -hex 32)" \
+  -e TAILORY_PUBLIC_URL=http://127.0.0.1:4413 \
+  -e TAILORY_AUTH_EMAIL_PASSWORD=true \
+  ghcr.io/abijith-suresh/tailory:dev
+```
+
+A new secret on each run signs everyone out; reuse one to keep sessions. Pin a build with
+`tailory@0.0.0-dev.<timestamp>` or the image tag of the same name.
 
 ## Run it on your computer
 
@@ -105,8 +132,8 @@ also runs the DCR flow against the Docker image (`src/server/remote.test.ts`).
 
 ## Run it with Docker
 
-The image installs the same tarball as the npm package. Build the tarball, then start the app with
-Postgres:
+The image installs the same tarball as the npm package. To build it from source, build the
+tarball, then start the app with Postgres:
 
 ```sh
 npm ci
