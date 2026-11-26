@@ -1,4 +1,5 @@
 import type { PdfMargin, ResumeDesignSettings } from "../resume/design.ts";
+import type { ResumeSectionKey } from "../types/application.ts";
 import type { TemplateId } from "../types/template.ts";
 
 export interface ResumeHeaderModel {
@@ -24,19 +25,7 @@ export interface ResumeEntryModel {
 export interface ResumeSectionModel {
   dividerAfter?: boolean;
   entries?: ResumeEntryModel[];
-  id:
-    | "summary"
-    | "work"
-    | "volunteer"
-    | "education"
-    | "awards"
-    | "publications"
-    | "skills"
-    | "languages"
-    | "interests"
-    | "projects"
-    | "references"
-    | "certificates";
+  id: ResumeSectionKey;
   kind: "text" | "entries";
   text?: string;
   title: string;

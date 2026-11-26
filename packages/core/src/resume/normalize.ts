@@ -4,6 +4,7 @@ import {
   type ResumeBasics,
   type ResumeCertificate,
   type ResumeEducation,
+  type ResumeHighlight,
   type ResumeInterest,
   type ResumeLanguage,
   type ResumeLocation,
@@ -16,6 +17,7 @@ import {
   type ResumeVolunteer,
   type ResumeWork,
 } from "../types/resume.ts";
+import { createId } from "./ids.ts";
 
 const MONTH_ABBREVIATIONS: Record<string, string> = {
   jan: "Jan",
@@ -66,16 +68,12 @@ function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function ensureId(id: string | undefined): string {
+function ensureId(id: unknown): string {
   if (typeof id === "string" && id.trim()) {
     return id.trim();
   }
 
-  if (globalThis.crypto?.randomUUID) {
-    return globalThis.crypto.randomUUID();
-  }
-
-  return `generated-${Math.random().toString(36).slice(2, 10)}`;
+  return createId();
 }
 
 function normalizeInlineText(value: unknown): string {
@@ -106,6 +104,22 @@ function normalizeStringArray(values: unknown): string[] {
   }
 
   return values.map((value) => normalizeInlineText(value)).filter(Boolean);
+}
+
+/**
+ * Keeps each bullet's id and drops empty bullets. A plain string (as JSON Resume writes bullets)
+ * becomes a bullet with a new id.
+ */
+function normalizeHighlights(values: unknown): ResumeHighlight[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return values.flatMap((value) => {
+    const source = typeof value === "object" && value !== null ? value : { text: value };
+    const text = normalizeInlineText((source as { text?: unknown }).text);
+    return text ? [{ id: ensureId((source as { id?: unknown }).id), text }] : [];
+  });
 }
 
 function normalizeUrl(value: unknown): string | undefined {
@@ -253,7 +267,7 @@ function normalizeWorkEntry(entry: unknown): ResumeWork | undefined {
     startDate: normalizeDate(source.startDate),
     endDate: normalizeDate(source.endDate),
     summary: normalizeMultilineText(source.summary),
-    highlights: normalizeStringArray(source.highlights),
+    highlights: normalizeHighlights(source.highlights),
   };
   const highlights = normalized.highlights ?? [];
 
@@ -288,7 +302,7 @@ function normalizeVolunteerEntry(entry: unknown): ResumeVolunteer | undefined {
     startDate: normalizeDate(source.startDate),
     endDate: normalizeDate(source.endDate),
     summary: normalizeMultilineText(source.summary),
-    highlights: normalizeStringArray(source.highlights),
+    highlights: normalizeHighlights(source.highlights),
   };
   const highlights = normalized.highlights ?? [];
 
@@ -516,7 +530,7 @@ function normalizeProjectEntry(entry: unknown): ResumeProject | undefined {
     id: ensureId(source.id),
     name: normalizeInlineText(source.name),
     description: normalizeMultilineText(source.description),
-    highlights: normalizeStringArray(source.highlights),
+    highlights: normalizeHighlights(source.highlights),
     keywords: normalizeStringArray(source.keywords),
     startDate: normalizeDate(source.startDate),
     endDate: normalizeDate(source.endDate),

@@ -29,6 +29,12 @@ export interface ResumeBasics {
   profiles?: ResumeProfile[];
 }
 
+/** One bullet under a work, volunteer, or project entry. The id lets applications refer to it. */
+export interface ResumeHighlight {
+  id: string;
+  text: string;
+}
+
 export interface ResumeWork {
   id: string;
   name: string;
@@ -37,7 +43,7 @@ export interface ResumeWork {
   startDate?: string;
   endDate?: string;
   summary?: string;
-  highlights?: string[];
+  highlights?: ResumeHighlight[];
 }
 
 export interface ResumeVolunteer {
@@ -48,7 +54,7 @@ export interface ResumeVolunteer {
   startDate?: string;
   endDate?: string;
   summary?: string;
-  highlights?: string[];
+  highlights?: ResumeHighlight[];
 }
 
 export interface ResumeEducation {
@@ -117,7 +123,7 @@ export interface ResumeProject {
   id: string;
   name: string;
   description?: string;
-  highlights?: string[];
+  highlights?: ResumeHighlight[];
   keywords?: string[];
   startDate?: string;
   endDate?: string;
