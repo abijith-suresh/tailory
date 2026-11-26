@@ -154,7 +154,7 @@ jobs:
       - name: Run the database and MCP tests against Postgres
         env:
           TAILORY_TEST_DATABASE_URL: postgres://tailory:tailory@127.0.0.1:5432/tailory
-        run: npm run test --workspace tailory -- src/server/db/ src/server/mcp-flow.test.ts
+        run: npm run test --workspace tailory -- src/server/db/ src/server/data/ src/server/mcp-flow.test.ts
 
   # Packs the server app, installs the tarball in an empty folder, and starts it; then builds
   # the Docker image from the same tarball and runs it with Postgres.

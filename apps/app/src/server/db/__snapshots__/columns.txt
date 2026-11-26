@@ -14,6 +14,27 @@ account.updated_at timestamp without time zone NO
 app_meta.key text NO
 app_meta.value text NO
 app_meta.updated_at timestamp with time zone NO
+application.id text NO
+application.user_id text NO
+application.company text NO
+application.role text NO
+application.status text NO
+application.archived boolean NO
+application.created_at timestamp with time zone NO
+application.updated_at timestamp with time zone NO
+application.data jsonb NO
+change.id text NO
+change.seq bigint NO
+change.user_id text NO
+change.target_kind text NO
+change.target_id text NO
+change.actor_kind text NO
+change.actor_client text YES
+change.summary text NO
+change.before jsonb YES
+change.after jsonb YES
+change.undoes text YES
+change.created_at timestamp with time zone NO
 jwks.id text NO
 jwks.public_key text NO
 jwks.private_key text NO
@@ -121,6 +142,9 @@ oauth_resource.created_at timestamp without time zone YES
 oauth_resource.updated_at timestamp without time zone YES
 oauth_resource.policy_version integer YES
 oauth_resource.metadata jsonb YES
+profile.user_id text NO
+profile.resume jsonb NO
+profile.updated_at timestamp with time zone NO
 session.id text NO
 session.expires_at timestamp without time zone NO
 session.token text NO
