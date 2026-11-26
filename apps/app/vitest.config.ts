@@ -1,9 +1,12 @@
+import solid from "@solidjs/vite-plugin";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Compiles components for the server, so their tests render them to HTML.
+  plugins: [solid({ ssr: true })],
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     // PGlite runs initdb on first open, which takes a second or two.
     testTimeout: 30_000,
     hookTimeout: 30_000,

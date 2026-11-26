@@ -1,8 +1,9 @@
 # tailory (server app)
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
-handles sign-in, and serves an MCP endpoint with the resume tools agents use. The pages are
-placeholders; the real screens come later. Not published to npm yet.
+handles sign-in, and serves an MCP endpoint with the resume tools agents use. The app shell and
+navigation are in place, but the Applications, Profile and Connect an agent screens are still
+empty. Not published to npm yet.
 
 ## Run it on your computer
 
@@ -128,6 +129,13 @@ npm run test:smoke --workspace tailory   # pack, install in an empty folder, sta
 npm run db:generate --workspace tailory  # after editing src/server/db/schema.ts
 npm run auth:generate --workspace tailory  # after changing Better Auth plugins, then db:generate
 ```
+
+In dev, `/dev/components` shows every shared component for design review; production builds
+leave it out.
+
+Styles are plain CSS in `src/styles/app.css`, in cascade layers. The tokens are the marketing
+site's (`apps/site/src/styles/global.css`); change both together. Components in
+`src/components` have tests that render them on the server and query the HTML.
 
 `npm run dev` starts local mode. For server mode, set `TAILORY_MODE=server` and the sign-in
 variables above, with `TAILORY_PUBLIC_URL=http://localhost:4413`.

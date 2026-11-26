@@ -1,6 +1,7 @@
 import { Meta, Title } from "@solidjs/meta";
 import { createSignal, onSettled } from "solid-js";
 
+import { Button } from "../components/Button";
 import { authClient, redirectOf } from "../lib/auth-client";
 
 // Better Auth sends people here when an agent asks to use their account. The page's query is the
@@ -34,21 +35,36 @@ export default function Consent() {
   };
 
   return (
-    <>
+    <div class="narrow">
       <Title>Allow access · Tailory</Title>
       <Meta name="referrer" content="no-referrer" />
-      <h1>Allow an agent to use your Tailory account?</h1>
-      <p>Agent: {client()}</p>
-      <p>Requested access: {scopes().join(", ")}</p>
-      <p>
-        <button type="button" disabled={pending()} onClick={() => void decide(true)}>
-          Allow
-        </button>{" "}
-        <button type="button" disabled={pending()} onClick={() => void decide(false)}>
-          Deny
-        </button>
-      </p>
-      <p role="alert">{error()}</p>
-    </>
+      <section class="panel stack" aria-labelledby="consent-title">
+        <h1 class="panel__title" id="consent-title">
+          Allow an agent to use your Tailory account?
+        </h1>
+        <p class="panel__text">If you allow it, the agent can use Tailory's tools as you.</p>
+        <dl class="stack">
+          <div class="definition">
+            <dt>Agent</dt>
+            <dd>{client()}</dd>
+          </div>
+          <div class="definition">
+            <dt>Access requested</dt>
+            <dd>{scopes().join(", ")}</dd>
+          </div>
+        </dl>
+        <div class="panel__actions">
+          <Button variant="primary" disabled={pending()} onClick={() => void decide(true)}>
+            Allow
+          </Button>
+          <Button disabled={pending()} onClick={() => void decide(false)}>
+            Deny
+          </Button>
+        </div>
+        <p class="form-error" role="alert">
+          {error()}
+        </p>
+      </section>
+    </div>
   );
 }

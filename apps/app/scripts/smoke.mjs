@@ -184,7 +184,7 @@ try {
   const first = await start(bin, args);
   const home = await get(first.url);
   check(home.status === 200, `GET / answered ${home.status}`);
-  check(home.body.includes("Tailory is running"), "GET / is missing the placeholder text");
+  check(home.body.includes("No applications yet"), "GET / is missing the applications page");
   const health = await get(`${first.url}/healthz`);
   check(health.status === 200, `GET /healthz answered ${health.status}`);
   const missing = await get(`${first.url}/no-such-page`);

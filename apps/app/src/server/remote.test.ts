@@ -54,7 +54,7 @@ describe.skipIf(!url)("a running server", () => {
     const cookie = await signUp(origin, "Container User");
     const home = await fetch(origin, { headers: { cookie } });
     expect(home.status).toBe(200);
-    expect(await home.text()).toContain("Signed in as Container User");
+    expect(await home.text()).toContain("Account: Container User");
   });
 
   it.skipIf(!functionIds.deleteAccount)(
