@@ -5,7 +5,7 @@
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
-    "types": ["node", "@solidjs/vite-plugin/virtual-modules"]
+    "types": ["node", "vite/client", "@solidjs/vite-plugin/virtual-modules"]
   },
   "include": ["src", "scripts", "*.ts"]
 }
