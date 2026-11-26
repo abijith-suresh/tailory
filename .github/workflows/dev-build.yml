@@ -1,0 +1,270 @@
+name: Dev build
+
+# Every push to main that changes the app or core publishes an untested dev build: the npm package
+# `tailory` under the `dev` dist-tag, and ghcr.io/abijith-suresh/tailory:dev. There are no stable
+# releases yet.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/app/**
+      - packages/core/**
+      - package.json
+      - package-lock.json
+      - .github/workflows/dev-build.yml
+  workflow_dispatch:
+
+concurrency:
+  group: dev-build
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  # Builds, packs, and smoke-tests the tarball, the same way CI's app-package job does. The npm and
+  # Docker jobs publish this exact tarball.
+  build:
+    name: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read the Node version from mise.toml
+        id: node
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^node[[:space:]]*=[[:space:]]*"\([0-9.]*\)".*/\1/p' mise.toml)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "mise.toml must pin node as major.minor.patch" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install exact npm from package metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_manager="$(node --print "require('./package.json').packageManager ?? ''")"
+          if [[ ! "$package_manager" =~ ^npm@[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json must declare an exact npm packageManager as npm@major.minor.patch" >&2
+            exit 1
+          fi
+          npm install --global "$package_manager"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 0.0.0-dev.<UTC yyyymmddhhmmss>. A numeric prerelease identifier compares as a number, so
+      # later builds always sort higher. A timestamp, unlike the run number, never repeats when a
+      # run is re-run and survives renaming this workflow.
+      - name: Set the dev version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="0.0.0-dev.$(date -u +%Y%m%d%H%M%S)"
+          npm version "$version" --workspace tailory --no-git-tag-version --ignore-scripts
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Dev version: \`$version\`" >> "$GITHUB_STEP_SUMMARY"
+
+      # Packs apps/app/.pack/tailory-<version>.tgz, installs it in an empty folder, and starts it.
+      - name: Pack and smoke-test the app
+        run: npm run test:smoke --workspace tailory
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tailory-tarball
+          path: apps/app/.pack/tailory-${{ steps.version.outputs.version }}.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  npm:
+    name: npm
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      # To switch to npm trusted publishing (OIDC, no token), set this to "true" and configure the
+      # trusted publisher on npmjs.com. Then NPM_TOKEN can be deleted; npm reads the OIDC token.
+      TRUSTED_PUBLISHING: "false"
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # setup-node fills NODE_AUTH_TOKEN with a placeholder when it is empty, so test the secret.
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+    steps:
+      - name: Check for npm credentials
+        id: auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TRUSTED_PUBLISHING" == "true" || "$HAS_NPM_TOKEN" == "true" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=npm publish skipped::The NPM_TOKEN secret is not set, so tailory@$VERSION was not published to npm."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out repository
+        if: steps.auth.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            mise.toml
+            package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Read the Node version from mise.toml
+        if: steps.auth.outputs.ready == 'true'
+        id: node
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^node[[:space:]]*=[[:space:]]*"\([0-9.]*\)".*/\1/p' mise.toml)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "mise.toml must pin node as major.minor.patch" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        if: steps.auth.outputs.ready == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          registry-url: https://registry.npmjs.org
+
+      - name: Install exact npm from package metadata
+        if: steps.auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_manager="$(node --print "require('./package.json').packageManager ?? ''")"
+          if [[ ! "$package_manager" =~ ^npm@[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json must declare an exact npm packageManager as npm@major.minor.patch" >&2
+            exit 1
+          fi
+          npm install --global "$package_manager"
+
+      - name: Download the tarball
+        if: steps.auth.outputs.ready == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tailory-tarball
+          path: ${{ runner.temp }}/pack
+
+      # Publishing the tarball runs no lifecycle scripts, so the package's prepublishOnly guard
+      # (which stops `npm publish` from a checkout) does not apply here.
+      - name: Publish to npm under the dev tag
+        if: steps.auth.outputs.ready == 'true'
+        run: npm publish "$RUNNER_TEMP/pack/tailory-$VERSION.tgz" --tag dev --access public --provenance
+
+      # The registry points `latest` at the first version ever published and never moves it for
+      # --tag dev. Until there is a stable release, `latest` follows the newest dev build so a bare
+      # `npx tailory` never runs a stale one. Trusted publishing can't change dist-tags, so this
+      # step needs NPM_TOKEN even after the switch. Remove it when the first stable release ships.
+      - name: Point latest at this dev build
+        if: steps.auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$HAS_NPM_TOKEN" != "true" ]]; then
+            echo "::notice title=latest not moved::Changing dist-tags needs NPM_TOKEN; latest still points at an older dev build."
+            exit 0
+          fi
+          npm dist-tag add "tailory@$VERSION" latest
+
+      - name: Summarize
+        if: steps.auth.outputs.ready == 'true'
+        run: |
+          {
+            echo "Published [tailory@$VERSION](https://www.npmjs.com/package/tailory/v/$VERSION) under \`dev\`."
+            echo
+            echo '```sh'
+            echo 'npx tailory@dev'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  docker:
+    name: docker
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      IMAGE: ghcr.io/${{ github.repository_owner }}/tailory
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the tarball
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tailory-tarball
+          path: apps/app/.pack
+
+      # The image only installs the tarball, and its one dependency (PGlite) is WebAssembly, so
+      # emulating arm64 costs an npm install, not a build.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Sign in to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push the image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: apps/app
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:dev
+            ${{ env.IMAGE }}:${{ env.VERSION }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.VERSION }}
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.description=Tailory dev build. Untested; not a stable release.
+
+      - name: Summarize
+        run: |
+          {
+            echo "Pushed \`$IMAGE:dev\` and \`$IMAGE:$VERSION\` (linux/amd64, linux/arm64)."
+          } >> "$GITHUB_STEP_SUMMARY"

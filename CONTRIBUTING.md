@@ -10,7 +10,7 @@ The resume logic the app shares lives in `packages/core` (`@tailory/core`): type
 import and export, normalization, the text parser, the template render models, applications and
 how they resolve against the profile, and page fit. Workspaces
 import its TypeScript source directly; it has no build step. The server app lives in `apps/app`
-(npm package `tailory`, not published yet); its README covers running it locally and in Docker.
+(npm package `tailory`, published as dev builds only); its README covers running it locally and in Docker.
 
 ```sh
 npm ci
@@ -58,10 +58,22 @@ npm run assets:pdf-worker
 
 ## Releases
 
-Changesets versions the workspace packages: `tailory` (`apps/app`), `@tailory/site` (`apps/site`),
-and `@tailory/core` (`packages/core`). All three are private, and nothing is published to npm yet.
+There are no stable releases yet. Every push to `main` that changes `apps/app`, `packages/core`,
+or the root package files runs the Dev build workflow (`.github/workflows/dev-build.yml`; also
+runnable by hand). It packs and smoke-tests the `tailory` tarball, then publishes that exact
+tarball:
 
-When a pull request changes what a package ships, add a Changeset:
+- to npm as `tailory@0.0.0-dev.<UTC yyyymmddhhmmss>` under the `dev` tag, with provenance.
+  `latest` is moved to the same build until a stable release exists. Without the `NPM_TOKEN`
+  secret the npm job skips publishing with a notice. To switch to trusted publishing (OIDC), set
+  `TRUSTED_PUBLISHING: "true"` in the npm job and add the trusted publisher on npmjs.com.
+- to `ghcr.io/abijith-suresh/tailory` as `dev` and the same version, for linux/amd64 and arm64.
+
+`npm publish` from a checkout fails on purpose (`prepublishOnly`); only the workflow publishes.
+
+Changesets still versions the workspace packages: `tailory` (`apps/app`), `@tailory/site`
+(`apps/site`), and `@tailory/core` (`packages/core`). When a pull request changes what a package
+ships, add a Changeset:
 
 ```sh
 npx changeset
@@ -71,6 +83,5 @@ Pick each package you changed, leave the bump at patch, write one line for the c
 commit the file it creates under `.changeset/`. CI's `changeset` job fails without one; tests,
 READMEs, and pull requests titled `docs`, `ci`, `chore`, `style`, or `test` are exempt.
 
-The Release workflow collects merged Changesets into a "chore: version packages" pull request
-that bumps the versions and updates each package's `CHANGELOG.md`. Merging it records the
-release. Tags and GitHub Releases wait until publishing is enabled. Do not hand-edit versions.
+Nothing consumes the Changesets yet. They pile up in `.changeset/` and become the changelog of the
+first stable release. Do not hand-edit versions.

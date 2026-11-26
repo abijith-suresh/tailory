@@ -9,7 +9,7 @@ const read = (...segments: string[]) => readFileSync(path.join(repoRoot, ...segm
 const readJson = <T>(...segments: string[]) => JSON.parse(read(...segments)) as T;
 
 describe("release automation source of truth", () => {
-  it("versions every workspace package with Changesets and does not publish", () => {
+  it("versions every workspace package with Changesets and keeps all but the app private", () => {
     const config = readJson<{
       baseBranch: string;
       ignore: string[];
@@ -22,17 +22,27 @@ describe("release automation source of truth", () => {
 
     for (const dir of ["apps/app", "apps/site", "packages/core"]) {
       const pkg = readJson<{ private?: boolean; version?: string }>(dir, "package.json");
-      expect(pkg.private, dir).toBe(true);
+      expect(pkg.private, dir).toBe(dir === "apps/app" ? undefined : true);
       expect(pkg.version, dir).toMatch(/^\d+\.\d+\.\d+$/);
     }
+    expect(existsSync(path.join(repoRoot, ".github", "workflows", "release.yml"))).toBe(false);
+  });
 
-    const workflow = read(".github", "workflows", "release.yml");
-    expect(workflow).toMatch(/uses: changesets\/action@[0-9a-f]{40} # v\d/);
-    expect(workflow).toContain("version-script: npm run version-packages");
-    expect(workflow).toContain("secrets.RELEASE_TOKEN");
-    expect(workflow).not.toContain("publish-script");
-    expect(workflow).not.toContain("NPM_TOKEN");
-    expect(workflow).not.toContain("NODE_AUTH_TOKEN");
+  it("publishes the app only as dev builds, from CI", () => {
+    const pkg = readJson<{
+      publishConfig?: { tag?: string; provenance?: boolean };
+      scripts: Record<string, string>;
+    }>("apps", "app", "package.json");
+    expect(pkg.publishConfig?.tag).toBe("dev");
+    expect(pkg.publishConfig?.provenance).toBe(true);
+    expect(pkg.scripts.prepublishOnly).toContain("process.exit(1)");
+
+    const workflow = read(".github", "workflows", "dev-build.yml");
+    expect(workflow).toContain("npm run test:smoke --workspace tailory");
+    expect(workflow).toMatch(/npm publish "\$RUNNER_TEMP\/pack\/tailory-\$VERSION\.tgz" --tag dev/);
+    expect(workflow).toContain("--provenance");
+    expect(workflow).toContain("id-token: write");
+    expect(workflow).toContain("secrets.NPM_TOKEN");
   });
 
   it("requires a Changeset in CI and keeps it in the gate", () => {
