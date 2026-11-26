@@ -63,7 +63,7 @@ describe("JSON Resume parsing", () => {
     expect(parsed.work?.[0]).toMatchObject({
       name: "Acme Corp",
       position: "Senior Engineer",
-      highlights: ["Led launch"],
+      highlights: [{ id: expect.any(String), text: "Led launch" }],
     });
     expect(parsed.work?.[0]?.id).toBeTruthy();
     expect(parsed.interests?.[0]).toMatchObject({
@@ -191,7 +191,7 @@ describe("JSON Resume export", () => {
             id: "work-1",
             name: " Acme Corp ",
             position: " Senior Engineer ",
-            highlights: [" Led launch "],
+            highlights: [{ id: "highlight-1", text: " Led launch " }],
           },
         ],
         interests: [{ id: "interest-1", name: " Hiking ", keywords: [" trail running "] }],

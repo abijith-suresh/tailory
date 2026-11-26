@@ -1,4 +1,5 @@
 import type { ResumeWork } from "@tailory/core";
+import { createId } from "@tailory/core";
 import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 import FormField from "@/components/ui/FormField";
@@ -41,13 +42,13 @@ const WorkForm: Component = () => {
       (w) => w?.id === id,
       produce((w: ResumeWork) => {
         if (!w.highlights) w.highlights = [];
-        w.highlights.push("");
+        w.highlights.push({ id: createId(), text: "" });
       })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("work", (w) => w?.id === id, "highlights", idx, value);
+    setResume("work", (w) => w?.id === id, "highlights", idx, "text", value);
   };
 
   const removeHighlight = (id: string, idx: number) => {

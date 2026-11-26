@@ -5,7 +5,10 @@ import HighlightList from "@/components/ui/HighlightList";
 
 function renderList(overrides: Partial<Parameters<typeof HighlightList>[0]> = {}) {
   const props = {
-    highlights: ["First bullet", "Second bullet"],
+    highlights: [
+      { id: "h1", text: "First bullet" },
+      { id: "h2", text: "Second bullet" },
+    ],
     idPrefix: "work-highlight-1",
     label: "Highlights / Bullets",
     addLabel: "Add bullet",

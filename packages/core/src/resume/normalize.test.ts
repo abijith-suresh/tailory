@@ -47,13 +47,16 @@ describe("normalizeResume", () => {
             startDate: "january 2021",
             endDate: "current",
             url: "www.acme.com/careers",
-            highlights: ["  Led launch  ", "   "],
+            highlights: [
+              { id: "h1", text: "  Led launch  " },
+              { id: "h2", text: "   " },
+            ],
           },
           {
             id: "work-2",
             name: " ",
             position: "",
-            highlights: ["  "],
+            highlights: [{ id: "h3", text: "  " }],
           },
         ],
         projects: [
@@ -61,13 +64,16 @@ describe("normalizeResume", () => {
             id: "project-1",
             name: " Portfolio ",
             url: "github.com/jane/portfolio",
-            highlights: ["  Shipped it  ", ""],
+            highlights: [
+              { id: "h4", text: "  Shipped it  " },
+              { id: "h5", text: "" },
+            ],
           },
           {
             id: "project-2",
             name: " ",
             description: "  ",
-            highlights: [" "],
+            highlights: [{ id: "h6", text: " " }],
           },
         ],
         skills: [
@@ -95,7 +101,7 @@ describe("normalizeResume", () => {
         startDate: "Jan 2021",
         endDate: "Present",
         url: "https://www.acme.com/careers",
-        highlights: ["Led launch"],
+        highlights: [{ id: "h1", text: "Led launch" }],
       }),
     ]);
     expect(normalized.projects).toEqual([
@@ -103,7 +109,7 @@ describe("normalizeResume", () => {
         id: "project-1",
         name: "Portfolio",
         url: "https://github.com/jane/portfolio",
-        highlights: ["Shipped it"],
+        highlights: [{ id: "h4", text: "Shipped it" }],
       }),
     ]);
     expect(normalized.skills).toEqual([
@@ -116,6 +122,26 @@ describe("normalizeResume", () => {
         url: "https://aws.amazon.com/cert",
       }),
     ]);
+  });
+
+  it("gives plain-string bullets an id and keeps the ids bullets already have", () => {
+    const normalized = normalizeResume({
+      ...createResume(),
+      work: [
+        {
+          id: "work-1",
+          name: "Acme",
+          position: "Engineer",
+          highlights: ["Saved before bullets had ids", { id: "kept", text: "Has an id" }],
+        },
+      ],
+    } as unknown as ResumeSchema);
+
+    const [legacy, kept] = normalized.work?.[0]?.highlights ?? [];
+    expect(legacy).toEqual({ id: expect.any(String), text: "Saved before bullets had ids" });
+    expect(legacy?.id).not.toBe("");
+    expect(kept).toEqual({ id: "kept", text: "Has an id" });
+    expect(normalizeResume(normalized)).toEqual(normalized);
   });
 });
 

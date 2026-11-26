@@ -1,4 +1,5 @@
 import type { ResumeVolunteer } from "@tailory/core";
+import { createId } from "@tailory/core";
 import type { Component } from "solid-js";
 import { produce } from "solid-js/store";
 import FormField from "@/components/ui/FormField";
@@ -47,13 +48,13 @@ const VolunteerForm: Component = () => {
       (v) => v?.id === id,
       produce((v: ResumeVolunteer) => {
         if (!v.highlights) v.highlights = [];
-        v.highlights.push("");
+        v.highlights.push({ id: createId(), text: "" });
       })
     );
   };
 
   const updateHighlight = (id: string, idx: number, value: string) => {
-    setResume("volunteer", (v) => v?.id === id, "highlights", idx, value);
+    setResume("volunteer", (v) => v?.id === id, "highlights", idx, "text", value);
   };
 
   const removeHighlight = (id: string, idx: number) => {
