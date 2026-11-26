@@ -17,6 +17,7 @@ import {
 import { request } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
@@ -90,6 +91,31 @@ const stop = (child) =>
     child.kill("SIGTERM");
   });
 
+/** A resume that runs onto a second page as designed, and fits one page tightened. */
+const twoPageResume = () => ({
+  basics: {
+    name: "Ada Smoke",
+    label: "Software Engineer",
+    email: "ada@example.com",
+    summary: "Builds small, reliable tools that run in the browser.",
+    location: {},
+    profiles: [],
+  },
+  work: ["A", "B", "C", "D"].map((company, index) => ({
+    id: `work-${company}`,
+    name: `Company ${company}`,
+    position: "Senior Software Engineer",
+    startDate: `${2016 + index * 2}-01`,
+    endDate: `${2017 + index * 2}-12`,
+    highlights: [1, 2, 3, 4, 5].map((item) => ({
+      id: `bullet-${company}${item}`,
+      text: `Led work item ${item} at Company ${company}, shipping a faster editor and a calmer review process for the team.`,
+    })),
+  })),
+  education: [{ id: "education-1", institution: "Example University", area: "Computer Science" }],
+  skills: [{ id: "skill-1", name: "Languages", keywords: ["TypeScript", "Rust", "Go"] }],
+});
+
 const work = mkdtempSync(path.join(tmpdir(), "tailory-smoke-"));
 try {
   const tarball = pack();
@@ -113,6 +139,43 @@ try {
   check(
     packages.sort().join(",") === "@electric-sql/pglite,tailory",
     `the installed package should depend on PGlite alone, found ${packages.join(", ")}`
+  );
+
+  // The bundled pdfmake fits and prints a resume from the installed package.
+  const render = await import(
+    pathToFileURL(path.join(modules, "tailory", "dist", "server", "render.js")).href
+  );
+  const application = {
+    excluded: [],
+    rewordings: [],
+    sectionOrder: [],
+    templateId: "modern",
+    pageTarget: 1,
+    autoFit: true,
+  };
+  const coldStarted = performance.now();
+  const fitted = await render.fitApplicationResult(twoPageResume(), application);
+  const pdf = await render.renderPdf(twoPageResume(), application);
+  const coldRenderMs = performance.now() - coldStarted;
+  const warmStarted = performance.now();
+  await render.fitApplicationResult(twoPageResume(), application);
+  await render.renderPdf(twoPageResume(), application);
+  const warmRenderMs = performance.now() - warmStarted;
+  check(
+    fitted.page.message === "1 page, fits with tighter spacing",
+    `fit said "${fitted.page.message}"`
+  );
+  const pdfPages = Buffer.from(pdf)
+    .toString("latin1")
+    .match(/\/Type \/Page\b/g)?.length;
+  check(pdfPages === 1, `the fitted PDF has ${pdfPages} pages`);
+  const untargeted = await render.fitApplicationResult(twoPageResume(), {
+    ...application,
+    pageTarget: null,
+  });
+  check(
+    untargeted.page.message === "2 pages",
+    `fit without a target said "${untargeted.page.message}"`
   );
 
   const bin = path.join(modules, "tailory", "bin", "tailory.mjs");
@@ -186,6 +249,7 @@ try {
     `| npm install (empty cache) | ${s(installMs)} |`,
     `| First start (creates and migrates the database) | ${s(first.ms)} |`,
     `| Warm start | ${s(warm.ms)} |`,
+    `| Fit and print a two-page resume to one page (first, then warm) | ${s(coldRenderMs)}, ${s(warmRenderMs)} |`,
     "",
   ].join("\n");
   console.log(summary);

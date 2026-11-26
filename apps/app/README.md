@@ -109,6 +109,9 @@ Migrations in `drizzle/` run at startup, on PGlite and on Postgres. The Postgres
 schema. Both drivers must build the columns in `src/server/db/__snapshots__/columns.txt`.
 
 The server build bundles every dependency except PGlite, which loads its WASM files from its own
-package folder, so the installed package depends on PGlite alone. Bundling also keeps Better Auth's
+package folder, so the installed package depends on PGlite alone. That includes pdfmake:
+`src/server/render.ts` loads its minified browser build and Roboto once per process to fit, print
+and export resumes, and the build emits it as `dist/server/render.js` so the smoke test can print
+from the installed package. Bundling also keeps Better Auth's
 optional `solid-js@^1` peer out of installs. In the browser, use `better-auth/client`, never
 `better-auth/solid`, which is written for Solid 1.
