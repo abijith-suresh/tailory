@@ -51,7 +51,10 @@ function renderMinimalSection(section: ResumeSectionModel, model: ResumeRenderMo
         ]);
 
   return {
-    stack: [{ text: section.title.toUpperCase(), style: "sectionTitle" }, ...body],
+    stack: [
+      { text: section.title.toUpperCase(), style: "sectionTitle", headlineLevel: 1 },
+      ...body,
+    ],
     margin: spacing.after(8),
   };
 }
@@ -59,13 +62,16 @@ function renderMinimalSection(section: ResumeSectionModel, model: ResumeRenderMo
 function renderModernSection(section: ResumeSectionModel, model: ResumeRenderModel): Content[] {
   const title = {
     stack: [
-      { text: section.title.toUpperCase(), style: "sectionTitle" },
-      renderDivider({
-        color: model.design.accentColor,
-        lineWidth: 1,
-        margin: spacing.before(6),
-        pageMargins: model.pageMargins,
-      }),
+      { text: section.title.toUpperCase(), style: "sectionTitle", headlineLevel: 1 },
+      {
+        ...(renderDivider({
+          color: model.design.accentColor,
+          lineWidth: 1,
+          margin: spacing.before(6),
+          pageMargins: model.pageMargins,
+        }) as object),
+        headlineLevel: 1,
+      } as Content,
     ],
   } satisfies Content;
 
@@ -110,7 +116,11 @@ function renderCompactSection(section: ResumeSectionModel, model: ResumeRenderMo
         ]);
 
   return [
-    { text: section.title.toUpperCase(), style: "sectionTitle" } satisfies Content,
+    {
+      text: section.title.toUpperCase(),
+      style: "sectionTitle",
+      headlineLevel: 1,
+    } satisfies Content,
     ...body,
     ...(section.dividerAfter
       ? [
