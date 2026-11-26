@@ -35,7 +35,7 @@ export default function Settings() {
           Deletes your account and everything Tailory keeps for it. This can't be undone.
         </p>
         <div class="panel__actions">
-          <Button disabled={pending()} onClick={() => void remove()}>
+          <Button variant="danger" disabled={pending()} onClick={() => void remove()}>
             Delete my account
           </Button>
         </div>

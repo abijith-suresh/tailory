@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 import { omit } from "solid-js";
 
-export type ButtonVariant = "primary" | "secondary" | "quiet";
+export type ButtonVariant = "primary" | "secondary" | "quiet" | "danger";
 
 const classes = (
   variant: ButtonVariant | undefined,

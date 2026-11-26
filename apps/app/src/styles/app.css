@@ -650,6 +650,16 @@
     background: var(--color-selected);
   }
 
+  .button--danger {
+    border-color: var(--color-status-negative-fg);
+    background: var(--color-surface);
+    color: var(--color-status-negative-fg);
+  }
+
+  .button--danger:not(:disabled):hover {
+    background: var(--color-status-negative-bg);
+  }
+
   .button--block {
     width: 100%;
   }

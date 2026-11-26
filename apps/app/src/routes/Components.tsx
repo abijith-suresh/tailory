@@ -25,6 +25,7 @@ export default function Components() {
             <Button variant="primary">Primary</Button>
             <Button>Secondary</Button>
             <Button variant="quiet">Quiet</Button>
+            <Button variant="danger">Danger</Button>
             <Button variant="primary" disabled>
               Disabled
             </Button>
