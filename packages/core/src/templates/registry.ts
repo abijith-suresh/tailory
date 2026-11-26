@@ -1,7 +1,9 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
+import { applySectionOrder } from "../applications/section-order.ts";
 import type { PdfTemplateOptions } from "../export/template-types.ts";
 import type { ResumeDesignSettings } from "../resume/design.ts";
+import type { ResumeSectionKey } from "../types/application.ts";
 import type { ResumeSchema } from "../types/resume.ts";
 import { TEMPLATE_IDS, type TemplateId } from "../types/template.ts";
 import { buildCompactAtsRenderModel, compactAtsTemplate } from "./compact-ats.ts";
@@ -66,7 +68,11 @@ export function loadPdfTemplateRenderer(templateId: TemplateId): PdfTemplateRend
 
 export function buildResumeRenderModel(
   resume: ResumeSchema,
-  design: ResumeDesignSettings
+  design: ResumeDesignSettings,
+  sectionOrder?: readonly ResumeSectionKey[]
 ): ResumeRenderModel {
-  return TEMPLATE_REGISTRY[design.template].buildRenderModel(resume, design);
+  return applySectionOrder(
+    TEMPLATE_REGISTRY[design.template].buildRenderModel(resume, design),
+    sectionOrder
+  );
 }

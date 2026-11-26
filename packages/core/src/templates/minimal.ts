@@ -1,4 +1,5 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
+import { applySectionOrder } from "../applications/section-order.ts";
 import { renderPdfResumeModel } from "../export/pdf-renderer.ts";
 
 import {
@@ -97,5 +98,7 @@ export function minimalTemplate(
     accentColor: options.accentColor,
   });
 
-  return renderPdfResumeModel(buildMinimalRenderModel(resume, design));
+  return renderPdfResumeModel(
+    applySectionOrder(buildMinimalRenderModel(resume, design), options.sectionOrder)
+  );
 }
