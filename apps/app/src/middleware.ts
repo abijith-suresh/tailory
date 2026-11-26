@@ -2,6 +2,7 @@ import type { StartMiddleware } from "@solidjs/vite-plugin";
 import { sql } from "drizzle-orm";
 
 import { AUTH_BASE_PATH, SIGN_IN_PATH } from "./server/auth";
+import { DOWNLOAD_PATH, handleDownload } from "./server/downloads";
 import { localRejectionResponse, localRequestRejection } from "./server/loopback";
 import { handleMcp } from "./server/mcp";
 import { getAuth, getConfig, getDatabase } from "./server/runtime";
@@ -46,6 +47,13 @@ const authRoutes: StartMiddleware = async (event, next) => {
 const mcp: StartMiddleware = (event, next) =>
   pathOf(event.request) === "/mcp" ? handleMcp(event.request) : next();
 
+/**
+ * Resume downloads from export_resume. The link's signed token is the authority, so it works in
+ * a browser that isn't signed in; see src/server/downloads.ts.
+ */
+const downloads: StartMiddleware = (event, next) =>
+  pathOf(event.request).startsWith(DOWNLOAD_PATH) ? handleDownload(event.request) : next();
+
 /** Paths a signed-out person may open. */
 const PUBLIC_PAGES = new Set([SIGN_IN_PATH]);
 
@@ -73,4 +81,4 @@ const signInGate: StartMiddleware = async (event, next) => {
   });
 };
 
-export default [loopbackOnly, health, authRoutes, mcp, signInGate];
+export default [loopbackOnly, health, authRoutes, mcp, downloads, signInGate];
