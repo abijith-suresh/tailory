@@ -1,9 +1,9 @@
+import type { ResumeHighlight } from "@tailory/core";
 import { type Component, For } from "solid-js";
-
 import Textarea from "@/components/ui/Textarea";
 
 interface HighlightListProps {
-  highlights: string[];
+  highlights: ResumeHighlight[];
   idPrefix: string;
   label: string;
   addLabel: string;
@@ -32,7 +32,7 @@ const HighlightList: Component<HighlightListProps> = (props) => {
               <Textarea
                 id={textareaId(index())}
                 aria-describedby={labelId()}
-                value={highlight}
+                value={highlight.text}
                 onInput={(value) => props.onInput(index(), value)}
                 placeholder={props.placeholder}
                 rows={2}

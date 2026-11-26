@@ -244,11 +244,11 @@ Adi Shankara Institute of Engineering and Technology 2021-2025
     expect(result.data.projects).toHaveLength(2);
     expect(result.data.projects?.[0]).toMatchObject({
       name: "Project One",
-      highlights: ["Built feature one"],
+      highlights: [{ id: expect.any(String), text: "Built feature one" }],
     });
     expect(result.data.projects?.[1]).toMatchObject({
       name: "Project Two",
-      highlights: ["Built feature two"],
+      highlights: [{ id: expect.any(String), text: "Built feature two" }],
     });
     expect(result.data.education).toHaveLength(2);
     expect(result.data.education?.[0]).toMatchObject({
@@ -374,7 +374,9 @@ https://example.com/resume-imports
       position: "Mentor",
       startDate: "2022",
       endDate: "Present",
-      highlights: ["Coached students on web development fundamentals"],
+      highlights: [
+        { id: expect.any(String), text: "Coached students on web development fundamentals" },
+      ],
     });
     expect(result.data.awards?.[0]).toMatchObject({
       title: "Builder of the Year",
