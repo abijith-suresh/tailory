@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
