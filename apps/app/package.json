@@ -1,9 +1,16 @@
 {
   "name": "tailory",
-  "private": true,
-  "type": "module",
   "version": "0.0.0",
+  "description": "Resume editor that runs on your computer or your server, with an MCP endpoint for agents.",
+  "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abijith-suresh/tailory.git",
+    "directory": "apps/app"
+  },
+  "homepage": "https://github.com/abijith-suresh/tailory/tree/main/apps/app#readme",
+  "bugs": "https://github.com/abijith-suresh/tailory/issues",
   "engines": {
     "node": ">=24"
   },
@@ -15,6 +22,11 @@
     "dist",
     "drizzle"
   ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "dev",
+    "provenance": true
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -26,6 +38,7 @@
     "test:smoke": "node scripts/smoke.mjs",
     "pack:tarball": "node scripts/pack.mjs",
     "prepack": "npm run build",
+    "prepublishOnly": "node -e \"console.error('tailory is published by the Dev build workflow, not from a checkout.'); process.exit(1)\"",
     "db:generate": "drizzle-kit generate",
     "auth:generate": "npx --yes auth@1.7.28 generate --config auth-cli.config.ts --output src/server/db/auth-schema.ts --yes && biome format --write src/server/db/auth-schema.ts"
   },

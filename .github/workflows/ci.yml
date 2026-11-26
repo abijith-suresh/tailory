@@ -27,9 +27,9 @@ jobs:
 
   # Repository-local jobs go here; add each one to the gate's needs.
 
-  # A PR that changes a versioned package needs a patch Changeset naming it. The script exempts
-  # docs, ci, chore, style, and test titles. A retitled PR keeps its last result until this job is
-  # re-run.
+  # A PR that changes a versioned package needs a patch Changeset naming it. Nothing consumes them
+  # until the first stable release, whose changelog they become. The script exempts docs, ci,
+  # chore, style, and test titles. A retitled PR keeps its last result until this job is re-run.
   changeset:
     name: changeset
     runs-on: ubuntu-24.04
@@ -76,14 +76,7 @@ jobs:
       - name: Install the Changesets parser without lifecycle scripts
         run: npm ci --ignore-scripts
 
-      # The gate counts a skipped job as a failure, so the version packages PR skips this step
-      # instead of the whole job.
       - name: Require a Changeset for changed packages
-        if: >-
-          !(
-            github.event.pull_request.head.repo.full_name == github.repository &&
-            github.event.pull_request.head.ref == 'changeset-release/main'
-          )
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}

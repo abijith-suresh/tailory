@@ -3,8 +3,7 @@
 // Every workspace package is versioned by Changesets (see .changeset/config.json). A pull request
 // that changes a package's shipped files must add a patch Changeset naming that package. Tests,
 // READMEs, and generated changelogs do not count as shipped files. Pull requests whose
-// Conventional Commit type is docs, ci, chore, style, or test are exempt, and CI skips the
-// generated "version packages" pull request.
+// Conventional Commit type is docs, ci, chore, style, or test are exempt.
 //
 // In CI: BASE_SHA, HEAD_SHA, and PR_TITLE come from the pull_request event.
 // Locally: node scripts/changeset-presence.mjs (compares HEAD^ with HEAD).
