@@ -129,22 +129,39 @@ const agentProvider = (
 };
 
 export type FlowResult = {
+  /** Connected and ready; close it when done. */
+  client: Client;
   protocolVersion: string | undefined;
   tools: string[];
-  whoami: unknown;
   log: FlowLog;
 };
 
-const callWhoami = async (client: Client) => {
-  const result = await client.callTool({ name: "whoami", arguments: {} });
+/** A tool call's answer: the text, the structured content, and whether it is an error. */
+export type ToolAnswer = {
+  isError: boolean;
+  text: string;
+  // biome-ignore lint/suspicious/noExplicitAny: tests read whatever shape each tool answers with
+  data: any;
+};
+
+export const callTool = async (
+  client: Client,
+  name: string,
+  args: Record<string, unknown> = {}
+): Promise<ToolAnswer> => {
+  const result = await client.callTool({ name, arguments: args });
   const [first] = result.content as { type: string; text: string }[];
-  return JSON.parse(first?.text ?? "null") as unknown;
+  return {
+    isError: result.isError === true,
+    text: first?.text ?? "",
+    data: result.structuredContent ?? null,
+  };
 };
 
 /**
  * Connects to /mcp, signing in first when `oauth` is given: discovery from the 401, client
  * registration (DCR or CIMD), authorization with consent, code exchange with the RFC 9207 `iss`
- * check, then `tools/list` and a `whoami` call.
+ * check, then `tools/list`. The caller closes the client.
  */
 export const runMcpFlow = async (
   mcpUrl: string,
@@ -174,15 +191,11 @@ export const runMcpFlow = async (
     await transport.finishAuth(log.callback);
     client = await connect();
   }
-  try {
-    const { tools } = await client.listTools();
-    return {
-      protocolVersion: client.getNegotiatedProtocolVersion(),
-      tools: tools.map((tool) => tool.name),
-      whoami: await callWhoami(client),
-      log,
-    };
-  } finally {
-    await client.close();
-  }
+  const { tools } = await client.listTools();
+  return {
+    client,
+    protocolVersion: client.getNegotiatedProtocolVersion(),
+    tools: tools.map((tool) => tool.name),
+    log,
+  };
 };

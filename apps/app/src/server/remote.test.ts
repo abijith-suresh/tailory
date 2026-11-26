@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { runMcpFlow, signUp } from "./testing/mcp-client";
+import { callTool, runMcpFlow, signUp } from "./testing/mcp-client";
 
 // Checks a running server-mode Tailory with email sign-in on, such as the Docker image in CI's
 // app-package job: TAILORY_TEST_SERVER_URL=http://127.0.0.1:4413. Skipped otherwise. CIMD needs
@@ -54,7 +54,7 @@ describe.skipIf(!url)("a running server", () => {
     const cookie = await signUp(origin, "Container User");
     const home = await fetch(origin, { headers: { cookie } });
     expect(home.status).toBe(200);
-    expect(await home.text()).toContain("Signed in as Container User");
+    expect(await home.text()).toContain("Account: Container User");
   });
 
   it.skipIf(!functionIds.deleteAccount)(
@@ -80,7 +80,10 @@ describe.skipIf(!url)("a running server", () => {
     const result = await runMcpFlow(`${origin}/mcp`, { cookie, registration: "dcr" });
     expect(result.log.callback?.get("iss")).toBe(`${origin}/api/auth`);
     expect(result.protocolVersion).toBe("2026-07-28");
-    expect(result.tools).toEqual(["whoami"]);
-    expect(result.whoami).toEqual({ name: "Agent Owner", mode: "server" });
+    expect(result.tools).toContain("get_profile");
+    const profile = await callTool(result.client, "get_profile");
+    await result.client.close();
+    expect(profile.isError).toBe(false);
+    expect(profile.data.profile.basics.name).toBe("");
   });
 });

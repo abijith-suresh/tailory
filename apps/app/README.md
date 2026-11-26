@@ -1,9 +1,9 @@
 # tailory (server app)
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
-handles sign-in, and serves an MCP endpoint for agents. The pages are placeholders, and the MCP
-endpoint has no resume tools yet; the real screens and tools come later. Dev builds only; no stable
-release yet.
+handles sign-in, and serves an MCP endpoint with the resume tools agents use. The app shell and
+navigation are in place, but the Applications, Profile and Connect an agent screens are still
+empty. Dev builds only; no stable release yet.
 
 ## Try the dev build
 
@@ -94,11 +94,39 @@ any instance can answer any request.
   Discovery: `/.well-known/oauth-protected-resource/mcp` and
   `/.well-known/oauth-authorization-server/api/auth`. Authorization responses carry `iss`
   (RFC 9207).
-- **Tools:** only `whoami` for now, which names the account and the mode.
+
+### Tools
+
+Agents work through eight tools (`src/server/tools.ts`). Every write acts as the agent: the change
+log records it with the OAuth client's registered name, or in local mode the name the client
+sends. Every write answers with the page result from `src/server/render.ts` (such as "1 page,
+fits" or "about 3 lines over 1 page") and the application's link in the web app
+(`<address>/applications/<id>`). Each tool answers with a short line of text plus structured
+content; a bad id or input answers with `isError` and what to do instead.
+
+| Tool                 | Does                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `get_profile`        | The profile, with an id on every entry and bullet                                                      |
+| `update_profile`     | `replace` the whole profile, merge `basics`, `add` entries or bullets, `change` or `remove` them by id |
+| `list_applications`  | Filter by `status`, `archived` (`exclude` by default, `include`, `only`) and a text `query`            |
+| `create_application` | Company, role, posting URL, job description; starts from the whole profile                             |
+| `get_application`    | Job details, tailoring, the resume as it will print, stale rewordings, the page result                 |
+| `tailor_application` | `exclude`/`include` item ids, `reword` lines, `sectionOrder`, `template`, `pageTarget`, `autoFit`      |
+| `update_application` | Status, notes, dates, job details, archive or unarchive                                                |
+| `export_resume`      | A download link for an application's or the profile's PDF or JSON Resume                               |
+
+Download links (`/download/<token>`) carry a token signed with a key derived from
+`TAILORY_AUTH_SECRET` (in local mode, a key made at start-up, so links end when Tailory stops). The
+token names the user, the resume and the format, and lasts an hour. It works in a browser that
+isn't signed in, which is where a person opens a link their agent hands them, and the download
+reads the resume with the token's user id, so it can't open anyone else's.
 
 `src/server/mcp-flow.test.ts` drives the endpoint with the official SDK client
 (`@modelcontextprotocol/client`, protocol 2026-07-28): discovery, CIMD and DCR sign-in, token,
-`tools/list` and a tool call in server mode, no OAuth in local mode, and -32022 for 2025-11-25.
+`tools/list` in server mode, no OAuth in local mode, and -32022 for 2025-11-25. It drives the
+whole flow over MCP in both modes (`src/server/testing/resume-flow.ts`): set up a profile, create
+an application, tailor it to one page, change its status, list it, and download the PDF; and
+checks that a second user can't reach the first user's application by id.
 It runs on PGlite in every test run and on Postgres in CI's app-postgres job. CI's app-package job
 also runs the DCR flow against the Docker image (`src/server/remote.test.ts`).
 
@@ -128,6 +156,13 @@ npm run test:smoke --workspace tailory   # pack, install in an empty folder, sta
 npm run db:generate --workspace tailory  # after editing src/server/db/schema.ts
 npm run auth:generate --workspace tailory  # after changing Better Auth plugins, then db:generate
 ```
+
+In dev, `/dev/components` shows every shared component for design review; production builds
+leave it out.
+
+Styles are plain CSS in `src/styles/app.css`, in cascade layers. The tokens are the marketing
+site's (`apps/site/src/styles/global.css`); change both together. Components in
+`src/components` have tests that render them on the server and query the HTML.
 
 `npm run dev` starts local mode. For server mode, set `TAILORY_MODE=server` and the sign-in
 variables above, with `TAILORY_PUBLIC_URL=http://localhost:4413`.
