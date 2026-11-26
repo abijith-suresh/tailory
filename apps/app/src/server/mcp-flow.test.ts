@@ -4,7 +4,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { deleteUser } from "./account";
 import { MCP_PROTOCOL_VERSIONS } from "./mcp";
-import { CIMD_CLIENT_ID, fetchCimdDocument, runMcpFlow, signUp } from "./testing/mcp-client";
+import {
+  CIMD_CLIENT_ID,
+  callTool,
+  fetchCimdDocument,
+  runMcpFlow,
+  signUp,
+} from "./testing/mcp-client";
+import { driveResumeFlow, RESUME_TOOLS } from "./testing/resume-flow";
 import { startTestServer, type TestServer } from "./testing/server";
 
 // The MCP endpoint end to end with the official SDK client (2026-07-28). Server mode runs on
@@ -72,8 +79,8 @@ describe.each(databases)("server mode on $name", ({ url }) => {
     expect(result.log.callback?.get("iss")).toBe(`${server.url}/api/auth`);
     expect(result.log.scope?.split(" ")).toContain("tailory");
     expect(result.protocolVersion).toBe("2026-07-28");
-    expect(result.tools).toEqual(["whoami"]);
-    expect(result.whoami).toEqual({ name: "Ada Lovelace", mode: "server" });
+    expect(result.tools).toEqual(RESUME_TOOLS);
+    await result.client.close();
 
     const client = await server.database.db.query.oauthClient.findFirst({
       where: (table, { eq }) => eq(table.clientId, CIMD_CLIENT_ID),
@@ -92,8 +99,50 @@ describe.each(databases)("server mode on $name", ({ url }) => {
     expect(client).toMatchObject({ name: "Tailory test agent (DCR)", clientDiscoveryId: null });
     expect(result.log.callback?.get("iss")).toBe(`${server.url}/api/auth`);
     expect(result.protocolVersion).toBe("2026-07-28");
-    expect(result.tools).toEqual(["whoami"]);
-    expect(result.whoami).toEqual({ name: "Grace Hopper", mode: "server" });
+    expect(result.tools).toEqual(RESUME_TOOLS);
+    await result.client.close();
+  });
+
+  it("drives the whole resume flow, and keeps one user's applications from another", async () => {
+    const owner = await runMcpFlow(`${server.url}/mcp`, {
+      cookie: await signUp(server.url, "Resume Owner"),
+      registration: "cimd",
+    });
+    const other = await runMcpFlow(`${server.url}/mcp`, {
+      cookie: await signUp(server.url, "Someone Else"),
+      registration: "dcr",
+    });
+    try {
+      const { applicationId, downloadUrl } = await driveResumeFlow(owner.client, server, {
+        actorClient: "Tailory test agent (CIMD)",
+      });
+
+      // The second user can't read, change or export the first user's application by id.
+      for (const [name, args] of [
+        ["get_application", { id: applicationId }],
+        ["tailor_application", { id: applicationId, pageTarget: 2 }],
+        ["update_application", { id: applicationId, status: "withdrawn" }],
+        ["export_resume", { applicationId }],
+      ] as const) {
+        const answer = await callTool(other.client, name, args);
+        expect(answer.isError, name).toBe(true);
+        expect(answer.text).toContain("Application not found");
+      }
+      const list = await callTool(other.client, "list_applications", { archived: "include" });
+      expect(list.data.applications).toEqual([]);
+
+      // A download link names its user inside the signature: changing it breaks the link.
+      const [body, signature] = new URL(downloadUrl).pathname.split("/").pop()?.split(".") ?? [];
+      const claims = JSON.parse(Buffer.from(body ?? "", "base64url").toString());
+      const forged = Buffer.from(JSON.stringify({ ...claims, u: "someone-else" })).toString(
+        "base64url"
+      );
+      const response = await fetch(`${server.url}/download/${forged}.${signature}`);
+      expect(response.status).toBe(404);
+    } finally {
+      await owner.client.close();
+      await other.client.close();
+    }
   });
 
   it("refuses a token-less call and a forged token", async () => {
@@ -113,7 +162,8 @@ describe.each(databases)("server mode on $name", ({ url }) => {
 
   it("deletes an account with everything it owns, and its tokens stop working", async () => {
     const cookie = await signUp(server.url, "Short Lived");
-    const { log } = await runMcpFlow(`${server.url}/mcp`, { cookie, registration: "dcr" });
+    const { log, client } = await runMcpFlow(`${server.url}/mcp`, { cookie, registration: "dcr" });
+    await client.close();
     const session = (await (
       await fetch(`${server.url}/api/auth/get-session`, { headers: { cookie } })
     ).json()) as { user: { id: string } };
@@ -206,7 +256,7 @@ describe("protocol revisions", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("mcp-session-id")).toBeNull();
     const body = (await response.json()) as { result: { tools: { name: string }[] } };
-    expect(body.result.tools.map((tool) => tool.name)).toEqual(["whoami"]);
+    expect(body.result.tools.map((tool) => tool.name)).toEqual(RESUME_TOOLS);
   });
 
   const expectUnsupported = async (response: Response, requested: string) => {
@@ -273,9 +323,14 @@ describe("local mode", () => {
 
   it("serves the SDK client with no OAuth, as the local user", async () => {
     const result = await runMcpFlow(`${server.url}/mcp`);
-    expect(result.protocolVersion).toBe("2026-07-28");
-    expect(result.tools).toEqual(["whoami"]);
-    expect(result.whoami).toEqual({ name: "You", mode: "local" });
+    try {
+      expect(result.protocolVersion).toBe("2026-07-28");
+      expect(result.tools).toEqual(RESUME_TOOLS);
+      // No OAuth client here, so the change log names the agent by the name it sends.
+      await driveResumeFlow(result.client, server, { actorClient: "tailory-test-agent" });
+    } finally {
+      await result.client.close();
+    }
   });
 
   it("has no sign-in or OAuth discovery", async () => {
