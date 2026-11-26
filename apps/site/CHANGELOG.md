@@ -2,6 +2,15 @@
 
 Releases up to 0.0.2 were cut by Release Please from the repository root, tagged `0.0.1` and `0.0.2`.
 
+## 0.0.3
+
+### Patch Changes
+
+- 69e7c19: Add the applications model, resolving an application against the profile, and page fit to core; bullets now carry stable ids.
+- Updated dependencies [84e0ba3]
+- Updated dependencies [69e7c19]
+  - @tailory/core@0.0.1
+
 ## 0.0.2 (2026-09-28)
 
 [Compare with 0.0.1](https://github.com/abijith-suresh/tailory/compare/0.0.1...0.0.2)
