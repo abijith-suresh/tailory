@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "case \"${VERCEL_GIT_COMMIT_REF:-}\" in dependabot/*) echo 'Skipping Dependabot preview deployment'; exit 0 ;; *) exit 1 ;; esac",
+  "ignoreCommand": "if [ \"${VERCEL_GIT_COMMIT_REF:-}\" = main ]; then exit 1; fi; echo 'Only main deploys; no preview deployments'; exit 0",
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build --workspace @tailory/site",
   "installCommand": "npm ci",
