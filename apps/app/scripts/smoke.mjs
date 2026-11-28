@@ -229,7 +229,10 @@ try {
     },
   });
   const created = await call("create_application", { company: "Acme", role: "Engineer" });
-  check(created.page.pageCount === 1, `the application prints on ${created.page.pageCount} pages`);
+  check(
+    created.page.pagesNeeded === 1,
+    `the application prints on ${created.page.pagesNeeded} pages`
+  );
   const exported = await call("export_resume", { applicationId: created.application.id });
   const download = await fetch(exported.url);
   const bytes = Buffer.from(await download.arrayBuffer());
