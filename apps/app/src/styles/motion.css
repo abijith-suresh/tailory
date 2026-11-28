@@ -1,0 +1,56 @@
+/*
+ * Motion primitives that live in CSS. Timing comes from the tokens in tokens.css; the scripted
+ * ones (FLIP, toast exit) are in src/lib/motion.ts. Usage notes: "Motion" in apps/app/README.md.
+ */
+@layer base {
+  /*
+   * Press with weight: a control goes down fast and comes back up a little slower, on a spring.
+   * It uses the individual translate and scale properties, so it never fights a transform.
+   * Components that press list `var(--press-transition)` in their own transition.
+   */
+  :root {
+    --press-transition:
+      translate var(--duration-settle) var(--ease-spring),
+      scale var(--duration-settle) var(--ease-spring);
+  }
+
+  .press {
+    transition: var(--press-transition);
+  }
+
+  .press:active:not(:disabled, [aria-disabled="true"]) {
+    translate: 0 var(--motion-press-y);
+    scale: var(--motion-press-scale);
+    --press-transition:
+      translate var(--duration-press) var(--ease-out), scale var(--duration-press) var(--ease-out);
+  }
+
+  /*
+   * Without a pointer press (keyboard Enter or Space), :active still fires in most browsers, so
+   * keyboard users get the same feedback.
+   */
+
+  /* A row that just landed in a list: a cobalt wash that fades, for "here it is". */
+  @keyframes motion-landed {
+    0%,
+    40% {
+      background-color: var(--color-selected);
+    }
+  }
+
+  .motion-landed {
+    animation: motion-landed 1200ms var(--ease-out);
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .motion-landed {
+      animation-duration: 600ms;
+    }
+  }
+}

@@ -55,6 +55,10 @@
       "assist": { "actions": { "source": { "organizeImports": "off" } } }
     },
     {
+      "includes": ["apps/app/src/**"],
+      "linter": { "domains": { "playwright": "none" } }
+    },
+    {
       "includes": ["apps/*/scripts/**"],
       "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
     }

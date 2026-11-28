@@ -1,0 +1,197 @@
+/* The country combobox and the link field that names the site from its address. */
+@layer components {
+  /* ── Combobox ───────────────────────────────────────────────────── */
+
+  .combobox {
+    position: relative;
+    min-width: 0;
+  }
+
+  .combobox__input {
+    padding-right: var(--space-8);
+  }
+
+  .combobox--badged .combobox__input {
+    padding-left: 2.875rem;
+  }
+
+  .combobox__badge {
+    position: absolute;
+    left: 0.625rem;
+    top: 50%;
+    min-width: 1.625rem;
+    height: 1.25rem;
+    padding-inline: 0.3125rem;
+    translate: 0 -50%;
+    border-radius: 4px;
+    background: var(--color-canvas-deep);
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.25rem;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .combobox__arrow {
+    position: absolute;
+    top: 50%;
+    right: var(--space-3);
+    width: 0.875rem;
+    height: 0.875rem;
+    translate: 0 -50%;
+    color: var(--color-fg-subtle);
+    pointer-events: none;
+    transition: rotate var(--duration-move) var(--ease-out);
+  }
+
+  .combobox__input[aria-expanded="true"] ~ .combobox__arrow {
+    rotate: 180deg;
+  }
+
+  /* The list sits in the top layer (popover), so a dialog's scrolling can't clip it. */
+  .combobox__list {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    max-height: 15rem;
+    overflow: auto;
+    padding: var(--space-1);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-fg);
+    box-shadow: var(--shadow-popover);
+    list-style: none;
+    opacity: 0;
+    translate: 0 var(--motion-drop);
+    transition:
+      opacity var(--duration-exit) var(--ease-in),
+      translate var(--duration-exit) var(--ease-in),
+      display var(--duration-exit) allow-discrete,
+      overlay var(--duration-exit) allow-discrete;
+  }
+
+  .combobox__list:popover-open {
+    opacity: 1;
+    translate: 0 0;
+    transition-duration: var(--duration-enter);
+    transition-timing-function: var(--ease-out);
+  }
+
+  @starting-style {
+    .combobox__list:popover-open {
+      opacity: 0;
+      translate: 0 var(--motion-drop);
+    }
+  }
+
+  .combobox__option {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+    cursor: pointer;
+  }
+
+  .combobox__option-badge {
+    width: 1.375rem;
+    flex: none;
+    color: var(--color-fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .combobox__option:hover,
+  .combobox__option[data-active] {
+    background: var(--color-tint-hover);
+  }
+
+  .combobox__option[aria-selected="true"] {
+    font-weight: 620;
+  }
+
+  .combobox__empty {
+    padding: var(--space-2);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-sm);
+  }
+
+  /* ── Link field ─────────────────────────────────────────────────── */
+
+  .link-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--control-height);
+    padding-inline: 0.375rem var(--space-3);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    cursor: text;
+    transition:
+      border-color var(--duration-hover) var(--ease-out),
+      box-shadow var(--duration-hover) var(--ease-out);
+  }
+
+  /* Empty, there is no site name: the text starts where every other field's does. */
+  .link-input:not(:has(.link-input__site)) {
+    padding-left: var(--space-3);
+  }
+
+  .link-input:hover {
+    border-color: color-mix(in srgb, var(--color-line-strong) 60%, var(--color-fg-subtle));
+  }
+
+  .link-input:focus-within {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 18%, transparent);
+  }
+
+  .link-input[data-invalid] {
+    border-color: var(--color-danger);
+  }
+
+  .link-input__site {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex: none;
+    max-width: 8rem;
+    height: 1.5rem;
+    padding-inline: var(--space-2);
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--color-canvas-deep);
+    color: var(--color-fg-muted);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .link-input__site[data-known] {
+    color: var(--color-fg);
+  }
+
+  .link-input__site svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex: none;
+  }
+
+  .link-input__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: var(--text-md);
+    outline: none;
+  }
+}

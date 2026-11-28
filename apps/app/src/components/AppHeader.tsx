@@ -1,7 +1,8 @@
 import { For, Show } from "solid-js";
 
+import { authClient } from "../lib/auth-client";
+import { Menu } from "./Menu";
 import { isCurrent, NAV_ITEMS } from "./nav";
-import { SignOut } from "./SignOut";
 
 export type Viewer = { name: string; email: string; mode: "local" | "server" };
 
@@ -12,8 +13,6 @@ type AppHeaderProps = {
   /** Sign-in and consent: the wordmark only, no navigation. */
   bare?: boolean;
 };
-
-const MENU_ID = "account-menu";
 
 // Links here always set aria-current. The router marks any link it finds unmarked whose address
 // matches the page, which would make the wordmark "current" on the home screen.
@@ -31,32 +30,37 @@ function Wordmark() {
   );
 }
 
-/** Account name and sign-out, in a popover. Server mode only: local mode has no accounts. */
+const signOut = async () => {
+  await authClient.signOut();
+  window.location.assign("/sign-in");
+};
+
+/** Who is signed in, and Sign out. Server mode only: local mode has no accounts. */
 function AccountMenu(props: { viewer: Viewer }) {
   const initial = () => props.viewer.name.trim().charAt(0).toUpperCase() || "?";
   return (
-    <>
-      <button
-        type="button"
-        class="account-button"
-        popovertarget={MENU_ID}
-        aria-label={`Account: ${props.viewer.name}`}
-      >
-        <span class="account-button__initial" aria-hidden="true">
-          {initial()}
-        </span>
-        <span class="account-button__name" aria-hidden="true">
-          {props.viewer.name}
-        </span>
-      </button>
-      <div id={MENU_ID} class="account-menu" popover="auto">
+    <Menu
+      align="end"
+      triggerClass="account-button"
+      triggerLabel={`Account: ${props.viewer.name}`}
+      trigger={
+        <>
+          <span class="account-button__initial" aria-hidden="true">
+            {initial()}
+          </span>
+          <span class="account-button__name" aria-hidden="true">
+            {props.viewer.name}
+          </span>
+        </>
+      }
+      header={
         <div class="account-menu__who">
           <span class="account-menu__name">{props.viewer.name}</span>
           <span class="account-menu__email">{props.viewer.email}</span>
         </div>
-        <SignOut />
-      </div>
-    </>
+      }
+      items={[{ label: "Sign out", onSelect: () => void signOut() }]}
+    />
   );
 }
 
@@ -76,32 +80,22 @@ export function AppHeader(props: AppHeaderProps) {
                       href={item.href}
                       aria-current={isCurrent(item.href, props.pathname) ? "page" : "false"}
                     >
-                      {item.label}
+                      <span class="app-nav__long">{item.label}</span>
+                      {/* Only one of the two shows, so the name is always the visible word. */}
+                      <span class="app-nav__short">{item.short}</span>
                     </a>
                   </li>
                 )}
               </For>
             </ul>
           </nav>
-          <div class="app-header__account">
-            <Show when={props.viewer}>
-              {(viewer) => (
-                <Show
-                  when={viewer().mode === "server"}
-                  fallback={
-                    <span
-                      class="mode-note"
-                      title="No sign-in: Tailory only answers on this computer"
-                    >
-                      Local mode
-                    </span>
-                  }
-                >
-                  <AccountMenu viewer={viewer()} />
-                </Show>
-              )}
-            </Show>
-          </div>
+          <Show when={props.viewer?.mode === "server" && props.viewer}>
+            {(viewer) => (
+              <div class="app-header__end">
+                <AccountMenu viewer={viewer()} />
+              </div>
+            )}
+          </Show>
         </Show>
       </div>
     </header>

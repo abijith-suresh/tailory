@@ -1,0 +1,31 @@
+/* Empty state: a dashed outline where content will be, one line, and what to do next. */
+@layer components {
+  .empty-state {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border: 1.5px dashed var(--color-line-strong);
+    border-radius: var(--radius-xl);
+    color: var(--color-fg-muted);
+  }
+
+  .empty-state__title {
+    color: var(--color-fg);
+    font-size: var(--text-md);
+    line-height: var(--text-md--lh);
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+
+  .empty-state__text {
+    max-width: var(--container-measure);
+  }
+
+  .empty-state__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+}

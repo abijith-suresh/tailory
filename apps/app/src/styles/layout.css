@@ -1,0 +1,148 @@
+/* Page frame: the container, the main region, page headings and panels. */
+@layer layout {
+  /* The page container: full width up to --container-page, with the side gutter inside. */
+  .page-x {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--container-page);
+    padding-inline: var(--space-4);
+  }
+
+  @media (min-width: 48rem) {
+    .page-x {
+      padding-inline: var(--space-6);
+    }
+  }
+
+  .app-main {
+    padding-block: var(--space-7) var(--space-16);
+  }
+
+  .app-main:focus {
+    outline: none;
+  }
+
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .page-title {
+    font-size: var(--text-title);
+    line-height: var(--text-title--lh);
+    letter-spacing: -0.03em;
+    font-weight: 650;
+  }
+
+  .page-lede {
+    margin-top: var(--space-1);
+    max-width: var(--container-measure);
+    color: var(--color-fg-muted);
+  }
+
+  @media (max-width: 40rem) {
+    .app-main {
+      padding-block: var(--space-5) var(--space-12);
+    }
+  }
+
+  /* A titled block on a surface: settings groups, forms. */
+  .panel {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-2xl);
+    background: var(--color-surface);
+    padding: var(--space-5);
+  }
+
+  .panel + .panel {
+    margin-top: var(--space-4);
+  }
+
+  .panel__title {
+    font-size: var(--text-heading-6);
+    line-height: var(--text-heading-6--lh);
+    letter-spacing: -0.015em;
+    font-weight: 620;
+  }
+
+  .panel__text {
+    margin-top: var(--space-1);
+    color: var(--color-fg-muted);
+  }
+
+  .panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+
+  @media (max-width: 40rem) {
+    .panel {
+      padding: var(--space-4);
+    }
+  }
+
+  /* Inside a stack, the gap does the spacing. */
+  .stack > .panel,
+  .stack > .panel__actions {
+    margin-top: 0;
+  }
+
+  .stack {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .form-error {
+    color: var(--color-danger);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .form-error:empty {
+    display: none;
+  }
+
+  /* Sign-in and consent: one narrow column in the middle of the page. */
+  .narrow {
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-2xs);
+    line-height: var(--text-2xs--lh);
+  }
+
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .definition {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .definition dt {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-2xs);
+    line-height: var(--text-2xs--lh);
+    font-weight: 500;
+  }
+
+  .definition dd {
+    overflow-wrap: anywhere;
+  }
+}

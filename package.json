@@ -23,7 +23,7 @@
     "format:check": "biome format .",
     "test": "npm run test --workspaces --if-present --",
     "test:coverage": "npm run test:coverage --workspaces --if-present --",
-    "test:e2e": "npm run test:e2e --workspace @tailory/site --",
+    "test:e2e": "npm run test:e2e --workspace @tailory/site --workspace tailory --",
     "test:e2e:build": "npm run build && npm run test:e2e",
     "assets:pdf-worker": "npm run assets:pdf-worker --workspace @tailory/site",
     "changeset": "changeset",
