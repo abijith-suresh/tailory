@@ -13,11 +13,11 @@ import {
   UnsupportedProtocolVersionError,
 } from "@modelcontextprotocol/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 import { authIssuer, MCP_SCOPE, mcpResource } from "./auth";
 import { LOCAL_USER, schema } from "./db";
 import { getAuth, getConfig, getDatabase } from "./runtime";
+import { registerResumeTools } from "./tools";
 
 declare const __TAILORY_VERSION__: string;
 
@@ -31,33 +31,33 @@ export const MCP_PROTOCOL_VERSIONS: readonly string[] = ["2026-07-28"];
 
 const version = typeof __TAILORY_VERSION__ === "string" ? __TAILORY_VERSION__ : "0.0.0";
 
-const textResult = (value: unknown) => ({
-  content: [{ type: "text" as const, text: JSON.stringify(value) }],
-});
+/** The agent's name: the OAuth client's registered name, or failing that the name it sends. */
+const oauthClientName = async (clientId: string) => {
+  if (clientId === "local") return null;
+  const { db } = await getDatabase();
+  const [client] = await db
+    .select({ name: schema.oauthClient.name })
+    .from(schema.oauthClient)
+    .where(eq(schema.oauthClient.clientId, clientId));
+  return client?.name ?? null;
+};
 
-/** The tools an agent gets. No resume tools yet: their names are under review in #186. */
-const buildServer = (userId: string) => {
+/** The tools an agent gets: the resume tools in src/server/tools.ts. */
+const buildServer = async (authInfo: AuthInfo) => {
+  const { userId, origin } = authInfo.extra ?? {};
+  if (typeof userId !== "string" || typeof origin !== "string") {
+    throw new Error("MCP request has no user");
+  }
   const server = new McpServer(
     { name: "tailory", version },
     { supportedProtocolVersions: [...MCP_PROTOCOL_VERSIONS] }
   );
-  server.registerTool(
-    "whoami",
-    {
-      description: "The name of the Tailory account this agent acts for, and how Tailory runs.",
-      inputSchema: z.object({}),
-      annotations: { readOnlyHint: true, openWorldHint: false },
-    },
-    async () => {
-      const { db } = await getDatabase();
-      const [user] = await db
-        .select({ name: schema.user.name })
-        .from(schema.user)
-        .where(eq(schema.user.id, userId));
-      if (!user) throw new Error("This account no longer exists");
-      return textResult({ name: user.name, mode: getConfig().mode });
-    }
-  );
+  const registered = await oauthClientName(authInfo.clientId);
+  registerResumeTools(server, {
+    userId,
+    origin,
+    clientName: () => registered ?? server.server.getClientVersion()?.name ?? null,
+  });
   return server;
 };
 
@@ -65,9 +65,8 @@ const buildServer = (userId: string) => {
 // traffic (an initialize handshake, a session) is rejected rather than served.
 const handler = createMcpHandler(
   ({ authInfo }) => {
-    const userId = authInfo?.extra?.userId;
-    if (typeof userId !== "string") throw new Error("MCP request has no user");
-    return buildServer(userId);
+    if (!authInfo) throw new Error("MCP request has no user");
+    return buildServer(authInfo);
   },
   {
     legacy: "reject",
@@ -175,12 +174,14 @@ export const handleMcp = async (request: Request): Promise<Response> => {
       token: "local",
       clientId: "local",
       scopes: [MCP_SCOPE],
-      extra: { userId: LOCAL_USER.id },
+      // Links point back at the loopback address the agent reached; Host was checked above.
+      extra: { userId: LOCAL_USER.id, origin: new URL(request.url).origin },
     });
   }
   const auth = await getAuth();
   if (!protectedHandler || protectedFor !== auth) {
     const resource = mcpResource(config.auth);
+    const origin = config.auth.publicUrl;
     protectedFor = auth;
     protectedHandler = requireMcpAuth(
       auth,
@@ -196,7 +197,7 @@ export const handleMcp = async (request: Request): Promise<Response> => {
           clientId: typeof clientId === "string" ? clientId : "unknown",
           scopes: typeof claims.scope === "string" ? claims.scope.split(" ") : [],
           resource: new URL(resource),
-          extra: { userId },
+          extra: { userId, origin },
         });
       },
       { resource, issuer: authIssuer(config.auth), requiredScopes: [MCP_SCOPE] }

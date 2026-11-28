@@ -213,11 +213,28 @@ try {
   check(version === "2026-07-28", `MCP negotiated ${version}`);
   const { tools } = await client.listTools();
   check(
-    tools.some((tool) => tool.name === "whoami"),
-    "MCP lists no whoami tool"
+    tools.some((tool) => tool.name === "export_resume"),
+    "MCP lists no resume tools"
   );
-  const whoami = await client.callTool({ name: "whoami", arguments: {} });
-  check(whoami.content[0].text.includes('"mode":"local"'), "whoami didn't answer for local mode");
+  const call = async (name, args) => {
+    const result = await client.callTool({ name, arguments: args });
+    check(!result.isError, `${name} failed: ${result.content[0]?.text}`);
+    return result.structuredContent;
+  };
+  // The installed package fits and prints: set up a profile, start an application, download it.
+  await call("update_profile", {
+    replace: {
+      basics: { name: "Smoke Test" },
+      work: [{ name: "Acme", position: "Engineer", highlights: ["Shipped the thing"] }],
+    },
+  });
+  const created = await call("create_application", { company: "Acme", role: "Engineer" });
+  check(created.page.pageCount === 1, `the application prints on ${created.page.pageCount} pages`);
+  const exported = await call("export_resume", { applicationId: created.application.id });
+  const download = await fetch(exported.url);
+  const bytes = Buffer.from(await download.arrayBuffer());
+  check(download.status === 200, `the download answered ${download.status}`);
+  check(bytes.subarray(0, 5).toString() === "%PDF-", "the download isn't a PDF");
   await client.close();
 
   // A second process can't open the same data folder.
