@@ -58,6 +58,13 @@ export type ChangeTargetKind = "profile" | "application";
 export type ActorKind = "user" | "agent";
 
 /**
+ * Where a change stands with the user: an agent's change waits as `pending` until the user keeps
+ * or undoes it. The user's own changes are born `kept`.
+ */
+export const REVIEW_STATES = ["pending", "kept", "undone"] as const;
+export type ReviewState = (typeof REVIEW_STATES)[number];
+
+/**
  * The change log: one row per write, with the value before and after it, so a change can be shown
  * and undone. `before` is null when the write created the target and `after` when it deleted it.
  */
@@ -82,8 +89,27 @@ export const change = pgTable(
     // The change this one undid, if it is an undo.
     undoes: text("undoes"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    review: text("review").$type<ReviewState>().notNull().default("kept"),
+    // When the change was kept or undone, and by whom. Set at birth for the user's own changes.
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewerKind: text("reviewer_kind").$type<ActorKind>(),
+    reviewerClient: text("reviewer_client"),
   },
   (table) => [
     index("change_target_idx").on(table.userId, table.targetKind, table.targetId, table.seq),
   ]
 );
+
+/**
+ * The last MCP tool call each user's agent made, for the connection check in Settings › Agents.
+ * One row per user, replaced on every call.
+ */
+export const mcpActivity = pgTable("mcp_activity", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  // The agent's client name when it gave one.
+  client: text("client"),
+  tool: text("tool").notNull(),
+  calledAt: timestamp("called_at", { withTimezone: true }).notNull(),
+});

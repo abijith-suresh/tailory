@@ -8,6 +8,7 @@ import {
   createPageMeasurer,
   DEFAULT_TEMPLATE_ID,
   exportJsonResumeDocument,
+  type FitDensity,
   type FitResult,
   type FitStep,
   fitApplication,
@@ -60,14 +61,19 @@ const measurePages = createPageMeasurer(loadPdfMake);
 
 /** How a resume falls on its page target, with a line an agent can act on. */
 export interface PageResult {
-  pageCount: number;
+  /** Pages the resume takes as it prints. */
+  pagesNeeded: number;
   pageTarget: number | null;
   /** True when there is no target or the resume is within it. */
   fits: boolean;
-  /** Spacing and text were tightened to meet the target. */
+  /** Spacing, margins or text were tightened to meet the target. */
   tightened: boolean;
   /** Roughly how many lines of body text run past the target. 0 when it fits. */
   linesOver: number;
+  /** How much of the last page the content uses, from 0 to 1. */
+  lastPageFill: number;
+  /** How tight it prints: 0 to 1, with the body text size and narrowest margin. */
+  density: FitDensity;
   /** Such as "1 page, fits" or "about 3 lines over 1 page". */
   message: string;
 }
@@ -96,7 +102,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 
 /** The page result in words: short, factual, and saying what the agent can change. */
 export function describeFit(fit: FitResult, autoFit: boolean): string {
-  const pages = plural(fit.pageCount, "page");
+  const pages = plural(fit.pagesNeeded, "page");
   const target = fit.pageTarget;
   switch (fit.status) {
     case "none":
@@ -107,18 +113,22 @@ export function describeFit(fit: FitResult, autoFit: boolean): string {
       return `${pages}, fits with tighter spacing`;
     case "over": {
       const over = `about ${plural(fit.linesOver, "line")} over ${plural(target ?? 0, "page")}`;
-      return autoFit ? `${over}, even with the tightest spacing` : `${over}; tightening is off`;
+      return autoFit
+        ? `${over} at the tightest; leave a line or two out`
+        : `${over}; tightening is off`;
     }
   }
 }
 
 function pageResult(fit: FitResult, autoFit: boolean): PageResult {
   return {
-    pageCount: fit.pageCount,
+    pagesNeeded: fit.pagesNeeded,
     pageTarget: fit.pageTarget,
     fits: fit.status !== "over",
     tightened: fit.status === "tightened",
     linesOver: fit.linesOver,
+    lastPageFill: fit.lastPageFill,
+    density: fit.density,
     message: describeFit(fit, autoFit),
   };
 }

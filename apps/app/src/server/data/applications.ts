@@ -1,20 +1,24 @@
 import {
   type Application,
   type ApplicationDetails,
+  type ApplicationOutcome,
   type ApplicationStatus,
+  ApplicationStatusError,
+  moveApplication,
   createApplication as newApplication,
   normalizeApplication,
+  profileSectionOrder,
   type ResumeSchema,
   type ResumeSectionKey,
   type Rewording,
-  setApplicationStatus,
   type TemplateId,
 } from "@tailory/core";
 import { and, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 
 import { schema } from "../db";
-import { type DataContext, notFound, recordChange, sameJson, type Tx } from "./context";
+import { type DataContext, DataError, notFound, recordChange, sameJson, type Tx } from "./context";
 import { currentResume } from "./profile";
+import { effectsStillShowing, hasLineEffects, lineEffects } from "./review";
 
 /** An application as stored, with when it last changed. */
 export type ApplicationRecord = Application & { updatedAt: string };
@@ -146,15 +150,21 @@ export const getApplication = async (
   return toRecord(row);
 };
 
-/** A new application, drafting, that keeps everything in the profile. */
+/**
+ * A new application, drafting, that keeps everything in the profile and starts from the
+ * profile's section order.
+ */
 export const createApplication = async (
   ctx: DataContext,
-  details: ApplicationDetails,
+  details: Omit<ApplicationDetails, "sectionOrder">,
   summary?: string
 ): Promise<ApplicationRecord> =>
   ctx.db.transaction(async (tx) => {
     const profile = await currentResume(tx, ctx.userId);
-    const application = normalizeApplication(newApplication(details), profile);
+    const application = normalizeApplication(
+      newApplication({ ...details, sectionOrder: profileSectionOrder(profile) }),
+      profile
+    );
     const { record } = await writeApplication(
       tx,
       ctx,
@@ -172,8 +182,15 @@ export type ApplicationChanges = {
   role?: string;
   postingUrl?: string | null;
   jobDescription?: string | null;
-  /** Moves the status and keeps `appliedAt` and `closedAt` in step, unless those are given too. */
+  /**
+   * Moves the status and keeps `appliedAt`, `closedAt` and `statusChangedAt` in step, unless
+   * those dates are given too. Closing needs an `outcome`, unless the application has one.
+   */
   status?: ApplicationStatus;
+  /** How a closed application ended. Ignored while it is open. */
+  outcome?: ApplicationOutcome | null;
+  /** An offer waiting on the user's answer. Cleared on closing. */
+  offer?: boolean;
   archived?: boolean;
   appliedAt?: string | null;
   closedAt?: string | null;
@@ -192,6 +209,8 @@ const FIELD_NAMES: Record<keyof ApplicationChanges, string> = {
   postingUrl: "posting URL",
   jobDescription: "job description",
   status: "status",
+  outcome: "outcome",
+  offer: "offer",
   archived: "archived",
   appliedAt: "applied date",
   closedAt: "closed date",
@@ -204,7 +223,10 @@ const FIELD_NAMES: Record<keyof ApplicationChanges, string> = {
   autoFit: "fitting",
 };
 
-const STATUS_FIELDS = new Set<string>(["status", "appliedAt", "closedAt"]);
+const STATUS_FIELDS = new Set<string>(["status", "outcome", "offer", "appliedAt", "closedAt"]);
+
+const where = (application: Application) =>
+  application.status === "closed" ? `closed (${application.outcome})` : application.status;
 
 const describeChanges = (before: Application, after: Application) => {
   const changed = (Object.keys(FIELD_NAMES) as (keyof ApplicationChanges)[]).filter(
@@ -213,23 +235,45 @@ const describeChanges = (before: Application, after: Application) => {
   if (changed.length === 1 && changed[0] === "archived") {
     return `${after.archived ? "Archived" : "Unarchived"} ${label(after)}`;
   }
-  if (changed.includes("status") && changed.every((key) => STATUS_FIELDS.has(key))) {
-    return `Moved ${label(after)} to ${after.status}`;
+  if (changed.length === 1 && changed[0] === "offer") {
+    return after.offer
+      ? `Marked an offer from ${label(after)}`
+      : `Cleared the offer flag of ${label(after)}`;
+  }
+  if (
+    (changed.includes("status") || changed.includes("outcome")) &&
+    changed.every((key) => STATUS_FIELDS.has(key))
+  ) {
+    return `Moved ${label(after)} to ${where(after)}`;
   }
   return `Changed the ${changed.map((key) => FIELD_NAMES[key]).join(", ")} of ${label(after)}`;
 };
 
-/** Applies `changes` to an application, normalized against `profile`. */
+/**
+ * Applies `changes` to an application, normalized against `profile`. Throws `invalid` for a
+ * status move that can't happen, such as closing without an outcome.
+ */
 export const applyChanges = (
   current: Application,
   changes: ApplicationChanges,
   profile: ResumeSchema,
   now = new Date()
 ): Application => {
-  const { status, appliedAt, closedAt, ...rest } = changes;
-  let next: Application = { ...current, ...rest, id: current.id, createdAt: current.createdAt };
-  if (status !== undefined && status !== current.status) {
-    next = setApplicationStatus(next, status, now);
+  const { status, outcome, offer, appliedAt, closedAt, ...rest } = changes;
+  let next: Application = {
+    ...current,
+    ...rest,
+    id: current.id,
+    createdAt: current.createdAt,
+    statusChangedAt: current.statusChangedAt,
+  };
+  if (status !== undefined || outcome !== undefined || offer !== undefined) {
+    try {
+      next = moveApplication(next, { status, outcome, offer }, now);
+    } catch (error) {
+      if (error instanceof ApplicationStatusError) throw new DataError("invalid", error.message);
+      throw error;
+    }
   }
   if (appliedAt !== undefined) next.appliedAt = appliedAt;
   if (closedAt !== undefined) next.closedAt = closedAt;
@@ -247,9 +291,49 @@ export type ApplicationEdit = (
 ) => { changes: ApplicationChanges; summary?: string };
 
 /**
+ * Marks kept the agent's pending changes to an application that the user has since changed
+ * again, line by line: once every line a change reworded or left out reads differently, the
+ * user has reviewed it by editing. Changes to other fields (status, notes) stay pending.
+ */
+const keepSupersededChanges = async (
+  tx: Tx,
+  ctx: DataContext,
+  id: string,
+  current: Application,
+  profile: ResumeSchema
+) => {
+  const pending = await tx
+    .select()
+    .from(schema.change)
+    .where(
+      and(
+        eq(schema.change.userId, ctx.userId),
+        eq(schema.change.targetKind, "application"),
+        eq(schema.change.targetId, id),
+        eq(schema.change.review, "pending")
+      )
+    );
+  for (const row of pending) {
+    if (!row.before || !row.after) continue;
+    const effects = lineEffects(
+      normalizeApplication(row.before, profile),
+      normalizeApplication(row.after, profile),
+      profile
+    );
+    if (!hasLineEffects(effects)) continue;
+    if (hasLineEffects(effectsStillShowing(effects, current, profile))) continue;
+    await tx
+      .update(schema.change)
+      .set({ review: "kept", reviewedAt: new Date(), reviewerKind: "user", reviewerClient: null })
+      .where(eq(schema.change.id, row.id));
+  }
+};
+
+/**
  * Changes the user's application `id` and logs the change. `changes` may be an edit that reads
  * the current application, so concurrent writes never undo each other. Returns it unchanged,
- * with nothing logged, when the changes make no difference.
+ * with nothing logged, when the changes make no difference. A user's edit that changes every
+ * line an agent's pending change touched counts as reviewing that change.
  */
 export const updateApplication = async (
   ctx: DataContext,
@@ -274,6 +358,7 @@ export const updateApplication = async (
       after,
       summary ?? edit.summary ?? describeChanges(before, after)
     );
+    if (ctx.actor.kind === "user") await keepSupersededChanges(tx, ctx, id, after, profile);
     return record as ApplicationRecord;
   });
 

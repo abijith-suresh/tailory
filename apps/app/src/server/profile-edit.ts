@@ -5,6 +5,7 @@ import {
   normalizeResume,
   parseJsonResumeDocument,
   type ResumeSchema,
+  type ResumeSectionKey,
 } from "@tailory/core";
 
 // The edits `update_profile` makes, as one pure step: replace the whole profile, merge fields
@@ -28,6 +29,8 @@ export type ProfileEdit = {
   add?: ProfileAdd[];
   change?: { id: string; fields: Record<string, unknown> }[];
   remove?: string[];
+  /** The profile's section order, first to last. Applied last. */
+  sectionOrder?: ResumeSectionKey[];
 };
 
 type Entry = { id: string; highlights?: { id: string; text: string }[] } & Record<string, unknown>;
@@ -67,7 +70,8 @@ export const editProfile = (
   let resume = structuredClone(current);
   if (edit.replace) {
     try {
-      resume = parseJsonResumeDocument(edit.replace);
+      // A JSON Resume has no section order, so the profile keeps its own.
+      resume = { ...parseJsonResumeDocument(edit.replace), sectionOrder: current.sectionOrder };
     } catch (error) {
       throw new ProfileEditError((error as Error).message);
     }
@@ -150,6 +154,8 @@ export const editProfile = (
       );
   }
 
+  if (edit.sectionOrder) resume.sectionOrder = edit.sectionOrder;
+
   return { resume: normalizeResume(resume), added };
 };
 
@@ -159,7 +165,7 @@ export const countItems = (resume: ResumeSchema) => {
   let bullets = 0;
   for (const item of indexProfileItems(resume).values()) {
     if (item.kind === "highlight") bullets += 1;
-    else if (item.kind !== "basics") entries += 1;
+    else if ((ENTRY_SECTIONS as readonly string[]).includes(item.kind)) entries += 1;
   }
   return { entries, bullets };
 };

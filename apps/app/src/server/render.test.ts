@@ -33,39 +33,49 @@ describe("fitApplicationResult", () => {
       const application = modern({ pageTarget, autoFit });
       const fitted = await fitApplicationResult(profile, application);
       const pdf = await renderPdf(profile, application);
-      expect(countPdfPages(pdf)).toBe(fitted.page.pageCount);
+      expect(countPdfPages(pdf)).toBe(fitted.page.pagesNeeded);
     }
   });
 
   it("says a short resume fits", async () => {
     const fitted = await fitApplicationResult(sampleProfile(), modern({ pageTarget: 1 }));
     expect(fitted.page).toEqual({
-      pageCount: 1,
+      pagesNeeded: 1,
       pageTarget: 1,
       fits: true,
       tightened: false,
       linesOver: 0,
+      lastPageFill: expect.any(Number),
+      density: { level: 0, bodyPt: 10, marginMm: 15.9 },
       message: "1 page, fits",
     });
+    expect(fitted.page.lastPageFill).toBeGreaterThan(0);
+    expect(fitted.page.lastPageFill).toBeLessThan(1);
   });
 
   it("reports how far a resume too long for its target runs over", async () => {
     const fitted = await fitApplicationResult(veryLongResume(), modern({ pageTarget: 1 }));
     expect(fitted.page.fits).toBe(false);
-    expect(fitted.page.pageCount).toBeGreaterThan(1);
+    expect(fitted.page.pagesNeeded).toBeGreaterThan(1);
     expect(fitted.page.linesOver).toBeGreaterThan(0);
     expect(fitted.page.message).toBe(
-      `about ${fitted.page.linesOver} lines over 1 page, even with the tightest spacing`
+      `about ${fitted.page.linesOver} lines over 1 page at the tightest; leave a line or two out`
     );
+    // Past the floor it reports the overflow rather than shrink further.
+    expect(fitted.page.density).toMatchObject({ level: 1 });
+    expect(fitted.page.density.bodyPt).toBeGreaterThanOrEqual(9.5);
+    expect(fitted.page.density.marginMm).toBeGreaterThanOrEqual(10);
   });
 
   it("tightens to meet the target only when allowed", async () => {
     const off = await fitApplicationResult(longResume(), modern({ autoFit: false }));
-    expect(off.page).toMatchObject({ pageCount: 2, fits: false, tightened: false });
+    expect(off.page).toMatchObject({ pagesNeeded: 2, fits: false, tightened: false });
     expect(off.page.message).toMatch(/^about \d+ lines? over 1 page; tightening is off$/);
 
     const on = await fitApplicationResult(longResume(), modern({ autoFit: true }));
-    expect(on.page).toMatchObject({ pageCount: 1, fits: true, tightened: true, linesOver: 0 });
+    expect(on.page).toMatchObject({ pagesNeeded: 1, fits: true, tightened: true, linesOver: 0 });
+    expect(on.page.density.level).toBeGreaterThan(0);
+    expect(on.page.density.level).toBeLessThan(1);
     expect(on.page.message).toBe("1 page, fits with tighter spacing");
     expect(on.fit.stepIndex).toBeGreaterThan(0);
     expect(countPdfPages(await renderPdf(longResume(), modern({ autoFit: true })))).toBe(1);
@@ -82,14 +92,14 @@ describe("fitApplicationResult", () => {
 describe("fitProfileResult", () => {
   it("counts pages without a target", async () => {
     const fitted = await fitProfileResult(longResume());
-    expect(fitted.page).toMatchObject({ pageCount: 2, pageTarget: null, fits: true });
+    expect(fitted.page).toMatchObject({ pagesNeeded: 2, pageTarget: null, fits: true });
     expect(fitted.page.message).toBe("2 pages");
     expect(countPdfPages(await renderPdf(longResume(), null))).toBe(2);
   });
 
   it("fits to a target the caller gives", async () => {
     const fitted = await fitProfileResult(longResume(), { pageTarget: 1, autoFit: true });
-    expect(fitted.page).toMatchObject({ pageCount: 1, tightened: true });
+    expect(fitted.page).toMatchObject({ pagesNeeded: 1, tightened: true });
     const pdf = await renderPdf(longResume(), null, { pageTarget: 1, autoFit: true });
     expect(countPdfPages(pdf)).toBe(1);
   });
@@ -97,17 +107,17 @@ describe("fitProfileResult", () => {
 
 describe("describeFit", () => {
   const result = (overrides: Partial<FitResult>) =>
-    ({ status: "over", pageCount: 2, pageTarget: 1, linesOver: 1, ...overrides }) as FitResult;
+    ({ status: "over", pagesNeeded: 2, pageTarget: 1, linesOver: 1, ...overrides }) as FitResult;
 
   it("names one line and one page in the singular", () => {
     expect(describeFit(result({}), true)).toBe(
-      "about 1 line over 1 page, even with the tightest spacing"
+      "about 1 line over 1 page at the tightest; leave a line or two out"
     );
-    expect(describeFit(result({ status: "none", pageCount: 1 }), true)).toBe("1 page");
+    expect(describeFit(result({ status: "none", pagesNeeded: 1 }), true)).toBe("1 page");
   });
 
   it("counts past a target of several pages", () => {
-    expect(describeFit(result({ pageCount: 3, pageTarget: 2, linesOver: 12 }), false)).toBe(
+    expect(describeFit(result({ pagesNeeded: 3, pageTarget: 2, linesOver: 12 }), false)).toBe(
       "about 12 lines over 2 pages; tightening is off"
     );
   });

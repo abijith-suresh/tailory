@@ -64,8 +64,9 @@ export type ProfileUpdate = (current: ResumeSchema) => ResumeSchema;
 
 /**
  * Changes the profile with `update`, which gets the current profile and returns the new one.
- * The result is normalized (entries and bullets get ids) and the change is logged. Nothing is
- * written or logged when the profile comes out the same.
+ * The result is normalized (entries, bullets and links get ids; a link's network is read from
+ * its URL) and the change is logged. Nothing is written or logged when the profile comes out
+ * the same.
  */
 export const updateProfile = async (
   ctx: DataContext,
@@ -82,9 +83,20 @@ export const updateProfile = async (
     return (await writeProfile(tx, ctx, before, next, summary)).record;
   });
 
-/** Replaces the whole profile, as an import does. */
+/**
+ * Replaces the whole profile, as an import does. A resume without a section order keeps the
+ * profile's, since an imported file has none.
+ */
 export const replaceProfile = (
   ctx: DataContext,
   resume: ResumeSchema,
   summary = "Replaced the profile"
-) => updateProfile(ctx, () => resume, summary);
+) =>
+  updateProfile(
+    ctx,
+    (current) =>
+      resume.sectionOrder || !current.sectionOrder
+        ? resume
+        : { ...resume, sectionOrder: current.sectionOrder },
+    summary
+  );
