@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { FIRST_RUN, fillProfile } from "./helpers";
+
 /**
  * Pages swap at once and leave nothing behind. After every navigation between the app's pages:
  * the new page's heading is the only one, no text from the last page is left, no dialog, menu or
@@ -11,7 +13,6 @@ type Stop = { name: string; heading: RegExp };
 const HOME: Stop = { name: "Applications", heading: /^Applications$/ };
 const PROFILE: Stop = { name: "Profile", heading: /^Profile$/ };
 const SETTINGS: Stop = { name: "Settings", heading: /^Settings$/ };
-const CONNECT: Stop = { name: "Connect an agent", heading: /^Connect an agent$/ };
 const APPLICATION: Stop = { name: "Application", heading: /^Shell check/ };
 
 const main = (page: Page) => page.locator("main#main");
@@ -60,6 +61,11 @@ let applicationPath = "";
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
   await page.goto("/");
+  // A fresh install shows the first-run screen; a name in the profile brings the board.
+  if (await page.getByRole("heading", { name: FIRST_RUN }).isVisible()) {
+    await fillProfile(page, "Shell Check");
+    await page.goto("/");
+  }
   const existing = page.getByRole("link", { name: /Shell check/ }).first();
   if ((await existing.count()) === 0) {
     await page.getByRole("button", { name: "New application" }).click();
@@ -125,15 +131,17 @@ test("moving between every page leaves nothing behind", async ({ page }, info) =
   await clickNav(page, "Profile");
   await expectSettled(page, PROFILE, "Shell check");
 
-  // Settings into Connect an agent, which still counts as Settings.
+  // Between the Settings pages, which keep the one Settings heading.
   await clickNav(page, "Settings");
-  await page.getByRole("link", { name: "Connect an agent" }).click();
-  await expectSettled(page, CONNECT, "Settings");
+  await expectSettled(page, SETTINGS, "Profile");
+  for (const name of ["Agents", "Data", "General"]) {
+    await page.getByRole("navigation", { name: "Settings" }).getByRole("link", { name }).click();
+    await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
+    await expectSettled(page, SETTINGS);
+  }
   await expect(
     page.getByRole("navigation", { name: "Main" }).locator('a[aria-current="page"]')
   ).toHaveAttribute("href", "/settings");
-  await page.goBack();
-  await expectSettled(page, SETTINGS, "Connect an agent");
 
   await page.screenshot({ path: info.outputPath("settings.png"), fullPage: true });
 });
@@ -158,8 +166,9 @@ test("a dialog closes with Escape, keeps Tab inside, and gives focus back", asyn
 for (const [name, path] of [
   ["applications", "/"],
   ["profile", "/profile"],
-  ["settings", "/settings"],
-  ["connect", "/connect"],
+  ["settings", "/settings/general"],
+  ["agents", "/settings/agents"],
+  ["data", "/settings/data"],
 ] as const) {
   test(`screenshot: ${name}`, async ({ page }, info) => {
     await page.goto(path);

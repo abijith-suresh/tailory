@@ -1,57 +1,66 @@
 import { Title } from "@solidjs/meta";
-import { createSignal } from "solid-js";
+import { useParams } from "@solidjs/router";
+import { createMemo, Loading, Match, Show, Switch } from "solid-js";
 
-import { Button, LinkButton } from "../components/Button";
-import { deleteAccount } from "../server/functions";
+import { SideNav } from "../components/SideNav";
+import { getViewer } from "../server/functions";
+import NotFound from "./NotFound";
+import Account from "./settings/Account";
+import Agents from "./settings/Agents";
+import Data from "./settings/Data";
+import General from "./settings/General";
 
+const PAGES = [
+  { id: "general", label: "General" },
+  { id: "agents", label: "Agents" },
+  { id: "data", label: "Data" },
+  // Local mode has no sign-in, so no account to manage.
+  { id: "account", label: "Account", serverOnly: true },
+] as const;
+
+/** Settings: General, Agents, Data, and Account in server mode. /settings opens General. */
 export default function Settings() {
-  const [pending, setPending] = createSignal(false);
-  const [error, setError] = createSignal("");
-
-  const remove = async () => {
-    if (!window.confirm("Delete your account and everything in it? This can't be undone.")) return;
-    setPending(true);
-    setError("");
-    try {
-      await deleteAccount();
-      window.location.assign("/");
-    } catch {
-      setError("Couldn't delete the account. Try again.");
-      setPending(false);
-    }
-  };
+  const params = useParams<{ page?: string }>();
+  const viewer = createMemo(() => getViewer());
+  const page = () => params.page ?? "general";
+  const pages = () => PAGES.filter((item) => !("serverOnly" in item) || viewer().mode === "server");
+  const current = () => pages().find((item) => item.id === page());
 
   return (
-    <>
-      <Title>Settings · Tailory</Title>
-      <div class="page-head">
-        <h1 class="page-title">Settings</h1>
-      </div>
-      <section class="panel" aria-labelledby="agents">
-        <h2 class="panel__title" id="agents">
-          Agents
-        </h2>
-        <p class="panel__text">Connect Claude Code, Codex, Cursor or another MCP client.</p>
-        <div class="panel__actions">
-          <LinkButton href="/connect">Connect an agent</LinkButton>
-        </div>
-      </section>
-      <section class="panel" aria-labelledby="delete-account">
-        <h2 class="panel__title" id="delete-account">
-          Delete account
-        </h2>
-        <p class="panel__text">
-          Deletes your account and everything Tailory keeps for it. This can't be undone.
-        </p>
-        <div class="panel__actions">
-          <Button variant="danger" disabled={pending()} onClick={() => void remove()}>
-            Delete my account
-          </Button>
-        </div>
-        <p class="form-error" role="alert">
-          {error()}
-        </p>
-      </section>
-    </>
+    <Loading fallback={<p class="loading-note">Loading…</p>}>
+      <Show when={current()} fallback={<NotFound />}>
+        {(item) => (
+          <>
+            <Title>{`${item().label} · Settings · Tailory`}</Title>
+            <div class="settings">
+              <div class="settings__nav">
+                <h1 class="settings__heading">Settings</h1>
+                <SideNav
+                  label="Settings"
+                  current={`/settings/${item().id}`}
+                  items={pages().map(({ id, label }) => ({ href: `/settings/${id}`, label }))}
+                />
+              </div>
+              <div class="settings__pane">
+                <Switch>
+                  <Match when={item().id === "general"}>
+                    <General />
+                  </Match>
+                  <Match when={item().id === "agents"}>
+                    <Agents />
+                  </Match>
+                  <Match when={item().id === "data"}>
+                    <Data />
+                  </Match>
+                  <Match when={item().id === "account"}>
+                    <Account name={viewer().name} email={viewer().email} />
+                  </Match>
+                </Switch>
+              </div>
+            </div>
+          </>
+        )}
+      </Show>
+    </Loading>
   );
 }

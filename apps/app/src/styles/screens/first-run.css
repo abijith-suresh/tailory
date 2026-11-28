@@ -1,0 +1,192 @@
+/* First run (/ on a fresh install): two ways in, over a faint empty board. */
+
+@layer screens {
+  .first-run {
+    position: relative;
+    max-width: 67.5rem;
+    margin-inline: auto;
+  }
+
+  .first-run__board {
+    position: absolute;
+    inset: 0 var(--space-6) auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+    opacity: 0.55;
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  }
+
+  .first-run__column {
+    height: 32.5rem;
+    border-radius: var(--radius-2xl);
+    background: var(--color-canvas-deep);
+    padding: var(--space-3);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+    font-weight: 560;
+  }
+
+  .first-run__title {
+    position: relative;
+    padding: var(--space-16) 0 var(--space-8);
+    text-align: center;
+    font-size: 2.5rem;
+    line-height: 3rem;
+    letter-spacing: -0.035em;
+    font-weight: 650;
+  }
+
+  .first-run__paths {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    max-width: 55rem;
+    margin-inline: auto;
+  }
+
+  .first-run__card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: var(--space-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-3xl);
+    background: var(--color-surface);
+    padding: var(--space-6);
+    box-shadow: 0 20px 40px -28px var(--color-shadow-deep);
+  }
+
+  .first-run__mark {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--color-selected);
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .first-run__name {
+    margin-top: var(--space-1);
+    font-size: var(--text-heading-6);
+    line-height: var(--text-heading-6--lh);
+    letter-spacing: -0.015em;
+    font-weight: 620;
+  }
+
+  .first-run__text {
+    color: var(--color-fg-muted);
+  }
+
+  .first-run__state {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .first-run__more {
+    justify-self: start;
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    font-weight: 580;
+    text-decoration-color: transparent;
+  }
+
+  .first-run__drop {
+    display: grid;
+    place-items: center;
+    gap: var(--space-1);
+    padding: var(--space-7) var(--space-4);
+    border: 1.5px dashed var(--color-line-strong);
+    border-radius: var(--radius-2xl);
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    text-align: center;
+    text-decoration: none;
+    transition:
+      border-color var(--duration-hover) var(--ease-out),
+      background-color var(--duration-hover) var(--ease-out),
+      scale var(--duration-press) var(--ease-out);
+  }
+
+  .first-run__drop:hover {
+    border-color: var(--color-primary);
+    background: var(--color-selected);
+  }
+
+  .first-run__drop:active {
+    scale: 0.99;
+  }
+
+  .first-run__drop svg {
+    width: 1.625rem;
+    height: 1.625rem;
+    margin-bottom: var(--space-1);
+    fill: none;
+    stroke: var(--color-fg-subtle);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .first-run__drop strong {
+    font-weight: 600;
+  }
+
+  .first-run__drop small {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+  }
+
+  .first-run__then {
+    position: relative;
+    max-width: 35rem;
+    margin: var(--space-8) auto 0;
+    color: var(--color-fg-muted);
+    text-align: center;
+  }
+
+  .first-run__then q {
+    color: var(--color-fg);
+    font-weight: 560;
+  }
+
+  @media (max-width: 47.5rem) {
+    .first-run__board {
+      inset-inline: 0;
+      grid-template-columns: repeat(2, 1fr);
+      opacity: 0.35;
+    }
+
+    .first-run__column {
+      color: transparent;
+    }
+
+    .first-run__column:nth-child(n + 3) {
+      display: none;
+    }
+
+    .first-run__title {
+      padding: var(--space-8) 0 var(--space-6);
+      font-size: 2rem;
+      line-height: 2.5rem;
+    }
+
+    .first-run__paths {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .first-run__card {
+      padding: var(--space-5);
+    }
+  }
+}

@@ -30,7 +30,7 @@ function Wordmark() {
   );
 }
 
-const signOut = async () => {
+export const signOut = async () => {
   await authClient.signOut();
   window.location.assign("/sign-in");
 };

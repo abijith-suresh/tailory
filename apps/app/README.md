@@ -2,8 +2,8 @@
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
 handles sign-in, and serves an MCP endpoint with the resume tools agents use. The main
-navigation has Applications, Profile and Settings; Connect an agent is reached from Settings. Dev
-builds only; no stable release yet.
+navigation has Applications, Profile and Settings; connecting an agent lives in Settings › Agents.
+Dev builds only; no stable release yet.
 
 ## Try the dev build
 
@@ -76,10 +76,16 @@ mode needs a secret, the public URL, and at least one sign-in method, or it refu
 | `TAILORY_GITHUB_CLIENT_ID`, `TAILORY_GITHUB_CLIENT_SECRET` | Both set: GitHub sign-in. Callback `<public URL>/api/auth/callback/github`                    |
 | `TAILORY_GOOGLE_CLIENT_ID`, `TAILORY_GOOGLE_CLIENT_SECRET` | Both set: Google sign-in. Callback `<public URL>/api/auth/callback/google`                    |
 
-Signed-out page requests go to `/sign-in`. Settings has a button that deletes your account and
-everything Tailory keeps for it.
+Signed-out page requests go to `/sign-in`. Settings › Account deletes your account and everything
+Tailory keeps for it.
 
 ## Screens
+
+**First run** (`/` on a fresh install). With an empty profile and no applications, the home screen
+shows two ways in over a faint empty board: **Connect your agent**, with the Claude Code command to
+copy and a live "Waiting for your agent" line that turns into "Claude Code connected" once the
+agent makes its first call, and **Import a resume**, which opens the file picker on Profile
+(`/profile?import`). The board comes back as soon as the profile has anything in it.
 
 **Applications** (`/`) lists your applications grouped by status: interviewing, applied,
 drafting, then closed. Each row shows the company, role, status, page result and
@@ -115,10 +121,25 @@ replaces the profile as one change. The recent changes list offers Undo on the n
 Redo after an undo. Older changes can't be undone from there, because undoing them would throw
 away the later ones.
 
-**Connect an agent** (`/connect`) shows the MCP address, which is the loopback address the page was
-opened on in local mode, and `TAILORY_PUBLIC_URL` + `/mcp` in server mode. It has copy-paste setup
-for Claude Code, Codex, Cursor and VS Code. In server mode it adds the Claude.ai and ChatGPT
-custom connector steps; local mode says those can't reach it.
+**Settings** (`/settings/*`) has its own navigation, a row of chips on phones:
+
+- **General:** the theme, System, Light or Dark. It is kept in this browser (localStorage) and set
+  before the first paint.
+- **Agents:** the MCP address with Copy, which is the loopback address the page was opened on in
+  local mode, and `TAILORY_PUBLIC_URL` + `/mcp` in server mode. One tab per client with one line
+  of setup to copy: Claude Code, Codex, Cursor and VS Code, plus Claude.ai and ChatGPT in server
+  mode (they connect from their makers' servers, so they can't reach local mode). **Check
+  connection** reads the agent's last MCP call ("Connected: Claude Code, 2 minutes ago", or "No
+  agent has connected yet") and keeps listening for a minute. A link goes to the full setup guide
+  (`SETUP_GUIDE_URL` in `src/components/AgentSetup.tsx`, a placeholder until the docs site
+  exists).
+- **Data:** where the data lives (the data folder in local mode, with Copy; the database
+  otherwise), **Export everything** as one JSON file, and **Erase all data**, which asks you to type
+  "erase" first. In server mode erasing also deletes the account.
+- **Account:** server mode only. Name and email, Sign out, and Delete account, which asks you to
+  type "delete" first. Local mode has no account, so no Account page.
+
+`/connect`, the old Connect an agent page, redirects to `/settings/agents`.
 
 ## Data
 
@@ -169,6 +190,8 @@ The web app calls these server functions:
 | `exportAllData()`                    | The profile and every application as one JSON file (`fileName`, `data`)     |
 | `eraseAllData()`                     | Local mode: erases the local user's rows. Server mode: deletes the account  |
 | `getAgentConnection()`               | The agent's last MCP call, for Settings › Agents to poll                    |
+| `getDataInfo()`                      | Where the data lives, and how many applications erasing removes             |
+| `isFirstRun()`                       | True with an empty profile and no applications: the home shows first run    |
 
 ## MCP
 

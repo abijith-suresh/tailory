@@ -21,8 +21,9 @@ describe("AppHeader", () => {
     expect(currentLinks(render({ pathname: "/applications/a1", viewer: signedIn }))).toEqual([
       "Applications",
     ]);
-    // Connect an agent is part of Settings now.
-    expect(currentLinks(render({ pathname: "/connect", viewer: signedIn }))).toEqual(["Settings"]);
+    expect(currentLinks(render({ pathname: "/settings/agents", viewer: signedIn }))).toEqual([
+      "Settings",
+    ]);
     expect(currentLinks(render({ pathname: "/settings", viewer: signedIn }))).toEqual(["Settings"]);
     expect(currentLinks(render({ pathname: "/no-such-page", viewer: signedIn }))).toEqual([]);
   });
@@ -78,7 +79,6 @@ describe("isCurrent", () => {
     expect(isCurrent("/", "/profile")).toBe(false);
     expect(isCurrent("/settings", "/settings/account")).toBe(true);
     expect(isCurrent("/settings", "/settingsx")).toBe(false);
-    expect(isCurrent("/settings", "/connect")).toBe(true);
     expect(isCurrent("/", "/applications")).toBe(false);
   });
 });

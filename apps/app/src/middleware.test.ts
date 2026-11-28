@@ -43,3 +43,28 @@ describe("loopback middleware", () => {
     expect((await response).status).toBe(200);
   });
 });
+
+describe("moved pages", () => {
+  const moved = middleware[5];
+  const call = (url: string) => {
+    const next = vi.fn(async () => new Response("page"));
+    const event = { request: new Request(url) } as Parameters<typeof moved>[0];
+    return { response: moved(event, next), next };
+  };
+
+  it("sends /connect to Settings › Agents", async () => {
+    for (const path of ["/connect", "/connect/"]) {
+      const { response, next } = call(`http://127.0.0.1:4413${path}`);
+      const answer = await response;
+      expect(answer.status).toBe(301);
+      expect(answer.headers.get("location")).toBe("/settings/agents");
+      expect(next).not.toHaveBeenCalled();
+    }
+  });
+
+  it("leaves every other page alone", async () => {
+    const { response, next } = call("http://127.0.0.1:4413/settings/agents");
+    expect((await response).status).toBe(200);
+    expect(next).toHaveBeenCalledOnce();
+  });
+});

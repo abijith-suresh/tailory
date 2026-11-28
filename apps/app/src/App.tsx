@@ -9,7 +9,7 @@ import { AppHeader } from "./components/AppHeader";
 import { Toaster } from "./components/Toaster";
 import { clearToasts } from "./lib/toast";
 import Application from "./routes/Application";
-import Connect from "./routes/Connect";
+import ConnectRedirect from "./routes/ConnectRedirect";
 import Consent from "./routes/Consent";
 import Home from "./routes/Home";
 import NotFound from "./routes/NotFound";
@@ -23,8 +23,12 @@ const Router = createRouter({
     { path: "/", component: Home },
     { path: "/applications/:id", component: Application },
     { path: "/profile", component: Profile },
-    { path: "/connect", component: Connect },
-    { path: "/settings", component: Settings },
+    { path: "/connect", component: ConnectRedirect },
+    {
+      path: "/settings/:page?",
+      component: Settings,
+      matchFilters: { page: ["general", "agents", "data", "account"] },
+    },
     { path: "/sign-in", component: SignIn },
     { path: "/oauth/consent", component: Consent },
     // Design review page for the shared components; left out of production builds.
