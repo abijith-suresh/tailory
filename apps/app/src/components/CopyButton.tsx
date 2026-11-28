@@ -26,7 +26,12 @@ export function CopyButton(props: CopyButtonProps) {
   };
 
   return (
-    <Button variant="quiet" class="copy-button" aria-label={props.label} onClick={() => void copy()}>
+    <Button
+      variant="quiet"
+      class="copy-button"
+      aria-label={props.label}
+      onClick={() => void copy()}
+    >
       <span aria-hidden={props.label ? "true" : undefined}>
         {state() === "copied" ? "Copied" : state() === "failed" ? "Select and copy" : "Copy"}
       </span>

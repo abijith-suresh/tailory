@@ -198,8 +198,10 @@ export type Entry = {
 };
 
 /** The entries of `section`, made an array when the resume has none. */
-export const entriesOf = (resume: ResumeSchema, section: ProfileSection): Entry[] =>
-  (resume[section] ??= []) as unknown as Entry[];
+export const entriesOf = (resume: ResumeSchema, section: ProfileSection): Entry[] => {
+  resume[section] ??= [];
+  return resume[section] as unknown as Entry[];
+};
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 

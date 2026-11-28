@@ -56,8 +56,8 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
           }
         >
           <p class="panel__text">
-            Local mode: this address only works on this computer, for agents that run here. There
-            is no sign-in, and it changes if you start Tailory on another port.
+            Local mode: this address only works on this computer, for agents that run here. There is
+            no sign-in, and it changes if you start Tailory on another port.
           </p>
         </Show>
         <p class="panel__text">
@@ -97,10 +97,7 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
             <p>
               Or add it to <code>~/.codex/config.toml</code>:
             </p>
-            <CodeBlock
-              label="Codex config.toml"
-              code={`[mcp_servers.tailory]\nurl = "${url()}"`}
-            />
+            <CodeBlock label="Codex config.toml" code={`[mcp_servers.tailory]\nurl = "${url()}"`} />
           </Client>
 
           <Client id="cursor" name="Cursor">
@@ -145,8 +142,8 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
                 paste the address and continue. Claude asks you to sign in to Tailory.
               </p>
               <p class="client__note">
-                Claude only connects to HTTPS addresses on the standard port. On Team and
-                Enterprise plans, an owner adds the connector in Organization settings first.
+                Claude only connects to HTTPS addresses on the standard port. On Team and Enterprise
+                plans, an owner adds the connector in Organization settings first.
               </p>
             </Show>
           </Client>
@@ -179,7 +176,9 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
         <h2 class="panel__title" id="try">
           Things to ask
         </h2>
-        <p class="panel__text">Once it's connected, ask your agent in your own words. For example:</p>
+        <p class="panel__text">
+          Once it's connected, ask your agent in your own words. For example:
+        </p>
         <ul class="prompts">
           <For each={EXAMPLE_PROMPTS}>
             {(prompt) => (

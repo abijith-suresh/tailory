@@ -15,7 +15,7 @@ export type ImportPreview = {
   fileName: string;
   kind: SupportedUploadExtension;
   resume: ResumeSchema;
-  /** The text parser's confidence, 0 to 1. PDF and DOCX only. */
+  /** The text parser's confidence, 0 to 100. PDF and DOCX only. */
   confidence?: number;
   /** Top-level JSON fields Tailory doesn't keep. JSON only. */
   ignoredFields: string[];
@@ -60,8 +60,7 @@ export async function readResumeFile(file: File): Promise<ImportOutcome> {
   }
 }
 
-const plural = (count: number, one: string, many: string) =>
-  `${count} ${count === 1 ? one : many}`;
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 /** One line per thing found, such as "3 jobs", in the order a resume reads. Empty sections left out. */
 export function describeFound(resume: ResumeSchema): string[] {

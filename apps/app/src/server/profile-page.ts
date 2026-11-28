@@ -60,6 +60,8 @@ export type ChangeView = {
   by: string;
   byAgent: boolean;
   createdAt: string;
+  /** This change undid an earlier one, so undoing it redoes that. */
+  isUndo: boolean;
   /** Only the newest change can be undone; undoing an older one would throw away later edits. */
   undoable: boolean;
 };
@@ -82,6 +84,7 @@ export const toChangeView = (change: ChangeRecord, newest: boolean): ChangeView 
   by: change.actor.kind === "user" ? "You" : (change.actor.client ?? "Your agent"),
   byAgent: change.actor.kind === "agent",
   createdAt: change.createdAt,
+  isUndo: change.undoes !== null,
   undoable: newest,
 });
 
@@ -151,16 +154,24 @@ export const saveProfile = async (
 ): Promise<SaveResult> => {
   try {
     const resume = normalizeResume(toResumeInput(next));
-    await ctx.db.transaction(async (tx) => {
+    const saved = await ctx.db.transaction(async (tx) => {
       const row = await readProfile(tx, ctx.userId, true);
       const current = row?.resume ?? emptyProfile();
       if (!sameJson(current, base)) {
         throw new DataError("conflict", "The profile changed somewhere else since you opened it");
       }
-      if (sameJson(current, resume)) return;
-      await writeProfile(tx, ctx, row?.resume ?? null, resume, describeProfileEdit(current, resume));
+      if (sameJson(current, resume)) return current;
+      await writeProfile(
+        tx,
+        ctx,
+        row?.resume ?? null,
+        resume,
+        describeProfileEdit(current, resume)
+      );
+      return resume;
     });
-    return { ok: true, ...(await loadProfile(ctx)) };
+    // The page's next base is what this call wrote, even if another write lands right after it.
+    return { ok: true, ...(await loadProfile(ctx)), resume: saved };
   } catch (error) {
     return failure(error);
   }
