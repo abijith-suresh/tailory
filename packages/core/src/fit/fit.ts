@@ -5,7 +5,7 @@ import type { Application, ResumeSectionKey } from "../types/application.ts";
 import type { ResumeSchema } from "../types/resume.ts";
 import type { TemplateId } from "../types/template.ts";
 import type { MeasurePages, PageLayout } from "./measure.ts";
-import { type FitStep, fitSteps } from "./steps.ts";
+import { type FitStep, fitSteps, stepDensity } from "./steps.ts";
 
 /** Roboto's line height as pdfmake sets it, per point of font size. */
 export const ROBOTO_LINE_HEIGHT = 2400 / 2048;
@@ -27,25 +27,52 @@ export interface FitInput {
  */
 export type FitStatus = "none" | "fits" | "tightened" | "over";
 
+/** How tight the printed page is: the step it is at, and what that means on paper. */
+export interface FitDensity {
+  /** From 0, the template as designed, to 1, the tightest it may go. */
+  level: number;
+  /** Body text size, in points. Never below MIN_BODY_TEXT_PT. */
+  bodyPt: number;
+  /** The narrowest page margin, in millimetres. Never below MIN_PAGE_MARGIN_MM. */
+  marginMm: number;
+}
+
 export interface FitResult {
   status: FitStatus;
   /** Index into the template's steps; 0 is untightened. */
   stepIndex: number;
   step: FitStep;
-  pageCount: number;
+  density: FitDensity;
+  /** Pages the resume takes as it prints, at this density. */
+  pagesNeeded: number;
   pageTarget: number | null;
   /** Roughly how many lines of body text run past the target. 0 unless over. */
   linesOver: number;
+  /** How much of the last page the content uses, from 0 to 1. */
+  lastPageFill: number;
   /** For each page after the first, the block it starts with. */
   pageStarts: PageLayout["pageStarts"];
 }
 
+/** The size of body text in a document, in points. */
+function bodyFontSize(doc: TDocumentDefinitions): number {
+  return doc.styles?.body?.fontSize ?? doc.defaultStyle?.fontSize ?? 10;
+}
+
 /** The height of one line of body text in a document, in points. */
 function bodyLineHeight(doc: TDocumentDefinitions): number {
-  const body = doc.styles?.body ?? {};
-  const fontSize = body.fontSize ?? doc.defaultStyle?.fontSize ?? 10;
-  const lineHeight = body.lineHeight ?? doc.defaultStyle?.lineHeight ?? 1;
-  return fontSize * lineHeight * ROBOTO_LINE_HEIGHT;
+  const lineHeight = doc.styles?.body?.lineHeight ?? doc.defaultStyle?.lineHeight ?? 1;
+  return bodyFontSize(doc) * lineHeight * ROBOTO_LINE_HEIGHT;
+}
+
+const MM_PER_POINT = 25.4 / 72;
+
+/** The narrowest page margin of a document, in millimetres. */
+function narrowestMarginMm(doc: TDocumentDefinitions): number {
+  const margins = doc.pageMargins;
+  const points =
+    typeof margins === "number" ? margins : Array.isArray(margins) ? Math.min(...margins) : 0;
+  return Math.round(points * MM_PER_POINT * 10) / 10;
 }
 
 /** The document a fit input gives at one step. */
@@ -58,9 +85,10 @@ export function fitDocument(input: FitInput, step: FitStep): TDocumentDefinition
 }
 
 /**
- * Finds the least tightening that brings a resume within its page target. Without a target, or
- * with tightening off, it only measures. When even the tightest step runs over, that step is kept
- * and the overflow reported. Content is never dropped.
+ * Finds the least tightening that brings a resume within its page target: with tightening on,
+ * always the smallest density that fits. Without a target, or with tightening off, it only
+ * measures. When even the tightest step runs over, that step is kept and the overflow reported.
+ * Content is never dropped.
  *
  * Pages never grow as a step tightens, so the search halves the steps between the first that
  * fits and the last that doesn't: a handful of layouts at most.
@@ -83,20 +111,24 @@ export async function fitResume(input: FitInput, measure: MeasurePages): Promise
   const result = async (status: FitStatus, stepIndex: number): Promise<FitResult> => {
     const layout = await layoutAt(stepIndex);
     const step = steps[stepIndex] as FitStep;
+    const doc = fitDocument(input, step);
     const linesOver =
       status === "over" && target !== null
-        ? Math.max(
-            1,
-            Math.ceil(layout.heightPast(target) / bodyLineHeight(fitDocument(input, step)))
-          )
+        ? Math.max(1, Math.ceil(layout.heightPast(target) / bodyLineHeight(doc)))
         : 0;
     return {
       status,
       stepIndex,
       step,
-      pageCount: layout.pageCount,
+      density: {
+        level: stepDensity(input.template, stepIndex),
+        bodyPt: bodyFontSize(doc),
+        marginMm: narrowestMarginMm(doc),
+      },
+      pagesNeeded: layout.pageCount,
       pageTarget: target,
       linesOver,
+      lastPageFill: layout.lastPageFill,
       pageStarts: layout.pageStarts,
     };
   };

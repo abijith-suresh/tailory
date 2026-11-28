@@ -20,6 +20,8 @@ export interface PageLayout {
   pageStarts: { page: number; blockId: string }[];
   /** Points of content past the end of page `pages`. 0 when it fits. */
   heightPast: (pages: number) => number;
+  /** How much of the last page the content uses, from 0 to 1. */
+  lastPageFill: number;
 }
 
 /** Lays out a document and reports its pages. */
@@ -117,6 +119,16 @@ export function createPageMeasurer(
       return between + Math.max(0, end.top - top);
     };
 
-    return { pageCount, pageStarts, heightPast };
+    const lastPageFill =
+      end && end.pageInnerHeight > 0
+        ? Math.min(1, Math.max(0, (end.top - top) / end.pageInnerHeight))
+        : 0;
+
+    return {
+      pageCount,
+      pageStarts,
+      heightPast,
+      lastPageFill: Math.round(lastPageFill * 1000) / 1000,
+    };
   };
 }

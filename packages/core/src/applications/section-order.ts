@@ -44,3 +44,16 @@ export function applySectionOrder(
     })),
   };
 }
+
+/** The order a profile prints its sections in, and new applications start from. */
+export function profileSectionOrder(profile: { sectionOrder?: unknown }): ResumeSectionKey[] {
+  return normalizeSectionOrder(profile.sectionOrder);
+}
+
+/** Scales a render model's page margins, so its rules still span the width between them. */
+export function scalePageMargins(model: ResumeRenderModel, scale = 1): ResumeRenderModel {
+  if (scale === 1) return model;
+  const [left, top, right, bottom] = model.pageMargins;
+  const scaled = (value: number) => Math.round(value * scale * 100) / 100;
+  return { ...model, pageMargins: [scaled(left), scaled(top), scaled(right), scaled(bottom)] };
+}

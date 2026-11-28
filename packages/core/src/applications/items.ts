@@ -18,6 +18,22 @@ import type {
 /** The id a rewording uses for the fields under the name (headline, summary, contact details). */
 export const BASICS_ITEM_ID = "basics";
 
+/**
+ * Keys an application leaves contact details out by, in its `excluded` list. Each profile link
+ * has its own key, `contact:profile:<link id>`, so leaving one out survives reordering the links.
+ */
+export const CONTACT_KEYS = {
+  email: "contact:email",
+  phone: "contact:phone",
+  location: "contact:location",
+  url: "contact:url",
+} as const;
+
+export const contactProfileKey = (linkId: string) => `contact:profile:${linkId}`;
+
+/** The key an application leaves the summary out by. */
+export const SUMMARY_KEY = "basics:summary";
+
 /** The profile sections made of entries with ids. */
 export const ENTRY_SECTIONS = [
   "work",
@@ -55,6 +71,8 @@ export const REWORDABLE_FIELDS = {
   references: ["name", "reference"],
   projects: ["name", "description", "startDate", "endDate", "url", "entity", "type"],
   highlight: ["text"],
+  contact: [],
+  summary: [],
 } as const satisfies {
   basics: readonly TextField<ResumeBasics>[];
   work: readonly TextField<ResumeWork>[];
@@ -69,6 +87,8 @@ export const REWORDABLE_FIELDS = {
   references: readonly TextField<ResumeReference>[];
   projects: readonly TextField<ResumeProject>[];
   highlight: readonly TextField<ResumeHighlight>[];
+  contact: readonly never[];
+  summary: readonly never[];
 };
 
 export type ItemKind = keyof typeof REWORDABLE_FIELDS;
@@ -82,11 +102,21 @@ export function isRewordableField(kind: ItemKind, field: string): boolean {
   return (REWORDABLE_FIELDS[kind] as readonly string[]).includes(field);
 }
 
-/** Every item in the profile an application can refer to, by id. */
+/**
+ * Every item in the profile an application can refer to, by id: the basics, each entry and
+ * bullet, each contact detail by its key (whether or not it is filled in), and the summary.
+ */
 export function indexProfileItems(profile: ResumeSchema): Map<string, ProfileItem> {
   const items = new Map<string, ProfileItem>([
     [BASICS_ITEM_ID, { kind: "basics", values: profile.basics }],
+    [SUMMARY_KEY, { kind: "summary", values: {} }],
   ]);
+  for (const key of Object.values(CONTACT_KEYS)) {
+    items.set(key, { kind: "contact", values: {} });
+  }
+  for (const link of profile.basics.profiles ?? []) {
+    if (link.id) items.set(contactProfileKey(link.id), { kind: "contact", values: link });
+  }
 
   for (const section of ENTRY_SECTIONS) {
     for (const entry of profile[section] ?? []) {
@@ -102,7 +132,10 @@ export function indexProfileItems(profile: ResumeSchema): Map<string, ProfileIte
   return items;
 }
 
-/** An entry or a bullet can be left out of an application; the fields under the name cannot. */
+/**
+ * An entry, a bullet, a contact detail or the summary can be left out of an application; the
+ * name and headline cannot.
+ */
 export function isExcludable(item: ProfileItem | undefined): boolean {
   return item !== undefined && item.kind !== "basics";
 }

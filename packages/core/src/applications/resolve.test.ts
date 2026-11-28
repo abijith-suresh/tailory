@@ -100,6 +100,53 @@ describe("resolveApplication", () => {
     expect(staleRewordings).toEqual([changed]);
   });
 
+  it("leaves out the contact details and summary it lists, links by their id", () => {
+    const profile = sampleProfile();
+    profile.basics = {
+      ...profile.basics,
+      email: "jane@example.com",
+      phone: "555 0100",
+      url: "https://jane.example",
+      location: { city: "Leeds", countryCode: "GB" },
+      profiles: [
+        { id: "link-gh", network: "GitHub", username: "jane", url: "https://github.com/jane" },
+        {
+          id: "link-in",
+          network: "LinkedIn",
+          username: "jane",
+          url: "https://linkedin.com/in/jane",
+        },
+      ],
+    };
+    const { resume } = resolveApplication(
+      profile,
+      sampleApplication({
+        excluded: [
+          "contact:phone",
+          "contact:location",
+          "contact:profile:link-gh",
+          "basics:summary",
+        ],
+      })
+    );
+    expect(resume.basics).toMatchObject({
+      email: "jane@example.com",
+      phone: "",
+      url: "https://jane.example",
+      summary: "",
+    });
+    expect(resume.basics.location?.city ?? "").toBe("");
+    expect(resume.basics.profiles?.map((link) => link.id)).toEqual(["link-in"]);
+
+    const all = resolveApplication(
+      profile,
+      sampleApplication({ excluded: ["contact:email", "contact:url"] })
+    );
+    expect(all.resume.basics).toMatchObject({ email: "", phone: "555 0100" });
+    expect(all.resume.basics.url).toBeUndefined();
+    expect(all.resume.basics.profiles).toHaveLength(2);
+  });
+
   it("ignores wording for fields an application can't reword", () => {
     const { resume } = resolveApplication(
       sampleProfile(),

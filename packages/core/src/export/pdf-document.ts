@@ -59,11 +59,13 @@ export function buildPdfDocument(
   template: TemplateId,
   options: PdfDocumentOptions = {}
 ): TDocumentDefinitions {
+  const step = options.fitStep ?? UNTIGHTENED;
   const doc = loadPdfTemplateRenderer(template)(resume, {
     accentColor: options.accentColor,
     sectionOrder: options.sectionOrder,
+    marginScale: step.margin,
   });
-  const fitted = applyFitStep(doc, options.fitStep ?? UNTIGHTENED);
+  const fitted = applyFitStep(doc, step);
   return {
     ...fitted,
     content: nameBlocks(fitted.content, { index: 0 }),

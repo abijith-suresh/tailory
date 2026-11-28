@@ -1,3 +1,4 @@
+import { normalizeSectionOrder } from "../applications/section-order.ts";
 import {
   EMPTY_RESUME,
   type ResumeAward,
@@ -18,6 +19,7 @@ import {
   type ResumeWork,
 } from "../types/resume.ts";
 import { createId } from "./ids.ts";
+import { inferProfileLink, WEBSITE_NETWORK } from "./links.ts";
 
 const MONTH_ABBREVIATIONS: Record<string, string> = {
   jan: "Jan",
@@ -217,17 +219,21 @@ function normalizeProfile(profile: unknown): ResumeProfile | undefined {
     return undefined;
   }
 
-  const normalized: ResumeProfile = {
-    network: normalizeInlineText(source.network),
-    username: normalizeInlineText(source.username),
-    url: normalizeUrl(source.url) ?? "",
-  };
+  const network = normalizeInlineText(source.network);
+  const username = normalizeInlineText(source.username);
+  const url = normalizeUrl(source.url) ?? "";
 
-  if (!normalized.network && !normalized.username && !normalized.url) {
+  if (!network && !username && !url) {
     return undefined;
   }
 
-  return normalized;
+  const inferred = url ? inferProfileLink(url) : null;
+  return {
+    id: ensureId(source.id),
+    network: inferred?.network ?? (network || (url ? WEBSITE_NETWORK : "")),
+    username: username || inferred?.username || "",
+    url,
+  };
 }
 
 function normalizeBasics(basics: unknown): ResumeBasics {
@@ -612,6 +618,9 @@ export function normalizeResume(data: ResumeSchema): ResumeSchema {
     interests: normalizeSection(source.interests, normalizeInterestEntry),
     references: normalizeSection(source.references, normalizeReferenceEntry),
     projects: normalizeSection(source.projects, normalizeProjectEntry),
+    ...(source.sectionOrder === undefined
+      ? {}
+      : { sectionOrder: normalizeSectionOrder(source.sectionOrder) }),
   };
 }
 

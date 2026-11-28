@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { sampleApplication, sampleProfile } from "../test/support.ts";
 import { RESUME_SECTION_KEYS } from "../types/application.ts";
 import {
+  ApplicationStatusError,
   createApplication,
+  isApplicationOutcome,
   isApplicationStatus,
+  moveApplication,
   normalizeApplication,
   normalizePageTarget,
-  setApplicationStatus,
 } from "./application.ts";
 
 const NOW = new Date("2026-11-20T10:00:00.000Z");
@@ -32,8 +34,11 @@ describe("createApplication", () => {
       postingUrl: "https://acme.example/jobs/1",
       jobDescription: null,
       status: "drafting",
+      outcome: null,
+      offer: false,
       archived: false,
       createdAt: "2026-11-20T10:00:00.000Z",
+      statusChangedAt: "2026-11-20T10:00:00.000Z",
       appliedAt: null,
       closedAt: null,
       notes: "",
@@ -44,6 +49,16 @@ describe("createApplication", () => {
       pageTarget: null,
       autoFit: true,
     });
+  });
+
+  it("starts from the profile's section order", () => {
+    const application = createApplication({
+      company: "Acme",
+      role: "Designer",
+      sectionOrder: ["skills", "work"],
+    });
+    expect(application.sectionOrder.slice(0, 3)).toEqual(["skills", "work", "summary"]);
+    expect(application.sectionOrder).toHaveLength(RESUME_SECTION_KEYS.length);
   });
 
   it("takes a template and a page target the user picked", () => {
@@ -61,35 +76,80 @@ describe("createApplication", () => {
   });
 });
 
-describe("setApplicationStatus", () => {
-  it("records when it was applied, once", () => {
-    const applied = setApplicationStatus(sampleApplication(), "applied", NOW);
-    const interviewing = setApplicationStatus(applied, "interviewing", LATER);
+describe("moveApplication", () => {
+  it("records when it was applied, once, and when the status last changed", () => {
+    const applied = moveApplication(sampleApplication(), { status: "applied" }, NOW);
+    const interviewing = moveApplication(applied, { status: "interviewing" }, LATER);
 
-    expect(applied).toMatchObject({ status: "applied", appliedAt: NOW.toISOString() });
+    expect(applied).toMatchObject({
+      status: "applied",
+      appliedAt: NOW.toISOString(),
+      statusChangedAt: NOW.toISOString(),
+    });
     expect(interviewing).toMatchObject({
       status: "interviewing",
       appliedAt: NOW.toISOString(),
       closedAt: null,
+      outcome: null,
+      statusChangedAt: LATER.toISOString(),
     });
   });
 
   it("leaves the applied date empty while drafting", () => {
-    expect(setApplicationStatus(sampleApplication(), "drafting", NOW).appliedAt).toBeNull();
+    expect(moveApplication(sampleApplication(), { status: "drafting" }, NOW).appliedAt).toBeNull();
   });
 
-  it("records when it closed, and clears that when it reopens", () => {
-    const rejected = setApplicationStatus(sampleApplication(), "rejected", NOW);
-    const withdrawn = setApplicationStatus(rejected, "withdrawn", LATER);
-    const reopened = setApplicationStatus(withdrawn, "interviewing", LATER);
-
-    expect(rejected).toMatchObject({ closedAt: NOW.toISOString(), appliedAt: NOW.toISOString() });
-    expect(withdrawn.closedAt).toBe(NOW.toISOString());
-    expect(reopened.closedAt).toBeNull();
+  it("needs an outcome to close", () => {
+    expect(() => moveApplication(sampleApplication(), { status: "closed" }, NOW)).toThrow(
+      ApplicationStatusError
+    );
   });
 
-  it("does not close an application with an offer", () => {
-    expect(setApplicationStatus(sampleApplication(), "offer", NOW).closedAt).toBeNull();
+  it("records when it closed and how, and clears both when it reopens", () => {
+    const rejected = moveApplication(
+      sampleApplication(),
+      { status: "closed", outcome: "rejected" },
+      NOW
+    );
+    const withdrawn = moveApplication(rejected, { outcome: "withdrawn" }, LATER);
+    const reopened = moveApplication(withdrawn, { status: "interviewing" }, LATER);
+
+    expect(rejected).toMatchObject({
+      status: "closed",
+      outcome: "rejected",
+      closedAt: NOW.toISOString(),
+      appliedAt: NOW.toISOString(),
+    });
+    // A new outcome keeps the closing date but counts as a move.
+    expect(withdrawn).toMatchObject({
+      outcome: "withdrawn",
+      closedAt: NOW.toISOString(),
+      statusChangedAt: LATER.toISOString(),
+    });
+    expect(reopened).toMatchObject({ closedAt: null, outcome: null });
+  });
+
+  it("ignores an outcome while the application is open", () => {
+    const moved = moveApplication(sampleApplication(), { status: "applied", outcome: "accepted" });
+    expect(moved.outcome).toBeNull();
+  });
+
+  it("flags an offer while interviewing, and drops the flag on closing", () => {
+    const interviewing = moveApplication(sampleApplication(), { status: "interviewing" }, NOW);
+    const offer = moveApplication(interviewing, { offer: true }, LATER);
+    const accepted = moveApplication(offer, { status: "closed", outcome: "accepted" }, LATER);
+
+    expect(offer).toMatchObject({ status: "interviewing", offer: true, closedAt: null });
+    // The flag alone is not a move between columns.
+    expect(offer.statusChangedAt).toBe(NOW.toISOString());
+    expect(accepted).toMatchObject({ offer: false, outcome: "accepted" });
+  });
+
+  it("does not count a move to the same place as a change", () => {
+    const applied = moveApplication(sampleApplication(), { status: "applied" }, NOW);
+    expect(moveApplication(applied, { status: "applied" }, LATER).statusChangedAt).toBe(
+      NOW.toISOString()
+    );
   });
 });
 
@@ -181,6 +241,50 @@ describe("normalizeApplication", () => {
     expect(normalizeApplication(null, sampleProfile()).status).toBe("drafting");
   });
 
+  it("gives a closed application an outcome, and an open one none", () => {
+    const profile = sampleProfile();
+    expect(normalizeApplication({ status: "closed" }, profile)).toMatchObject({
+      outcome: "withdrawn",
+      offer: false,
+    });
+    expect(
+      normalizeApplication({ status: "closed", outcome: "accepted", offer: true }, profile)
+    ).toMatchObject({ outcome: "accepted", offer: false });
+    expect(
+      normalizeApplication({ status: "interviewing", outcome: "accepted", offer: true }, profile)
+    ).toMatchObject({ outcome: null, offer: true });
+  });
+
+  it("dates the last status change from creation when it has none", () => {
+    const normalized = normalizeApplication(
+      { createdAt: "2026-11-02T00:00:00.000Z" },
+      sampleProfile()
+    );
+    expect(normalized.statusChangedAt).toBe("2026-11-02T00:00:00.000Z");
+  });
+
+  it("keeps contact details and the summary it leaves out", () => {
+    const profile = sampleProfile();
+    profile.basics.profiles = [{ id: "link-a", network: "GitHub", username: "jane", url: "" }];
+    const normalized = normalizeApplication(
+      {
+        excluded: [
+          "contact:email",
+          "contact:profile:link-a",
+          "contact:profile:gone",
+          "basics:summary",
+          "contact:fax",
+        ],
+      },
+      profile
+    );
+    expect(normalized.excluded).toEqual([
+      "contact:email",
+      "contact:profile:link-a",
+      "basics:summary",
+    ]);
+  });
+
   it("only turns tightening off when told to", () => {
     expect(normalizeApplication({ autoFit: false }, sampleProfile()).autoFit).toBe(false);
   });
@@ -194,8 +298,10 @@ describe("helpers", () => {
     expect(normalizePageTarget("2")).toBeNull();
   });
 
-  it("knows the statuses", () => {
-    expect(isApplicationStatus("offer")).toBe(true);
-    expect(isApplicationStatus("won")).toBe(false);
+  it("knows the statuses and outcomes", () => {
+    expect(isApplicationStatus("closed")).toBe(true);
+    expect(isApplicationStatus("offer")).toBe(false);
+    expect(isApplicationOutcome("declined")).toBe(true);
+    expect(isApplicationOutcome("closed")).toBe(false);
   });
 });

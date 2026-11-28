@@ -1,5 +1,5 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-import { applySectionOrder } from "../applications/section-order.ts";
+import { applySectionOrder, scalePageMargins } from "../applications/section-order.ts";
 import { renderPdfResumeModel } from "../export/pdf-renderer.ts";
 
 import {
@@ -132,6 +132,9 @@ export function modernTemplate(
   });
 
   return renderPdfResumeModel(
-    applySectionOrder(buildModernRenderModel(resume, design), options.sectionOrder)
+    scalePageMargins(
+      applySectionOrder(buildModernRenderModel(resume, design), options.sectionOrder),
+      options.marginScale
+    )
   );
 }
