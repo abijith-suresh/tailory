@@ -237,13 +237,24 @@ export const applyChanges = (
 };
 
 /**
- * Changes the user's application `id` and logs the change. Returns it unchanged, with nothing
- * logged, when the changes make no difference.
+ * Changes worked out from the application as it is inside the write, for edits that depend on
+ * the current value (leave one more item out, move a section). Returns the changes and, if it
+ * wants one, the summary to log.
+ */
+export type ApplicationEdit = (
+  current: Application,
+  profile: ResumeSchema
+) => { changes: ApplicationChanges; summary?: string };
+
+/**
+ * Changes the user's application `id` and logs the change. `changes` may be an edit that reads
+ * the current application, so concurrent writes never undo each other. Returns it unchanged,
+ * with nothing logged, when the changes make no difference.
  */
 export const updateApplication = async (
   ctx: DataContext,
   id: string,
-  changes: ApplicationChanges,
+  changes: ApplicationChanges | ApplicationEdit,
   summary?: string
 ): Promise<ApplicationRecord> =>
   ctx.db.transaction(async (tx) => {
@@ -251,7 +262,9 @@ export const updateApplication = async (
     if (!row) throw notFound("Application");
     const before = toApplication(row);
     const profile = await currentResume(tx, ctx.userId);
-    const after = applyChanges(before, changes, profile);
+    const edit =
+      typeof changes === "function" ? changes(before, profile) : { changes, summary: undefined };
+    const after = applyChanges(before, edit.changes, profile);
     if (sameJson(before, after)) return toRecord(row);
     const { record } = await writeApplication(
       tx,
@@ -259,7 +272,7 @@ export const updateApplication = async (
       id,
       before,
       after,
-      summary ?? describeChanges(before, after)
+      summary ?? edit.summary ?? describeChanges(before, after)
     );
     return record as ApplicationRecord;
   });
