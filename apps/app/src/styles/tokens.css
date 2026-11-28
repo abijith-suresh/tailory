@@ -1,0 +1,202 @@
+/*
+ * Design tokens. Colours come from the marketing site's "Fitted" direction
+ * (apps/site/src/styles/global.css); change a shared value there and here together.
+ *
+ * Each colour holds its light and dark value in one light-dark() pair. The page follows the
+ * system setting; `data-theme="light"` or `"dark"` on <html> pins one.
+ */
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, monospace;
+
+    /*
+     * Surfaces and ink. Contrast (light): fg-muted on canvas 6.5:1; fg-subtle 4.9:1 on surface but
+     * 4.4:1 on canvas, so set fg-subtle text on surfaces only. Primary on surface 7.7:1.
+     */
+    --color-canvas: light-dark(#f4f3ef, #141518);
+    --color-canvas-deep: light-dark(#ebeae4, #101114);
+    --color-surface: light-dark(#ffffff, #1c1d22);
+    --color-fg: light-dark(#1b1c20, #ecedf0);
+    --color-fg-muted: light-dark(#55575f, #a9abb3);
+    --color-fg-subtle: light-dark(#6f717a, #8b8d96);
+    --color-line: light-dark(#e3e2dc, #2c2e35);
+    --color-line-strong: light-dark(#cfcec7, #3a3c44);
+    --color-cut: light-dark(#a0a2aa, #5d5f68);
+
+    /* Cobalt means one of two things: where you are, or the main action. Nothing else. */
+    --color-primary: light-dark(#2b3fd1, #8d9bff);
+    --color-primary-hover: light-dark(#2233b0, #a6b1ff);
+    --color-on-primary: light-dark(#ffffff, #10122a);
+    --color-selected: light-dark(#eceefc, #262a45);
+    --color-focus: light-dark(#2b3fd1, #8d9bff);
+
+    /* One tint for every hover and one for every press: nav, buttons, rows, menu items. */
+    --color-tint-hover: light-dark(rgb(27 28 32 / 0.055), rgb(236 237 240 / 0.06));
+    --color-tint-press: light-dark(rgb(27 28 32 / 0.1), rgb(236 237 240 / 0.11));
+
+    --color-danger: light-dark(#b42318, #f87171);
+    --color-danger-hover: light-dark(#931c13, #fb9a9a);
+    --color-danger-tint: light-dark(#fbeae8, #3a1d1d);
+    --color-over: light-dark(#c2410c, #fb923c);
+    --color-fits: light-dark(#1d7a43, #4ade80);
+
+    --color-scrim: light-dark(rgb(20 21 24 / 0.32), rgb(0 0 0 / 0.55));
+    --color-toast: light-dark(#1b1c20, #ecedf0);
+    --color-on-toast: light-dark(#f4f3ef, #1b1c20);
+    --color-toast-action: light-dark(#a6b1ff, #2b3fd1);
+    --color-shadow: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.04));
+    --color-shadow-deep: light-dark(rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.6));
+
+    /*
+     * Where an application stands: a dot beside the word, so colour is never the only cue.
+     * Applied is slate, not cobalt, because cobalt is kept for "current" and "primary".
+     */
+    --color-status-drafting: light-dark(#6f717a, #8b8d96);
+    --color-status-applied: light-dark(#3d6aa8, #84aee6);
+    --color-status-interviewing: light-dark(#a16207, #f5b94a);
+    --color-status-closed: light-dark(#8a8c94, #6f717a);
+
+    /* Tinted pills (outcomes, the offer tag, page results): ink 4.5:1 or more on its tint. */
+    --color-status-neutral-bg: light-dark(#ebeae5, #2a2c32);
+    --color-status-neutral-fg: light-dark(#4a4c53, #c3c5cc);
+    --color-status-active-bg: var(--color-selected);
+    --color-status-active-fg: light-dark(#2233b0, #b8c0ff);
+    --color-status-progress-bg: light-dark(#f6ecd6, #3a2f17);
+    --color-status-progress-fg: light-dark(#74500a, #ecc878);
+    --color-status-positive-bg: light-dark(#e0f0e4, #1d3324);
+    --color-status-positive-fg: light-dark(#1d5f32, #8fd6a4);
+    --color-status-negative-bg: light-dark(#f7e3e1, #3d2220);
+    --color-status-negative-fg: light-dark(#9a2b22, #f2a59d);
+
+    /* Type scale: size / line height. Line heights sit on 4px. */
+    --text-heading-4: 2rem;
+    --text-heading-4--lh: 2.5rem;
+    --text-title: 1.75rem;
+    --text-title--lh: 2.25rem;
+    --text-heading-5: 1.375rem;
+    --text-heading-5--lh: 1.875rem;
+    --text-heading-6: 1.125rem;
+    --text-heading-6--lh: 1.5rem;
+    --text-md: 0.9375rem;
+    --text-md--lh: 1.5rem;
+    --text-sm: 0.875rem;
+    --text-sm--lh: 1.25rem;
+    --text-xs: 0.8125rem;
+    --text-xs--lh: 1.125rem;
+    --text-2xs: 0.75rem;
+    --text-2xs--lh: 1rem;
+
+    /* Spacing on a 4px grid. */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-7: 1.75rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+
+    --container-page: 92.5rem;
+    --container-measure: 36rem;
+    --header-height: 3.5rem;
+
+    /* Inputs and selects are 40px so a row of fields lines up; buttons are 36px. Phones: 44px. */
+    --control-height: 2.5rem;
+    --button-height: 2.25rem;
+    --button-height-small: 1.875rem;
+
+    --radius-sm: 5px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 10px;
+    --radius-2xl: 13px;
+    --radius-3xl: 19px;
+    --radius-button: var(--radius-lg);
+
+    --shadow-raised: 0 1px 0 var(--color-shadow);
+    --shadow-popover:
+      0 1px 2px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.4)),
+      0 12px 28px -8px light-dark(rgb(0 0 0 / 0.22), rgb(0 0 0 / 0.7));
+    --shadow-lift:
+      0 2px 4px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.4)),
+      0 24px 48px -16px light-dark(rgb(0 0 0 / 0.28), rgb(0 0 0 / 0.8));
+
+    /*
+     * Motion. One duration scale by job and one set of curves; every transition and animation in
+     * the app takes its timing from here. See "Motion" in apps/app/README.md.
+     */
+    --duration-press: 90ms; /* a control going down under the pointer */
+    --duration-hover: 150ms; /* colour and tint changes */
+    --duration-exit: 150ms; /* menus, dialogs and toasts leaving */
+    --duration-enter: 220ms; /* menus, dialogs and toasts arriving */
+    --duration-move: 320ms; /* things changing place: list rows, switches, sheets */
+    --duration-settle: 480ms; /* a pressed control springing back */
+
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-in: cubic-bezier(0.5, 0, 0.75, 0);
+    --ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
+    /* A slightly heavy spring: overshoots about 6%, then settles. */
+    --ease-spring: linear(
+      0,
+      0.013 0.9%,
+      0.05 1.9%,
+      0.199 4.4%,
+      0.431 7.4%,
+      0.66 10.6%,
+      0.844 14%,
+      0.97 17.6%,
+      1.035 20.9%,
+      1.06 24.4%,
+      1.058 28.1%,
+      1.038 32.8%,
+      1.011 40.4%,
+      0.998 49.3%,
+      0.997 62%,
+      1
+    );
+
+    /* How far things travel on the way in. Reduced motion sets them to nothing: fades only. */
+    --motion-rise: 6px;
+    --motion-drop: -4px;
+    --motion-scale: 0.97;
+    --motion-press-y: 1px;
+    --motion-press-scale: 0.97;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  @media (max-width: 40rem) {
+    :root {
+      --control-height: 2.75rem;
+      --button-height: 2.75rem;
+      --button-height-small: 2.25rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-press: 0ms;
+      --duration-move: 0ms;
+      --duration-settle: 0ms;
+      --duration-enter: 120ms;
+      --duration-exit: 100ms;
+      --motion-rise: 0px;
+      --motion-drop: 0px;
+      --motion-scale: 1;
+      --motion-press-y: 0px;
+      --motion-press-scale: 1;
+    }
+  }
+}

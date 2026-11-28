@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta";
 import { createSignal } from "solid-js";
 
-import { Button } from "../components/Button";
+import { Button, LinkButton } from "../components/Button";
 import { deleteAccount } from "../server/functions";
 
 export default function Settings() {
@@ -27,6 +27,15 @@ export default function Settings() {
       <div class="page-head">
         <h1 class="page-title">Settings</h1>
       </div>
+      <section class="panel" aria-labelledby="agents">
+        <h2 class="panel__title" id="agents">
+          Agents
+        </h2>
+        <p class="panel__text">Connect Claude Code, Codex, Cursor or another MCP client.</p>
+        <div class="panel__actions">
+          <LinkButton href="/connect">Connect an agent</LinkButton>
+        </div>
+      </section>
       <section class="panel" aria-labelledby="delete-account">
         <h2 class="panel__title" id="delete-account">
           Delete account

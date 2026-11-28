@@ -1,0 +1,264 @@
+/* One application (/applications/:id): preview, job details, changes and tailoring. */
+
+@layer screens {
+  /* ── Preview ────────────────────────────────────────────────────── */
+
+  .preview-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+
+  .preview-head__result .page-result {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .pdf-preview {
+    display: grid;
+    gap: var(--space-4);
+    transition: opacity var(--duration-hover);
+  }
+
+  .pdf-preview--stale {
+    opacity: 0.55;
+  }
+
+  .pdf-preview__page {
+    aspect-ratio: 8.5 / 11;
+    border: 1px solid var(--color-line);
+    background: #ffffff;
+    box-shadow: 0 1px 2px var(--color-shadow);
+  }
+
+  .pdf-preview__page > canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pdf-preview__page--empty {
+    display: grid;
+    place-items: center;
+    padding: var(--space-6);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  /* ── Job details ────────────────────────────────────────────────── */
+
+  .disclosure__summary {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .disclosure__body {
+    margin-top: var(--space-3);
+  }
+
+  .disclosure__body .field__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ── Change log ─────────────────────────────────────────────────── */
+
+  .change-list {
+    margin-top: var(--space-3);
+    padding: 0;
+    list-style: none;
+    max-height: 22rem;
+    overflow-y: auto;
+  }
+
+  .change {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+  }
+
+  .change + .change {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .change__summary {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+    overflow-wrap: anywhere;
+  }
+
+  .change__meta {
+    margin-top: var(--space-1);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+  }
+
+  .change__who {
+    font-weight: 500;
+    color: var(--color-fg-muted);
+  }
+
+  .change__who--agent {
+    color: var(--color-status-active-fg);
+  }
+
+  .change__undo {
+    flex-shrink: 0;
+  }
+
+  /* ── Section order ──────────────────────────────────────────────── */
+
+  .order {
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .order__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .order__item + .order__item {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .order__buttons {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  /* ── What to keep ───────────────────────────────────────────────── */
+
+  .tree {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-2);
+  }
+
+  .tree__section {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .tree__legend {
+    margin-bottom: var(--space-2);
+    padding: 0;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .tree__entries,
+  .tree__bullets {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  .tree__entry {
+    padding: var(--space-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+  }
+
+  .tree__title {
+    font-weight: 600;
+  }
+
+  .tree__detail {
+    margin-left: var(--space-2);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+  }
+
+  .tree__children {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 0 var(--space-6);
+  }
+
+  .tree__bullet {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-2);
+  }
+
+  .line__view {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .line__text {
+    flex: 1 1 14rem;
+    min-width: 0;
+    font-size: var(--text-sm);
+    line-height: 1.5rem;
+    overflow-wrap: anywhere;
+  }
+
+  .line__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .line__note {
+    flex-basis: 100%;
+    color: var(--color-status-progress-fg);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+  }
+
+  .line--reworded > .line__view > .line__text {
+    padding-left: var(--space-2);
+    border-left: 2px solid var(--color-primary);
+  }
+
+  .line__form {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .line__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Left out of this application: struck through, still readable. */
+  .tree__entry--out .tree__title,
+  .tree__bullet--out .line__view > .line__text {
+    color: var(--color-fg-subtle);
+    text-decoration: line-through;
+    text-decoration-color: var(--color-cut);
+  }
+}

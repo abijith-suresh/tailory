@@ -295,6 +295,8 @@ jobs:
           path: |
             apps/site/test-results/
             apps/site/playwright-report/
+            apps/app/test-results/
+            apps/app/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
 

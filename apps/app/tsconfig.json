@@ -8,5 +8,5 @@
     "jsxImportSource": "@solidjs/web",
     "types": ["node", "vite/client", "@solidjs/vite-plugin/virtual-modules"]
   },
-  "include": ["src", "scripts", "*.ts"]
+  "include": ["src", "scripts", "e2e", "*.ts"]
 }
