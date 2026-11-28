@@ -81,8 +81,8 @@ everything Tailory keeps for it.
 
 ## Screens
 
-**Applications** (`/`) lists your applications grouped by status: offer, interviewing, applied,
-drafting, then rejected and withdrawn. Each row shows the company, role, status, page result and
+**Applications** (`/`) lists your applications grouped by status: interviewing, applied,
+drafting, then closed. Each row shows the company, role, status, page result and
 when it last changed. Search matches the company or role; archived applications stay hidden
 until you tick "Show archived". "New application" asks for the company, role, and optionally the
 posting link and job description, for when you aren't using an agent.
@@ -120,6 +120,56 @@ opened on in local mode, and `TAILORY_PUBLIC_URL` + `/mcp` in server mode. It ha
 for Claude Code, Codex, Cursor and VS Code. In server mode it adds the Claude.ai and ChatGPT
 custom connector steps; local mode says those can't reach it.
 
+## Data
+
+The data layer (`src/server/data`) holds one user's profile, applications and change log. The
+MCP tools and the web app both go through it, and every write logs a change in the same
+transaction. The model lives in `packages/core`.
+
+- **Statuses:** `drafting`, `applied`, `interviewing`, `closed`. A closed application has an
+  `outcome` (`accepted`, `declined`, `rejected` or `withdrawn`); closing without one is refused,
+  and an open application has none. `offer` flags an offer waiting on an answer, usually while
+  interviewing, and clears on closing. `archived` hides an application from every view unless
+  asked for. `statusChangedAt` moves with the status or outcome; `appliedAt` is set on the first
+  move past drafting, and `closedAt` on closing, cleared on reopening.
+- **Review:** each change has a `review` state. The user's own changes are born `kept`; an
+  agent's are born `pending` until the user keeps or undoes them, with `reviewedAt` and the
+  reviewer recorded. Undo marks the change `undone` and reverts it, and refuses when the target
+  has changed since. Undo all is all or none. Downloading a PDF doesn't count as keeping. A user
+  edit that changes every line a pending change reworded or left out counts as reviewing it.
+  `listPendingChanges` gives each pending change with what it still shows on the page: each
+  reworded line (item id, field, old and new text) and each left-out entry, bullet or contact
+  detail (its id, and `afterId`, the item before it, for a margin mark).
+- **Leaving things out:** an application's `excluded` list holds entry and bullet ids, contact
+  keys (`contact:email`, `contact:phone`, `contact:location`, `contact:url`, and
+  `contact:profile:<link id>` for each profile link), and `basics:summary`. Rewordings of the
+  `basics` item cover the headline (`label`) and the summary.
+- **Section order:** the profile has a default `sectionOrder`, which an import keeps and new
+  applications copy. Each application then keeps its own, moving whole sections.
+- **Profile links:** each `profiles[]` link has an id, and its `network` is read from the URL on
+  save: GitHub, LinkedIn, X, GitLab, Dribbble, Behance, Mastodon, or Website for any other site.
+- **Fit:** the page result has `pagesNeeded`, `linesOver`, `lastPageFill` (0 to 1) and the
+  `density` it prints at (`level` 0 to 1, body text size, narrowest margin). With tightening on it
+  always uses the smallest density that fits. It stops at 9.5 pt body text and 10 mm margins and
+  reports what is still over.
+- **Connection status:** every MCP tool call records the user's agent's last call (client name,
+  tool, time) in `mcp_activity`.
+
+The web app calls these server functions:
+
+| Function                             | Does                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| `newApplication(input)`              | Creates an application: company, role, posting URL, job description         |
+| `changeApplication(id, edit)`        | One edit, including `{ type: "status", status, outcome, offer }`            |
+| `getPendingChanges(applicationId)`   | The agent's pending changes, with reworded lines and left-out items to mark |
+| `keepAgentChange(changeId)`          | Keeps one change                                                            |
+| `undoAgentChange(changeId)`          | Undoes one change and marks it undone                                       |
+| `keepAllAgentChanges(applicationId)` | Keeps every pending change to an application                                |
+| `undoAllAgentChanges(applicationId)` | Undoes every pending change to an application, all or none                  |
+| `exportAllData()`                    | The profile and every application as one JSON file (`fileName`, `data`)     |
+| `eraseAllData()`                     | Local mode: erases the local user's rows. Server mode: deletes the account  |
+| `getAgentConnection()`               | The agent's last MCP call, for Settings › Agents to poll                    |
+
 ## MCP
 
 Agents connect to `<address>/mcp` over Streamable HTTP. It is stateless: no `Mcp-Session-Id`, so
@@ -140,21 +190,23 @@ any instance can answer any request.
 
 Agents work through eight tools (`src/server/tools.ts`). Every write acts as the agent: the change
 log records it with the OAuth client's registered name, or in local mode the name the client
-sends. Every write answers with the page result from `src/server/render.ts` (such as "1 page,
-fits" or "about 3 lines over 1 page") and the application's link in the web app
-(`<address>/applications/<id>`). Each tool answers with a short line of text plus structured
+sends, and waits as pending for the user to keep or undo. Every call is recorded as the agent's
+last, for the connection check. Every write answers with the page result from
+`src/server/render.ts` (a short message such as "1 page, fits" or "about 3 lines over 1 page",
+with `pagesNeeded`, `linesOver`, `lastPageFill` and `density`) and the application's link in the
+web app (`<address>/applications/<id>`). Each tool answers with a short line of text plus structured
 content; a bad id or input answers with `isError` and what to do instead.
 
-| Tool                 | Does                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `get_profile`        | The profile, with an id on every entry and bullet                                                      |
-| `update_profile`     | `replace` the whole profile, merge `basics`, `add` entries or bullets, `change` or `remove` them by id |
-| `list_applications`  | Filter by `status`, `archived` (`exclude` by default, `include`, `only`) and a text `query`            |
-| `create_application` | Company, role, posting URL, job description; starts from the whole profile                             |
-| `get_application`    | Job details, tailoring, the resume as it will print, stale rewordings, the page result                 |
-| `tailor_application` | `exclude`/`include` item ids, `reword` lines, `sectionOrder`, `template`, `pageTarget`, `autoFit`      |
-| `update_application` | Status, notes, dates, job details, archive or unarchive                                                |
-| `export_resume`      | A download link for an application's or the profile's PDF or JSON Resume                               |
+| Tool                 | Does                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `get_profile`        | The profile, with an id on every entry and bullet                                                                  |
+| `update_profile`     | `replace` the whole profile, merge `basics`, `add`, `change` or `remove` entries and bullets, `sectionOrder`       |
+| `list_applications`  | Filter by `status`, `archived` (`exclude` by default, `include`, `only`) and a text `query`                        |
+| `create_application` | Company, role, posting URL, job description; starts from the whole profile                                         |
+| `get_application`    | Job details, tailoring, the resume as it will print, stale rewordings, the page result, pending count              |
+| `tailor_application` | `exclude`/`include` item ids and contact keys, `reword` lines, `sectionOrder`, `template`, `pageTarget`, `autoFit` |
+| `update_application` | `status`, `outcome`, `offer`, notes, dates, job details, archive or unarchive                                      |
+| `export_resume`      | A download link for an application's or the profile's PDF or JSON Resume                                           |
 
 Download links (`/download/<token>`) carry a token signed with a key derived from
 `TAILORY_AUTH_SECRET` (in local mode, a key made at start-up, so links end when Tailory stops). The
@@ -165,9 +217,11 @@ reads the resume with the token's user id, so it can't open anyone else's.
 `src/server/mcp-flow.test.ts` drives the endpoint with the official SDK client
 (`@modelcontextprotocol/client`, protocol 2026-07-28): discovery, CIMD and DCR sign-in, token,
 `tools/list` in server mode, no OAuth in local mode, and -32022 for 2025-11-25. It drives the
-whole flow over MCP in both modes (`src/server/testing/resume-flow.ts`): set up a profile, create
-an application, tailor it to one page, change its status, list it, and download the PDF; and
-checks that a second user can't reach the first user's application by id.
+whole flow over MCP in both modes (`src/server/testing/resume-flow.ts`): set up a profile with
+every section and links, set its section order, create an application, tailor it to one page,
+leave contact details out, flag an offer, close it with an outcome, list it, and download the PDF;
+it checks that the writes wait for review, that the last call is recorded, and that a second user
+can't reach the first user's application by id.
 It runs on PGlite in every test run and on Postgres in CI's app-postgres job. CI's app-package job
 also runs the DCR flow against the Docker image (`src/server/remote.test.ts`).
 

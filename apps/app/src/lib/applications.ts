@@ -7,12 +7,10 @@ import type { ApplicationStatus } from "@tailory/core";
  * applications last.
  */
 export const STATUS_ORDER: readonly ApplicationStatus[] = [
-  "offer",
   "interviewing",
   "applied",
   "drafting",
-  "rejected",
-  "withdrawn",
+  "closed",
 ];
 
 export type StatusGroup<T> = { status: ApplicationStatus; items: T[] };

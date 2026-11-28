@@ -68,17 +68,10 @@ describe("Select", () => {
 });
 
 describe("StatusBadge", () => {
-  it("shows the word for each of the six statuses", () => {
+  it("shows the word for each of the four statuses", () => {
     const words = STATUSES.map(
       (status) => renderHtml(() => <StatusBadge status={status} />).body.textContent
     );
-    expect(words).toEqual([
-      "Drafting",
-      "Applied",
-      "Interviewing",
-      "Offer",
-      "Rejected",
-      "Withdrawn",
-    ]);
+    expect(words).toEqual(["Drafting", "Applied", "Interviewing", "Closed"]);
   });
 });

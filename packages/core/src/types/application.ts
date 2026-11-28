@@ -1,19 +1,22 @@
 import type { TemplateId } from "./template.ts";
 
-/** The sections of a resume page, in the order the templates print them by default. */
+/**
+ * The sections of a resume page, in the default order: the order a new profile prints in, and so
+ * the order a new application starts from.
+ */
 export const RESUME_SECTION_KEYS = [
   "summary",
   "work",
-  "volunteer",
+  "projects",
   "education",
+  "volunteer",
   "awards",
-  "publications",
+  "certificates",
   "skills",
   "languages",
+  "publications",
   "interests",
-  "projects",
   "references",
-  "certificates",
 ] as const;
 
 export type ResumeSectionKey = (typeof RESUME_SECTION_KEYS)[number];
@@ -30,17 +33,18 @@ export interface Rewording {
   baseText: string;
 }
 
-/** Where an application stands with the employer. */
-export const APPLICATION_STATUSES = [
-  "drafting",
-  "applied",
-  "interviewing",
-  "offer",
-  "rejected",
-  "withdrawn",
-] as const;
+/**
+ * Where an application stands with the employer, in the order it moves. A board shows one column
+ * for each.
+ */
+export const APPLICATION_STATUSES = ["drafting", "applied", "interviewing", "closed"] as const;
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+/** How a closed application ended. Every closed application has one; no other has any. */
+export const APPLICATION_OUTCOMES = ["accepted", "declined", "rejected", "withdrawn"] as const;
+
+export type ApplicationOutcome = (typeof APPLICATION_OUTCOMES)[number];
 
 /** How a resume is fitted to pages. */
 export interface PageFit {
@@ -61,15 +65,26 @@ export interface Application extends PageFit {
   postingUrl: string | null;
   jobDescription: string | null;
   status: ApplicationStatus;
-  /** Hidden from the main list but kept. */
+  /** How it ended: set when `status` is closed, and null otherwise. */
+  outcome: ApplicationOutcome | null;
+  /** An offer waiting on the user's answer, usually while interviewing. Never set once closed. */
+  offer: boolean;
+  /** Hidden from every view unless asked for, but kept. */
   archived: boolean;
   createdAt: string;
+  /** When the status or outcome last changed; the creation time until then. */
+  statusChangedAt: string;
   appliedAt: string | null;
   closedAt: string | null;
   notes: string;
-  /** Ids of profile entries and bullets this application leaves out. */
+  /**
+   * What this application leaves out of the profile: entry and bullet ids, contact keys
+   * (`contact:email`, `contact:phone`, `contact:location`, `contact:url`, and
+   * `contact:profile:<link id>`), and `basics:summary` for the summary.
+   */
   excluded: string[];
   rewordings: Rewording[];
+  /** Every section, first to last. Starts as the profile's order; moves whole sections only. */
   sectionOrder: ResumeSectionKey[];
   templateId: TemplateId;
 }

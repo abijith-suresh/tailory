@@ -1,14 +1,17 @@
 import { normalizeResume } from "../resume/normalize.ts";
 import type { Application, Rewording } from "../types/application.ts";
-import type { ResumeHighlight, ResumeSchema } from "../types/resume.ts";
+import type { ResumeBasics, ResumeHighlight, ResumeSchema } from "../types/resume.ts";
 import {
   BASICS_ITEM_ID,
+  CONTACT_KEYS,
+  contactProfileKey,
   ENTRY_SECTIONS,
   type ItemKind,
   indexProfileItems,
   isRewordableField,
   type ProfileItem,
   readProfileText,
+  SUMMARY_KEY,
 } from "./items.ts";
 
 type Wording = Map<string, Map<string, string>>;
@@ -42,6 +45,18 @@ function resolveHighlights(
   return highlights
     ?.filter((highlight) => !excluded.has(highlight.id))
     .map((highlight) => reword(highlight, highlight.id, "highlight", wording));
+}
+
+/** The basics without the contact details and summary the application leaves out. */
+function leaveOutOfBasics(basics: ResumeBasics, excluded: Set<string>): ResumeBasics {
+  const kept: ResumeBasics = { ...basics };
+  if (excluded.has(CONTACT_KEYS.email)) kept.email = "";
+  if (excluded.has(CONTACT_KEYS.phone)) kept.phone = "";
+  if (excluded.has(CONTACT_KEYS.url)) kept.url = undefined;
+  if (excluded.has(CONTACT_KEYS.location)) kept.location = {};
+  if (excluded.has(SUMMARY_KEY)) kept.summary = "";
+  kept.profiles = basics.profiles?.filter((link) => !excluded.has(contactProfileKey(link.id)));
+  return kept;
 }
 
 /** Text compared without regard to spacing, so retyping the same words is not a change. */
@@ -80,8 +95,8 @@ export interface ResolvedApplication {
 }
 
 /**
- * The resume an application prints: the profile without the application's left-out entries and
- * bullets, with the application's wording where it has any. The profile's other edits come
+ * The resume an application prints: the profile without the application's left-out entries,
+ * bullets, contact details and summary, with the application's wording where it has any. The profile's other edits come
  * through. Neither argument is changed.
  */
 export function resolveApplication(
@@ -93,7 +108,10 @@ export function resolveApplication(
   const wording = wordingByItem(application.rewordings);
   const resume: Record<string, unknown> = {
     ...normalized,
-    basics: reword(normalized.basics, BASICS_ITEM_ID, "basics", wording),
+    basics: leaveOutOfBasics(
+      reword(normalized.basics, BASICS_ITEM_ID, "basics", wording),
+      excluded
+    ),
   };
 
   for (const section of ENTRY_SECTIONS) {

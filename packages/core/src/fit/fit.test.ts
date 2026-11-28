@@ -5,6 +5,7 @@ import {
   loadTestPdfMake,
   longResume,
   sampleApplication,
+  sampleProfile as sampleApplicationResume,
   veryLongResume,
 } from "../test/support.ts";
 import type { ResumeSchema } from "../types/resume.ts";
@@ -45,20 +46,20 @@ describe("fitResume", () => {
   it("only counts pages without a target", async () => {
     const result = await fitResume(input(longResume(), null), measurePages);
 
-    expect(result).toMatchObject({ status: "none", stepIndex: 0, pageCount: 2, linesOver: 0 });
+    expect(result).toMatchObject({ status: "none", stepIndex: 0, pagesNeeded: 2, linesOver: 0 });
     expect(result.pageStarts).toEqual([{ page: 2, blockId: expect.any(String) }]);
   });
 
   it("leaves a resume that fits as designed", async () => {
     const result = await fitResume(input(longResume(), 2), measurePages);
-    expect(result).toMatchObject({ status: "fits", stepIndex: 0, pageCount: 2 });
+    expect(result).toMatchObject({ status: "fits", stepIndex: 0, pagesNeeded: 2 });
   });
 
   it("tightens as little as it can to meet the target", async () => {
     const fit = input(longResume(), 1);
     const result = await fitResume(fit, measurePages);
 
-    expect(result).toMatchObject({ status: "tightened", pageCount: 1, linesOver: 0 });
+    expect(result).toMatchObject({ status: "tightened", pagesNeeded: 1, linesOver: 0 });
     expect(result.stepIndex).toBeGreaterThan(0);
     // One step less doesn't fit.
     expect(await exportedPages(fit, result.stepIndex - 1)).toBe(2);
@@ -67,7 +68,7 @@ describe("fitResume", () => {
   it("reports the overflow untightened once tightening is off", async () => {
     const result = await fitResume(input(longResume(), 1, false), measurePages);
 
-    expect(result).toMatchObject({ status: "over", stepIndex: 0, pageCount: 2 });
+    expect(result).toMatchObject({ status: "over", stepIndex: 0, pagesNeeded: 2 });
     expect(result.linesOver).toBeGreaterThan(0);
     expect(result.pageStarts.map((start) => start.page)).toEqual([2]);
   });
@@ -78,11 +79,40 @@ describe("fitResume", () => {
 
     expect(result).toMatchObject({ status: "over", stepIndex: steps.length - 1 });
     expect(result.step).toEqual(steps.at(-1));
-    expect(result.pageCount).toBeGreaterThan(1);
+    expect(result.pagesNeeded).toBeGreaterThan(1);
 
     // Roughly the lines on the pages past the target: more for a longer resume.
     const shorter = await fitResume(input(longResume(), 1, false), measurePages);
     expect(result.linesOver).toBeGreaterThan(shorter.linesOver);
+  });
+
+  it("reports the density it prints at, and how full the last page is", async () => {
+    const asDesigned = await fitResume(input(longResume(), null), measurePages);
+    expect(asDesigned.density).toEqual({ level: 0, bodyPt: 10, marginMm: 15.9 });
+    expect(asDesigned.lastPageFill).toBeGreaterThan(0);
+    expect(asDesigned.lastPageFill).toBeLessThan(1);
+
+    const tightest = await fitResume(input(veryLongResume(), 1), measurePages);
+    expect(tightest.density.level).toBe(1);
+    expect(tightest.density.bodyPt).toBeCloseTo(9.5, 2);
+    expect(tightest.density.marginMm).toBeCloseTo(10, 1);
+
+    const tightened = await fitResume(input(longResume(), 1), measurePages);
+    expect(tightened.density.level).toBeGreaterThan(0);
+    expect(tightened.density.level).toBeLessThan(1);
+  });
+
+  it("fills the last page less as content goes", async () => {
+    const profile = sampleApplicationResume();
+    const full = await fitResume(input(profile, null), measurePages);
+    const shorter = await fitResume(
+      input({ ...profile, work: profile.work?.slice(0, 1) }, null),
+      measurePages
+    );
+    expect(full.pagesNeeded).toBe(1);
+    expect(full.lastPageFill).toBeLessThan(1);
+    expect(shorter.lastPageFill).toBeGreaterThan(0);
+    expect(shorter.lastPageFill).toBeLessThan(full.lastPageFill);
   });
 
   it("starts a page with a section heading rather than leave it at the foot of the last", async () => {
@@ -121,7 +151,7 @@ describe("fitResume", () => {
   ] as const)("measures the pages the exported PDF has, with %s", async (_, target, autoFit) => {
     const fit = input(longResume(), target, autoFit);
     const result = await fitResume(fit, measurePages);
-    expect(await exportedPages(fit, result.stepIndex)).toBe(result.pageCount);
+    expect(await exportedPages(fit, result.stepIndex)).toBe(result.pagesNeeded);
   });
 
   it("measures each step at most once, and few of them", async () => {
@@ -139,7 +169,7 @@ describe("fitApplication", () => {
     const application = sampleApplication({ templateId: "modern", pageTarget: 1 });
 
     const all = await fitApplication(profile, { ...application, autoFit: false }, measurePages);
-    expect(all.fit).toMatchObject({ status: "over", pageCount: 2 });
+    expect(all.fit).toMatchObject({ status: "over", pagesNeeded: 2 });
 
     // Leaving out two jobs brings it onto one page with no tightening.
     const cut = await fitApplication(
@@ -147,7 +177,7 @@ describe("fitApplication", () => {
       { ...application, excluded: ["work-C", "work-D"] },
       measurePages
     );
-    expect(cut.fit).toMatchObject({ status: "fits", stepIndex: 0, pageCount: 1 });
+    expect(cut.fit).toMatchObject({ status: "fits", stepIndex: 0, pagesNeeded: 1 });
     expect(cut.resume.work?.map((entry) => entry.id)).toEqual(["work-A", "work-B"]);
     expect(cut.staleRewordings).toEqual([]);
   });

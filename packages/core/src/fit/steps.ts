@@ -3,41 +3,68 @@ import type { TemplateId } from "../types/template.ts";
 
 /**
  * How much a resume is tightened. Each value multiplies the template's own: `space` the vertical
- * gaps, `leading` the line heights, `text` the font sizes. 1 everywhere is the template as designed.
+ * gaps, `leading` the line heights, `text` the font sizes, `margin` the page margins. 1 everywhere
+ * is the template as designed.
  */
 export interface FitStep {
   space: number;
   leading: number;
   text: number;
+  margin: number;
 }
 
 /** The tightest a template may go. Past these it reads as cramped. */
-export interface FitBounds {
-  space: number;
-  leading: number;
-  text: number;
-}
+export type FitBounds = FitStep;
 
-export const UNTIGHTENED: FitStep = { space: 1, leading: 1, text: 1 };
+export const UNTIGHTENED: FitStep = { space: 1, leading: 1, text: 1, margin: 1 };
+
+/** Body text never prints smaller than this, in points. */
+export const MIN_BODY_TEXT_PT = 9.5;
+/** Page margins never shrink below this, in millimetres. */
+export const MIN_PAGE_MARGIN_MM = 10;
+
+const POINTS_PER_MM = 72 / 25.4;
+
+/** Each template's body text size and page margin as designed, in points. */
+export const TEMPLATE_METRICS: Record<TemplateId, { bodyPt: number; marginPt: number }> = {
+  modern: { bodyPt: 10, marginPt: 45 },
+  minimal: { bodyPt: 10, marginPt: 50 },
+  "compact-ats": { bodyPt: 9.5, marginPt: 36 },
+};
 
 /** Spacing and line height first, in these many even steps, so it tightens no more than needed. */
 const SPACING_STEPS = 6;
-/** Then text size, in these many even steps, with spacing at its tightest. */
+/** Then the page margins, in these many even steps. */
+const MARGIN_STEPS = 3;
+/** Then text size, in these many even steps, once spacing and margins are at their tightest. */
 const TEXT_STEPS = 2;
+
+const boundsFor = (
+  template: TemplateId,
+  spacing: { space: number; leading: number }
+): FitBounds => {
+  const { bodyPt, marginPt } = TEMPLATE_METRICS[template];
+  return {
+    ...spacing,
+    text: Math.min(1, MIN_BODY_TEXT_PT / bodyPt),
+    margin: Math.min(1, (MIN_PAGE_MARGIN_MM * POINTS_PER_MM) / marginPt),
+  };
+};
 
 export const FIT_BOUNDS: Record<TemplateId, FitBounds> = {
   // Entries keep at least 60% of their gaps, so they stay visibly apart.
-  modern: { space: 0.6, leading: 0.88, text: 0.9 },
-  minimal: { space: 0.6, leading: 0.88, text: 0.9 },
+  modern: boundsFor("modern", { space: 0.6, leading: 0.88 }),
+  minimal: boundsFor("minimal", { space: 0.6, leading: 0.88 }),
   // Compact is dense already, so it has less room to give.
-  "compact-ats": { space: 0.7, leading: 0.9, text: 0.95 },
+  "compact-ats": boundsFor("compact-ats", { space: 0.7, leading: 0.9 }),
 };
 
 const lerp = (from: number, to: number, amount: number) => from + (to - from) * amount;
 
 /**
  * Every step from the template as designed to its tightest, in order. Step 0 is untightened.
- * Spacing and line height tighten first; text gets smaller only once they are at their bounds.
+ * Spacing and line height tighten first, then the page margins; text gets smaller only once they
+ * are at their bounds. A template whose text is already at the floor skips the text steps.
  */
 export function fitSteps(template: TemplateId): FitStep[] {
   const bounds = FIT_BOUNDS[template];
@@ -49,17 +76,30 @@ export function fitSteps(template: TemplateId): FitStep[] {
       space: lerp(1, bounds.space, amount),
       leading: lerp(1, bounds.leading, amount),
       text: 1,
+      margin: 1,
     });
   }
-  for (let i = 1; i <= TEXT_STEPS; i += 1) {
+  for (let i = 1; i <= MARGIN_STEPS; i += 1) {
     steps.push({
       space: bounds.space,
       leading: bounds.leading,
-      text: lerp(1, bounds.text, i / TEXT_STEPS),
+      text: 1,
+      margin: lerp(1, bounds.margin, i / MARGIN_STEPS),
     });
+  }
+  if (bounds.text < 1) {
+    for (let i = 1; i <= TEXT_STEPS; i += 1) {
+      steps.push({ ...bounds, text: lerp(1, bounds.text, i / TEXT_STEPS) });
+    }
   }
 
   return steps;
+}
+
+/** How tight a step is, from 0 (as designed) to 1 (the template's tightest). */
+export function stepDensity(template: TemplateId, stepIndex: number): number {
+  const last = fitSteps(template).length - 1;
+  return last === 0 ? 0 : Math.round((stepIndex / last) * 1000) / 1000;
 }
 
 const round = (value: number) => Math.round(value * 1000) / 1000;
@@ -102,7 +142,8 @@ function scaleContent(content: Content, step: FitStep): Content {
 
 /**
  * The document tightened by one step: gaps, line heights and font sizes, in its styles and on
- * every node. Widths, page margins and rules keep their size.
+ * every node. Widths and rules keep their size. Page margins are the template's to set, since
+ * its rules span the width between them; see `marginScale` in the template options.
  */
 export function applyFitStep(doc: TDocumentDefinitions, step: FitStep): TDocumentDefinitions {
   if (step.space === 1 && step.leading === 1 && step.text === 1) return doc;

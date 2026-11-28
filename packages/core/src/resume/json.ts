@@ -87,6 +87,7 @@ function parseBasics(input: unknown): Record<string, unknown> {
 
   const profiles = Array.isArray(input.profiles)
     ? input.profiles.filter(isRecord).map((profile) => ({
+        id: "",
         network: parseString(profile.network),
         username: parseString(profile.username),
         url: parseString(profile.url),

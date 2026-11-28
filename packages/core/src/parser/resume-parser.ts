@@ -229,6 +229,7 @@ function parseProfile(url: string): ResumeProfile | null {
   if (!username) return null;
 
   return {
+    id: "",
     network: match.network,
     username,
     url: normalizedUrl,

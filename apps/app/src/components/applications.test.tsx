@@ -12,15 +12,19 @@ const row = (id: string, status: ApplicationRow["status"], archived = false): Ap
   company: `Company ${id}`,
   role: "Engineer",
   status,
+  outcome: status === "closed" ? "rejected" : null,
+  offer: false,
   archived,
+  statusChangedAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  pendingChanges: 0,
 });
 
 describe("ApplicationList", () => {
   it("groups rows by status, soonest-needed first, each linking to its page", () => {
     const doc = renderHtml(() => (
       <ApplicationList
-        rows={[row("a", "drafting"), row("b", "offer"), row("c", "drafting", true)]}
+        rows={[row("a", "drafting"), row("b", "interviewing"), row("c", "drafting", true)]}
         pages={{ a: { message: "1 page, fits", fits: true, pageTarget: 1 } }}
       />
     ));
@@ -29,7 +33,7 @@ describe("ApplicationList", () => {
       links: [...group.querySelectorAll("a")].map((a) => a.getAttribute("href")),
     }));
     expect(groups).toEqual([
-      { title: "Offer", links: ["/applications/b"] },
+      { title: "Interviewing", links: ["/applications/b"] },
       { title: "Drafting", links: ["/applications/a", "/applications/c"] },
     ]);
     const rowA = doc.querySelector('a[href="/applications/a"]');

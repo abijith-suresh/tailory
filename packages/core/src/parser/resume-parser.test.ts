@@ -413,11 +413,13 @@ Available on request.
     expect(result.data.basics.phone).toBe("+91 98765 43210");
     expect(result.data.basics.profiles).toEqual([
       {
+        id: expect.any(String),
         network: "LinkedIn",
         username: "janedoe",
         url: "https://linkedin.com/in/janedoe",
       },
       {
+        id: expect.any(String),
         network: "GitHub",
         username: "janedoe",
         url: "https://github.com/janedoe",

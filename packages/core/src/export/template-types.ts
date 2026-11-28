@@ -4,4 +4,6 @@ export interface PdfTemplateOptions {
   accentColor?: string;
   /** An application's section order. Without one, sections print in the template's order. */
   sectionOrder?: readonly ResumeSectionKey[];
+  /** Multiplies the template's page margins, to fit a page target. 1 is as designed. */
+  marginScale?: number;
 }

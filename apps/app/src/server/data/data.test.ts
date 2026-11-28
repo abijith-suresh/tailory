@@ -10,14 +10,23 @@ import { deleteUser } from "../account";
 import { type Database, LOCAL_USER, openDatabase, schema } from "../db";
 import {
   type Actor,
+  countPendingChanges,
   createApplication,
   type DataContext,
   deleteApplication,
+  eraseUserData,
+  exportEverything,
   getApplication,
+  getLastToolCall,
   getProfile,
+  keepAllChanges,
+  keepChange,
   listApplications,
   listChanges,
+  listPendingChanges,
+  recordToolCall,
   replaceProfile,
+  undoAllChanges,
   undoChange,
   updateApplication,
   updateProfile,
@@ -234,13 +243,57 @@ describe.each(drivers)("the data layer on $name", ({ open }) => {
       const applied = await updateApplication(alice, created.id, { status: "applied" });
       expect(applied.appliedAt).not.toBeNull();
       expect(applied.closedAt).toBeNull();
-      const rejected = await updateApplication(alice, created.id, { status: "rejected" });
+      expect(applied.statusChangedAt > created.statusChangedAt).toBe(true);
+      const rejected = await updateApplication(alice, created.id, {
+        status: "closed",
+        outcome: "rejected",
+      });
+      expect(rejected).toMatchObject({ status: "closed", outcome: "rejected", offer: false });
       expect(rejected.appliedAt).toBe(applied.appliedAt);
       expect(rejected.closedAt).not.toBeNull();
       expect((await listChanges(alice)).slice(0, 2).map((change) => change.summary)).toEqual([
-        "Moved Stripe, Engineer to rejected",
+        "Moved Stripe, Engineer to closed (rejected)",
         "Moved Stripe, Engineer to applied",
       ]);
+      const reopened = await updateApplication(alice, created.id, { status: "interviewing" });
+      expect(reopened).toMatchObject({ outcome: null, closedAt: null });
+    });
+
+    it("refuses to close without an outcome, and changes nothing", async () => {
+      const created = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      await expect(
+        updateApplication(alice, created.id, { status: "closed" })
+      ).rejects.toMatchObject({ code: "invalid", message: expect.stringContaining("outcome") });
+      expect((await getApplication(alice, created.id)).status).toBe("drafting");
+      expect(await listChanges(alice)).toHaveLength(1);
+    });
+
+    it("flags an offer without moving the status", async () => {
+      const created = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      const interviewing = await updateApplication(alice, created.id, { status: "interviewing" });
+      const offer = await updateApplication(alice, created.id, { offer: true });
+      expect(offer).toMatchObject({ status: "interviewing", offer: true });
+      expect(offer.statusChangedAt).toBe(interviewing.statusChangedAt);
+      expect((await listChanges(alice))[0]?.summary).toBe("Marked an offer from Stripe, Engineer");
+      const declined = await updateApplication(alice, created.id, {
+        status: "closed",
+        outcome: "declined",
+      });
+      expect(declined).toMatchObject({ offer: false, outcome: "declined" });
+    });
+
+    it("starts from the profile's section order, and keeps its own after", async () => {
+      await replaceProfile(alice, {
+        ...resume("Alice"),
+        sectionOrder: ["skills", "education", "work"],
+      });
+      const created = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      expect(created.sectionOrder.slice(0, 3)).toEqual(["skills", "education", "work"]);
+
+      await updateProfile(alice, (current) => ({ ...current, sectionOrder: ["work"] }));
+      expect((await getApplication(alice, created.id)).sectionOrder[0]).toBe("skills");
+      const later = await createApplication(alice, { company: "Linear", role: "Engineer" });
+      expect(later.sectionOrder[0]).toBe("work");
     });
 
     it("changes job fields, notes, archive and tailoring, normalized against the profile", async () => {
@@ -327,6 +380,283 @@ describe.each(drivers)("the data layer on $name", ({ open }) => {
         code: "conflict",
       });
       expect((await getApplication(alice, created.id)).notes).toBe("Two");
+    });
+  });
+
+  describe("the profile model", () => {
+    it("names links by their site and gives each an id", async () => {
+      const saved = await replaceProfile(alice, {
+        ...resume("Alice"),
+        basics: {
+          ...resume("Alice").basics,
+          profiles: [
+            { id: "", network: "", username: "", url: "https://gitlab.com/alice" },
+            { id: "", network: "", username: "", url: "https://alice.example" },
+          ],
+        },
+      });
+      expect(saved.resume.basics.profiles).toEqual([
+        {
+          id: expect.any(String),
+          network: "GitLab",
+          username: "alice",
+          url: "https://gitlab.com/alice",
+        },
+        { id: expect.any(String), network: "Website", username: "", url: "https://alice.example" },
+      ]);
+      const ids = saved.resume.basics.profiles?.map((link) => link.id);
+      // Saving again keeps the ids, so an application's left-out link stays left out.
+      const again = await updateProfile(alice, (current) => ({
+        ...current,
+        basics: { ...current.basics, label: "Engineer" },
+      }));
+      expect(again.resume.basics.profiles?.map((link) => link.id)).toEqual(ids);
+    });
+
+    it("keeps volunteering, awards, certificates and languages", async () => {
+      const saved = await replaceProfile(alice, {
+        ...resume("Alice"),
+        volunteer: [
+          {
+            id: "",
+            organization: "Code Club",
+            position: "Mentor",
+            startDate: "2019-01",
+            highlights: [{ id: "", text: "Taught Python" }],
+          },
+        ],
+        awards: [{ id: "", title: "Engineer of the Year", date: "2016-12", awarder: "Acme" }],
+        certificates: [{ id: "", name: "AWS SA", issuer: "Amazon", date: "2020-03" }],
+        languages: [{ id: "", language: "French", fluency: "Professional" }],
+      });
+      const { resume: stored } = await getProfile(alice);
+      expect(stored).toEqual(saved.resume);
+      expect(stored.volunteer?.[0]?.highlights?.[0]?.id).toMatch(/\S/);
+      expect(stored.awards?.[0]).toMatchObject({ title: "Engineer of the Year", awarder: "Acme" });
+      expect(stored.certificates?.[0]).toMatchObject({ name: "AWS SA", issuer: "Amazon" });
+      expect(stored.languages?.[0]).toMatchObject({ language: "French", fluency: "Professional" });
+
+      // An application can leave each of them out.
+      const created = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      const ids = [
+        stored.volunteer?.[0]?.highlights?.[0]?.id,
+        stored.awards?.[0]?.id,
+        stored.certificates?.[0]?.id,
+        stored.languages?.[0]?.id,
+      ] as string[];
+      const updated = await updateApplication(alice, created.id, { excluded: ids });
+      expect(updated.excluded).toEqual(ids);
+    });
+
+    it("keeps its section order when an import replaces it", async () => {
+      await replaceProfile(alice, { ...resume("Alice"), sectionOrder: ["skills"] });
+      const imported = await replaceProfile(alice, resume("Alice Smith"));
+      expect(imported.resume.sectionOrder?.[0]).toBe("skills");
+    });
+  });
+
+  describe("reviewing the agent's changes", () => {
+    const asAgent = () => ({ ...alice, actor: agent });
+
+    /** A profile with one job of three bullets, and an application for it. */
+    const setUp = async () => {
+      const saved = await replaceProfile(alice, resume("Alice", ["One", "Two", "Three"]));
+      const job = saved.resume.work?.[0];
+      const [b1, b2, b3] = (job?.highlights ?? []).map((bullet) => bullet.id);
+      const created = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      return { id: created.id, jobId: job?.id as string, b1, b2, b3 } as {
+        id: string;
+        jobId: string;
+        b1: string;
+        b2: string;
+        b3: string;
+      };
+    };
+
+    it("keeps the user's own changes at once, and holds the agent's", async () => {
+      const { id } = await setUp();
+      await updateApplication(asAgent(), id, { notes: "From the agent" });
+      const [byAgent, byUser] = await listChanges(alice, { kind: "application", id });
+      expect(byUser).toMatchObject({
+        review: "kept",
+        reviewer: { kind: "user" },
+        reviewedAt: byUser?.createdAt,
+      });
+      expect(byAgent).toMatchObject({ review: "pending", reviewer: null, reviewedAt: null });
+      expect(await listChanges(alice, undefined, { review: "pending" })).toHaveLength(1);
+    });
+
+    it("draws each pending change on the page: reworded lines and left-out items", async () => {
+      const { id, jobId, b1, b2 } = await setUp();
+      await updateApplication(asAgent(), id, {
+        excluded: [b2, "contact:phone"],
+        rewordings: [{ itemId: b1, field: "text", text: "Uno", baseText: "One" }],
+      });
+      await updateApplication(asAgent(), id, { excluded: [b2, "contact:phone", b1] });
+
+      const [second, first] = await listPendingChanges(alice, id);
+      expect(first).toMatchObject({
+        client: "claude-code",
+        created: false,
+        reworded: [{ itemId: b1, field: "text", oldText: "One", newText: "Uno" }],
+        leftOut: [
+          { id: b2, section: "work", afterId: b1 },
+          { id: "contact:phone", section: "basics", afterId: "contact:email" },
+        ],
+        putBack: [],
+      });
+      // The first bullet sits right after its entry.
+      expect(second?.leftOut).toEqual([{ id: b1, section: "work", afterId: jobId }]);
+      expect(await countPendingChanges(alice)).toEqual({ [id]: 2 });
+    });
+
+    it("keeps one change, then all of them", async () => {
+      const { id, b1, b2 } = await setUp();
+      await updateApplication(asAgent(), id, { excluded: [b1] });
+      await updateApplication(asAgent(), id, { excluded: [b1, b2] });
+      const [newer, older] = await listPendingChanges(alice, id);
+
+      const kept = await keepChange(alice, older?.id as string);
+      expect(kept).toMatchObject({ review: "kept", reviewer: { kind: "user" } });
+      expect(kept.reviewedAt).toEqual(expect.any(String));
+      expect((await listPendingChanges(alice, id)).map((change) => change.id)).toEqual([newer?.id]);
+      // Keeping a kept change does nothing.
+      expect((await keepChange(alice, older?.id as string)).reviewedAt).toBe(kept.reviewedAt);
+
+      expect(await keepAllChanges(alice, { kind: "application", id })).toBe(1);
+      expect(await listPendingChanges(alice, id)).toEqual([]);
+      expect((await getApplication(alice, id)).excluded).toEqual([b1, b2]);
+    });
+
+    it("undoes one change and marks it undone; an undone change can't be kept", async () => {
+      const { id, b1 } = await setUp();
+      await updateApplication(asAgent(), id, { excluded: [b1] });
+      const [pending] = await listPendingChanges(alice, id);
+
+      const undo = await undoChange(alice, pending?.id as string);
+      expect(undo).toMatchObject({ undoes: pending?.id, review: "kept" });
+      expect((await getApplication(alice, id)).excluded).toEqual([]);
+      const [, original] = await listChanges(alice, { kind: "application", id });
+      expect(original).toMatchObject({ review: "undone", reviewer: { kind: "user" } });
+      await expect(keepChange(alice, pending?.id as string)).rejects.toMatchObject({
+        code: "conflict",
+      });
+    });
+
+    it("undoes all pending changes newest first, or none when one is in the way", async () => {
+      const { id, b1, b2 } = await setUp();
+      await updateApplication(asAgent(), id, { excluded: [b1] });
+      await updateApplication(asAgent(), id, { excluded: [b1, b2] });
+      const undone = await undoAllChanges(alice, { kind: "application", id });
+      expect(undone.map((change) => change.summary)).toEqual([
+        expect.stringMatching(/^Undid: /),
+        expect.stringMatching(/^Undid: /),
+      ]);
+      expect((await getApplication(alice, id)).excluded).toEqual([]);
+      expect(await listPendingChanges(alice, id)).toEqual([]);
+
+      // The user's own edit after the agent's is in the way: nothing is undone.
+      await updateApplication(asAgent(), id, { excluded: [b1] });
+      await updateApplication(alice, id, { notes: "Mine" });
+      await expect(undoAllChanges(alice, { kind: "application", id })).rejects.toMatchObject({
+        code: "conflict",
+      });
+      expect(await getApplication(alice, id)).toMatchObject({ excluded: [b1], notes: "Mine" });
+      expect(await listPendingChanges(alice, id)).toHaveLength(1);
+    });
+
+    it("counts the user's edit of every line a change touched as reviewing it", async () => {
+      const { id, b1, b2 } = await setUp();
+      await updateApplication(asAgent(), id, {
+        excluded: [b2],
+        rewordings: [{ itemId: b1, field: "text", text: "Uno", baseText: "One" }],
+      });
+      await updateApplication(asAgent(), id, { notes: "Agent notes" });
+
+      // Rewording one of the lines again: the change still shows the other.
+      await updateApplication(alice, id, {
+        rewordings: [{ itemId: b1, field: "text", text: "Mine", baseText: "One" }],
+      });
+      const [, partly] = await listPendingChanges(alice, id);
+      expect(partly).toMatchObject({ reworded: [], leftOut: [{ id: b2 }] });
+
+      // Putting the left-out line back too: the change is reviewed. The notes change is not.
+      await updateApplication(alice, id, { excluded: [] });
+      const pending = await listPendingChanges(alice, id);
+      expect(pending.map((change) => change.summary)).toEqual([
+        "Changed the notes of Stripe, Engineer",
+      ]);
+      const reviewed = (await listChanges(alice, { kind: "application", id })).find(
+        (change) => change.id === partly?.id
+      );
+      expect(reviewed).toMatchObject({ review: "kept", reviewer: { kind: "user" } });
+    });
+
+    it("lists an agent's new application as created", async () => {
+      const created = await createApplication(asAgent(), { company: "Stripe", role: "Engineer" });
+      expect(await listPendingChanges(alice, created.id)).toEqual([
+        expect.objectContaining({ created: true, reworded: [], leftOut: [] }),
+      ]);
+      await expect(listPendingChanges(bob, created.id)).rejects.toMatchObject({
+        code: "not_found",
+      });
+    });
+  });
+
+  describe("the agent's last call", () => {
+    it("is none until a call, then the latest one", async () => {
+      expect(await getLastToolCall(alice)).toBeNull();
+      await recordToolCall(alice, { client: "claude-code", tool: "get_profile" });
+      await recordToolCall(
+        alice,
+        { client: "codex", tool: "tailor_application" },
+        new Date("2026-11-28T12:00:00.000Z")
+      );
+      expect(await getLastToolCall(alice)).toEqual({
+        client: "codex",
+        tool: "tailor_application",
+        calledAt: "2026-11-28T12:00:00.000Z",
+      });
+      expect(await getLastToolCall(bob)).toBeNull();
+    });
+  });
+
+  describe("export and erase", () => {
+    it("exports the profile and every application, archived ones too", async () => {
+      await replaceProfile(alice, resume("Alice"));
+      const one = await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      await updateApplication(alice, one.id, { archived: true });
+      await createApplication(alice, { company: "Linear", role: "Designer" });
+      await createApplication(bob, { company: "Elsewhere", role: "Other" });
+
+      const exported = await exportEverything(alice, new Date("2026-11-28T00:00:00.000Z"));
+      expect(exported).toMatchObject({
+        format: "tailory-export",
+        version: 1,
+        exportedAt: "2026-11-28T00:00:00.000Z",
+        profile: { resume: { basics: { name: "Alice" } } },
+      });
+      expect(exported.applications.map((application) => application.company).sort()).toEqual([
+        "Linear",
+        "Stripe",
+      ]);
+      expect(JSON.parse(JSON.stringify(exported))).toEqual(exported);
+    });
+
+    it("erases one user's rows and leaves the user and everyone else", async () => {
+      await replaceProfile(alice, resume("Alice"));
+      await createApplication(alice, { company: "Stripe", role: "Engineer" });
+      await recordToolCall(alice, { client: null, tool: "get_profile" });
+      await createApplication(bob, { company: "Linear", role: "Designer" });
+
+      expect(await eraseUserData(database.db, "alice")).toEqual({ applications: 1 });
+      expect((await getProfile(alice)).updatedAt).toBeNull();
+      expect(await listApplications(alice)).toEqual([]);
+      expect(await listChanges(alice)).toEqual([]);
+      expect(await getLastToolCall(alice)).toBeNull();
+      const users = await database.db.select({ id: schema.user.id }).from(schema.user);
+      expect(users.map((row) => row.id)).toContain("alice");
+      expect(await listApplications(bob)).toHaveLength(1);
     });
   });
 

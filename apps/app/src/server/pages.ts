@@ -3,6 +3,7 @@
 // without a request.
 
 import {
+  APPLICATION_OUTCOMES,
   APPLICATION_STATUSES,
   type Application,
   BASICS_ITEM_ID,
@@ -27,6 +28,7 @@ import {
   type ApplicationEdit,
   type ApplicationRecord,
   type ChangeRecord,
+  countPendingChanges,
   createApplication,
   type DataContext,
   DataError,
@@ -45,26 +47,46 @@ type ReadContext = Pick<DataContext, "db" | "userId">;
 
 export type ApplicationRow = Pick<
   ApplicationRecord,
-  "id" | "company" | "role" | "status" | "archived" | "updatedAt"
->;
+  | "id"
+  | "company"
+  | "role"
+  | "status"
+  | "outcome"
+  | "offer"
+  | "archived"
+  | "statusChangedAt"
+  | "updatedAt"
+> & {
+  /** The agent's changes waiting for the user to keep or undo. */
+  pendingChanges: number;
+};
 
 /** The rows of the home screen, most recently changed first. Archived ones only when asked. */
 export const listApplicationRows = async (
   ctx: ReadContext,
   options: { search?: string; showArchived?: boolean } = {}
 ): Promise<ApplicationRow[]> => {
-  const applications = await listApplications(ctx, {
-    search: options.search?.slice(0, 200),
-    archived: options.showArchived ? undefined : false,
-  });
-  return applications.map(({ id, company, role, status, archived, updatedAt }) => ({
-    id,
-    company,
-    role,
-    status,
-    archived,
-    updatedAt,
-  }));
+  const [applications, pending] = await Promise.all([
+    listApplications(ctx, {
+      search: options.search?.slice(0, 200),
+      archived: options.showArchived ? undefined : false,
+    }),
+    countPendingChanges(ctx),
+  ]);
+  return applications.map(
+    ({ id, company, role, status, outcome, offer, archived, statusChangedAt, updatedAt }) => ({
+      id,
+      company,
+      role,
+      status,
+      outcome,
+      offer,
+      archived,
+      statusChangedAt,
+      updatedAt,
+      pendingChanges: pending[id] ?? 0,
+    })
+  );
 };
 
 /** The home screen: its rows, and whether the user has any application at all, archived too. */
@@ -383,7 +405,12 @@ export const applicationEditInput = z.discriminatedUnion("type", [
     jobDescription: text(100_000).nullable().optional(),
     notes: text(20_000).optional(),
   }),
-  z.object({ type: z.literal("status"), status: z.enum(APPLICATION_STATUSES) }),
+  z.object({
+    type: z.literal("status"),
+    status: z.enum(APPLICATION_STATUSES).optional(),
+    outcome: z.enum(APPLICATION_OUTCOMES).nullable().optional(),
+    offer: z.boolean().optional(),
+  }),
   z.object({ type: z.literal("archive"), archived: z.boolean() }),
   z.object({ type: z.literal("include"), itemId: z.string(), included: z.boolean() }),
   z.object({
@@ -440,8 +467,10 @@ export const editToChanges =
         if (fields.postingUrl === "") changes.postingUrl = null;
         return { changes };
       }
-      case "status":
-        return { changes: { status: edit.status } };
+      case "status": {
+        const { type: _, ...move } = edit;
+        return { changes: move };
+      }
       case "archive":
         return { changes: { archived: edit.archived } };
       case "include": {
@@ -533,13 +562,12 @@ export const editToChanges =
 
 const failure = (error: unknown): { ok: false; error: string } => {
   if (error instanceof DataError) {
-    return {
-      ok: false,
-      error:
-        error.code === "conflict"
-          ? "Can't undo this: it was changed again since. Undo the later changes first."
-          : "This application no longer exists.",
+    const messages: Record<DataError["code"], string> = {
+      conflict: "Can't undo this: it was changed again since. Undo the later changes first.",
+      not_found: "This application no longer exists.",
+      invalid: `${error.message}`,
     };
+    return { ok: false, error: messages[error.code] };
   }
   throw error;
 };

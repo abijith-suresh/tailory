@@ -347,7 +347,7 @@ describe("JSON Resume export", () => {
           email: "jane@example.com",
           summary: "",
           location: { city: "" },
-          profiles: [{ network: "", username: "", url: "" }],
+          profiles: [{ id: "", network: "", username: "", url: "" }],
         },
         work: [
           {

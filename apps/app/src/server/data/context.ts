@@ -45,9 +45,13 @@ export type ChangeInput = {
   undoes?: string | null;
 };
 
-/** Writes one change row inside the caller's transaction. */
+/**
+ * Writes one change row inside the caller's transaction. An agent's change waits for the user's
+ * review; the user's own is kept as it is made.
+ */
 export const recordChange = async (tx: Tx, ctx: DataContext, input: ChangeInput, now: Date) => {
   const actorKind: ActorKind = ctx.actor.kind;
+  const byUser = actorKind === "user";
   const [row] = await tx
     .insert(schema.change)
     .values({
@@ -62,6 +66,10 @@ export const recordChange = async (tx: Tx, ctx: DataContext, input: ChangeInput,
       after: input.after ?? null,
       undoes: input.undoes ?? null,
       createdAt: now,
+      review: byUser ? "kept" : "pending",
+      reviewedAt: byUser ? now : null,
+      reviewerKind: byUser ? "user" : null,
+      reviewerClient: null,
     })
     .returning();
   return row;

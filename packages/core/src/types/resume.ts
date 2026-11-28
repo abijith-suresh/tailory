@@ -1,6 +1,8 @@
 // JSON Resume schema — https://jsonresume.org/schema/
 // Extended with additional fields for Tailory
 
+import type { ResumeSectionKey } from "./application.ts";
+
 export type { TemplateId } from "./template.ts";
 
 export interface ResumeLocation {
@@ -11,7 +13,9 @@ export interface ResumeLocation {
   region?: string;
 }
 
+/** A link to the person elsewhere. The id lets an application leave one link out. */
 export interface ResumeProfile {
+  id: string;
   network: string;
   username: string;
   url: string;
@@ -146,6 +150,11 @@ export interface ResumeSchema {
   interests?: ResumeInterest[];
   references?: ResumeReference[];
   projects?: ResumeProject[];
+  /**
+   * Tailory's own: the order the profile prints its sections in, which new applications start
+   * from. Not part of JSON Resume; the export leaves it out.
+   */
+  sectionOrder?: ResumeSectionKey[];
 }
 
 export type SectionId =

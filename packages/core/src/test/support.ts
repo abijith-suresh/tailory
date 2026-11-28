@@ -4,7 +4,7 @@
 import { PDF_FONT_FAMILY } from "../export/pdf-renderer.ts";
 import type { PdfLayoutRuntime } from "../fit/measure.ts";
 import { normalizeResume } from "../resume/normalize.ts";
-import type { Application } from "../types/application.ts";
+import { type Application, RESUME_SECTION_KEYS } from "../types/application.ts";
 import {
   EMPTY_RESUME,
   type ResumeHighlight,
@@ -60,27 +60,17 @@ export function sampleApplication(overrides: Partial<Application> = {}): Applica
     postingUrl: "https://acme.example/jobs/staff-designer",
     jobDescription: "Lead design for scheduling.",
     status: "drafting",
+    outcome: null,
+    offer: false,
     archived: false,
     createdAt: "2026-11-01T09:00:00.000Z",
+    statusChangedAt: "2026-11-01T09:00:00.000Z",
     appliedAt: null,
     closedAt: null,
     notes: "",
     excluded: [],
     rewordings: [],
-    sectionOrder: [
-      "summary",
-      "work",
-      "volunteer",
-      "education",
-      "awards",
-      "publications",
-      "skills",
-      "languages",
-      "interests",
-      "projects",
-      "references",
-      "certificates",
-    ],
+    sectionOrder: [...RESUME_SECTION_KEYS],
     templateId: "minimal",
     pageTarget: 1,
     autoFit: true,
