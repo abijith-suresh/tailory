@@ -88,16 +88,14 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
           </Client>
 
           <Client id="codex" name="Codex">
-            <p>Run this in a terminal:</p>
-            <CodeBlock label="Codex command" code={`codex mcp add tailory --url ${url()}`} />
+            <p>
+              Add this to <code>~/.codex/config.toml</code>:
+            </p>
+            <CodeBlock label="Codex config.toml" code={`[mcp_servers.tailory]\nurl = "${url()}"`} />
             <Show when={!local()}>
               <p>Then sign in:</p>
               <CodeBlock label="Codex sign-in command" code="codex mcp login tailory" />
             </Show>
-            <p>
-              Or add it to <code>~/.codex/config.toml</code>:
-            </p>
-            <CodeBlock label="Codex config.toml" code={`[mcp_servers.tailory]\nurl = "${url()}"`} />
           </Client>
 
           <Client id="cursor" name="Cursor">
@@ -113,17 +111,18 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
 
           <Client id="vscode" name="VS Code">
             <p>
-              Add this to <code>.mcp.json</code> at the root of your workspace:
+              Run <strong>Chat: Open Customizations</strong> from the Command Palette and open{" "}
+              <strong>MCP Servers</strong>. Choose <strong>Add Server</strong> in the User group,
+              pick <strong>HTTP (HTTP or Server-Sent Events)</strong>, paste the address, name it
+              tailory, and choose <strong>Global</strong>, then <strong>Copilot Global</strong>.
+            </p>
+            <p>
+              Or add this to <code>~/.copilot/mcp-config.json</code>:
             </p>
             <CodeBlock
-              label="VS Code .mcp.json"
+              label="VS Code mcp-config.json"
               code={json({ mcpServers: { tailory: { type: "http", url: url() } } })}
             />
-            <p>
-              Or run <strong>Chat: Open Customizations</strong> from the Command Palette, choose{" "}
-              <strong>MCP Servers</strong>, then <strong>Add Server</strong>, pick{" "}
-              <strong>HTTP</strong> and paste the address.
-            </p>
           </Client>
 
           <Client id="claude-ai" name="Claude.ai">
@@ -164,8 +163,12 @@ export function ConnectGuide(props: { info: ConnectInfo }) {
                   chatgpt.com/plugins
                 </a>
                 , choose <strong>+</strong>, then <strong>Add custom MCP server</strong>. Name it
-                Tailory, paste the address as the <strong>Server URL</strong>, choose OAuth, and
-                create the plugin. Install it before you use it.
+                Tailory, paste the address as the connection URL, choose OAuth, and create it as a
+                plugin. To use it, type <kbd>@</kbd> in a new chat and pick Tailory.
+              </p>
+              <p class="client__note">
+                Which ChatGPT plans can add custom MCP servers, and use every tool, is up to OpenAI;
+                check your plan if the option is missing.
               </p>
             </Show>
           </Client>

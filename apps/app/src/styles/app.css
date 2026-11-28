@@ -1409,7 +1409,9 @@
     display: grid;
     gap: var(--space-2);
     min-width: 0;
+    margin: 0;
     border: 0;
+    padding: 0;
   }
 
   .links {
@@ -1417,6 +1419,7 @@
   }
 
   .bullets__legend {
+    padding: 0;
     margin-bottom: var(--space-2);
     font-size: var(--text-sm);
     line-height: var(--text-sm--lh);
@@ -1573,14 +1576,14 @@
     line-height: var(--text-sm--lh);
   }
 
-  /* The change log. */
-  .changes {
+  /* The profile's change log. */
+  .profile-changes {
     display: grid;
     margin-top: var(--space-3);
     list-style: none;
   }
 
-  .change {
+  .profile-change {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -1589,39 +1592,39 @@
     border-top: 1px solid var(--color-line);
   }
 
-  .change:first-child {
+  .profile-change:first-child {
     border-top: 0;
   }
 
-  .change__summary {
+  .profile-change__summary {
     font-size: var(--text-sm);
     line-height: var(--text-sm--lh);
     overflow-wrap: anywhere;
   }
 
-  .change__meta {
+  .profile-change__meta {
     grid-column: 1;
     color: var(--color-fg-subtle);
     font-size: var(--text-xs);
     line-height: var(--text-xs--lh);
   }
 
-  .change__meta time:not(:empty)::before {
+  .profile-change__meta time:not(:empty)::before {
     content: " · ";
   }
 
-  .change--agent .change__meta {
+  .profile-change--agent .profile-change__meta {
     color: var(--color-status-active-fg);
   }
 
-  .change__undo {
+  .profile-change__undo {
     grid-column: 2;
     grid-row: 1 / span 2;
     height: 2rem;
     padding-inline: var(--space-3);
   }
 
-  .changes__empty {
+  .profile-changes__empty {
     margin-top: var(--space-2);
     color: var(--color-fg-muted);
     font-size: var(--text-sm);

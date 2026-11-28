@@ -1,7 +1,7 @@
 import { createSignal, For, onSettled, Show } from "solid-js";
 
-import type { ChangeView } from "../server/profile-page";
-import { Button } from "./Button";
+import type { ChangeView } from "../../server/profile-page";
+import { Button } from "../Button";
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ["year", 365 * 24 * 3600],
@@ -43,35 +43,37 @@ function When(props: { iso: string }) {
   );
 }
 
-type ChangeListProps = {
+type ProfileChangesProps = {
   changes: readonly ChangeView[];
   onUndo: (id: string) => void;
   /** Undo is under way, or the page is busy saving. */
   busy?: boolean;
 };
 
-/** Recent changes, newest first, who made each, and Undo (or Redo, after an undo) on the newest. */
-export function ChangeList(props: ChangeListProps) {
+/** The profile's recent changes, newest first, who made each, and Undo (or Redo, after an undo) on the newest. */
+export function ProfileChanges(props: ProfileChangesProps) {
   return (
     <Show
       when={props.changes.length > 0}
       fallback={
-        <p class="changes__empty">No changes yet. Edits you and your agent make show up here.</p>
+        <p class="profile-changes__empty">
+          No changes yet. Edits you and your agent make show up here.
+        </p>
       }
     >
-      <ol class="changes">
+      <ol class="profile-changes">
         <For each={props.changes} keyed={(change) => change.id}>
           {(item) => (
-            <li class={["change", { "change--agent": item().byAgent }]}>
-              <p class="change__summary">{item().summary}</p>
-              <p class="change__meta">
+            <li class={["profile-change", { "profile-change--agent": item().byAgent }]}>
+              <p class="profile-change__summary">{item().summary}</p>
+              <p class="profile-change__meta">
                 {item().by}
                 <When iso={item().createdAt} />
               </p>
               <Show when={item().undoable}>
                 <Button
                   variant="quiet"
-                  class="change__undo"
+                  class="profile-change__undo"
                   disabled={props.busy}
                   aria-label={`${item().isUndo ? "Redo" : "Undo"}: ${item().summary.replace(/^Undid: /, "")}`}
                   onClick={() => props.onUndo(item().id)}

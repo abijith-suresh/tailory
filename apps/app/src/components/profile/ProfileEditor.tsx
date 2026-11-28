@@ -1,6 +1,7 @@
 import type { ResumeSchema } from "@tailory/core";
 import { createSignal, createStore, onSettled, Show, snapshot } from "solid-js";
 
+import { type AutosaveStatus, createAutosave } from "../../lib/autosave";
 import type { ImportPreview } from "../../lib/import/import-file";
 import {
   getProfileState,
@@ -10,8 +11,8 @@ import {
 } from "../../server/profile-functions";
 import type { ChangeView, ProfileState, SaveResult } from "../../server/profile-page";
 import { Button } from "../Button";
-import { ChangeList } from "../ChangeList";
 import { ImportReview } from "./ImportReview";
+import { ProfileChanges } from "./ProfileChanges";
 import { type Edit, ProfileForm } from "./ProfileForm";
 
 /** A JSON copy: server function arguments must be plain JSON, and resumes hold undefined fields. */
@@ -20,9 +21,7 @@ const plain = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 /** How long typing pauses before the profile saves. */
 export const SAVE_DELAY_MS = 800;
 
-type SaveStatus = "saved" | "unsaved" | "saving" | "error" | "conflict";
-
-const STATUS_TEXT: Record<SaveStatus, string> = {
+const STATUS_TEXT: Record<AutosaveStatus, string> = {
   saved: "All changes saved",
   unsaved: "Unsaved changes",
   saving: "Saving…",
@@ -43,7 +42,7 @@ export function ProfileEditor(props: { initial: ProfileState }) {
   const [loaded, setLoaded] = createSignal(() => props.initial);
   const [resume, setResume] = createStore(() => structuredClone(loaded().resume));
   const [changes, setChanges] = createSignal<ChangeView[]>(() => props.initial.changes);
-  const [status, setStatus] = createSignal<SaveStatus>("saved");
+  const [status, setStatus] = createSignal<AutosaveStatus>("saved");
   const [busy, setBusy] = createSignal(false);
   const [preview, setPreview] = createSignal<ImportPreview | null>(null);
   const [reading, setReading] = createSignal(false);
@@ -51,80 +50,45 @@ export function ProfileEditor(props: { initial: ProfileState }) {
   const [notice, setNotice] = createSignal("");
   let fileInput: HTMLInputElement | undefined;
 
-  // Save bookkeeping lives in plain variables: signal reads lag writes until the next flush.
-  let base: ResumeSchema | undefined; // the profile the server has, as this page last saw it
-  let dirty = false;
-  let conflicted = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  let inFlight: Promise<void> | null = null;
-
+  // The profile the server has, as this page last saw it. Saves send it so the server can tell
+  // when someone else changed the profile meanwhile.
+  let base: ResumeSchema | undefined;
   const currentBase = () => base ?? props.initial.resume;
+
+  const saver = createAutosave({
+    delay: SAVE_DELAY_MS,
+    onStatus: setStatus,
+    save: async () => {
+      const result = await saveProfileEdit(plain(currentBase()), plain(snapshot(resume)));
+      if (result.ok) {
+        base = result.resume;
+        setChanges(result.changes);
+        return "saved";
+      }
+      if (result.reason === "invalid") setNotice(result.message);
+      return result.reason === "conflict" ? "conflict" : "failed";
+    },
+  });
+  const flush = () => saver.flush();
 
   const show = (state: ProfileState) => {
     base = state.resume;
-    dirty = false;
-    conflicted = false;
+    saver.reset();
     setLoaded(() => state);
     setChanges(state.changes);
-    setStatus("saved");
-  };
-
-  const send = async () => {
-    dirty = false;
-    setStatus("saving");
-    let result: SaveResult;
-    try {
-      result = await saveProfileEdit(plain(currentBase()), plain(snapshot(resume)));
-    } catch {
-      dirty = true;
-      setStatus("error");
-      return;
-    }
-    if (result.ok) {
-      base = result.resume;
-      setChanges(result.changes);
-      setStatus(dirty ? "unsaved" : "saved");
-    } else if (result.reason === "conflict") {
-      dirty = true;
-      conflicted = true;
-      setStatus("conflict");
-    } else {
-      setStatus("error");
-      setNotice(result.message);
-    }
-  };
-
-  /** Saves now if anything is waiting. Resolves once the profile on the server is up to date. */
-  const flush = async () => {
-    clearTimeout(timer);
-    while (inFlight) await inFlight;
-    if (!dirty || conflicted) return;
-    inFlight = send().finally(() => {
-      inFlight = null;
-    });
-    await inFlight;
-    if (dirty && !conflicted) schedule();
-  };
-
-  const schedule = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => void flush(), SAVE_DELAY_MS);
   };
 
   const edit: Edit = (change) => {
     setResume((draft) => {
       change(draft);
     });
-    dirty = true;
     setNotice("");
-    if (conflicted) return;
-    setStatus("unsaved");
-    schedule();
+    saver.changed();
   };
 
   onSettled(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (dirty || inFlight) event.preventDefault();
+      if (saver.pending()) event.preventDefault();
     };
     const hide = () => {
       if (document.visibilityState === "hidden") void flush();
@@ -134,7 +98,7 @@ export function ProfileEditor(props: { initial: ProfileState }) {
     return () => {
       window.removeEventListener("beforeunload", warn);
       document.removeEventListener("visibilitychange", hide);
-      clearTimeout(timer);
+      saver.dispose();
     };
   });
 
@@ -177,10 +141,8 @@ export function ProfileEditor(props: { initial: ProfileState }) {
     try {
       const latest = await getProfileState();
       base = latest.resume;
-      conflicted = false;
-      dirty = true;
       setChanges(latest.changes);
-      await flush();
+      await saver.retry();
     } finally {
       setBusy(false);
     }
@@ -294,7 +256,11 @@ export function ProfileEditor(props: { initial: ProfileState }) {
             <h2 class="panel__title" id="recent-changes">
               Recent changes
             </h2>
-            <ChangeList changes={changes()} busy={busy() || status() === "saving"} onUndo={undo} />
+            <ProfileChanges
+              changes={changes()}
+              busy={busy() || status() === "saving"}
+              onUndo={undo}
+            />
           </section>
         </aside>
       </div>

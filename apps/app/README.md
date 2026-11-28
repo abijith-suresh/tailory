@@ -1,9 +1,9 @@
 # tailory (server app)
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
-handles sign-in, and serves an MCP endpoint with the resume tools agents use. The app shell and
-navigation are in place, but the Applications, Profile and Connect an agent screens are still
-empty. Dev builds only; no stable release yet.
+handles sign-in, and serves an MCP endpoint with the resume tools agents use. The Profile and
+Connect an agent screens work; the Applications screen is still empty. Dev builds only; no stable
+release yet.
 
 ## Try the dev build
 
@@ -78,6 +78,27 @@ mode needs a secret, the public URL, and at least one sign-in method, or it refu
 
 Signed-out page requests go to `/sign-in`. Settings has a button that deletes your account and
 everything Tailory keeps for it.
+
+## Screens
+
+**Profile** (`/profile`) edits the whole career history: the basics and every section of the
+resume model, with entries and bullets to add, remove and reorder. Edits save on their own 0.8 s
+after you stop typing (`src/lib/autosave.ts`). Each save is one change in the log, named for the
+sections it touched ("Edited work and skills"), and records you as its author. A save sends the
+profile the page last saw. If an agent or another tab changed the profile since, nothing is
+written and the page asks whether to load the latest or keep your version.
+
+Import reads a PDF, DOCX or JSON Resume file in the browser (`src/lib/import`, ported from the
+site's editor): pdf.js and mammoth turn PDF and DOCX into text, and core's text parser reads it,
+best effort; JSON goes through core's JSON Resume import. The page shows what it found. Confirming
+replaces the profile as one change. The recent changes list offers Undo on the newest change, and
+Redo after an undo. Older changes can't be undone from there, because undoing them would throw
+away the later ones.
+
+**Connect an agent** (`/connect`) shows the MCP address, which is the loopback address the page was
+opened on in local mode, and `TAILORY_PUBLIC_URL` + `/mcp` in server mode. It has copy-paste setup
+for Claude Code, Codex, Cursor and VS Code. In server mode it adds the Claude.ai and ChatGPT
+custom connector steps; local mode says those can't reach it.
 
 ## MCP
 
