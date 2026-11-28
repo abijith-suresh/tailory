@@ -16,9 +16,12 @@ export type DataContext = { db: Db; userId: string; actor: Actor };
 /** A transaction, or the database itself; both run the same queries. */
 export type Tx = Db | Parameters<Parameters<Db["transaction"]>[0]>[0];
 
-export type DataErrorCode = "not_found" | "conflict";
+export type DataErrorCode = "not_found" | "conflict" | "invalid";
 
-/** A data call that can't go ahead: the row isn't this user's (or doesn't exist), or has moved on. */
+/**
+ * A data call that can't go ahead: the row isn't this user's (or doesn't exist), has moved on, or
+ * the input isn't usable.
+ */
 export class DataError extends Error {
   readonly code: DataErrorCode;
   constructor(code: DataErrorCode, message: string) {
