@@ -188,11 +188,23 @@ export async function renderPdf(
     const fitted = await fitProfileResult(profile, options);
     return printPdf(fitted.resume, fitted.template, { step: fitted.fit.step });
   }
+  return (await printApplication(profile, application)).pdf;
+}
+
+/**
+ * An application's fit and its PDF from one measure, for the web app's preview. Throws
+ * `ResumeExportValidationError` for a resume with nothing to print.
+ */
+export async function printApplication(
+  profile: ResumeSchema,
+  application: Application
+): Promise<FittedApplicationResume & { pdf: Uint8Array }> {
   const fitted = await fitApplicationResult(profile, application);
-  return printPdf(fitted.resume, fitted.template, {
+  const pdf = await printPdf(fitted.resume, fitted.template, {
     step: fitted.fit.step,
     sectionOrder: application.sectionOrder,
   });
+  return { ...fitted, pdf };
 }
 
 /** The JSON Resume document of an application's resume, or of the bare profile. */
