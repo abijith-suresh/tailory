@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { CONTACT_KEYS, contactProfileKey } from "../applications/items.ts";
+import { resolveApplication } from "../applications/resolve.ts";
 import { resolveResumeDesignSettings } from "../resume/design.ts";
+import { sampleApplication } from "../test/support.ts";
 
 import { buildCompactAtsRenderModel, compactAtsTemplate } from "./compact-ats.ts";
 import { createTemplateFixture } from "./template-fixtures.ts";
@@ -63,5 +66,83 @@ describe("compactAtsTemplate", () => {
       "references",
       "certificates",
     ]);
+  });
+
+  it("prints basics.url and profile links compactly and clickably in the contact line", () => {
+    const resume = createTemplateFixture();
+    resume.basics.url = "https://janedoe.dev/";
+    resume.basics.profiles = [
+      { id: "gh", network: "GitHub", username: "janedoe", url: "https://github.com/janedoe/" },
+      { id: "site", network: "Blog", username: "", url: "https://www.blog.janedoe.dev/" },
+    ];
+
+    const model = buildCompactAtsRenderModel(
+      resume,
+      resolveResumeDesignSettings({ template: "compact-ats", accentColor: "#1d6648" })
+    );
+    expect(model.header.contactLine).toBe(
+      "Senior Frontend Engineer | jane.doe.very.long.email@example.dev | +1 (555) 123-4567 | San Francisco, CA | janedoe.dev | github.com/janedoe | blog.janedoe.dev"
+    );
+
+    const doc = compactAtsTemplate(resume);
+    const content = doc.content as unknown[];
+    expect(content[1]).toEqual({
+      text: [
+        "Senior Frontend Engineer",
+        " | ",
+        "jane.doe.very.long.email@example.dev",
+        " | ",
+        "+1 (555) 123-4567",
+        " | ",
+        "San Francisco, CA",
+        " | ",
+        { text: "janedoe.dev", link: "https://janedoe.dev/" },
+        " | ",
+        { text: "github.com/janedoe", link: "https://github.com/janedoe/" },
+        " | ",
+        { text: "blog.janedoe.dev", link: "https://www.blog.janedoe.dev/" },
+      ],
+      style: "contact",
+      margin: [0, 1, 0, 8],
+    });
+  });
+
+  it("omits left-out profile links and basics.url when resolved for an application", () => {
+    const profile = createTemplateFixture();
+    profile.basics.url = "https://janedoe.dev/";
+    profile.basics.profiles = [
+      { id: "gh", network: "GitHub", username: "janedoe-gh", url: "https://github.com/janedoe-gh" },
+      {
+        id: "li",
+        network: "LinkedIn",
+        username: "jane-doe",
+        url: "https://linkedin.com/in/jane-doe",
+      },
+    ];
+
+    const { resume } = resolveApplication(
+      profile,
+      sampleApplication({ excluded: [contactProfileKey("gh"), CONTACT_KEYS.url] })
+    );
+    const headerSerialized = JSON.stringify((compactAtsTemplate(resume).content as unknown[])[1]);
+
+    expect(headerSerialized).toContain("linkedin.com/in/jane-doe");
+    expect(headerSerialized).not.toContain("github.com/janedoe-gh");
+    expect(headerSerialized).not.toContain("janedoe.dev");
+  });
+
+  it("renders a profile without links as before", () => {
+    const resume = createTemplateFixture();
+    resume.basics.url = "";
+    resume.basics.profiles = [];
+
+    const doc = compactAtsTemplate(resume);
+    const content = doc.content as unknown[];
+    expect(content[0]).toEqual({ text: "Jane Doe", style: "name" });
+    expect(content[1]).toEqual({
+      text: "Senior Frontend Engineer | jane.doe.very.long.email@example.dev | +1 (555) 123-4567 | San Francisco, CA",
+      style: "contact",
+      margin: [0, 1, 0, 8],
+    });
   });
 });

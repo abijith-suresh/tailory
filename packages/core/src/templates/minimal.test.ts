@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { CONTACT_KEYS, contactProfileKey } from "../applications/items.ts";
+import { resolveApplication } from "../applications/resolve.ts";
 import { resolveResumeDesignSettings } from "../resume/design.ts";
+import { sampleApplication } from "../test/support.ts";
 import { buildMinimalRenderModel, minimalTemplate } from "./minimal.ts";
 import { createTemplateFixture, createUnicodeTemplateFixture } from "./template-fixtures.ts";
 
@@ -80,5 +83,97 @@ describe("minimalTemplate", () => {
     expect(serialized).toContain("Chloe Moreau");
     expect(serialized).toContain("bullets");
     expect(serialized).toContain('"font":"Roboto"');
+  });
+
+  it("prints basics.url and profile links compactly and clickably in the contact line", () => {
+    const resume = createTemplateFixture();
+    resume.basics.url = "https://janedoe.dev/";
+    resume.basics.profiles = [
+      { id: "gh", network: "GitHub", username: "janedoe", url: "https://github.com/janedoe/" },
+      {
+        id: "li",
+        network: "LinkedIn",
+        username: "jane-doe",
+        url: "https://www.linkedin.com/in/jane-doe/",
+      },
+    ];
+
+    const model = buildMinimalRenderModel(
+      resume,
+      resolveResumeDesignSettings({ template: "minimal", accentColor: "#1d6648" })
+    );
+    expect(model.header.urlLine).toBeUndefined();
+    expect(model.header.contactLine).toBe(
+      "jane.doe.very.long.email@example.dev | +1 (555) 123-4567 | janedoe.dev | github.com/janedoe | linkedin.com/in/jane-doe"
+    );
+
+    const doc = minimalTemplate(resume);
+    const headerStack = (doc.content as Array<{ stack?: unknown[] }>)[0]?.stack ?? [];
+    expect(headerStack).toHaveLength(3);
+    expect(headerStack[2]).toEqual({
+      text: [
+        "jane.doe.very.long.email@example.dev",
+        " | ",
+        "+1 (555) 123-4567",
+        " | ",
+        { text: "janedoe.dev", link: "https://janedoe.dev/" },
+        " | ",
+        { text: "github.com/janedoe", link: "https://github.com/janedoe/" },
+        " | ",
+        { text: "linkedin.com/in/jane-doe", link: "https://www.linkedin.com/in/jane-doe/" },
+      ],
+      style: "contact",
+    });
+  });
+
+  it("omits left-out profile links and basics.url when resolved for an application", () => {
+    const profile = createTemplateFixture();
+    profile.basics.url = "https://janedoe.dev/";
+    profile.basics.profiles = [
+      { id: "gh", network: "GitHub", username: "janedoe-gh", url: "https://github.com/janedoe-gh" },
+      {
+        id: "li",
+        network: "LinkedIn",
+        username: "jane-doe",
+        url: "https://linkedin.com/in/jane-doe",
+      },
+    ];
+
+    const { resume: withoutLinkedIn } = resolveApplication(
+      profile,
+      sampleApplication({ excluded: [contactProfileKey("li")] })
+    );
+    const headerWithoutLinkedIn = JSON.stringify(
+      (minimalTemplate(withoutLinkedIn).content as unknown[])[0]
+    );
+
+    expect(headerWithoutLinkedIn).toContain("janedoe.dev");
+    expect(headerWithoutLinkedIn).toContain("github.com/janedoe-gh");
+    expect(headerWithoutLinkedIn).not.toContain("linkedin.com/in/jane-doe");
+
+    const { resume: withoutUrl } = resolveApplication(
+      profile,
+      sampleApplication({ excluded: [CONTACT_KEYS.url] })
+    );
+    const headerWithoutUrl = JSON.stringify((minimalTemplate(withoutUrl).content as unknown[])[0]);
+    expect(headerWithoutUrl).not.toContain("janedoe.dev");
+    expect(headerWithoutUrl).toContain("github.com/janedoe-gh");
+  });
+
+  it("renders a profile without links as before", () => {
+    const resume = createTemplateFixture();
+    resume.basics.url = "";
+    resume.basics.profiles = [];
+
+    const doc = minimalTemplate(resume);
+    const headerStack = (doc.content as Array<{ stack?: unknown[] }>)[0]?.stack ?? [];
+    expect(headerStack).toEqual([
+      { text: "Jane Doe", style: "name" },
+      { text: "Senior Frontend Engineer", style: "label" },
+      {
+        text: "jane.doe.very.long.email@example.dev | +1 (555) 123-4567",
+        style: "contact",
+      },
+    ]);
   });
 });

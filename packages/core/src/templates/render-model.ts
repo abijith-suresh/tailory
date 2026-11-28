@@ -2,8 +2,15 @@ import type { PdfMargin, ResumeDesignSettings } from "../resume/design.ts";
 import type { ResumeSectionKey } from "../types/application.ts";
 import type { TemplateId } from "../types/template.ts";
 
+export interface ResumeContactItem {
+  link?: string;
+  text: string;
+}
+
 export interface ResumeHeaderModel {
+  contactItems?: ResumeContactItem[];
   contactLine?: string;
+  contactSeparator?: string;
   dividerAfter?: boolean;
   label?: string;
   name: string;

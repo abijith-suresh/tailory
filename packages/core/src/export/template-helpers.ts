@@ -1,10 +1,12 @@
 import type { Content, Margins } from "pdfmake/interfaces";
 import type { PdfMargin } from "../resume/design.ts";
+import type { ResumeContactItem, ResumeHeaderModel } from "../templates/render-model.ts";
 import type {
   ResumeBasics,
   ResumeInterest,
   ResumeLanguage,
   ResumeLocation,
+  ResumeProfile,
   ResumeProject,
   ResumeSkill,
 } from "../types/resume.ts";
@@ -36,13 +38,46 @@ function formatLocation(location?: ResumeLocation): string | undefined {
 }
 
 export function formatDisplayUrl(url?: string): string | undefined {
-  if (!url) return undefined;
+  const trimmed = url?.trim();
+  if (!trimmed) return undefined;
 
-  return url
-    .trim()
+  const formatted = trimmed
     .replace(/^https?:\/\//i, "")
     .replace(/^www\./i, "")
-    .replace(/\/$/, "");
+    .replace(/\/+$/, "");
+  return formatted || undefined;
+}
+
+function toClickableHref(url?: string): string | undefined {
+  const trimmed = url?.trim();
+  if (!trimmed) return undefined;
+
+  const candidate = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : /^[a-z][a-z0-9+.-]*:/i.test(trimmed)
+      ? ""
+      : `https://${trimmed}`;
+  if (!candidate) return undefined;
+
+  try {
+    const parsed = new URL(candidate);
+    return /^https?:$/i.test(parsed.protocol) ? candidate : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function formatProfileContactItem(profile: ResumeProfile): ResumeContactItem | undefined {
+  const url = profile.url?.trim();
+  if (url) {
+    const text = formatDisplayUrl(url);
+    if (!text) return undefined;
+    const link = toClickableHref(url);
+    return link ? { text, link } : { text };
+  }
+
+  const text = joinDefined([profile.network, profile.username], ": ");
+  return text ? { text } : undefined;
 }
 
 export interface ContactLineOptions {
@@ -50,33 +85,73 @@ export interface ContactLineOptions {
   includeLabel?: boolean;
   includeLocation?: boolean;
   includePhone?: boolean;
+  includeProfiles?: boolean;
   includeUrl?: boolean;
   separator?: string;
+}
+
+export function formatContactItems(
+  basics: ResumeBasics,
+  options: Omit<ContactLineOptions, "separator"> = {}
+): ResumeContactItem[] {
+  const {
+    includeEmail = true,
+    includeLabel = false,
+    includeLocation = false,
+    includePhone = true,
+    includeProfiles = false,
+    includeUrl = false,
+  } = options;
+
+  const items: ResumeContactItem[] = [];
+  const pushText = (value?: string) => {
+    const trimmed = value?.trim();
+    if (trimmed) items.push({ text: trimmed });
+  };
+  const pushLink = (url?: string) => {
+    const text = formatDisplayUrl(url);
+    if (!text) return;
+    const link = toClickableHref(url);
+    items.push(link ? { text, link } : { text });
+  };
+
+  if (includeLabel) pushText(basics.label);
+  if (includeEmail) pushText(basics.email);
+  if (includePhone) pushText(basics.phone);
+  if (includeLocation) pushText(formatLocation(basics.location));
+  if (includeUrl) pushLink(basics.url);
+  if (includeProfiles) {
+    for (const profile of basics.profiles ?? []) {
+      const item = formatProfileContactItem(profile);
+      if (item) items.push(item);
+    }
+  }
+
+  return items;
 }
 
 export function formatContactLine(
   basics: ResumeBasics,
   options: ContactLineOptions = {}
 ): string | undefined {
-  const {
-    includeEmail = true,
-    includeLabel = false,
-    includeLocation = false,
-    includePhone = true,
-    includeUrl = false,
-    separator = " | ",
-  } = options;
+  const separator = options.separator ?? " | ";
+  const items = formatContactItems(basics, options);
+  return items.length > 0 ? items.map((item) => item.text).join(separator) : undefined;
+}
 
-  return joinDefined(
-    [
-      includeLabel ? basics.label : undefined,
-      includeEmail ? basics.email : undefined,
-      includePhone ? basics.phone : undefined,
-      includeLocation ? formatLocation(basics.location) : undefined,
-      includeUrl ? formatDisplayUrl(basics.url) : undefined,
-    ],
-    separator
-  );
+export function buildHeaderContact(
+  basics: ResumeBasics,
+  options: ContactLineOptions = {}
+): Pick<ResumeHeaderModel, "contactItems" | "contactLine" | "contactSeparator"> {
+  const separator = options.separator ?? " | ";
+  const contactItems = formatContactItems(basics, options);
+  if (contactItems.length === 0) return {};
+
+  return {
+    contactItems,
+    contactLine: contactItems.map((item) => item.text).join(separator),
+    ...(separator !== " | " ? { contactSeparator: separator } : {}),
+  };
 }
 
 export function formatDateRange(startDate?: string, endDate?: string): string | undefined {
