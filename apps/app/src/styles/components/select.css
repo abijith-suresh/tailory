@@ -1,0 +1,169 @@
+/*
+ * Select: a real <select>. Where the customizable select works (appearance: base-select), it gets
+ * the app's own button and picker. Elsewhere it stays native, with our arrow drawn over it.
+ */
+@layer components {
+  .select-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .select {
+    appearance: none;
+    width: 100%;
+    height: var(--control-height);
+    padding-inline: var(--space-3) var(--space-8);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-fg);
+    font-size: var(--text-md);
+    line-height: var(--text-md--lh);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-hover) var(--ease-out),
+      box-shadow var(--duration-hover) var(--ease-out);
+  }
+
+  .select:hover {
+    border-color: color-mix(in srgb, var(--color-line-strong) 60%, var(--color-fg-subtle));
+  }
+
+  .select:focus-visible {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 18%, transparent);
+    outline: none;
+  }
+
+  .select[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .select:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* The fallback arrow, over a native select. */
+  .select-wrap__arrow {
+    position: absolute;
+    top: 50%;
+    right: var(--space-3);
+    width: 0.875rem;
+    height: 0.875rem;
+    translate: 0 -50%;
+    color: var(--color-fg-subtle);
+    pointer-events: none;
+  }
+
+  .select__arrow {
+    display: none;
+  }
+
+  @supports (appearance: base-select) {
+    .select,
+    .select::picker(select) {
+      appearance: base-select;
+    }
+
+    .select {
+      display: flex;
+      align-items: center;
+      padding-right: var(--space-3);
+    }
+
+    .select-wrap__arrow {
+      display: none;
+    }
+
+    .select > button {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .select selectedcontent {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .select::picker-icon {
+      display: none;
+    }
+
+    .select__arrow {
+      display: block;
+      width: 0.875rem;
+      height: 0.875rem;
+      flex-shrink: 0;
+      color: var(--color-fg-subtle);
+      transition: rotate var(--duration-move) var(--ease-out);
+    }
+
+    .select:open .select__arrow {
+      rotate: 180deg;
+    }
+
+    .select::picker(select) {
+      margin-block: var(--space-1);
+      padding: var(--space-1);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-popover);
+      opacity: 0;
+      translate: 0 var(--motion-drop);
+      transition:
+        opacity var(--duration-exit) var(--ease-in),
+        translate var(--duration-exit) var(--ease-in),
+        display var(--duration-exit) allow-discrete,
+        overlay var(--duration-exit) allow-discrete;
+    }
+
+    .select:open::picker(select) {
+      opacity: 1;
+      translate: 0 0;
+      transition-duration: var(--duration-enter);
+      transition-timing-function: var(--ease-out);
+    }
+
+    @starting-style {
+      .select:open::picker(select) {
+        opacity: 0;
+        translate: 0 var(--motion-drop);
+      }
+    }
+
+    .select option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-height: 2rem;
+      padding-inline: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      line-height: var(--text-sm--lh);
+      cursor: pointer;
+    }
+
+    .select option:hover,
+    .select option:focus-visible {
+      background: var(--color-tint-hover);
+      outline: none;
+    }
+
+    .select option::checkmark {
+      order: 1;
+      margin-left: auto;
+      color: var(--color-primary);
+    }
+
+    .select option:checked {
+      font-weight: 620;
+    }
+  }
+}

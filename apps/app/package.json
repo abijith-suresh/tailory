@@ -40,7 +40,8 @@
     "prepack": "npm run build",
     "prepublishOnly": "node -e \"console.error('tailory is published by the Dev build workflow, not from a checkout.'); process.exit(1)\"",
     "db:generate": "drizzle-kit generate",
-    "auth:generate": "npx --yes auth@1.7.28 generate --config auth-cli.config.ts --output src/server/db/auth-schema.ts --yes && biome format --write src/server/db/auth-schema.ts"
+    "auth:generate": "npx --yes auth@1.7.28 generate --config auth-cli.config.ts --output src/server/db/auth-schema.ts --yes && biome format --write src/server/db/auth-schema.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.6.0"
@@ -53,6 +54,7 @@
     "@modelcontextprotocol/client": "^2.4.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@modelcontextprotocol/server": "^2.4.0",
+    "@playwright/test": "^1.65.1",
     "@solidjs/meta": "^2.0.0",
     "@solidjs/router": "^2.0.1",
     "@solidjs/vite-plugin": "^3.0.1",

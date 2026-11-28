@@ -1,0 +1,176 @@
+/*
+ * Side navigation (the section editor and Settings) and tabs. The current item has the neutral
+ * tint and a 2px cobalt bar on its left edge; the header nav marks it with a bar underneath.
+ */
+@layer components {
+  /* ── Side navigation ────────────────────────────────────────────── */
+
+  .sidenav__list {
+    display: grid;
+    gap: 1px;
+    list-style: none;
+  }
+
+  .sidenav__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    height: 2.125rem;
+    padding-inline: 0.625rem;
+    border-radius: var(--radius-lg);
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+    font-weight: 520;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-hover) var(--ease-out),
+      color var(--duration-hover) var(--ease-out),
+      var(--press-transition);
+  }
+
+  .sidenav__link:hover {
+    background: var(--color-tint-hover);
+    color: var(--color-fg);
+  }
+
+  .sidenav__link:active {
+    background: var(--color-tint-press);
+    translate: 0 var(--motion-press-y);
+    --press-transition: translate var(--duration-press) var(--ease-out);
+  }
+
+  .sidenav__link[aria-current="page"],
+  .sidenav__link[aria-current="true"] {
+    background: var(--color-tint-hover);
+    color: var(--color-fg);
+    font-weight: 620;
+  }
+
+  .sidenav__link[aria-current="page"]::before,
+  .sidenav__link[aria-current="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--color-primary);
+  }
+
+  .sidenav__count {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Phones: a row of chips that scrolls sideways. */
+  @media (max-width: 45rem) {
+    .sidenav {
+      margin-inline: calc(var(--space-4) * -1);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .sidenav__list {
+      display: flex;
+      gap: 0.375rem;
+      width: max-content;
+      padding-inline: var(--space-4);
+    }
+
+    .sidenav__link {
+      height: 2rem;
+      padding-inline: var(--space-3);
+      border-radius: 999px;
+      background: var(--color-canvas-deep);
+      gap: 0.375rem;
+    }
+
+    .sidenav__link[aria-current="page"],
+    .sidenav__link[aria-current="true"] {
+      background: var(--color-fg);
+      color: var(--color-canvas);
+    }
+
+    .sidenav__link[aria-current="page"] .sidenav__count,
+    .sidenav__link[aria-current="true"] .sidenav__count {
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    .sidenav__link[aria-current="page"]::before,
+    .sidenav__link[aria-current="true"]::before {
+      display: none;
+    }
+  }
+
+  /* ── Tabs ───────────────────────────────────────────────────────── */
+
+  .tabs__list {
+    display: flex;
+    gap: var(--space-1);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-line);
+    scrollbar-width: none;
+  }
+
+  .tabs__tab {
+    position: relative;
+    flex: none;
+    height: 2.5rem;
+    padding-inline: var(--space-3);
+    border: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: transparent;
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    font-weight: 540;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-hover) var(--ease-out),
+      color var(--duration-hover) var(--ease-out);
+  }
+
+  .tabs__tab:hover {
+    background: var(--color-tint-hover);
+    color: var(--color-fg);
+  }
+
+  .tabs__tab:active {
+    background: var(--color-tint-press);
+  }
+
+  .tabs__tab[aria-selected="true"] {
+    color: var(--color-fg);
+    font-weight: 620;
+  }
+
+  .tabs__tab[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-primary);
+  }
+
+  .tabs__tab:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .tabs__panel {
+    padding-top: var(--space-4);
+  }
+
+  .tabs__panel:focus-visible {
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+}

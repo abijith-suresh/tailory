@@ -1,0 +1,56 @@
+/* /dev/components: the design review page. Dev builds only. */
+@layer screens {
+  .dev-row-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .dev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-4);
+  }
+
+  .dev-split {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+
+  @media (max-width: 45rem) {
+    .dev-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .dev-rows {
+    display: grid;
+    gap: 0.375rem;
+    list-style: none;
+  }
+
+  .dev-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.5625rem 0.875rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .dev-row span {
+    grid-column: 1;
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+  }
+
+  .dev-row .dev-row__when {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    color: var(--color-fg-subtle);
+    font-variant-numeric: tabular-nums;
+  }
+}

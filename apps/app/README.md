@@ -1,9 +1,9 @@
 # tailory (server app)
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
-handles sign-in, and serves an MCP endpoint with the resume tools agents use. All four screens
-work: Applications, Application, Profile and Connect an agent. Dev builds only; no stable release
-yet.
+handles sign-in, and serves an MCP endpoint with the resume tools agents use. The main
+navigation has Applications, Profile and Settings; Connect an agent is reached from Settings. Dev
+builds only; no stable release yet.
 
 ## Try the dev build
 
@@ -252,12 +252,65 @@ npm run db:generate --workspace tailory  # after editing src/server/db/schema.ts
 npm run auth:generate --workspace tailory  # after changing Better Auth plugins, then db:generate
 ```
 
-In dev, `/dev/components` shows every shared component for design review; production builds
-leave it out.
+In dev, `/dev/components` shows every shared component for design review, with the motion demos;
+production builds leave it out.
 
-Styles are plain CSS in `src/styles/app.css`, in cascade layers. The tokens are the marketing
-site's (`apps/site/src/styles/global.css`); change both together. Components in
-`src/components` have tests that render them on the server and query the HTML.
+Styles are plain CSS in cascade layers (`reset, tokens, base, layout, components, screens`),
+one file per concern, all pulled in by `src/styles/index.css`:
+
+- `tokens.css`: colour (each a `light-dark()` pair), type, spacing, radii, shadows and motion. The
+  colours are the marketing site's (`apps/site/src/styles/global.css`); change both together.
+- `base.css`, `layout.css`, `motion.css`: element defaults, the page frame, press feedback.
+- `components/*.css`: one file per shared component family.
+- `screens/*.css`: one file per screen. A screen change touches only its own file.
+
+The page follows the system theme; `data-theme="light"` or `"dark"` on `<html>` pins one. Hover
+and press use the same two tints everywhere (`--color-tint-hover`, `--color-tint-press`). Cobalt
+(`--color-primary`) means "where you are" or "the main action", nothing else.
+
+Tests come in two kinds. `*.test.tsx` renders components on the server and queries the HTML.
+`*.dom.test.tsx` mounts them in jsdom for behaviour: focus, keys, timers (`src/testing/dom.ts`).
+`npm run test:e2e --workspace tailory` builds nothing: it starts the built app (`npm run build`
+first) and checks the shell in Chromium at 1440 and 390 px, light and dark. It moves between every
+page and fails if anything from the last page is still there or still animating.
+
+### Motion
+
+Motion is for feedback inside one page. Pages swap at once: there are no page transitions and no
+view transitions, and nothing a page starts outlives it. Every duration and curve is a token:
+
+| Token                                                       | Use                                                    |
+| ----------------------------------------------------------- | ------------------------------------------------------ |
+| `--duration-press`                                          | a control going down (90 ms)                           |
+| `--duration-hover`                                          | colour and tint changes (150 ms)                       |
+| `--duration-exit`                                           | menus, dialogs and toasts leaving (150 ms)             |
+| `--duration-enter`                                          | menus, dialogs and toasts arriving (220 ms)            |
+| `--duration-move`                                           | things changing place: rows, switches, sheets (320 ms) |
+| `--duration-settle`                                         | a pressed control springing back (480 ms)              |
+| `--ease-out`, `--ease-in`, `--ease-in-out`, `--ease-spring` | the curves                                             |
+
+With `prefers-reduced-motion`, the tokens drop movement (`--motion-rise`, `--motion-press-y` and
+the rest become 0) and keep short fades, so nothing needs its own media query.
+
+- **Press.** `Button` already has it. For anything else that presses, add the `press` class, or
+  list `var(--press-transition)` in its own `transition` and set `translate`/`scale` on `:active`
+  (see `components/button.css`). It goes down fast and springs back.
+- **Dialogs and menus.** `Dialog` and `Menu` enter and leave in CSS (`@starting-style`, and
+  `display`/`overlay` transitions) in `components/overlay.css`. Don't add script for it.
+- **Toasts.** Call `toast(message, { action: { label: "Undo", run } })` from `src/lib/toast.ts`.
+  The shell's `Toaster` plays the entrance and exit and clears toasts when the page changes.
+- **Lists that re-sort.** Give each child a stable `data-flip-key`, then make the change through
+  `flip` from `src/lib/motion.ts`. Rows slide to their new places and new rows rise in. `land(row)`
+  marks the row someone just added:
+
+  ```ts
+  const added = await flip(list, () => setEntries(sorted));
+  const row = list.querySelector(`[data-flip-key="${added[0]}"]`);
+  if (row) land(row);
+  ```
+
+- **Anything else scripted.** Use `play(element, keyframes, { duration: "move", easing: "out" })`,
+  which reads the tokens, respects reduced motion and replaces whatever it was already playing.
 
 `npm run dev` starts local mode. For server mode, set `TAILORY_MODE=server` and the sign-in
 variables above, with `TAILORY_PUBLIC_URL=http://localhost:4413`.
