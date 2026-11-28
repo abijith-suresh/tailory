@@ -154,6 +154,8 @@ jobs:
         with:
           node-version: ${{ steps.node.outputs.version }}
           registry-url: https://registry.npmjs.org
+          # The sparse checkout has no lockfile, so setup-node's automatic npm cache would fail.
+          package-manager-cache: false
 
       # Trusted publishing needs npm 11.5.1+, and changing dist-tags over OIDC needs 11.21.0+.
       - name: Install exact npm from package metadata
