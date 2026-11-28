@@ -48,3 +48,48 @@ export function Field(props: FieldProps) {
     </div>
   );
 }
+
+type TextAreaProps = JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  label: string;
+  hint?: string;
+  error?: string;
+  optional?: boolean;
+};
+
+/** A labelled multi-line text input, laid out like Field. */
+export function TextArea(props: TextAreaProps) {
+  const rest = omit(props, "label", "hint", "error", "optional", "id", "class");
+  const id = props.id ?? createUniqueId();
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  const describedBy = () =>
+    [props.hint && hintId, props.error && errorId].filter(Boolean).join(" ") || undefined;
+
+  return (
+    <div class={props.class ? `field ${props.class}` : "field"}>
+      <label class="field__label" for={id}>
+        {props.label}
+        <Show when={props.optional}>
+          <span class="field__optional"> (optional)</span>
+        </Show>
+      </label>
+      <textarea
+        {...rest}
+        id={id}
+        class="input textarea"
+        aria-describedby={describedBy()}
+        aria-invalid={props.error ? "true" : undefined}
+      />
+      <Show when={props.hint}>
+        <p class="field__hint" id={hintId}>
+          {props.hint}
+        </p>
+      </Show>
+      <Show when={props.error}>
+        <p class="field__error" id={errorId}>
+          {props.error}
+        </p>
+      </Show>
+    </div>
+  );
+}
