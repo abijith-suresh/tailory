@@ -54,6 +54,17 @@ const mcp: StartMiddleware = (event, next) =>
 const downloads: StartMiddleware = (event, next) =>
   pathOf(event.request).startsWith(DOWNLOAD_PATH) ? handleDownload(event.request) : next();
 
+/** Pages that moved, and where they live now. */
+export const MOVED_PAGES: Record<string, string> = { "/connect": "/settings/agents" };
+
+/** Sends an old address to the page that replaced it. */
+const moved: StartMiddleware = (event, next) => {
+  const url = new URL(event.request.url);
+  const to = MOVED_PAGES[url.pathname.replace(/\/$/, "")];
+  if (!to) return next();
+  return new Response(null, { status: 301, headers: { location: to + url.search } });
+};
+
 /** Paths a signed-out person may open. */
 const PUBLIC_PAGES = new Set([SIGN_IN_PATH]);
 
@@ -81,4 +92,4 @@ const signInGate: StartMiddleware = async (event, next) => {
   });
 };
 
-export default [loopbackOnly, health, authRoutes, mcp, downloads, signInGate];
+export default [loopbackOnly, health, authRoutes, mcp, downloads, moved, signInGate];

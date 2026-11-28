@@ -7,11 +7,9 @@ export const NAV_ITEMS = [
 
 /**
  * Whether a nav item is the current section. Applications is the home screen, so it also owns the
- * pages under /applications. Settings owns Connect an agent, which becomes Settings › Agents.
+ * pages under /applications.
  */
 export const isCurrent = (href: string, pathname: string) => {
   if (href === "/") return pathname === "/" || pathname.startsWith("/applications/");
-  if (href === "/settings" && (pathname === "/connect" || pathname.startsWith("/connect/")))
-    return true;
   return pathname === href || pathname.startsWith(`${href}/`);
 };

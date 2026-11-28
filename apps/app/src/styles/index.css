@@ -21,8 +21,10 @@
 @import "./components/empty-state.css";
 @import "./components/navigation.css";
 @import "./components/pickers.css";
+@import "./components/copy.css";
 @import "./screens/applications.css";
 @import "./screens/application.css";
 @import "./screens/profile.css";
-@import "./screens/connect.css";
+@import "./screens/settings.css";
+@import "./screens/first-run.css";
 @import "./screens/dev-components.css";

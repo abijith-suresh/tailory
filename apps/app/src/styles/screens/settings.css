@@ -1,0 +1,230 @@
+/* Settings (/settings/*): the left navigation, then one page each. */
+
+@layer screens {
+  .settings {
+    display: grid;
+    grid-template-columns: 12.5rem minmax(0, 1fr);
+    gap: var(--space-10);
+    align-items: start;
+    max-width: 65rem;
+    margin-inline: auto;
+  }
+
+  .settings__nav {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-7));
+  }
+
+  .settings__heading {
+    margin: 0 0 var(--space-3) 0.625rem;
+    font-size: var(--text-heading-6);
+    line-height: var(--text-heading-6--lh);
+    letter-spacing: -0.015em;
+    font-weight: 650;
+  }
+
+  .settings__pane {
+    max-width: 42.5rem;
+    min-width: 0;
+  }
+
+  .settings__title {
+    margin-bottom: var(--space-5);
+    font-size: var(--text-heading-5);
+    line-height: var(--text-heading-5--lh);
+    letter-spacing: -0.025em;
+    font-weight: 650;
+  }
+
+  /* A card of rows: a name and a line about it, with its control at the end. */
+  .settings-rows {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-2xl);
+    background: var(--color-surface);
+  }
+
+  .settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .settings-rows > * + * {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .settings-row__text {
+    display: grid;
+    gap: 0.125rem;
+    flex: 1;
+    min-width: min(100%, 13.75rem);
+  }
+
+  .settings-row__name {
+    font-size: var(--text-md);
+    line-height: var(--text-md--lh);
+    font-weight: 600;
+  }
+
+  .settings-row__desc {
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .settings-row--danger .settings-row__name {
+    color: var(--color-danger);
+  }
+
+  .settings-path {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    margin-top: var(--space-1);
+  }
+
+  .settings-path code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--text-sm);
+  }
+
+  .settings-account {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  /* Agents */
+  .settings-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+  }
+
+  .settings-block__label {
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+    font-weight: 600;
+  }
+
+  .settings-block__note {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+  }
+
+  .agent-tabs .tabs__panel {
+    padding-top: var(--space-3);
+  }
+
+  .agent-setup {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--lh);
+  }
+
+  .agent-setup strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .agent-setup .code-block {
+    color: var(--color-fg);
+  }
+
+  .agent-setup__then {
+    color: var(--color-fg-subtle);
+  }
+
+  .connection-check {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-2xl);
+    background: var(--color-surface);
+    padding: var(--space-4);
+  }
+
+  .connection-check__state {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: min(100%, 12rem);
+    min-height: var(--space-6);
+    font-size: var(--text-md);
+    line-height: var(--text-md--lh);
+  }
+
+  .settings__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-5);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+  }
+
+  .settings__guide {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    font-weight: 580;
+    text-decoration-color: transparent;
+  }
+
+  .settings__guide svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  .confirm-dialog__text {
+    margin-bottom: var(--space-4);
+    color: var(--color-fg-muted);
+  }
+
+  @media (max-width: 45rem) {
+    .settings {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+    }
+
+    .settings__nav {
+      position: static;
+    }
+
+    .settings__heading {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .settings-account {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .settings-row {
+      padding: var(--space-4);
+    }
+  }
+}

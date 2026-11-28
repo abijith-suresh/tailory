@@ -184,7 +184,7 @@ try {
   const first = await start(bin, args);
   const home = await get(first.url);
   check(home.status === 200, `GET / answered ${home.status}`);
-  check(home.body.includes("No applications yet"), "GET / is missing the applications page");
+  check(home.body.includes("Connect your agent"), "GET / is missing the first-run screen");
   const health = await get(`${first.url}/healthz`);
   check(health.status === 200, `GET /healthz answered ${health.status}`);
   const missing = await get(`${first.url}/no-such-page`);

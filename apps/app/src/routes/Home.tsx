@@ -5,10 +5,24 @@ import { ApplicationList } from "../components/ApplicationList";
 import { LinkButton } from "../components/Button";
 import { Checkbox } from "../components/Checkbox";
 import { EmptyState } from "../components/EmptyState";
+import { FirstRun } from "../components/FirstRun";
 import { NewApplication } from "../components/NewApplication";
 import { getApplicationRows, getPageResults } from "../server/functions";
+import { isFirstRun } from "../server/settings-functions";
 
+/** A fresh install (no profile, no applications) gets the first-run screen instead. */
 export default function Home() {
+  const firstRun = createMemo(() => isFirstRun());
+  return (
+    <Loading fallback={null}>
+      <Show when={!firstRun()} fallback={<FirstRun />}>
+        <Applications />
+      </Show>
+    </Loading>
+  );
+}
+
+function Applications() {
   const [typed, setTyped] = createSignal("");
   const [search, setSearch] = createSignal("");
   const [showArchived, setShowArchived] = createSignal(false);
@@ -45,7 +59,7 @@ export default function Home() {
             <EmptyState
               title="No applications yet"
               actions={
-                <LinkButton variant="primary" href="/connect">
+                <LinkButton variant="primary" href="/settings/agents">
                   Connect an agent
                 </LinkButton>
               }

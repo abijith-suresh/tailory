@@ -50,6 +50,14 @@ export function ProfileEditor(props: { initial: ProfileState }) {
   const [notice, setNotice] = createSignal("");
   let fileInput: HTMLInputElement | undefined;
 
+  // "Import a resume" on the first-run screen links to /profile?import: open the file picker.
+  // Browsers may refuse without a fresh click, so the Import button also gets focus.
+  onSettled(() => {
+    if (!new URLSearchParams(window.location.search).has("import")) return;
+    document.getElementById("import")?.focus();
+    fileInput?.click();
+  });
+
   // The profile the server has, as this page last saw it. Saves send it so the server can tell
   // when someone else changed the profile meanwhile.
   let base: ResumeSchema | undefined;
@@ -196,7 +204,7 @@ export function ProfileEditor(props: { initial: ProfileState }) {
               void pickFile(file);
             }}
           />
-          <Button disabled={reading() || busy()} onClick={() => fileInput?.click()}>
+          <Button id="import" disabled={reading() || busy()} onClick={() => fileInput?.click()}>
             {reading() ? "Reading the file…" : "Import a file"}
           </Button>
         </div>
