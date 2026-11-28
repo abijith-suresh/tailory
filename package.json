@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=24.19.0 <25"
   },
-  "packageManager": "npm@11.16.0",
+  "packageManager": "npm@11.21.3",
   "workspaces": [
     "apps/*",
     "packages/*"
