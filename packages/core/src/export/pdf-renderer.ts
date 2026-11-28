@@ -1,6 +1,7 @@
-import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
+import type { Content, Margins, TDocumentDefinitions } from "pdfmake/interfaces";
 import type {
   ResumeEntryModel,
+  ResumeHeaderModel,
   ResumeRenderModel,
   ResumeSectionModel,
 } from "../templates/render-model.ts";
@@ -133,6 +134,37 @@ function renderCompactSection(section: ResumeSectionModel, model: ResumeRenderMo
   ];
 }
 
+function renderContactLine(
+  header: ResumeHeaderModel,
+  style: string,
+  margin?: Margins
+): Content | null {
+  const items = header.contactItems;
+  if (items && items.length > 0) {
+    const separator = header.contactSeparator ?? " | ";
+    const hasLinks = items.some((item) => Boolean(item.link));
+    const text: Content = hasLinks
+      ? items.flatMap((item, index) => {
+          const part: Content = item.link ? { text: item.text, link: item.link } : item.text;
+          return index === 0 ? [part] : [separator, part];
+        })
+      : (header.contactLine ?? items.map((item) => item.text).join(separator));
+
+    return {
+      text,
+      style,
+      ...(margin ? { margin } : {}),
+    } satisfies Content;
+  }
+
+  if (!header.contactLine) return null;
+  return {
+    text: header.contactLine,
+    style,
+    ...(margin ? { margin } : {}),
+  } satisfies Content;
+}
+
 export function renderPdfResumeModel(model: ResumeRenderModel): TDocumentDefinitions {
   if (model.template === "modern") {
     return {
@@ -141,9 +173,7 @@ export function renderPdfResumeModel(model: ResumeRenderModel): TDocumentDefinit
           stack: [
             { text: model.header.name, style: "name" },
             model.header.label ? { text: model.header.label, style: "label" } : null,
-            model.header.contactLine
-              ? { text: model.header.contactLine, style: "contactLine" }
-              : null,
+            renderContactLine(model.header, "contactLine"),
             model.header.urlLine ? { text: model.header.urlLine, style: "contactLine" } : null,
           ].filter(Boolean) as Content[],
           margin: spacing.after(16),
@@ -174,18 +204,11 @@ export function renderPdfResumeModel(model: ResumeRenderModel): TDocumentDefinit
   }
 
   if (model.template === "compact-ats") {
+    const contact = renderContactLine(model.header, "contact", spacing.y(1, 8));
     return {
       content: [
         { text: model.header.name, style: "name" },
-        ...(model.header.contactLine
-          ? [
-              {
-                text: model.header.contactLine,
-                style: "contact",
-                margin: spacing.y(1, 8),
-              } satisfies Content,
-            ]
-          : []),
+        ...(contact ? [contact] : []),
         ...(model.header.dividerAfter
           ? [
               renderDivider({
@@ -224,7 +247,7 @@ export function renderPdfResumeModel(model: ResumeRenderModel): TDocumentDefinit
         stack: [
           { text: model.header.name, style: "name" },
           model.header.label ? { text: model.header.label, style: "label" } : null,
-          model.header.contactLine ? { text: model.header.contactLine, style: "contact" } : null,
+          renderContactLine(model.header, "contact"),
           model.header.urlLine ? { text: model.header.urlLine, style: "contact" } : null,
         ].filter(Boolean) as Content[],
         margin: spacing.after(20),

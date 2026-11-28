@@ -36,7 +36,11 @@ function printedText(doc: unknown): string[] {
   if (!doc || typeof doc !== "object") return [];
   const node = doc as Record<string, unknown>;
   return [
-    ...(typeof node.text === "string" ? [node.text] : []),
+    ...(typeof node.text === "string"
+      ? [node.text]
+      : Array.isArray(node.text)
+        ? printedText(node.text)
+        : []),
     ...printedText(node.stack),
     ...printedText(node.columns),
   ];
@@ -135,12 +139,17 @@ describe("fitResume", () => {
   });
 
   it("never drops content, however far it tightens", async () => {
-    const fit = input(veryLongResume(), 1);
+    const resume = veryLongResume();
+    resume.basics.url = "https://ada.example/";
+    resume.basics.profiles = [
+      { id: "gh", network: "GitHub", username: "ada", url: "https://github.com/ada" },
+    ];
+    const fit = input(resume, 1);
     const result = await fitResume(fit, measurePages);
 
-    expect(printedText(fitDocument(fit, result.step).content)).toEqual(
-      printedText(buildPdfDocument(fit.resume, "modern").content)
-    );
+    const text = printedText(fitDocument(fit, result.step).content);
+    expect(text).toEqual(printedText(buildPdfDocument(fit.resume, "modern").content));
+    expect(text).toContain("github.com/ada");
   });
 
   it.each([

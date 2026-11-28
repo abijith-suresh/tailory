@@ -3,8 +3,8 @@ import { applySectionOrder, scalePageMargins } from "../applications/section-ord
 import { renderPdfResumeModel } from "../export/pdf-renderer.ts";
 
 import {
+  buildHeaderContact,
   buildProjectMetadata,
-  formatContactLine,
   formatDisplayUrl,
   formatInterestsText,
   formatLanguagesText,
@@ -111,12 +111,13 @@ export function buildModernRenderModel(
     header: {
       name: resume.basics.name,
       label: resume.basics.label,
-      contactLine: formatContactLine(resume.basics, {
+      ...buildHeaderContact(resume.basics, {
         includeEmail: true,
         includeLocation: true,
         includePhone: true,
+        includeProfiles: true,
+        includeUrl: true,
       }),
-      urlLine: formatDisplayUrl(resume.basics.url),
     },
     sections,
   };
