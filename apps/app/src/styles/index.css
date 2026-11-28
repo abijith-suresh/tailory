@@ -21,6 +21,7 @@
 @import "./components/empty-state.css";
 @import "./components/navigation.css";
 @import "./components/pickers.css";
+@import "./screens/board.css";
 @import "./screens/applications.css";
 @import "./screens/application.css";
 @import "./screens/profile.css";

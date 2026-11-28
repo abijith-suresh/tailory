@@ -1,31 +1,4 @@
-// Shared by the Applications screens on both sides: how the list groups, and how times read.
-
-import type { ApplicationStatus } from "@tailory/core";
-
-/**
- * The order of the status groups on the home screen: what needs you soonest first, closed
- * applications last.
- */
-export const STATUS_ORDER: readonly ApplicationStatus[] = [
-  "interviewing",
-  "applied",
-  "drafting",
-  "closed",
-];
-
-export type StatusGroup<T> = { status: ApplicationStatus; items: T[] };
-
-/**
- * Applications grouped by status, in STATUS_ORDER, leaving out empty groups. Each group keeps the
- * order it was given (most recently changed first).
- */
-export const groupByStatus = <T extends { status: ApplicationStatus }>(
-  applications: readonly T[]
-): StatusGroup<T>[] =>
-  STATUS_ORDER.map((status) => ({
-    status,
-    items: applications.filter((application) => application.status === status),
-  })).filter((group) => group.items.length > 0);
+// Shared by the Applications screens: how times read.
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ["year", 365 * 24 * 60 * 60],

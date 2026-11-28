@@ -5,7 +5,6 @@ import { EMPTY_RESUME, type ResumeSchema } from "@tailory/core";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { groupByStatus } from "../lib/applications";
 import {
   createApplication,
   type DataContext,
@@ -20,7 +19,9 @@ import { type Database, openDatabase, schema } from "./db";
 import {
   createApplicationFromForm,
   editApplication,
+  getApplicationPdf,
   getApplicationView,
+  getBoardView,
   listApplicationRows,
   listPageResults,
   undoApplicationChange,
@@ -111,24 +112,8 @@ describe("the Applications screens' server side", () => {
         archived: false,
         statusChangedAt: expect.any(String),
         updatedAt: expect.any(String),
-        pendingChanges: 0,
+        pending: null,
       });
-    });
-
-    it("groups by status, soonest-needed first, and drops empty groups", () => {
-      const rows = [
-        { id: "a", status: "drafting" as const },
-        { id: "b", status: "closed" as const },
-        { id: "c", status: "interviewing" as const },
-        { id: "d", status: "drafting" as const },
-      ];
-      expect(
-        groupByStatus(rows).map((group) => [group.status, group.items.map((row) => row.id)])
-      ).toEqual([
-        ["interviewing", ["c"]],
-        ["drafting", ["a", "d"]],
-        ["closed", ["b"]],
-      ]);
     });
 
     it("gives each application its page result, and only the caller's", async () => {
@@ -139,6 +124,79 @@ describe("the Applications screens' server side", () => {
 
       await updateApplication(ada, id, { pageTarget: 1 });
       expect((await listPageResults(ada, [id]))[id]?.message).toBe("1 page, fits");
+    });
+  });
+
+  describe("the board", () => {
+    it("has every application, archived too, most recently moved first", async () => {
+      const first = await make("Stripe", "Engineer");
+      const second = await make("Linear", "Engineer");
+      const third = await make("Initech", "Engineer");
+      await updateApplication(ada, third, { archived: true });
+      await updateApplication(ada, first, { status: "applied" });
+      const { rows } = await getBoardView(ada);
+      expect(rows.map((row) => row.id)).toEqual([first, third, second]);
+      expect(rows.find((row) => row.id === third)?.archived).toBe(true);
+    });
+
+    it("sums up the agent's pending changes: how many, who, and when", async () => {
+      const id = await make("Stripe", "Engineer");
+      const agent: DataContext = { ...ada, actor: { kind: "agent", client: "Claude" } };
+      await updateApplication(agent, id, { notes: "One" });
+      await updateApplication(agent, id, { notes: "Two" });
+      const [row] = (await getBoardView(ada)).rows;
+      expect(row?.pending).toEqual({ count: 2, client: "Claude", latestAt: expect.any(String) });
+      const [latest] = await listChanges(ada, { kind: "application", id }, { limit: 1 });
+      expect(row?.pending?.latestAt).toBe(latest?.createdAt);
+    });
+
+    it("moves a card, says which change to undo, and the undo puts it back", async () => {
+      const id = await make("Stripe", "Engineer");
+      const before = await getApplication(ada, id);
+      const moved = await editApplication(ada, id, {
+        type: "status",
+        status: "closed",
+        outcome: "rejected",
+      });
+      if (!moved.ok) throw new Error(moved.error);
+      expect(moved.value.statusChangedAt).not.toBe(before.statusChangedAt);
+      expect(await getApplication(ada, id)).toMatchObject({
+        status: "closed",
+        outcome: "rejected",
+      });
+
+      const changeId = moved.value.changeId ?? "";
+      expect(await undoApplicationChange(ada, id, changeId)).toEqual({
+        ok: true,
+        value: undefined,
+      });
+      expect(await getApplication(ada, id)).toMatchObject({
+        status: "drafting",
+        outcome: null,
+        statusChangedAt: before.statusChangedAt,
+      });
+
+      // Closing without saying how it ended is refused.
+      expect(await editApplication(ada, id, { type: "status", status: "closed" })).toMatchObject({
+        ok: false,
+      });
+      // A move that changes nothing logs nothing.
+      const same = await editApplication(ada, id, { type: "status", status: "drafting" });
+      expect(same).toMatchObject({ ok: true, value: { changeId: null } });
+    });
+
+    it("prints a card's PDF for its thumbnail, only for the caller's applications", async () => {
+      const id = await make("Stripe", "Engineer");
+      const pdf = await getApplicationPdf(ada, id);
+      expect(
+        Buffer.from(pdf ?? "", "base64")
+          .subarray(0, 5)
+          .toString()
+      ).toBe("%PDF-");
+      expect(await getApplicationPdf(ada, id)).toBe(pdf);
+      expect(await getApplicationPdf(ada, "someone-elses")).toBeNull();
+      await replaceProfile(ada, structuredClone(EMPTY_RESUME));
+      expect(await getApplicationPdf(ada, id)).toBeNull();
     });
   });
 
@@ -217,7 +275,7 @@ describe("the Applications screens' server side", () => {
       const bullet = bullets[0]?.id ?? "";
       expect(
         await editApplication(ada, id, { type: "include", itemId: bullet, included: false })
-      ).toEqual({ ok: true, value: undefined });
+      ).toMatchObject({ ok: true, value: { changeId: expect.any(String) } });
       expect((await getApplication(ada, id)).excluded).toEqual([bullet]);
 
       const view = await getApplicationView(ada, id);

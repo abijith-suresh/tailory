@@ -1,50 +1,103 @@
 import { describe, expect, it } from "vitest";
-
+import type { CardPage } from "../lib/board";
 import type { ApplicationRow, ChangeView, SectionView } from "../server/pages";
-import { ApplicationList } from "./ApplicationList";
+import { BoardCard } from "./board/BoardCard";
 import { ChangeList } from "./ChangeList";
 import { PageResult } from "./PageResult";
 import { ResumeTree } from "./ResumeEditor";
 import { renderHtml } from "./render.testing";
 
-const row = (id: string, status: ApplicationRow["status"], archived = false): ApplicationRow => ({
+const row = (
+  id: string,
+  status: ApplicationRow["status"],
+  overrides: Partial<ApplicationRow> = {}
+): ApplicationRow => ({
   id,
   company: `Company ${id}`,
   role: "Engineer",
   status,
   outcome: status === "closed" ? "rejected" : null,
   offer: false,
-  archived,
+  archived: false,
   statusChangedAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  pendingChanges: 0,
+  pending: null,
+  ...overrides,
 });
 
-describe("ApplicationList", () => {
-  it("groups rows by status, soonest-needed first, each linking to its page", () => {
-    const doc = renderHtml(() => (
-      <ApplicationList
-        rows={[row("a", "drafting"), row("b", "interviewing"), row("c", "drafting", true)]}
-        pages={{ a: { message: "1 page, fits", fits: true, pageTarget: 1 } }}
-      />
+const fits: CardPage = {
+  pagesNeeded: 1,
+  pageTarget: null,
+  fits: true,
+  linesOver: 0,
+  lastPageFill: 0.6,
+};
+
+describe("BoardCard", () => {
+  const card = (overrides: Partial<ApplicationRow>, page = fits) =>
+    renderHtml(() => (
+      <ul>
+        <BoardCard
+          row={row("a", "applied", overrides)}
+          page={() => page}
+          version="v1"
+          lifted={false}
+          slot={false}
+          describedBy="help"
+          onPointerDown={() => {}}
+          onLinkKeyDown={() => {}}
+          onLinkClick={() => {}}
+          onOpen={() => {}}
+          onMove={() => {}}
+          onArchive={() => {}}
+        />
+      </ul>
     ));
-    const groups = [...doc.querySelectorAll(".app-group")].map((group) => ({
-      title: group.querySelector("h2")?.firstChild?.textContent,
-      links: [...group.querySelectorAll("a")].map((a) => a.getAttribute("href")),
-    }));
-    expect(groups).toEqual([
-      { title: "Interviewing", links: ["/applications/b"] },
-      { title: "Drafting", links: ["/applications/a", "/applications/c"] },
-    ]);
-    const rowA = doc.querySelector('a[href="/applications/a"]');
-    expect(rowA?.textContent).toContain("1 page, fits");
-    expect(doc.querySelector('a[href="/applications/c"]')?.textContent).toContain("Archived");
-    expect(doc.querySelector('a[href="/applications/b"]')?.textContent).not.toContain("Archived");
+
+  it("links the company to the application and shows the role, page fit and last move", () => {
+    const doc = card({});
+    const link = doc.querySelector(".board-card__link");
+    expect(link?.getAttribute("href")).toBe("/applications/a");
+    expect(link?.textContent).toBe("Company a");
+    expect(link?.getAttribute("aria-describedby")).toBe("help");
+    expect(doc.querySelector(".board-card__role")?.textContent).toBe("Engineer");
+    expect(doc.querySelector(".page-fit")?.textContent).toBe("1 page");
+    expect(doc.querySelector(".board-card__moved")?.textContent).toBe("Moved just now");
+    expect(doc.querySelector(".board-card__agent")).toBeNull();
+    expect(doc.querySelector(".board-card__tags")).toBeNull();
   });
 
-  it("holds a place for page results while they load", () => {
-    const doc = renderHtml(() => <ApplicationList rows={[row("a", "applied")]} />);
-    expect(doc.querySelector(".app-row__page")?.textContent).toBe("…");
+  it("says how far over the page target it runs", () => {
+    const doc = card({}, { ...fits, fits: false, pageTarget: 1, pagesNeeded: 2, linesOver: 3 });
+    const fit = doc.querySelector(".page-fit");
+    expect(fit?.textContent).toBe("3 lines over 1 page");
+    expect(fit?.getAttribute("data-state")).toBe("over");
+  });
+
+  it("names the agent and how many changes wait for review", () => {
+    const doc = card({
+      pending: {
+        count: 5,
+        client: "Claude",
+        latestAt: new Date(Date.now() - 5 * 60_000).toISOString(),
+      },
+    });
+    expect(doc.querySelector(".board-card__agent")?.textContent).toBe(
+      "Claude changed 5 · 5 minutes ago"
+    );
+  });
+
+  it("tags an outcome on closed cards, an open offer, and archived cards", () => {
+    expect(
+      card({ status: "closed", outcome: "rejected" }).querySelector(".board-card__tags")
+        ?.textContent
+    ).toBe("Rejected");
+    expect(
+      card({ status: "interviewing", offer: true }).querySelector(".board-card__tags")?.textContent
+    ).toBe("Offer");
+    expect(card({ archived: true }).querySelector(".board-card__tags")?.textContent).toBe(
+      "Archived"
+    );
   });
 });
 

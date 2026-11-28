@@ -28,7 +28,6 @@ import {
   type ApplicationEdit,
   type ApplicationRecord,
   type ChangeRecord,
-  countPendingChanges,
   createApplication,
   type DataContext,
   DataError,
@@ -36,6 +35,8 @@ import {
   getProfile,
   listApplications,
   listChanges,
+  type PendingSummary,
+  summarizePendingChanges,
   undoChange,
   updateApplication,
 } from "./data";
@@ -57,8 +58,8 @@ export type ApplicationRow = Pick<
   | "statusChangedAt"
   | "updatedAt"
 > & {
-  /** The agent's changes waiting for the user to keep or undo. */
-  pendingChanges: number;
+  /** The agent's changes waiting for the user to keep or undo; null when there are none. */
+  pending: PendingSummary | null;
 };
 
 /** The rows of the home screen, most recently changed first. Archived ones only when asked. */
@@ -71,7 +72,7 @@ export const listApplicationRows = async (
       search: options.search?.slice(0, 200),
       archived: options.showArchived ? undefined : false,
     }),
-    countPendingChanges(ctx),
+    summarizePendingChanges(ctx),
   ]);
   return applications.map(
     ({ id, company, role, status, outcome, offer, archived, statusChangedAt, updatedAt }) => ({
@@ -84,19 +85,23 @@ export const listApplicationRows = async (
       archived,
       statusChangedAt,
       updatedAt,
-      pendingChanges: pending[id] ?? 0,
+      pending: pending[id] ?? null,
     })
   );
 };
 
-/** The home screen: its rows, and whether the user has any application at all, archived too. */
-export const getHomeView = async (
-  ctx: ReadContext,
-  options: { search?: string; showArchived?: boolean } = {}
-) => {
-  const rows = await listApplicationRows(ctx, options);
-  const hasAny = rows.length > 0 || (await listApplications(ctx)).length > 0;
-  return { rows, hasAny };
+/**
+ * The board: every application, archived ones too, most recently moved first. The page filters
+ * by search and archive itself, so typing and the View menu answer at once.
+ */
+export const getBoardView = async (ctx: ReadContext) => {
+  const rows = await listApplicationRows(ctx, { showArchived: true });
+  rows.sort(
+    (a, b) =>
+      Date.parse(b.statusChangedAt) - Date.parse(a.statusChangedAt) ||
+      Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+  );
+  return { rows };
 };
 
 // Fitting measures the resume with pdfmake, ~100 ms or more each, so the list's page results are
@@ -138,6 +143,45 @@ export const listPageResults = async (
       results[application.id] = await cachedPage(profile, application);
   }
   return results;
+};
+
+// The board draws page one of each card's PDF. Printing costs as much as fitting, so the PDFs
+// are kept too, fewer of them, under the same key.
+const PDF_CACHE_SIZE = 100;
+const pdfCache = new Map<string, string>();
+
+/**
+ * The PDF of the user's application `id` as it prints, base64, for the board's thumbnail. Null
+ * for an id the user doesn't have, or a resume with nothing to print.
+ */
+export const getApplicationPdf = async (ctx: ReadContext, id: string): Promise<string | null> => {
+  let application: ApplicationRecord;
+  try {
+    application = await getApplication(ctx, id);
+  } catch (error) {
+    if (error instanceof DataError) return null;
+    throw error;
+  }
+  const profile = await getProfile(ctx);
+  const key = `${application.id}|${application.updatedAt}|${profile.updatedAt ?? ""}`;
+  const hit = pdfCache.get(key);
+  if (hit) {
+    pdfCache.delete(key);
+    pdfCache.set(key, hit);
+    return hit;
+  }
+  let printed: Awaited<ReturnType<typeof printApplication>>;
+  try {
+    printed = await printApplication(profile.resume, application);
+  } catch (error) {
+    if (error instanceof ResumeExportValidationError) return null;
+    throw error;
+  }
+  const pdf = Buffer.from(printed.pdf).toString("base64");
+  pdfCache.set(key, pdf);
+  pageCache.set(key, printed.page);
+  if (pdfCache.size > PDF_CACHE_SIZE) pdfCache.delete(pdfCache.keys().next().value as string);
+  return pdf;
 };
 
 // ── One application ──────────────────────────────────────────────────────────────────────────
@@ -590,16 +634,32 @@ export const createApplicationFromForm = async (
   return { ok: true, value: { id: record.id } };
 };
 
+/** What an edit did: the change it logged (null when it changed nothing), and where it stands. */
+export type EditOutcome = {
+  changeId: string | null;
+  statusChangedAt: string;
+  updatedAt: string;
+};
+
 export const editApplication = async (
   ctx: DataContext,
   id: string,
   input: unknown
-): Promise<WriteResult> => {
+): Promise<WriteResult<EditOutcome>> => {
   const parsed = applicationEditInput.safeParse(input);
   if (!parsed.success) return { ok: false, error: "That change isn't valid." };
   try {
-    await updateApplication(ctx, id, editToChanges(parsed.data));
-    return { ok: true, value: undefined };
+    const before = await getApplication(ctx, id);
+    const record = await updateApplication(ctx, id, editToChanges(parsed.data));
+    let changeId: string | null = null;
+    if (record.updatedAt !== before.updatedAt) {
+      const [latest] = await listChanges(ctx, { kind: "application", id }, { limit: 1 });
+      changeId = latest?.id ?? null;
+    }
+    return {
+      ok: true,
+      value: { changeId, statusChangedAt: record.statusChangedAt, updatedAt: record.updatedAt },
+    };
   } catch (error) {
     return failure(error);
   }

@@ -1,0 +1,495 @@
+/* The Applications board (/): the head, four columns of cards, dragging, the outcome question. */
+
+@layer screens {
+  /* ── Head: title, search, View, New application ─────────────────── */
+
+  .board-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  .board-head .page-title {
+    margin-right: auto;
+  }
+
+  .board-search {
+    position: relative;
+    width: 15rem;
+  }
+
+  .board-search__input {
+    padding-inline: 2.125rem;
+  }
+
+  /* The browser's own clear button would sit on the shortcut hint. */
+  .board-search__input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .board-search__icon {
+    position: absolute;
+    top: 50%;
+    left: 0.6875rem;
+    width: 1rem;
+    height: 1rem;
+    translate: 0 -50%;
+    color: var(--color-fg-subtle);
+    pointer-events: none;
+  }
+
+  .board-search__key {
+    font-family: var(--font-mono);
+    position: absolute;
+    top: 50%;
+    right: 0.5625rem;
+    display: grid;
+    place-items: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    translate: 0 -50%;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-sm);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-2xs);
+    line-height: 1;
+    pointer-events: none;
+    transition: opacity var(--duration-hover);
+  }
+
+  .board-search__input:focus ~ .board-search__key,
+  .board-search__input:not(:placeholder-shown) ~ .board-search__key {
+    opacity: 0;
+  }
+
+  .board-none {
+    margin-bottom: var(--space-4);
+    color: var(--color-fg-muted);
+  }
+
+  /* ── Columns ────────────────────────────────────────────────────── */
+
+  .board {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(14.5rem, 1fr);
+    gap: var(--space-3);
+    margin-inline: calc(var(--space-6) * -1);
+    padding: 0 var(--space-6) var(--space-3);
+    scroll-padding-inline: var(--space-6);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .board-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: calc(100dvh - 13rem);
+    padding: 0.375rem;
+    border-radius: var(--radius-2xl);
+    background: var(--color-canvas-deep);
+    transition:
+      background-color var(--duration-hover) var(--ease-out),
+      box-shadow var(--duration-hover) var(--ease-out);
+  }
+
+  .board-column--target {
+    background: color-mix(in srgb, var(--color-canvas-deep) 88%, var(--color-primary));
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .board-column__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.25rem;
+    padding-inline: 0.625rem 0.5rem;
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--lh);
+    font-weight: 560;
+  }
+
+  .board-column__count {
+    color: var(--color-fg-subtle);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .board-column__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0.125rem 0 var(--space-2);
+    list-style: none;
+  }
+
+  .board-column__drop {
+    display: grid;
+    place-items: center;
+    height: 4.5rem;
+    margin: 0.25rem 0.125rem;
+    border: 1.5px dashed var(--color-line-strong);
+    border-radius: var(--radius-xl);
+    color: var(--color-fg-subtle);
+    font-size: var(--text-xs);
+  }
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+
+  .board-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    padding: 0.625rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: 0 1px 2px var(--color-shadow);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition:
+      box-shadow var(--duration-hover) var(--ease-out),
+      border-color var(--duration-hover) var(--ease-out),
+      opacity var(--duration-hover) var(--ease-out),
+      var(--press-transition);
+  }
+
+  .board-card:hover {
+    border-color: var(--color-line-strong);
+    box-shadow:
+      0 1px 2px var(--color-shadow),
+      0 8px 18px -10px var(--color-shadow-deep);
+  }
+
+  .board-card:active {
+    scale: var(--motion-press-scale);
+  }
+
+  .board-card:has(.board-card__link:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .board-card--archived {
+    opacity: 0.62;
+  }
+
+  .board-card--lifted {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-lift);
+    rotate: -1deg;
+  }
+
+  /* The gap a dragged card leaves where it will land. */
+  .board-card--slot {
+    border: 1.5px dashed color-mix(in srgb, var(--color-primary) 45%, var(--color-line-strong));
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .board-card--slot > * {
+    visibility: hidden;
+  }
+
+  /* The copy that follows the pointer; the board script places it. */
+  .board-card--ghost {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    margin: 0;
+    border-color: var(--color-line-strong);
+    box-shadow: var(--shadow-lift);
+    list-style: none;
+    pointer-events: none;
+    transition: none;
+    will-change: transform;
+  }
+
+  .board-dragging,
+  .board-dragging * {
+    cursor: grabbing;
+  }
+
+  .board-thumb {
+    position: relative;
+    display: block;
+    width: 3rem;
+    aspect-ratio: 8.5 / 11;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow:
+      0 0 0 1px var(--color-line),
+      0 2px 6px -2px var(--color-shadow-deep);
+  }
+
+  .board-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .board-card__body {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .board-card__company {
+    padding-right: 1.5rem;
+    overflow: hidden;
+    font-size: var(--text-sm);
+    line-height: 1.25rem;
+    font-weight: 640;
+    letter-spacing: -0.015em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .board-card__link {
+    color: inherit;
+    text-decoration: none;
+    -webkit-user-drag: none;
+  }
+
+  .board-card__link:focus-visible {
+    outline: none;
+  }
+
+  /* The whole card takes the link's click. */
+  .board-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .board-card__role {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+    line-height: 1.125rem;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .board-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: 0.25rem;
+  }
+
+  .board-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.125rem var(--space-2);
+    margin-top: 0.375rem;
+  }
+
+  .board-card__moved {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-2xs);
+    line-height: var(--text-2xs--lh);
+    white-space: nowrap;
+  }
+
+  /* The agent's changes waiting for review: cobalt, because they want you. */
+  .board-card__agent {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0.125rem -0.125rem -0.125rem;
+    padding: 0.3125rem 0.5rem;
+    border-radius: var(--radius-md);
+    background: var(--color-selected);
+    color: var(--color-primary);
+    font-size: var(--text-2xs);
+    line-height: var(--text-2xs--lh);
+    font-weight: 560;
+    white-space: nowrap;
+  }
+
+  .board-card__agent::before {
+    content: "";
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+  }
+
+  .board-card__agent time {
+    margin-left: auto;
+    overflow: hidden;
+    font-weight: 500;
+    opacity: 0.8;
+    text-overflow: ellipsis;
+  }
+
+  /* Above the link's cover, so it opens its own menu. */
+  .board-card__more {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 1.625rem;
+    height: 1.625rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-fg-subtle);
+    opacity: 0;
+    cursor: pointer;
+    transition:
+      opacity var(--duration-hover),
+      background-color var(--duration-hover);
+  }
+
+  .board-card__more svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .board-card:hover .board-card__more,
+  .board-card:focus-within .board-card__more,
+  .board-card__more[aria-expanded="true"] {
+    opacity: 1;
+  }
+
+  .board-card__more:hover {
+    background: var(--color-tint-hover);
+    color: var(--color-fg);
+  }
+
+  @media (hover: none) {
+    .board-card__more {
+      opacity: 1;
+    }
+  }
+
+  /* ── The page result ───────────────────────────────────────────── */
+
+  .page-fit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    color: var(--color-fg-muted);
+    font-size: var(--text-2xs);
+    line-height: var(--text-2xs--lh);
+    font-weight: 540;
+    white-space: nowrap;
+  }
+
+  .page-fit--none {
+    color: var(--color-fg-subtle);
+  }
+
+  .page-fit__glyph {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  .page-fit__glyph i {
+    position: relative;
+    width: 0.625rem;
+    height: 0.875rem;
+    overflow: hidden;
+    border: 1.25px solid currentColor;
+    border-radius: 2px;
+    color: var(--color-fg-subtle);
+  }
+
+  .page-fit__glyph i::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--fill, 100%);
+    background: currentColor;
+    opacity: 0.35;
+  }
+
+  .page-fit[data-state="fits"] .page-fit__glyph i {
+    color: var(--color-fg-muted);
+  }
+
+  .page-fit[data-state="over"] {
+    color: var(--color-over);
+  }
+
+  .page-fit[data-state="over"] .page-fit__glyph i:last-child {
+    border-style: dashed;
+    color: var(--color-over);
+  }
+
+  /* ── How did it end? ────────────────────────────────────────────── */
+
+  .board-outcome__lede {
+    margin-bottom: var(--space-3);
+    color: var(--color-fg-muted);
+  }
+
+  .board-outcome {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  /* ── Phones: one column and a bit, swiped with snap ─────────────── */
+
+  @media (max-width: 47.99rem) {
+    .board-head .page-title {
+      width: 100%;
+    }
+
+    .board-search {
+      flex: 1;
+      width: auto;
+    }
+
+    .board-search__key,
+    .board-head__label,
+    .new-application__label {
+      display: none;
+    }
+
+    .board-view,
+    .new-application {
+      width: var(--button-height);
+      padding: 0;
+      justify-content: center;
+    }
+
+    .board {
+      grid-auto-columns: 84%;
+      margin-inline: calc(var(--space-4) * -1);
+      padding-inline: var(--space-4);
+      scroll-padding-inline: var(--space-4);
+      scroll-snap-type: x mandatory;
+    }
+
+    .board-column {
+      min-height: 60dvh;
+      scroll-snap-align: start;
+    }
+  }
+}
