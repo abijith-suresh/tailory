@@ -37,6 +37,8 @@ export function NewApplication() {
     <>
       <Button
         variant="primary"
+        class="new-application"
+        aria-label="New application"
         aria-haspopup="dialog"
         onClick={() => {
           setError("");
@@ -44,7 +46,7 @@ export function NewApplication() {
         }}
       >
         <Icon name="plus" />
-        New application
+        <span class="new-application__label">New application</span>
       </Button>
       <Dialog
         open={open()}

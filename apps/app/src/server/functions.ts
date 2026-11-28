@@ -17,8 +17,9 @@ import { createDownloadLink } from "./downloads";
 import {
   createApplicationFromForm,
   editApplication,
+  getApplicationPdf,
   getApplicationView,
-  getHomeView,
+  getBoardView,
   listPageResults,
   undoApplicationChange,
 } from "./pages";
@@ -58,12 +59,14 @@ const userData = async (): Promise<DataContext> => {
   return { db, userId: viewer.id, actor: { kind: "user" } };
 };
 
-/** The home screen's rows, and whether there are any applications at all. */
-export async function getApplicationRows(search: string, showArchived: boolean) {
-  return getHomeView(await userData(), {
-    search: String(search ?? ""),
-    showArchived: showArchived === true,
-  });
+/** The board's cards: every application, archived ones too, most recently moved first. */
+export async function getBoard() {
+  return getBoardView(await userData());
+}
+
+/** An application's PDF as it prints, base64, for its card's thumbnail; null if nothing prints. */
+export async function getCardPdf(id: string) {
+  return getApplicationPdf(await userData(), String(id));
 }
 
 /** Page results for the rows on the home screen, by application id. */

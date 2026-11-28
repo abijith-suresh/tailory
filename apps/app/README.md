@@ -81,11 +81,23 @@ everything Tailory keeps for it.
 
 ## Screens
 
-**Applications** (`/`) lists your applications grouped by status: interviewing, applied,
-drafting, then closed. Each row shows the company, role, status, page result and
-when it last changed. Search matches the company or role; archived applications stay hidden
-until you tick "Show archived". "New application" asks for the company, role, and optionally the
-posting link and job description, for when you aren't using an agent.
+**Applications** (`/`) is a board with four columns: Drafting, Applied, Interviewing and Closed.
+Each card shows page one of the resume as it prints, the company and role, the page result ("1
+page", "3 lines over 1 page") and when it last moved. A closed card shows how it ended, and an
+open offer shows an Offer tag. When the agent has changes waiting for review, a cobalt strip
+names it and says how many and when ("Claude changed 5 · 5 minutes ago").
+
+Drag a card to another column to change its status; on a phone, hold it first, so a swipe still
+scrolls the columns. With the keyboard, Space on a card picks it up, the left and right arrows
+carry it, Space drops it and Escape puts it back. The card's menu moves it too, and archives or
+unarchives it. Dropping on Closed asks how it ended. A move shows at once and saves in the
+background, with Undo in a toast; if the save fails, the card goes back and the toast says why.
+Cards in a column are in the order they last moved.
+
+Search (`/` to focus it) matches the company or role as you type. View › Show archived brings
+archived cards back. "New application" asks for the company, role, and optionally the posting
+link and job description, for when you aren't using an agent, then opens the new application.
+Thumbnails are drawn with pdf.js once a card comes into view, a few at a time.
 
 **Application** (`/applications/<id>`) shows the resume as it will print, its page result ("1
 page, fits", "about 3 lines over 1 page"), the job details and notes, the status, and Archive.
@@ -99,7 +111,7 @@ Download PDF and Download JSON use the same signed links as `export_resume`.
 
 The preview is the PDF the server prints, drawn page by page with pdf.js in the browser. Phones
 don't show PDFs in a frame, so canvases are the one way that looks the same everywhere. pdf.js
-loads only on this screen.
+loads only on this screen and the board.
 
 **Profile** (`/profile`) edits the whole career history: the basics and every section of the
 resume model, with entries and bullets to add, remove and reorder. Edits save on their own 0.8 s
@@ -157,18 +169,21 @@ transaction. The model lives in `packages/core`.
 
 The web app calls these server functions:
 
-| Function                             | Does                                                                        |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| `newApplication(input)`              | Creates an application: company, role, posting URL, job description         |
-| `changeApplication(id, edit)`        | One edit, including `{ type: "status", status, outcome, offer }`            |
-| `getPendingChanges(applicationId)`   | The agent's pending changes, with reworded lines and left-out items to mark |
-| `keepAgentChange(changeId)`          | Keeps one change                                                            |
-| `undoAgentChange(changeId)`          | Undoes one change and marks it undone                                       |
-| `keepAllAgentChanges(applicationId)` | Keeps every pending change to an application                                |
-| `undoAllAgentChanges(applicationId)` | Undoes every pending change to an application, all or none                  |
-| `exportAllData()`                    | The profile and every application as one JSON file (`fileName`, `data`)     |
-| `eraseAllData()`                     | Local mode: erases the local user's rows. Server mode: deletes the account  |
-| `getAgentConnection()`               | The agent's last MCP call, for Settings › Agents to poll                    |
+| Function                             | Does                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `getBoard()`                         | Every application, archived too, with its pending agent changes in brief                                |
+| `getPageResults(ids)`                | The page result of each application                                                                     |
+| `getCardPdf(id)`                     | An application's PDF, for its card's thumbnail                                                          |
+| `newApplication(input)`              | Creates an application: company, role, posting URL, job description                                     |
+| `changeApplication(id, edit)`        | One edit, including `{ type: "status", status, outcome, offer }`; says which change it logged, for Undo |
+| `getPendingChanges(applicationId)`   | The agent's pending changes, with reworded lines and left-out items to mark                             |
+| `keepAgentChange(changeId)`          | Keeps one change                                                                                        |
+| `undoAgentChange(changeId)`          | Undoes one change and marks it undone                                                                   |
+| `keepAllAgentChanges(applicationId)` | Keeps every pending change to an application                                                            |
+| `undoAllAgentChanges(applicationId)` | Undoes every pending change to an application, all or none                                              |
+| `exportAllData()`                    | The profile and every application as one JSON file (`fileName`, `data`)                                 |
+| `eraseAllData()`                     | Local mode: erases the local user's rows. Server mode: deletes the account                              |
+| `getAgentConnection()`               | The agent's last MCP call, for Settings › Agents to poll                                                |
 
 ## MCP
 
@@ -300,7 +315,9 @@ the rest become 0) and keep short fades, so nothing needs its own media query.
 - **Toasts.** Call `toast(message, { action: { label: "Undo", run } })` from `src/lib/toast.ts`.
   The shell's `Toaster` plays the entrance and exit and clears toasts when the page changes.
 - **Lists that re-sort.** Give each child a stable `data-flip-key`, then make the change through
-  `flip` from `src/lib/motion.ts`. Rows slide to their new places and new rows rise in. `land(row)`
+  `flip` from `src/lib/motion.ts`. Rows slide to their new places and new rows rise in. For items
+  that move between lists, such as board cards between columns, pass the element holding the
+  lists and `{ deep: true }`. `land(row)`
   marks the row someone just added:
 
   ```ts

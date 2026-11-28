@@ -81,8 +81,8 @@ export function play(
 }
 
 /** Children of a FLIP container that take part, by their `data-flip-key`. */
-const flipChildren = (container: Element) =>
-  [...container.querySelectorAll<HTMLElement>(":scope > [data-flip-key]")].map(
+const flipChildren = (container: Element, selector: string) =>
+  [...container.querySelectorAll<HTMLElement>(selector)].map(
     (element) => [element.dataset.flipKey as string, element] as const
   );
 
@@ -94,12 +94,21 @@ const flipChildren = (container: Element) =>
  *   await flip(listElement, () => setEntries(sorted));
  *
  * Returns the keys of the children that are new, so the caller can mark one as landed.
+ *
+ * For items spread over several lists, such as cards moving between board columns, pass the
+ * element holding the lists and `{ deep: true }`: every `[data-flip-key]` inside takes part, so
+ * an item keeps its key across lists and slides from one to the other.
  */
-export async function flip(container: HTMLElement, change: () => unknown): Promise<string[]> {
+export async function flip(
+  container: HTMLElement,
+  change: () => unknown,
+  options: { deep?: boolean } = {}
+): Promise<string[]> {
+  const selector = options.deep ? "[data-flip-key]" : ":scope > [data-flip-key]";
   const before = new Map<string, DOMRect>();
   // Measured mid-slide if one is still running, so a quick second change starts from where
   // things are on screen, not where they were headed.
-  for (const [key, element] of flipChildren(container)) {
+  for (const [key, element] of flipChildren(container, selector)) {
     before.set(key, element.getBoundingClientRect());
   }
 
@@ -108,7 +117,7 @@ export async function flip(container: HTMLElement, change: () => unknown): Promi
 
   const added: string[] = [];
   const moves: Promise<void>[] = [];
-  for (const [key, element] of flipChildren(container)) {
+  for (const [key, element] of flipChildren(container, selector)) {
     const first = before.get(key);
     if (!first) {
       added.push(key);

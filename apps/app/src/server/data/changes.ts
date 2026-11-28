@@ -279,3 +279,41 @@ export const countPendingChanges = async (
   for (const { targetId: id } of rows) counts[id] = (counts[id] ?? 0) + 1;
   return counts;
 };
+
+/** An application's pending agent changes, in brief: how many, by whom, and the newest's time. */
+export type PendingSummary = {
+  count: number;
+  /** The agent's client name on the newest pending change, when it gave one. */
+  client: string | null;
+  /** When the newest pending change was made. */
+  latestAt: string;
+};
+
+/** Each application's pending agent changes in brief, by id. Ids with none are left out. */
+export const summarizePendingChanges = async (
+  ctx: Pick<DataContext, "db" | "userId">
+): Promise<Record<string, PendingSummary>> => {
+  const rows = await ctx.db
+    .select({
+      targetId: schema.change.targetId,
+      client: schema.change.actorClient,
+      createdAt: schema.change.createdAt,
+    })
+    .from(schema.change)
+    .where(
+      and(
+        eq(schema.change.userId, ctx.userId),
+        eq(schema.change.targetKind, "application"),
+        eq(schema.change.review, "pending")
+      )
+    )
+    .orderBy(desc(schema.change.seq));
+  const summaries: Record<string, PendingSummary> = {};
+  for (const { targetId: id, client, createdAt } of rows) {
+    const summary = summaries[id];
+    if (summary) summary.count += 1;
+    // Newest first, so the first row seen for an application names who and when.
+    else summaries[id] = { count: 1, client, latestAt: createdAt.toISOString() };
+  }
+  return summaries;
+};
