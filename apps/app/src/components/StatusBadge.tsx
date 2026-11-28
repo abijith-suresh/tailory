@@ -1,22 +1,15 @@
-/** Where an application stands. The same six names the MCP tools and the database use. */
-export const STATUSES = [
-  "drafting",
-  "applied",
-  "interviewing",
-  "offer",
-  "rejected",
-  "withdrawn",
-] as const;
+import { APPLICATION_STATUSES, type ApplicationStatus } from "@tailory/core";
 
-export type Status = (typeof STATUSES)[number];
+/** Where an application stands. The same four names the MCP tools and the database use. */
+export const STATUSES = APPLICATION_STATUSES;
+
+export type Status = ApplicationStatus;
 
 export const STATUS_LABELS: Record<Status, string> = {
   drafting: "Drafting",
   applied: "Applied",
   interviewing: "Interviewing",
-  offer: "Offer",
-  rejected: "Rejected",
-  withdrawn: "Withdrawn",
+  closed: "Closed",
 };
 
 /** The status word in a tinted pill. The word is always shown, so colour is never the only cue. */

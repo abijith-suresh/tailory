@@ -121,7 +121,7 @@ describe.each(databases)("server mode on $name", ({ url }) => {
       for (const [name, args] of [
         ["get_application", { id: applicationId }],
         ["tailor_application", { id: applicationId, pageTarget: 2 }],
-        ["update_application", { id: applicationId, status: "withdrawn" }],
+        ["update_application", { id: applicationId, status: "closed", outcome: "withdrawn" }],
         ["export_resume", { applicationId }],
       ] as const) {
         const answer = await callTool(other.client, name, args);

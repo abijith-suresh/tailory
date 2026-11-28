@@ -106,26 +106,28 @@ describe("the Applications screens' server side", () => {
         company: "Stripe",
         role: "Backend engineer",
         status: "drafting",
+        outcome: null,
+        offer: false,
         archived: false,
+        statusChangedAt: expect.any(String),
         updatedAt: expect.any(String),
+        pendingChanges: 0,
       });
     });
 
     it("groups by status, soonest-needed first, and drops empty groups", () => {
       const rows = [
         { id: "a", status: "drafting" as const },
-        { id: "b", status: "rejected" as const },
+        { id: "b", status: "closed" as const },
         { id: "c", status: "interviewing" as const },
         { id: "d", status: "drafting" as const },
-        { id: "e", status: "offer" as const },
       ];
       expect(
         groupByStatus(rows).map((group) => [group.status, group.items.map((row) => row.id)])
       ).toEqual([
-        ["offer", ["e"]],
         ["interviewing", ["c"]],
         ["drafting", ["a", "d"]],
-        ["rejected", ["b"]],
+        ["closed", ["b"]],
       ]);
     });
 
@@ -133,7 +135,7 @@ describe("the Applications screens' server side", () => {
       const id = await make("Stripe", "Engineer");
       const results = await listPageResults(ada, [id, "someone-elses"]);
       expect(Object.keys(results)).toEqual([id]);
-      expect(results[id]).toMatchObject({ pageCount: 1, fits: true, message: "1 page" });
+      expect(results[id]).toMatchObject({ pagesNeeded: 1, fits: true, message: "1 page" });
 
       await updateApplication(ada, id, { pageTarget: 1 });
       expect((await listPageResults(ada, [id]))[id]?.message).toBe("1 page, fits");
@@ -303,6 +305,33 @@ describe("the Applications screens' server side", () => {
         archived: true,
         appliedAt: expect.any(String),
       });
+    });
+
+    it("closes with an outcome, flags an offer, and refuses to close without one", async () => {
+      const id = await make("Stripe", "Engineer");
+      await editApplication(ada, id, { type: "status", status: "interviewing" });
+      await editApplication(ada, id, { type: "status", offer: true });
+      expect(await getApplication(ada, id)).toMatchObject({ status: "interviewing", offer: true });
+
+      const refused = await editApplication(ada, id, { type: "status", status: "closed" });
+      expect(refused).toEqual({ ok: false, error: expect.stringContaining("outcome") });
+
+      await editApplication(ada, id, { type: "status", status: "closed", outcome: "accepted" });
+      expect(await getApplication(ada, id)).toMatchObject({
+        status: "closed",
+        outcome: "accepted",
+        offer: false,
+        closedAt: expect.any(String),
+      });
+      expect((await listChanges(ada, { kind: "application", id }))[0]?.summary).toBe(
+        "Moved Stripe, Engineer to closed (accepted)"
+      );
+    });
+
+    it("leaves a contact detail out by its key", async () => {
+      const id = await make("Stripe", "Engineer");
+      await editApplication(ada, id, { type: "include", itemId: "contact:email", included: false });
+      expect((await getApplication(ada, id)).excluded).toEqual(["contact:email"]);
     });
   });
 

@@ -1,7 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import {
+  APPLICATION_OUTCOMES,
   APPLICATION_STATUSES,
   type Application,
+  CONTACT_KEYS,
   ENTRY_SECTIONS,
   type ItemKind,
   indexProfileItems,
@@ -12,6 +14,7 @@ import {
   type Rewording,
   readProfileText,
   resolveApplication,
+  SUMMARY_KEY,
   sameText,
   TEMPLATE_IDS,
   validateResumeForExport,
@@ -28,6 +31,8 @@ import {
   getApplication,
   getProfile,
   listApplications,
+  listPendingChanges,
+  recordToolCall,
   updateApplication,
   updateProfile,
 } from "./data";
@@ -37,7 +42,9 @@ import { fitApplicationResult, fitProfileResult } from "./render";
 import { getDatabase } from "./runtime";
 
 // The resume tools an agent gets over MCP (#186). Every write acts as the agent, is logged with
-// its client name, and answers with the page result and the link to open in the web app.
+// its client name, waits in the change log for the user to keep or undo it, and answers with the
+// page result and the link to open in the web app. Every call is recorded as the user's agent's
+// last, for the connection check in Settings › Agents.
 
 export type ToolContext = {
   userId: string;
@@ -79,6 +86,7 @@ const label = (application: Pick<Application, "company" | "role">) =>
 
 const ENTRY_SECTION = z.enum(ENTRY_SECTIONS);
 const STATUS = z.enum(APPLICATION_STATUSES);
+const OUTCOME = z.enum(APPLICATION_OUTCOMES);
 const TEMPLATE = z.enum(TEMPLATE_IDS);
 const PAGE_TARGET = z.number().int().min(1).nullable();
 const DATE = z
@@ -90,11 +98,34 @@ const FIELDS = z.record(z.string(), z.unknown());
 const describeItemFields = (kind: ItemKind) =>
   (REWORDABLE_FIELDS[kind] as readonly string[]).join(", ");
 
-export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
+export const registerResumeTools = (mcp: McpServer, tool: ToolContext) => {
   const data = async (): Promise<DataContext> => {
     const { db } = await getDatabase();
     const actor: Actor = { kind: "agent", client: tool.clientName() };
     return { db, userId: tool.userId, actor };
+  };
+
+  /** Notes the call as the agent's latest. A failure to note it never fails the tool. */
+  const noteCall = async (name: string) => {
+    try {
+      await recordToolCall(await data(), { client: tool.clientName(), tool: name });
+    } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: the call goes ahead, but the reason shouldn't vanish
+      console.error(`[mcp] could not record the call to ${name}: ${(error as Error).message}`);
+    }
+  };
+
+  // Every tool goes through here, so every call is recorded before it runs.
+  const server = {
+    registerTool: ((name: string, config: unknown, handler: (...args: unknown[]) => unknown) =>
+      mcp.registerTool(
+        name,
+        config as never,
+        (async (...args: unknown[]) => {
+          await noteCall(name);
+          return handler(...args);
+        }) as never
+      )) as McpServer["registerTool"],
   };
   const applicationUrl = (id: string) => `${tool.origin}/applications/${id}`;
   const profileUrl = `${tool.origin}/profile`;
@@ -104,7 +135,10 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
     company: application.company,
     role: application.role,
     status: application.status,
+    outcome: application.outcome,
+    offer: application.offer,
     archived: application.archived,
+    statusChangedAt: application.statusChangedAt,
     postingUrl: application.postingUrl,
     createdAt: application.createdAt,
     appliedAt: application.appliedAt,
@@ -151,10 +185,11 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
       description: [
         "Edits the profile. All edits apply together, in this order, or none do:",
         "replace: a whole JSON Resume (bullets as strings), e.g. on first import;",
-        "basics: fields merged into basics (name, label, email, phone, url, summary, location, profiles);",
+        "basics: fields merged into basics (name, label, email, phone, url, summary, location, profiles); a profile link's network is read from its URL;",
         "add: new entries { section, entry } or new bullets { entryId, bullet };",
         "change: { id, fields } merges fields into an entry, or { id, fields: { text } } rewords a bullet;",
-        "remove: entry or bullet ids.",
+        "remove: entry or bullet ids;",
+        "sectionOrder: the profile's section order, first to last, which new applications start from.",
         "Returns the ids of what was added. Applications follow the profile: removed items leave them too.",
       ].join(" "),
       inputSchema: z.object({
@@ -170,6 +205,7 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
           .optional(),
         change: z.array(z.object({ id: z.string(), fields: FIELDS })).optional(),
         remove: z.array(z.string()).optional(),
+        sectionOrder: z.array(z.enum(RESUME_SECTION_KEYS)).optional(),
       }),
       annotations: {
         readOnlyHint: false,
@@ -307,6 +343,7 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
               profileText: readProfileText(items, rewording.itemId, rewording.field),
             })),
             page: fitted.page,
+            pendingChanges: (await listPendingChanges(ctx, id)).length,
             url,
           }
         );
@@ -317,11 +354,13 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
     "tailor_application",
     {
       description: [
-        "Tailors an application's resume. exclude/include take profile entry or bullet ids.",
+        "Tailors an application's resume. exclude/include take profile entry or bullet ids,",
+        `contact keys (${Object.values(CONTACT_KEYS).join(", ")}, contact:profile:<link id>) and ${SUMMARY_KEY}.`,
         "reword sets this application's wording for one field of an item (a bullet's field is text; 'basics' is the item for summary and label); rewording to the profile's own text drops the rewording.",
         "sectionOrder lists sections first to last; the rest follow.",
-        "pageTarget is pages to fit on (null for none); autoFit lets Tailory tighten spacing to meet it.",
-        "Answers with the page result: fix overflow by leaving out or shortening lines.",
+        "pageTarget is pages to fit on (null for none); autoFit lets Tailory tighten spacing to meet it, at the smallest density that fits.",
+        "Answers with the page result (pagesNeeded, linesOver, lastPageFill, density): fix overflow by leaving out or shortening lines.",
+        "The user reviews each change: it shows as pending until they keep or undo it.",
       ].join(" "),
       inputSchema: z.object({
         id: z.string(),
@@ -356,11 +395,17 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
   server.registerTool(
     "update_application",
     {
-      description:
-        "Changes an application's status, notes, dates, job details, or archives it. Moving status keeps appliedAt and closedAt in step unless you give them.",
+      description: [
+        "Changes an application's status, notes, dates, job details, or archives it.",
+        "Statuses: drafting, applied, interviewing, closed. Closing needs an outcome (accepted, declined, rejected, withdrawn).",
+        "An offer waiting on an answer stays interviewing with offer: true; accepting or declining closes it.",
+        "Moving status keeps appliedAt and closedAt in step unless you give them.",
+      ].join(" "),
       inputSchema: z.object({
         id: z.string(),
         status: STATUS.optional(),
+        outcome: OUTCOME.optional().describe("How it ended; needed with status closed"),
+        offer: z.boolean().optional().describe("An offer waiting on the user's answer"),
         notes: z.string().optional(),
         appliedAt: DATE.optional(),
         closedAt: DATE.optional(),
@@ -380,7 +425,13 @@ export const registerResumeTools = (server: McpServer, tool: ToolContext) => {
     ({ id, ...changes }) =>
       run(async () => {
         const record = await updateApplication(await data(), id, changes);
-        const state = record.archived ? `${record.status}, archived` : record.status;
+        const where =
+          record.status === "closed"
+            ? `closed (${record.outcome})`
+            : record.offer
+              ? `${record.status}, with an offer`
+              : record.status;
+        const state = record.archived ? `${where}, archived` : where;
         return afterWrite(`${label(record)} is ${state}`, record);
       })
   );
@@ -447,7 +498,7 @@ export const tailoringChanges = (
     );
     if (unknown.length) {
       throw new ToolError(
-        `Not profile entry or bullet ids: ${unknown.join(", ")}. Call get_profile for the ids.`
+        `Not profile entry, bullet or contact keys: ${unknown.join(", ")}. Call get_profile for the ids.`
       );
     }
     const both = (input.exclude ?? []).filter((id) => input.include?.includes(id));

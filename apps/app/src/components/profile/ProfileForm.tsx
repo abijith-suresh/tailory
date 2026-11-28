@@ -518,7 +518,7 @@ function Basics(props: FormProps) {
           onClick={() =>
             props.edit((draft) => {
               draft.basics.profiles ??= [];
-              draft.basics.profiles.push({ network: "", username: "", url: "" });
+              draft.basics.profiles.push({ id: createId(), network: "", username: "", url: "" });
             })
           }
         >

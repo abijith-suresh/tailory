@@ -1,5 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { useParams } from "@solidjs/router";
+import { APPLICATION_OUTCOMES } from "@tailory/core";
 import { createMemo, createSignal, isPending, Loading, refresh, Show } from "solid-js";
 
 import { Button, LinkButton } from "../components/Button";
@@ -20,7 +21,20 @@ import {
 } from "../server/functions";
 import type { ApplicationView, ChangeView } from "../server/pages";
 
-const STATUS_OPTIONS = STATUSES.map((value) => ({ value, label: STATUS_LABELS[value] }));
+// Closing says how it ended, so each outcome is its own choice: "closed:rejected".
+const STATUS_OPTIONS = [
+  ...STATUSES.filter((value) => value !== "closed").map((value) => ({
+    value,
+    label: STATUS_LABELS[value],
+  })),
+  ...APPLICATION_OUTCOMES.map((outcome) => ({
+    value: `closed:${outcome}`,
+    label: `Closed, ${outcome}`,
+  })),
+];
+
+const statusValue = (app: { status: string; outcome: string | null }) =>
+  app.status === "closed" ? `closed:${app.outcome}` : app.status;
 
 const PAGE_TARGET_OPTIONS = [
   { value: "", label: "No target" },
@@ -173,13 +187,15 @@ function ApplicationScreen(props: {
             <Select
               label="Status"
               options={STATUS_OPTIONS}
-              value={app().status}
-              onChange={(event) =>
+              value={statusValue(app())}
+              onChange={(event) => {
+                const [status, outcome] = event.currentTarget.value.split(":");
                 void save({
                   type: "status",
-                  status: event.currentTarget.value as (typeof STATUSES)[number],
-                })
-              }
+                  status: status as (typeof STATUSES)[number],
+                  outcome: (outcome ?? null) as (typeof APPLICATION_OUTCOMES)[number] | null,
+                });
+              }}
             />
             <div class="form-row">
               <Field label="Company" value={app().company} onChange={saveField("company")} />
