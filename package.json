@@ -41,5 +41,14 @@
     "@commitlint/config-conventional": "^21.2.4",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.2"
+  },
+  "overrides": {
+    "drizzle-kit": {
+      "@esbuild-kit/esm-loader": {
+        "@esbuild-kit/core-utils": {
+          "esbuild": "^0.25.4"
+        }
+      }
+    }
   }
 }
