@@ -48,3 +48,38 @@ export function Field(props: FieldProps) {
     </div>
   );
 }
+
+type TextAreaProps = JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  label: string;
+  hint?: string;
+  optional?: boolean;
+};
+
+/** A labelled multi-line input that grows with its text, where the browser supports it. */
+export function TextArea(props: TextAreaProps) {
+  const rest = omit(props, "label", "hint", "optional", "id", "class");
+  const id = props.id ?? createUniqueId();
+  const hintId = `${id}-hint`;
+
+  return (
+    <div class={props.class ? `field ${props.class}` : "field"}>
+      <label class="field__label" for={id}>
+        {props.label}
+        <Show when={props.optional}>
+          <span class="field__optional"> (optional)</span>
+        </Show>
+      </label>
+      <textarea
+        {...rest}
+        id={id}
+        class="input textarea"
+        aria-describedby={props.hint ? hintId : undefined}
+      />
+      <Show when={props.hint}>
+        <p class="field__hint" id={hintId}>
+          {props.hint}
+        </p>
+      </Show>
+    </div>
+  );
+}
