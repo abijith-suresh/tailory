@@ -6,6 +6,7 @@ import type { JSX } from "@solidjs/web";
 import { createMemo, Loading, lazy } from "solid-js";
 
 import { AppHeader } from "./components/AppHeader";
+import Application from "./routes/Application";
 import Connect from "./routes/Connect";
 import Consent from "./routes/Consent";
 import Home from "./routes/Home";
@@ -18,6 +19,7 @@ import { getViewer } from "./server/functions";
 const Router = createRouter({
   routes: [
     { path: "/", component: Home },
+    { path: "/applications/:id", component: Application },
     { path: "/profile", component: Profile },
     { path: "/connect", component: Connect },
     { path: "/settings", component: Settings },

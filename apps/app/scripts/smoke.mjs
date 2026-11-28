@@ -237,6 +237,21 @@ try {
   check(bytes.subarray(0, 5).toString() === "%PDF-", "the download isn't a PDF");
   await client.close();
 
+  // The built app shows the new application: in the list on the home screen, and on its own page
+  // with the page result and the resume to preview.
+  const list = await get(first.url);
+  check(list.status === 200, `GET / answered ${list.status} after creating an application`);
+  check(
+    list.body.includes(`href="/applications/${created.application.id}"`),
+    "the applications list doesn't link to the new application"
+  );
+  check(list.body.includes("Drafting"), "the applications list has no Drafting group");
+  const page = await get(`${first.url}/applications/${created.application.id}`);
+  check(page.status === 200, `GET the application answered ${page.status}`);
+  check(page.body.includes("1 page"), "the application page shows no page result");
+  check(page.body.includes("Shipped the thing"), "the application page doesn't list the bullet");
+  check(page.body.includes("Recent changes"), "the application page has no change log");
+
   // A second process can't open the same data folder.
   const second = spawn(process.execPath, [bin, ...args], { stdio: ["ignore", "pipe", "pipe"] });
   let secondError = "";

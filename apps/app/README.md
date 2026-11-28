@@ -1,9 +1,9 @@
 # tailory (server app)
 
 The Tailory server app: a Solid 2 start-mode app with its own database. It runs in two modes,
-handles sign-in, and serves an MCP endpoint with the resume tools agents use. The Profile and
-Connect an agent screens work; the Applications screen is still empty. Dev builds only; no stable
-release yet.
+handles sign-in, and serves an MCP endpoint with the resume tools agents use. All four screens
+work: Applications, Application, Profile and Connect an agent. Dev builds only; no stable release
+yet.
 
 ## Try the dev build
 
@@ -80,6 +80,26 @@ Signed-out page requests go to `/sign-in`. Settings has a button that deletes yo
 everything Tailory keeps for it.
 
 ## Screens
+
+**Applications** (`/`) lists your applications grouped by status: offer, interviewing, applied,
+drafting, then rejected and withdrawn. Each row shows the company, role, status, page result and
+when it last changed. Search matches the company or role; archived applications stay hidden
+until you tick "Show archived". "New application" asks for the company, role, and optionally the
+posting link and job description, for when you aren't using an agent.
+
+**Application** (`/applications/<id>`) shows the resume as it will print, its page result ("1
+page, fits", "about 3 lines over 1 page"), the job details and notes, the status, and Archive.
+Recent changes lists the application's change log, newest first, with who made each change (you
+or the agent by name) and Undo; an undo that a later change is in the way of says so and changes
+nothing. Below that you tailor the resume: tick or untick profile entries and bullets, reword a
+line for this application only (it shows the profile text it was based on and flags it when the
+profile has changed since), set the page target and whether spacing may tighten to meet it,
+choose the template, and move sections up or down. Every edit saves at once and is logged.
+Download PDF and Download JSON use the same signed links as `export_resume`.
+
+The preview is the PDF the server prints, drawn page by page with pdf.js in the browser. Phones
+don't show PDFs in a frame, so canvases are the one way that looks the same everywhere. pdf.js
+loads only on this screen.
 
 **Profile** (`/profile`) edits the whole career history: the basics and every section of the
 resume model, with entries and bullets to add, remove and reorder. Edits save on their own 0.8 s

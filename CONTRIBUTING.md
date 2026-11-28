@@ -64,9 +64,10 @@ runnable by hand). It packs and smoke-tests the `tailory` tarball, then publishe
 tarball:
 
 - to npm as `tailory@0.0.0-dev.<UTC yyyymmddhhmmss>` under the `dev` tag, with provenance.
-  `latest` is moved to the same build until a stable release exists. Without the `NPM_TOKEN`
-  secret the npm job skips publishing with a notice. To switch to trusted publishing (OIDC), set
-  `TRUSTED_PUBLISHING: "true"` in the npm job and add the trusted publisher on npmjs.com.
+  `latest` is moved to the same build until a stable release exists. Publishing uses npm trusted
+  publishing (OIDC); no npm token is stored. The trusted publisher on npmjs.com allows
+  `npm publish` and `npm dist-tag` for `dev-build.yml`. Until the repository variable
+  `NPM_TRUSTED_PUBLISHING` is `true`, the npm job skips with a notice.
 - to `ghcr.io/abijith-suresh/tailory` as `dev` and the same version, for linux/amd64 and arm64.
 
 `npm publish` from a checkout fails on purpose (`prepublishOnly`); only the workflow publishes.

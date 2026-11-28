@@ -40,9 +40,9 @@ describe("release automation source of truth", () => {
     const workflow = read(".github", "workflows", "dev-build.yml");
     expect(workflow).toContain("npm run test:smoke --workspace tailory");
     expect(workflow).toMatch(/npm publish "\$RUNNER_TEMP\/pack\/tailory-\$VERSION\.tgz" --tag dev/);
-    expect(workflow).toContain("--provenance");
     expect(workflow).toContain("id-token: write");
-    expect(workflow).toContain("secrets.NPM_TOKEN");
+    expect(workflow).toContain("vars.NPM_TRUSTED_PUBLISHING");
+    expect(workflow).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN/);
   });
 
   it("requires a Changeset in CI and keeps it in the gate", () => {
@@ -71,12 +71,12 @@ describe("release automation source of truth", () => {
     expect(existsSync(path.join(repoRoot, ".node-version"))).toBe(false);
     expect(existsSync(path.join(repoRoot, "bun.lock"))).toBe(false);
     expect(existsSync(path.join(repoRoot, "package-lock.json"))).toBe(true);
-    expect(packageJson.packageManager).toBe("npm@11.16.0");
+    expect(packageJson.packageManager).toBe("npm@11.21.3");
 
     const mise = read("mise.toml");
     expect(mise).not.toContain("bun");
     expect(mise).toContain('node = "24.20.0"');
-    expect(mise).toContain('npm = "11.16.0"');
+    expect(mise).toContain('npm = "11.21.3"');
   });
 
   it("documents adding a Changeset in-repo", () => {

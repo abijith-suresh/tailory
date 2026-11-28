@@ -97,6 +97,10 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Publishes with npm trusted publishing (OIDC): no npm token is stored anywhere. The trusted
+  # publisher on npmjs.com must allow `npm publish` and `npm dist-tag` for this workflow file.
+  # Until it is set up, the repository variable NPM_TRUSTED_PUBLISHING is unset and this job
+  # skips with a notice.
   npm:
     name: npm
     needs: build
@@ -107,22 +111,17 @@ jobs:
       id-token: write
     env:
       VERSION: ${{ needs.build.outputs.version }}
-      # To switch to npm trusted publishing (OIDC, no token), set this to "true" and configure the
-      # trusted publisher on npmjs.com. Then NPM_TOKEN can be deleted; npm reads the OIDC token.
-      TRUSTED_PUBLISHING: "false"
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      # setup-node fills NODE_AUTH_TOKEN with a placeholder when it is empty, so test the secret.
-      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+      READY: ${{ vars.NPM_TRUSTED_PUBLISHING == 'true' }}
     steps:
-      - name: Check for npm credentials
+      - name: Check that trusted publishing is set up
         id: auth
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$TRUSTED_PUBLISHING" == "true" || "$HAS_NPM_TOKEN" == "true" ]]; then
+          if [[ "$READY" == "true" ]]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice title=npm publish skipped::The NPM_TOKEN secret is not set, so tailory@$VERSION was not published to npm."
+            echo "::notice title=npm publish skipped::Set the repository variable NPM_TRUSTED_PUBLISHING to true once the trusted publisher exists on npmjs.com. tailory@$VERSION was not published."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -156,6 +155,7 @@ jobs:
           node-version: ${{ steps.node.outputs.version }}
           registry-url: https://registry.npmjs.org
 
+      # Trusted publishing needs npm 11.5.1+, and changing dist-tags over OIDC needs 11.21.0+.
       - name: Install exact npm from package metadata
         if: steps.auth.outputs.ready == 'true'
         shell: bash
@@ -176,31 +176,24 @@ jobs:
           path: ${{ runner.temp }}/pack
 
       # Publishing the tarball runs no lifecycle scripts, so the package's prepublishOnly guard
-      # (which stops `npm publish` from a checkout) does not apply here.
+      # (which stops `npm publish` from a checkout) does not apply here. Provenance is automatic
+      # with trusted publishing.
       - name: Publish to npm under the dev tag
         if: steps.auth.outputs.ready == 'true'
-        run: npm publish "$RUNNER_TEMP/pack/tailory-$VERSION.tgz" --tag dev --access public --provenance
+        run: npm publish "$RUNNER_TEMP/pack/tailory-$VERSION.tgz" --tag dev --access public
 
       # The registry points `latest` at the first version ever published and never moves it for
       # --tag dev. Until there is a stable release, `latest` follows the newest dev build so a bare
-      # `npx tailory` never runs a stale one. Trusted publishing can't change dist-tags, so this
-      # step needs NPM_TOKEN even after the switch. Remove it when the first stable release ships.
+      # `npx tailory` never runs a stale one. Remove this step when the first stable release ships.
       - name: Point latest at this dev build
         if: steps.auth.outputs.ready == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$HAS_NPM_TOKEN" != "true" ]]; then
-            echo "::notice title=latest not moved::Changing dist-tags needs NPM_TOKEN; latest still points at an older dev build."
-            exit 0
-          fi
-          npm dist-tag add "tailory@$VERSION" latest
+        run: npm dist-tag add "tailory@$VERSION" latest
 
       - name: Summarize
         if: steps.auth.outputs.ready == 'true'
         run: |
           {
-            echo "Published [tailory@$VERSION](https://www.npmjs.com/package/tailory/v/$VERSION) under \`dev\`."
+            echo "Published [tailory@$VERSION](https://www.npmjs.com/package/tailory/v/$VERSION) under \`dev\` and \`latest\`."
             echo
             echo '```sh'
             echo 'npx tailory@dev'
